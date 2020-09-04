@@ -908,7 +908,7 @@ const btnGetGps_click = () => {
 
 			const ZipCode = data.address.Postal;
 			const City = data.address.City;
-			const State = states.getStateTwoDigitCode(data.address.Region);
+			const State = states.getTwoDigitCode(data.address.Region);
 			const Country = data.address.CountryCode;
 			const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
 
