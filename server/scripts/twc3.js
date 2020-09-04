@@ -2882,51 +2882,9 @@ const PopulateAlmanacInfo = async (WeatherParameters) => {
 
 
 
-const ShowRegionalMap = async (WeatherParameters, TomorrowForecast1, TomorrowForecast2) => {
-};
-
-
-
-
-
-const GetXYFromLatitudeLongitudeDoppler = (Latitude, Longitude, OffsetX, OffsetY) => {
-	let y = 0;
-	let x = 0;
-	const ImgHeight = 3200;
-	const ImgWidth = 5100;
-
-	y = (51.75 - Latitude) * 55.2;
-	y -= OffsetY; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (y > (ImgHeight - (OffsetY * 2))) {
-		y = ImgHeight - (OffsetY * 2);
-	} else if (y < 0) {
-		y = 0;
-	}
-
-	x = ((-130.37 - Longitude) * 41.775) * -1;
-	x -= OffsetX; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (x > (ImgWidth - (OffsetX * 2))) {
-		x = ImgWidth - (OffsetX * 2);
-	} else if (x < 0) {
-		x = 0;
-	}
-
-	return { x: x * 2, y: y * 2 };
-};
-
-
-
-
-
 const ShowDopplerMap = async (WeatherParameters) => {
 
-	// ALASKA ISN'T SUPPORTED!
-	if (WeatherParameters.State === 'AK') {
-		WeatherParameters.Progress.DopplerRadar = LoadStatuses.NoData;
-		return;
-	}
+
 
 	let OffsetY;
 	let OffsetX;
@@ -2938,11 +2896,6 @@ const ShowDopplerMap = async (WeatherParameters) => {
 
 	// Clear the current image.
 	divDopplerRadarMap.empty();
-
-	if (_DopplerRadarInterval !== null) {
-		window.clearTimeout(_DopplerRadarInterval);
-		_DopplerRadarInterval = null;
-	}
 
 	let src = 'images/4000RadarMap2.jpg';
 	if (WeatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';

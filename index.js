@@ -9,9 +9,11 @@ app.set('view engine', 'ejs');
 
 // cors pass through
 const corsPassThru = require('./cors');
+const radarPassThru = require('./cors/radar');
 
 // cors pass-thru to api.weather.gov
 app.get('/stations/*', corsPassThru);
+app.get('/Conus/*', radarPassThru);
 
 
 const index = (req, res) => {

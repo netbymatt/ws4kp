@@ -1,7 +1,7 @@
 'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
 /* globals utils, _StationInfo, STATUS */
-/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac */
+/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar */
 
 document.addEventListener('DOMContentLoaded', () => {
 	navigation.init();
@@ -107,6 +107,7 @@ const navigation = (() => {
 				new LocalForecast(6, 'localForecast', weatherParameters),
 				new ExtendedForecast(7, 'extendedForecast', weatherParameters),
 				new Almanac(8, 'alamanac', weatherParameters),
+				new Radar(8, 'radar', weatherParameters),
 			];
 		} else {
 			// or just call for new data if the canvases already exist

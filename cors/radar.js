@@ -6,8 +6,6 @@ const https = require('https');
 // url parsing
 const queryString = require('querystring');
 
-
-
 // return an express router
 module.exports = (req, res) => {
 	// add out-going headers
@@ -27,7 +25,7 @@ module.exports = (req, res) => {
 	if (query.length > 0) query = '?' + query;
 
 	// get the page
-	https.get('https://api.weather.gov' + req.path + query, {
+	https.get('https://radar.weather.gov' + req.path + query, {
 		headers,
 	}, getRes => {
 		// pull some info

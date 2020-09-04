@@ -34,6 +34,7 @@ const js_sources = [
 	'server/scripts/modules/localforecast.js',
 	'server/scripts/modules/extendedforecast.js',
 	'server/scripts/modules/almanac.js',
+	'server/scripts/modules/radar.js',
 	'server/scripts/modules/navigation.js',
 ];
 gulp.task('compress_js', () =>
