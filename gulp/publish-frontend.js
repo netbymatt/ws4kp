@@ -1,4 +1,4 @@
-const version = '2.0.0';
+const version = '2.1.0';
 
 const gulp = require('gulp');
 const concat = require('gulp-concat');
@@ -70,8 +70,6 @@ const other_files = [
 	'server/robots.txt',
 	'server/manifest.json',
 	'server/scripts/index.js',
-	'server/scripts/timer.js',
-	'server/scripts/TimerWorker.js',
 	'server/scripts/data/states.js',
 	'server/scripts/vendor/jquery-3.5.1.min.js',
 	'server/scripts/vendor/jquery.autocomplete.min.js',
