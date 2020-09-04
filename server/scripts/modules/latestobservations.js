@@ -15,6 +15,7 @@ class LatestObservations extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
+		super.getData();
 		// calculate distance to each station
 		const stationsByDistance = Object.keys(_StationInfo).map(key => {
 			const station = _StationInfo[key];

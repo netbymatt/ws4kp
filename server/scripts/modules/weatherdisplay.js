@@ -63,6 +63,22 @@ class WeatherDisplay {
 		this.data = undefined;
 		// set status
 		this.setStatus(STATUS.loading);
+
+		// set up the timing delays
+		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'number') {
+			// array is defined as how long each screen should be displayed. This needs to be converted into total time for use here
+			if (!this.timing.fullDelay) {
+				let sum = 0;
+				this.timing.fullDelay = this.timing.delay.map(val => {
+					const calc = sum + val;
+					sum += val;
+					return calc;
+				});
+			}
+		}
+
+		// update total screens
+		if (Array.isArray(this.timing.delay)) this.timing.totalScreens = this.timing.delay.length;
 	}
 
 	drawCanvas() {
@@ -216,6 +232,9 @@ class WeatherDisplay {
 		// reset timing
 		this.startNavCount(navigation.isPlaying());
 
+		// if there was a command the canvas has already been drawn
+		if (navCmd) return;
+
 		// refresh the canvas (incase the screen index changed)
 		if (navCmd) this.drawCanvas();
 	}
@@ -244,14 +263,24 @@ class WeatherDisplay {
 		// increment the base count
 		this.navBaseCount++;
 
-		// update total screens
-		if (Array.isArray(this.timing.delay)) this.timing.totalScreens = this.timing.delay.length;
+		// call base count change if available for this function
+		if (this.baseCountChange) this.baseCountChange(this.navBaseCount);
 
 		// determine type of timing
 		// simple delay
 		if (typeof this.timing.delay === 'number') {
 			this.navNext();
 			return;
+		}
+
+		// array of timing integers
+		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'number') {
+			// scan the array for a matching number and calculate new screen index from the number
+			const timingMatch = this.timing.fullDelay.indexOf(this.navBaseCount);
+			// if not found return
+			if (timingMatch < 0) return;
+			// navigate to the next screen
+			this.navNext();
 		}
 	}
 
@@ -260,20 +289,24 @@ class WeatherDisplay {
 		// check for special 'first frame' command
 		if (command === navigation.msg.command.firstFrame) {
 			this.resetNavBaseCount();
-			this.drawCanvas();
-			return;
+		} else {
+			// increment screen index
+			this.screenIndex++;
 		}
-
-		// increment screen index
-		this.screenIndex++;
 		// test for end reached
 		if (this.screenIndex >= this.timing.totalScreens) {
+			this.screenIndex = this.timing.totalScreens - 1;
 			this.sendNavDisplayMessage(navigation.msg.response.next);
 			this.stopNavBaseCount();
 			return;
 		}
-		// if the end was not reached, update the canvas
-		this.drawCanvas();
+		this.baseCountFromScreenIndex();
+		// if the end was not reached, update the canvas (typical), or run a callback (atypical)
+		if (!this.screenIndexChange) {
+			this.drawCanvas();
+		} else {
+			this.screenIndexChange(this.screenIndex);
+		}
 	}
 
 	// navigate to previous screen
@@ -281,19 +314,36 @@ class WeatherDisplay {
 		// check for special 'last frame' command
 		if (command === navigation.msg.command.lastFrame) {
 			this.screenIndex = this.timing.totalScreens-1;
-			this.drawCanvas();
-			return;
+		} else {
+			// decrement screen index
+			this.screenIndex--;
 		}
-		// decrement screen index
-		this.screenIndex--;
 
 		// test for end reached
 		if (this.screenIndex < 0) {
+			this.screenIndex = 0;
 			this.sendNavDisplayMessage(navigation.msg.response.previous);
 			return;
 		}
-		// if the end was not reached, update the canvas
-		this.drawCanvas();
+		this.baseCountFromScreenIndex();
+		// if the end was not reached, update the canvas (typical), or run a callback (atypical)
+		if (!this.screenIndexChange) {
+			this.drawCanvas();
+		} else {
+			this.screenIndexChange(this.screenIndex);
+		}
+	}
+
+	// calculate a baseCount from the screen index for the array timings
+	baseCountFromScreenIndex() {
+		if (!Array.isArray(this.timing.delay)) return;
+		// first screen starts at zero
+		if (this.screenIndex === 0) {
+			this.navBaseCount = 0;
+			return;
+		}
+		// otherwise return one more than the previous sum
+		this.navBaseCount = this.timing.fullDelay[this.screenIndex];
 	}
 
 	// start and stop base counter

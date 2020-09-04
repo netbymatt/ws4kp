@@ -10,7 +10,7 @@ This project aims to bring back the feel of the 90's with a weather forecast tha
 
 This project is based on the work of [Mike Battaglia](https://github.com/vbguyny/ws4kp). It was forked from his work in August 2020.
 
-* Mike Battaglia For the original project and all of the code which draws the weather displays. This code remains largely intact and was a huge amount of work to get exactly right.
+* Mike Battaglia for the original project and all of the code which draws the weather displays. This code remains largely intact and was a huge amount of work to get exactly right. He's also responsible for all of the background graphics including the maps used in the application.
 * The team at [TWCClassics](https://twcclassics.com/) for several resources.
 	* A [font](https://twcclassics.com/downloads.html) set used on the original WeatherStar 4000
 	* [Icon](https://twcclassics.com/downloads.html) sets

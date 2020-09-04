@@ -9,15 +9,30 @@ class TravelForecast extends WeatherDisplay {
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround6_1.png');
 
+		// height of one city in the travel forecast
+		this.cityHeight = 72;
+
+		// set up the timing
+		this.timing.baseDelay = 20;
+		// page sizes are 4 cities, calculate the number of pages necessary plus overflow
+		const pagesFloat = _TravelCities.length/4;
+		const pages = Math.floor(pagesFloat) - 1; // first page is already displayed
+		const extra = pages%1;
+		const timingStep = this.cityHeight*4;
+		this.timing.delay = [150];
+		// add additional pages
+		for (let i = 0; i < pages; i++) this.timing.delay.push(timingStep);
+		// add the extra (not exactly 4 pages portion)
+		if (extra !== 0) this.timing.delay.push(Math.round(this.extra*this.cityHeight));
+		// add the final 3 second delay
+		this.timing.delay.push(150);
+
 		// get the data
 		this.getData(weatherParameters);
-
-		// scrolling tracking
-		this.scrollCount = 0;
-		this.endDelay = 0;
 	}
 
 	async getData() {
+		super.getData();
 		const forecastPromises = _TravelCities.map(async city => {
 			try {
 				// get point then forecast
@@ -70,7 +85,7 @@ class TravelForecast extends WeatherDisplay {
 			this.longContext.clearRect(0,0,this.longCanvas.width,this.longCanvas.height);
 
 			// draw the "long" canvas with all cities
-			draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, 1728);
+			draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, _TravelCities.length*this.cityHeight);
 
 			for (let i = 0; i <= 4; i++) {
 				const y = i * 346;
@@ -79,7 +94,7 @@ class TravelForecast extends WeatherDisplay {
 
 			await Promise.all(cities.map(async (city, index) => {
 			// calculate base y value
-				const y = 50+72*index;
+				const y = 50+this.cityHeight*index;
 
 				// city name
 				draw.text(this.longContext, 'Star4000 Large Compressed', '24pt', '#FFFF00', 80, y, city.name, 2);
@@ -134,32 +149,28 @@ class TravelForecast extends WeatherDisplay {
 		// copy the scrolled portion of the canvas for the initial run before the scrolling starts
 		this.context.drawImage(this.longCanvas, 0, 0, 640, 289, 0, 110, 640, 289);
 
-		// set up scrolling one time
-		if (!this.scrollInterval) {
-			this.scrollInterval = window.setInterval(() => {
-				if (this.isActive()) {
-					// get a fresh canvas
-					const longCanvas = this.getLongCanvas();
-					// increment scrolling
-					this.scrollCount++;
-					// wait 3 seconds at begining
-					if (this.scrollCount < 150) return;
-					// calculate scroll offset and don't go past end of canvas
-					const offsetY = Math.min(longCanvas.height-289, (this.scrollCount-150));
-					// copy the scrolled portion of the canvas
-					this.context.drawImage(longCanvas, 0, offsetY, 640, 289, 0, 110, 640, 289);
-					// track end of scrolling for 3 seconds
-					if (offsetY >= longCanvas.height-289) this.endDelay++;
-					// TODO: report playback done
-				} else {
-					// reset scroll to top of image
-					this.scrollCount = 0;
-					this.endDelay = 0;
-				}
-			}, 20);
-		}
 		this.finishDraw();
 		this.setStatus(STATUS.loaded);
+	}
+
+	// screen index change callback just runs the base count callback
+	screenIndexChange() {
+		this.baseCountChange(this.navBaseCount);
+	}
+
+	// base count change callback
+	baseCountChange(count) {
+		// get a fresh canvas
+		const longCanvas = this.getLongCanvas();
+
+		// calculate scroll offset and don't go past end
+		let offsetY = Math.min(longCanvas.height-289, (count-this.timing.delay[0]));
+
+		// don't let offset go negative
+		if (offsetY < 0) offsetY = 0;
+
+		// copy the scrolled portion of the canvas
+		this.context.drawImage(longCanvas, 0, offsetY, 640, 289, 0, 110, 640, 289);
 	}
 
 	getTravelCitiesDayName(cities) {
