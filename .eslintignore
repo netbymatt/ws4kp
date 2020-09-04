@@ -1,0 +1,2 @@
+*.min.*
+server/scripts/vendor/*

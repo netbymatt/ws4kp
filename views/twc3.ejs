@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<% if (production) { %>
+    <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>">
+    <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>
+	<% } else { %>
+	<link rel="stylesheet" type="text/css" href="styles/twc3.css">
+    <script type="text/javascript" src="scripts/vendor/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="scripts/vendor/libgif.js"></script>
+    <script type="text/javascript" src="scripts/vendor/luxon.js"></script>
+    <script type="text/javascript" src="scripts/vendor/suncalc.js"></script>
+    <script type="text/javascript" src="scripts/data/travelcities.js"></script>
+    <script type="text/javascript" src="scripts/data/regionalcities.js"></script>
+    <script type="text/javascript" src="scripts/data/stations.js"></script>
+    <script type="text/javascript" src="scripts/modules/draw.js"></script>
+    <script type="text/javascript" src="scripts/modules/weatherdisplay.js"></script>
+    <script type="text/javascript" src="scripts/modules/icons.js"></script>
+    <script type="text/javascript" src="scripts/modules/utilities.js"></script>
+    <script type="text/javascript" src="scripts/modules/currentweather.js"></script>
+    <script type="text/javascript" src="scripts/modules/latestobservations.js"></script>
+    <script type="text/javascript" src="scripts/modules/travelforecast.js"></script>
+    <script type="text/javascript" src="scripts/modules/regionalforecastdata.js"></script>
+    <script type="text/javascript" src="scripts/modules/regionalforecast.js"></script>
+    <script type="text/javascript" src="scripts/modules/localforecast.js"></script>
+    <script type="text/javascript" src="scripts/modules/extendedforecast.js"></script>
+    <script type="text/javascript" src="scripts/modules/almanac.js"></script>
+	<script type="text/javascript" src="scripts/modules/navigation.js"></script>
+	<% } %>
+</head>
+<body>
+
+    <!-- This will force the browser to download the font before the canvas is rendered. -->
+    <div class="fontPreload" id="Star4000">123 This is a test</div>
+    <div class="fontPreload" id="Star4000Extended">123 This is a test</div>
+    <div class="fontPreload" id="Star4000LargeCompressedNumbers">123 This is a test</div>
+    <div class="fontPreload" id="Star4000LargeCompressed">123 This is a test</div>
+    <div class="fontPreload" id="Star4000Large">123 This is a test</div>
+    <div class="fontPreload" id="Star4000Small">123 This is a test</div>
+    <div class="fontPreload" id="Star4Radar">123 This is a test</div>
+
+	<div id="container">
+    	<canvas id="progressCanvas" width="640" height="480"></canvas>
+	</div>
+    
+</body>
+</html>
