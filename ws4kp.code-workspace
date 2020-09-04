@@ -5,10 +5,17 @@
 		}
 	],
 	"settings": {
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/bower_components": true,
+			"**/*.code-search": true,
+			"dist/**": true,
+			"**/*.min.js": true,
+		},
 		"cSpell.enabled": true,
 		"cSpell.words": [
 			"Battaglia",
 			"Noaa"
 		],
-	}
+	},
 }

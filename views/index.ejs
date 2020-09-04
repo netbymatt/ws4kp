@@ -15,6 +15,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="manifest.json" />
 	<link rel="icon" href="images/Logo192.png" />
+
+    <link rel="preload" href="fonts/Star4000.woff" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Star 4 Radar.woff" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Star4000 Extended.woff" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Star4000 Large Compressed Numbers.woff" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Star4000 Large Compressed.woff" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Star4000 Large.woff" as="font" crossorigin="anonymous" />
+	<link rel="preload" href="fonts/Star4000 Small.woff" as="font" crossorigin="anonymous" />
+	
 	<% if (production) { %>
 		<link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
 		<script type="text/javascript" src="scripts/vendor/jquery-3.5.1.min.js"></script>
@@ -127,7 +136,11 @@
         </div>
     </div>
 
-    <br />
+	<br />
+	
+	<div class="info">
+		<a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
+	</div>
 
     <div id="divInfo">
         Location: <span id="spanCity"></span> <span id="spanState"></span><br />
