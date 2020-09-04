@@ -91,17 +91,6 @@ class CurrentWeather extends WeatherDisplay {
 			WindGust = utils.units.kphToMph(WindGust);
 		}
 
-		// get main icon
-		this.gifs.push(await utils.image.superGifAsync({
-			src: Icon,
-			loop_delay: 100,
-			auto_play: true,
-			canvas: this.canvas,
-			x: 140,
-			y: 175,
-			max_width: 126,
-		}));
-
 		this.context.drawImage(await this.backgroundImage, 0, 0);
 		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
 		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
@@ -177,6 +166,18 @@ class CurrentWeather extends WeatherDisplay {
 			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 365, 'Wind Chill:', 2);
 			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 365, WindChill + String.fromCharCode(176), 2, 'right');
 		}
+
+		// get main icon
+		this.gifs.push(await utils.image.superGifAsync({
+			src: Icon,
+			loop_delay: 100,
+			auto_play: true,
+			canvas: this.canvas,
+			x: 140,
+			y: 175,
+			max_width: 126,
+		}));
+
 		this.finishDraw();
 		this.setStatus(STATUS.loaded);
 	}

@@ -91,7 +91,7 @@ class WeatherDisplay {
 		if (this.elemId === 'almanacTides') OkToDrawNoaaImage = false;
 		if (this.elemId === 'outlook') OkToDrawNoaaImage = false;
 		if (this.elemId === 'marineForecast')OkToDrawNoaaImage = false;
-		if (this.elemId === 'airQuailty') OkToDrawNoaaImage = false;
+		if (this.elemId === 'airQuality') OkToDrawNoaaImage = false;
 		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'regionalForecast1')OkToDrawNoaaImage = false;
 		if (this.elemId === 'regionalForecast2') OkToDrawNoaaImage = false;
@@ -135,7 +135,11 @@ class WeatherDisplay {
 
 		// on the first pass store the background for the date and time
 		if (!this.dateTimeBackground) {
-			this.dateTimeBackground = this.context.getImageData(410, 30, 175, 60);
+			const bg = this.context.getImageData(410, 30, 175, 60);
+			// test background draw complete and skip drawing if there is no background yet
+			if (bg.data[0] === 0) return;
+			// store the background
+			this.dateTimeBackground = bg;
 		}
 
 		// Clear the date and time area.
@@ -212,7 +216,7 @@ class WeatherDisplay {
 		// reset timing
 		this.startNavCount(navigation.isPlaying());
 
-		// refresh the canvas (incase the screen index chagned)
+		// refresh the canvas (incase the screen index changed)
 		if (navCmd) this.drawCanvas();
 	}
 	hideCanvas() {
