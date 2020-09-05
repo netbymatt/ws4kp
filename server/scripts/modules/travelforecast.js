@@ -16,16 +16,16 @@ class TravelForecast extends WeatherDisplay {
 		this.timing.baseDelay = 20;
 		// page sizes are 4 cities, calculate the number of pages necessary plus overflow
 		const pagesFloat = _TravelCities.length/4;
-		const pages = Math.floor(pagesFloat) - 1; // first page is already displayed
+		const pages = Math.floor(pagesFloat) - 2; // first page is already displayed, last page doesn't happen
 		const extra = pages%1;
 		const timingStep = this.cityHeight*4;
-		this.timing.delay = [150];
+		this.timing.delay = [150+timingStep];
 		// add additional pages
 		for (let i = 0; i < pages; i++) this.timing.delay.push(timingStep);
 		// add the extra (not exactly 4 pages portion)
 		if (extra !== 0) this.timing.delay.push(Math.round(this.extra*this.cityHeight));
 		// add the final 3 second delay
-		this.timing.delay.push(150);
+		this.timing.delay.push(150+timingStep);
 
 		// get the data
 		this.getData(weatherParameters);
@@ -164,7 +164,7 @@ class TravelForecast extends WeatherDisplay {
 		const longCanvas = this.getLongCanvas();
 
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(longCanvas.height-289, (count-this.timing.delay[0]));
+		let offsetY = Math.min(longCanvas.height-289, (count-150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
