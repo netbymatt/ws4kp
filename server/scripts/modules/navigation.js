@@ -106,7 +106,7 @@ const navigation = (() => {
 				new RegionalForecast(5, 'regionalForecast2', weatherParameters, 2),
 				new LocalForecast(6, 'localForecast', weatherParameters),
 				new ExtendedForecast(7, 'extendedForecast', weatherParameters),
-				new Almanac(8, 'alamanac', weatherParameters),
+				new Almanac(8, 'almanac', weatherParameters),
 				new Radar(8, 'radar', weatherParameters),
 			];
 		} else {

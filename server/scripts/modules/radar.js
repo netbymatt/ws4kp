@@ -1,5 +1,5 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, draw, navigation */
+/* globals WeatherDisplay, utils, STATUS, draw */
 
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
@@ -8,6 +8,9 @@ class Radar extends WeatherDisplay {
 
 		// set max images
 		this.dopplerRadarImageMax = 6;
+		// update timing
+		this.timing.baseDelay = 350;
+		this.timing.delay = [4,1,1,1,1,1,12];
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
@@ -140,15 +143,42 @@ class Radar extends WeatherDisplay {
 
 			return canvas;
 		}));
-			// set max length
+		// set max length
 		this.timing.totalScreens = radarCanvases.length;
-
-		console.log(radarCanvases);
+		// store the images
+		this.data = radarCanvases;
+		this.drawCanvas();
 	}
 
-	drawCanvas() {
+	async drawCanvas() {
 		super.drawCanvas();
+		this.context.drawImage(await this.backgroundImage, 0, 0);
 
+		// Title
+		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 65, 'Local', 2);
+		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 100, 'Radar', 2);
+
+		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 390, 49, 'PRECIP', 2);
+		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 298, 73, 'Light', 2);
+		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 517, 73, 'Heavy', 2);
+
+		let x = 362;
+		const y = 52;
+		draw.box(this.context, '#000000', x - 2, y - 2, 154, 28);
+		draw.box(this.context, 'rgb(49, 210, 22)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(28, 138, 18)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(20, 90, 15)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(10, 40, 10)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(196, 179, 70)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(190, 72, 19)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(171, 14, 14)', x, y, 17, 24); x += 19;
+		draw.box(this.context, 'rgb(115, 31, 4)', x, y, 17, 24); x += 19;
+
+		draw.box(this.context, 'rgb(143, 73, 95)', 318, 83, 32, 24);
+		draw.box(this.context, 'rgb(250, 122, 232)', 320, 85, 28, 20);
+		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 355, 105, '= Incomplete Data', 2);
+
+		this.context.drawImage(this.data[this.screenIndex], 0, 0, 640, 367, 0, 113, 640, 367);
 
 		this.finishDraw();
 		this.setStatus(STATUS.loaded);

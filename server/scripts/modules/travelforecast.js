@@ -25,7 +25,7 @@ class TravelForecast extends WeatherDisplay {
 		// add the extra (not exactly 4 pages portion)
 		if (extra !== 0) this.timing.delay.push(Math.round(this.extra*this.cityHeight));
 		// add the final 3 second delay
-		this.timing.delay.push(150+timingStep);
+		this.timing.delay.push(150);
 
 		// get the data
 		this.getData(weatherParameters);

@@ -1,4 +1,4 @@
-const version = '2.1.0';
+const version = '2.2.0';
 
 const gulp = require('gulp');
 const concat = require('gulp-concat');

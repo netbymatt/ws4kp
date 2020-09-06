@@ -104,15 +104,11 @@ class WeatherDisplay {
 		// visibility tests
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
 		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
-		if (this.elemId === 'almanacTides') OkToDrawNoaaImage = false;
-		if (this.elemId === 'outlook') OkToDrawNoaaImage = false;
-		if (this.elemId === 'marineForecast')OkToDrawNoaaImage = false;
-		if (this.elemId === 'airQuality') OkToDrawNoaaImage = false;
 		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast1')OkToDrawNoaaImage = false;
+		if (this.elemId === 'regionalForecast0') OkToDrawNoaaImage = false;
+		if (this.elemId === 'regionalForecast1') OkToDrawNoaaImage = false;
 		if (this.elemId === 'regionalForecast2') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalObservations') OkToDrawNoaaImage = false;
-		if (this.elemId === 'localRadar') {
+		if (this.elemId === 'radar') {
 			OkToDrawCurrentConditions = false;
 			OkToDrawCurrentDateTime = false;
 			OkToDrawNoaaImage = false;
@@ -278,7 +274,7 @@ class WeatherDisplay {
 			// scan the array for a matching number and calculate new screen index from the number
 			const timingMatch = this.timing.fullDelay.indexOf(this.navBaseCount);
 			// if not found return
-			if (timingMatch < 0) return;
+			if (timingMatch < 0 && this.navBaseCount <= this.timing.fullDelay[this.timing.totalScreens-1]) return;
 			// navigate to the next screen
 			this.navNext();
 		}
