@@ -103,14 +103,11 @@ const navigation = (() => {
 				new CurrentWeather(0,'currentWeather', weatherParameters),
 				new LatestObservations(1, 'latestObservations', weatherParameters),
 				new TravelForecast(2, 'travelForecast', weatherParameters),
-				// Regional Forecast: 0 = regional conditions, 1 = today, 2 = tomorrow
-				new RegionalForecast(3, 'regionalForecast0', weatherParameters, 0),
-				new RegionalForecast(4, 'regionalForecast1', weatherParameters, 1),
-				new RegionalForecast(5, 'regionalForecast2', weatherParameters, 2),
-				new LocalForecast(6, 'localForecast', weatherParameters),
-				new ExtendedForecast(7, 'extendedForecast', weatherParameters),
-				new Almanac(8, 'almanac', weatherParameters),
-				new Radar(8, 'radar', weatherParameters),
+				new RegionalForecast(3, 'regionalForecast', weatherParameters),
+				new LocalForecast(4, 'localForecast', weatherParameters),
+				new ExtendedForecast(5, 'extendedForecast', weatherParameters),
+				new Almanac(6, 'almanac', weatherParameters),
+				new Radar(7, 'radar', weatherParameters),
 			];
 		} else {
 			// or just call for new data if the canvases already exist
