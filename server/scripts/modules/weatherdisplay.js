@@ -11,13 +11,14 @@ const STATUS = {
 
 // eslint-disable-next-line no-unused-vars
 class WeatherDisplay {
-	constructor(navId, elemId, canvasWidth, canvasHeight) {
+	constructor(navId, elemId, name) {
 		// navId is used in messaging
 		this.navId = navId;
 		this.elemId = undefined;
 		this.gifs = [];
 		this.data = undefined;
 		this.loadingStatus = STATUS.loading;
+		this.name = name?name:elemId;
 
 		// default navigation timing
 		this.timing = {
@@ -29,7 +30,7 @@ class WeatherDisplay {
 		this.screenIndex = 0;
 
 		this.setStatus(STATUS.loading);
-		this.createCanvas(elemId, canvasWidth, canvasHeight);
+		this.createCanvas(elemId);
 	}
 
 	// set data status and send update to navigation module

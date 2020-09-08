@@ -1109,34 +1109,9 @@ Number.prototype.pad = function(size) {
 
 
 const Progress = function (e) {
-	const WeatherParameters = e.WeatherParameters;
 
-	this.CurrentConditions = LoadStatuses.Loading;
-	this.WordedForecast = LoadStatuses.Loading;
-	this.FourDayForecast = LoadStatuses.Loading;
-	this.TravelForecast = LoadStatuses.Loading;
-	this.NearbyConditions = LoadStatuses.Loading;
-	this.CurrentRegionalMap = LoadStatuses.Loading;
-	this.TomorrowsRegionalMap = LoadStatuses.Loading;
-	this.Almanac = LoadStatuses.Loading;
-	this.DopplerRadar = LoadStatuses.Loading;
-	this.Hazards = LoadStatuses.Loading;
-
-	this.Loaded = false;
-
-	const _self = this;
-
-	const canvas = canvasProgress[0];
-	const context = canvas.getContext('2d');
-	let gifProgress;
 
 	const _ProgressInterval = window.setInterval(() => {
-		if (!_self.Loaded) return;
-		if (!gifProgress) return;
-
-		const ProgressPercent = _self.GetTotalPercentage();
-		divProgress.html(ProgressPercent.toString());
-
 		gifProgress.get_canvas().width = (ProgressPercent / 100) * 530 + 1;
 
 		if (ProgressPercent > 0) {
@@ -1145,8 +1120,6 @@ const Progress = function (e) {
 		}
 
 		_DisplayLoadingDetails();
-		AssignPlayMsOffsets(true);
-
 		if (ProgressPercent >= 100) {
 			gifProgress.pause();
 			window.clearInterval(_ProgressInterval);
@@ -1160,46 +1133,11 @@ const Progress = function (e) {
 		DrawHorizontalGradientSingle(context, 0, 90, 52, 399, _SideColor1, _SideColor2);
 		DrawHorizontalGradientSingle(context, 584, 90, 640, 399, _SideColor1, _SideColor2);
 
-		let OffsetY = 120;
 		const __DrawText = (caption, status) => {
 			let StatusText;
 			let StatusColor;
 
-			const Dots = Array(120 - Math.floor(caption.length * 2.5)).join('.');
-			DrawText(context, 'Star4000 Extended', '19pt', '#ffffff', 70, OffsetY, caption + Dots, 2);
 
-			// Erase any dots that spill into the status text.
-			context.drawImage(BackGroundImage, 475, OffsetY - 20, 165, 30, 475, OffsetY - 20, 165, 30);
-			DrawHorizontalGradientSingle(context, 584, 90, 640, 399, _SideColor1, _SideColor2);
-
-			switch (status) {
-			case LoadStatuses.Loading:
-				StatusText = 'Loading';
-				StatusColor = '#ffff00';
-				break;
-			case LoadStatuses.Loaded:
-				//StatusText = "Loaded";
-				StatusText = 'Press Here';
-				StatusColor = '#00ff00';
-
-				if (caption === 'Hazardous Weather') {
-					StatusColor = '#ff0000';
-				}
-
-				context.drawImage(BackGroundImage, 440, OffsetY - 20, 75, 25, 440, OffsetY - 20, 75, 25);
-				break;
-			case LoadStatuses.Failed:
-				StatusText = 'Failed';
-				StatusColor = '#ff0000';
-				break;
-			case LoadStatuses.NoData:
-				StatusText = 'No Data';
-				StatusColor = '#C0C0C0';
-				DrawBox(context, 'rgb(33, 40, 90)', 475, OffsetY - 15, 75, 15);
-				break;
-			default:
-			}
-			DrawText(context, 'Star4000 Extended', '19pt', StatusColor, 565, OffsetY, StatusText, 2, 'end');
 
 			OffsetY += 29;
 		};
@@ -1216,26 +1154,6 @@ const Progress = function (e) {
 		__DrawText('Hazardous Weather', WeatherParameters.Progress.Hazards);
 
 	};
-
-	this.GetTotalPercentage = function() {
-		let Percentage = 0;
-		let IncreaseAmount = 10;
-
-		if (this.CurrentConditions !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.WordedForecast !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.FourDayForecast !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.TravelForecast !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.NearbyConditions !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.CurrentRegionalMap !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.TomorrowsRegionalMap !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.Almanac !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.DopplerRadar !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-		if (this.Hazards !== LoadStatuses.Loading) Percentage += IncreaseAmount;
-
-		return Percentage;
-	};
-
-	let BackGroundImage;
 
 	this.DrawProgress = async () => {
 		const DontLoadGifs = _DontLoadGifs;
