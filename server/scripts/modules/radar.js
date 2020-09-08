@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
 	constructor(navId,elemId,weatherParameters) {
-		super(navId,elemId);
+		super(navId,elemId,'Local Radar');
 
 		// set max images
 		this.dopplerRadarImageMax = 6;
@@ -134,9 +134,6 @@ class Radar extends WeatherDisplay {
 				workingContext.drawImage(imgBlob, 0, 0, 2550, 1600);
 			}
 
-			// clean the image
-			this.removeDopplerRadarImageNoise(workingContext);
-
 			// get the base map
 			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX*2, offsetY*2, 0, 0, 640, 367);
 
@@ -147,6 +144,8 @@ class Radar extends WeatherDisplay {
 			const cropContext = cropCanvas.getContext('2d');
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
+			// clean the image
+			this.removeDopplerRadarImageNoise(cropContext);
 
 			// merge the radar and map
 			this.mergeDopplerRadarImage(context, cropContext);

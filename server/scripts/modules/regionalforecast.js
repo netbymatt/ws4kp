@@ -7,7 +7,7 @@
 // eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId,elemId, weatherParameters, period) {
-		super(navId,elemId);
+		super(navId,elemId,'Regional Forecast');
 		// store the period, see above
 		this.period = period;
 

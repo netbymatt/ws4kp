@@ -2,38 +2,6 @@
 {
     font-family: "Star4000";
     src: url('../fonts/Star4000.woff') format('woff');
-    /*font-weight: bold;
-    font-style: italic;*/
-}
-@font-face 
-{
-    font-family: "Star 4 Radar";
-    src: url('../fonts/Star 4 Radar.woff') format('woff');
-}
-@font-face 
-{
-    font-family: 'Star4000 Extended';
-    src: url('../fonts/Star4000 Extended.woff') format('woff');
-}
-@font-face 
-{
-    font-family: 'Star4000 Large Compressed Numbers';
-    src: url('../fonts/Star4000 Large Compressed Numbers.woff') format('woff');
-}
-@font-face
- {
-    font-family: 'Star4000 Large Compressed';
-    src: url('../fonts/Star4000 Large Compressed.woff') format('woff');
-}
-@font-face 
-{
-    font-family: 'Star4000 Large';
-    src: url('../fonts/Star4000 Large.woff') format('woff');
-}
-@font-face
- {
-    font-family: 'Star4000 Small';
-    src: url('../fonts/Star4000 Small.woff') format('woff');
 }
 body
 {
@@ -53,7 +21,6 @@ input, button
 
 #txtAddress
 {
-    /*width: 400px;*/
     width: 490px;
     font-size: 16pt;
 }
@@ -82,31 +49,8 @@ input, button
 	background-color: #0000ff;
     color: #ffffff;
 }
-.autocomplete-suggestions strong
-{
-	/*font-weight: normal;*/
-	/*color: lightseagreen*/
-}
-.autocomplete-group
-{
-	/*padding: 2px 5px;*/
-}
-.autocomplete-group strong 
-{
-	/*display: block;
-	border-bottom: 1px solid black;*/
-}
-
-/*#Star4000LargeCompressedNumbers
-{
-    visibility: hidden;
-    position: absolute;
-    font-family: 'Star4000 Large Compressed Numbers';
-}*/
-
 #divTwc
 {
-    /*display: none;*/
     display: block;
     background-color: #000000;
     color: #ffffff;
@@ -133,8 +77,6 @@ input, button
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /*position: relative;
-    top: 10%;*/
 }
 
 #divTwcRight
@@ -152,8 +94,6 @@ input, button
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /*position: relative;
-    top: 10%;*/
 }
 
 #divTwcBottom
@@ -242,5 +182,4 @@ input, button
 #txtScrollText
 {
     width: 475px;
-    /*text-transform: uppercase;*/
 }

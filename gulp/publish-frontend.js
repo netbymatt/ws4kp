@@ -14,14 +14,23 @@ gulp.task('clean', () =>
 	del(['./dist**']),
 );
 
+const js_sources_data = [
+	'server/scripts/data/travelcities.js',
+	'server/scripts/data/regionalcities.js',
+	'server/scripts/data/stations.js',
+];
+gulp.task('compress_js_data', () =>
+	gulp.src(js_sources_data)
+		.pipe(concat('data.min.js'))
+		.pipe(terser())
+		.pipe(gulp.dest('./dist/resources')),
+);
+
 const js_sources = [
 	'server/scripts/vendor/jquery-3.5.1.min.js',
 	'server/scripts/vendor/libgif.js',
 	'server/scripts/vendor/luxon.js',
 	'server/scripts/vendor/suncalc.js',
-	'server/scripts/data/travelcities.js',
-	'server/scripts/data/regionalcities.js',
-	'server/scripts/data/stations.js',
 	'server/scripts/modules/draw.js',
 	'server/scripts/modules/weatherdisplay.js',
 	'server/scripts/modules/icons.js',
@@ -44,12 +53,22 @@ gulp.task('compress_js', () =>
 		.pipe(gulp.dest('./dist/resources')),
 );
 
-const css_sources = [
-	'server/styles/*.css',
+const css_sources_index = [
+	'server/styles/index.css',
 ];
-gulp.task('compress_css', () =>
-	gulp.src(css_sources)
-		.pipe(concat('ws.min.css'))
+gulp.task('compress_css_index', () =>
+	gulp.src(css_sources_index)
+		.pipe(concat('index.min.css'))
+		.pipe(cleanCSS())
+		.pipe(gulp.dest('./dist/resources')),
+);
+
+const css_sources_twc3 = [
+	'server/styles/twc3.css',
+];
+gulp.task('compress_css_twc3', () =>
+	gulp.src(css_sources_twc3)
+		.pipe(concat('twc3.min.css'))
 		.pipe(cleanCSS())
 		.pipe(gulp.dest('./dist/resources')),
 );
@@ -123,4 +142,4 @@ gulp.task('invalidate', async () => {
 	}).promise();
 });
 
-module.exports = gulp.series('clean', gulp.parallel('compress_js','compress_css', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');
+module.exports = gulp.series('clean', gulp.parallel('compress_js','compress_js_data','compress_css_index','compress_css_twc3', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');

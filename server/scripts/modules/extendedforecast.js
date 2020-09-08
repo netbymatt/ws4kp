@@ -6,7 +6,7 @@
 // eslint-disable-next-line no-unused-vars
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId,elemId,weatherParameters) {
-		super(navId,elemId);
+		super(navId,elemId,'Extended Forecast');
 
 		// set timings
 		this.timing.totalScreens = 2;

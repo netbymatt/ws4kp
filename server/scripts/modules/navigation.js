@@ -176,7 +176,7 @@ const navigation = (() => {
 		},
 	};
 
-	// receive naivgation messages from displays
+	// receive navigation messages from displays
 	const displayNavMessage = (message) => {
 		if (message.type === msg.response.previous) loadDisplay(-1);
 		if (message.type === msg.response.next) loadDisplay(1);
@@ -208,8 +208,9 @@ const navigation = (() => {
 
 	// get the current display index or value
 	const currentDisplayIndex = () => {
-		const index = displays.findIndex(display=>display.isActive());
-		if (index === undefined) console.error('No active display');
+		let index = displays.findIndex(display=>display.isActive());
+		// if there is no active display, default to the first one
+		if (index === -1) index = displays.length-1;
 		return index;
 	};
 	const currentDisplay = () => {

@@ -5,7 +5,7 @@
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, weatherParameters) {
 		// special height and width for scrolling
-		super(navId, elemId);
+		super(navId, elemId, 'Travel Forecast');
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround6_1.png');
 
