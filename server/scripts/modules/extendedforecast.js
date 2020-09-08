@@ -64,9 +64,7 @@ class ExtendedForecast extends WeatherDisplay {
 			// get the object to modify/populate
 			const fDay = forecast[destIndex];
 			// high temperature will always be last in the source array so it will overwrite the low values assigned below
-			// TODO: change to commented line when incons are matched up
-			// fDay.icon = icons.GetWeatherIconFromIconLink(period.icon);
-			fDay.icon = icons.getWeatherRegionalIconFromIconLink(period.icon);
+			fDay.icon = icons.getWeatherIconFromIconLink(period.icon);
 			fDay.text = this.shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = dates[destIndex];
 

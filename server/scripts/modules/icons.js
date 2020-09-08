@@ -1,13 +1,13 @@
 'use strict';
-
+/* spell-checker: disable */
 // eslint-disable-next-line no-unused-vars
 const icons = (() => {
-	// internal function to add path to returned icon
-	const addPath = (icon) => `images/r/${icon}`;
 
 	const getWeatherRegionalIconFromIconLink = (link, isNightTime) => {
-	// extract day or night if not provided
+		// extract day or night if not provided
 		if (isNightTime === undefined) isNightTime = link.indexOf('/night/') >=0;
+		// internal function to add path to returned icon
+		const addPath = (icon) => `images/r/${icon}`;
 
 		// grab everything after the last slash ending at any of these: ?&,
 		const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
@@ -128,8 +128,13 @@ const icons = (() => {
 		}
 	};
 
-	const getWeatherIconFromIconLink = function (link, OverrideIsDay = true) {
-	// grab everything after the last slash ending at any of these: ?&,
+	const getWeatherIconFromIconLink = function (link, isNightTime = false) {
+		// internal function to add path to returned icon
+		const addPath = (icon) => `images/${icon}`;
+		// extract day or night if not provided
+		if (isNightTime === undefined) isNightTime = link.indexOf('/night/') >=0;
+
+		// grab everything after the last slash ending at any of these: ?&,
 		const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
 		let conditionName = afterLastSlash.match(/(.*?)[,?&.]/)[1];
 
@@ -141,91 +146,105 @@ const icons = (() => {
 
 
 		// find the icon
-		switch (conditionName + (!OverrideIsDay?'-n':'')) {
-
-
+		switch (conditionName + (isNightTime?'-n':'')) {
 		case 'skc':
-			return addPath('Sunny.gif');
+		case 'hot':
+		case 'haze':
+			return addPath('CC_Clear1.gif');
 
 		case 'skc-n':
-			return addPath('Clear.gif');
+		case 'nskc':
+		case 'nskc-n':
+			return addPath('CC_Clear0.gif');
 
-		case 'cc_mostlycloudy1.gif':
-			return addPath('Mostly-Cloudy.gif');
+		case 'sct':
+		case 'few':
+		case 'bkn':
+			return addPath('CC_PartlyCloudy1.gif');
 
-		case 'cc_mostlycloudy0.gif':
-			return addPath('Partly-Clear.gif');
+		case 'bkn-n':
+		case 'few-n':
+		case 'nfew-n':
+		case 'nfew':
+		case 'sct-n':
+		case 'nsct':
+		case 'nsct-n':
+			return addPath('CC_PartlyCloudy0.gif');
 
-		case 'cc_partlycloudy1.gif':
-			return addPath('Partly-Cloudy.gif');
+		case 'ovc':
+		case 'novc':
+		case 'ovc-n':
+			return addPath('CC_Cloudy.gif');
 
-		case 'cc_partlycloudy0.gif':
-			return addPath('Mostly-Clear.gif');
+		case 'fog':
+			return addPath('CC_Fog.gif');
 
-		case 'cc_cloudy.gif':
-			return addPath('Cloudy.gif');
-
-		case 'cc_fog.gif':
-			return addPath('Fog.gif');
-
-		case 'sleet.gif':
+		case 'rain_sleet':
 			return addPath('Sleet.gif');
 
-		case 'ef_scatshowers.gif':
-			return addPath('Scattered-Showers.gif');
+		case 'rain_showers':
+		case 'rain_showers_high':
+			return addPath('CC_Showers.gif');
 
-		case 'cc_showers.gif':
-			return addPath('Shower.gif');
+		case 'rain_showers-n':
+		case 'rain_showers_high-n':
+			return addPath('CC_Showers.gif');
 
-		case 'cc_rain.gif':
-			return addPath('Rain.gif');
+		case 'rain':
+			return addPath('CC_Rain.gif');
 
-		//case "ef_scatsnowshowers.gif":
-		case 'light-snow.gif':
-			return addPath('Light-Snow.gif');
+			// case 'snow':
+			// 	return addPath('Light-Snow.gif');
+			// 	break;
 
-		case 'cc_snowshowers.gif':
-			return addPath('Heavy-Snow.gif');
+			// case 'cc_snowshowers.gif':
+			// 	//case "heavy-snow.gif":
+			// 	return addPath('AM-Snow-1994.gif');
+			// 	break;
 
-		case 'cc_snow.gif':
-		case 'heavy-snow.gif':
-			return addPath('Heavy-Snow.gif');
+		case 'snow':
+			return addPath('CC_Snow.gif');
 
-		case 'cc_rainsnow.gif':
-		//return addPath("Ice-Snow.gif");
-			return addPath('Rain-Snow.gif');
+		case 'rain_snow':
+			return addPath('CC_RainSnow.gif');
 
-		case 'cc_freezingrain.gif':
-			return addPath('Freezing-Rain.gif');
+		case 'snow_fzra':
+		case 'fzra':
+			return addPath('CC_FreezingRain.gif');
 
-		case 'cc_mix.gif':
-			return addPath('Wintry-Mix.gif');
-
-		case 'freezing-rain-sleet.gif':
-			return addPath('Freezing-Rain-Sleet.gif');
-
-		case 'snow-sleet.gif':
+		case 'snow_sleet':
 			return addPath('Snow-Sleet.gif');
 
-		case 'ef_scattstorms.gif':
-			return addPath('Scattered-Tstorms.gif');
+		case 'tsra_sct':
+		case 'tsra':
+			return addPath('EF_ScatTstorms.gif');
 
-		case 'ef_scatsnowshowers.gif':
-			return addPath('Scattered-Snow-Showers.gif');
+		case 'tsra_sct-n':
+		case 'tsra-n':
+			return addPath('CC_TStorm.gif');
 
-		case 'cc_tstorm.gif':
-		case 'ef_isolatedtstorms.gif':
-			return addPath('Thunderstorm.gif');
+		case 'tsra_hi':
+		case 'tsra_hi-n':
+		case 'hurricane':
+			return addPath('CC_TStorm');
 
-		case 'cc_windy.gif':
-		case 'cc_windy2.gif':
-			return addPath('Windy.gif');
+		case 'wind_few':
+		case 'wind_sct':
+		case 'wind_bkn':
+		case 'wind_ovc':
+			return addPath('CC_Windy.gif');
 
-		case 'blowing-snow.gif':
+		case 'wind_skc':
+			return addPath('CC_Windy.gif');
+
+		case 'wind_skc-n':
+			return addPath('CC_Windy.gif');
+
+		case 'blizzard':
 			return addPath('Blowing-Snow.gif');
 
 		default:
-			console.error('Unable to locate icon for \'' + link + '\'');
+			console.log(`Unable to locate icon for ${link} ${isNightTime}`);
 			return false;
 		}
 	};

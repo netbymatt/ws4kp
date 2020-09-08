@@ -64,8 +64,7 @@ class CurrentWeather extends WeatherDisplay {
 		let WindChill = Math.round(observations.windChill.value);
 		let WindGust = Math.round(observations.windGust.value);
 		let Humidity = Math.round(observations.relativeHumidity.value);
-		// TODO: switch to larger icon
-		const Icon = icons.getWeatherRegionalIconFromIconLink(observations.icon);
+		const Icon = icons.getWeatherIconFromIconLink(observations.icon);
 		let PressureDirection = '';
 		const TextConditions = observations.textDescription;
 

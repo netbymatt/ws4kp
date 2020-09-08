@@ -342,8 +342,6 @@ const utils = (() => {
 		}
 
 		for (i = -1, l = (r = str.split(/\r\n|\n|\r/)).length; ++i < l; r[i] += s) {
-			// @todo: Split this up over many more lines and more semantic variable names
-			// so it becomes readable
 			for (s = r[i], r[i] = '';
 				s.length > m;
 				r[i] += s.slice(0, j) + ((s = s.slice(j)).length ? b : '')) {
