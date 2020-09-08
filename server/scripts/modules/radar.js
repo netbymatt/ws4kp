@@ -1,5 +1,5 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, draw */
+/* globals WeatherDisplay, utils, STATUS, draw, luxon */
 
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
@@ -24,6 +24,9 @@ class Radar extends WeatherDisplay {
 			this.setStatus(STATUS.noData);
 			return;
 		}
+
+		// date and time parsing
+		const {DateTime} = luxon;
 
 		// get the base map
 		let src = 'images/4000RadarMap2.jpg';
@@ -106,6 +109,7 @@ class Radar extends WeatherDisplay {
 		}
 
 		// Load the most recent doppler radar images.
+		const radarTimes = [];
 		const radarCanvases = await Promise.all(urls.map(async (url) => {
 			// create destination context
 			const canvas = document.createElement('canvas');
@@ -113,6 +117,17 @@ class Radar extends WeatherDisplay {
 			canvas.height = 367;
 			const context = canvas.getContext('2d');
 			context.imageSmoothingEnabled = false;
+
+			// store the time
+			const [, year, month, day, hour, minute] = url.match(/_(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)_/);
+			radarTimes.push(DateTime.fromObject({
+				year,
+				month,
+				day,
+				hour,
+				minute,
+				zone: 'UTC',
+			}).setZone());
 
 			// get the image
 			const blob = await $.ajaxCORS({
@@ -158,13 +173,14 @@ class Radar extends WeatherDisplay {
 		this.timing.totalScreens = radarCanvases.length;
 		// store the images
 		this.data = radarCanvases;
+		this.times = radarTimes;
 		this.drawCanvas();
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
 		this.context.drawImage(await this.backgroundImage, 0, 0);
-
+		const {DateTime} = luxon;
 		// Title
 		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 65, 'Local', 2);
 		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 100, 'Radar', 2);
@@ -190,6 +206,7 @@ class Radar extends WeatherDisplay {
 		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 355, 105, '= Incomplete Data', 2);
 
 		this.context.drawImage(this.data[this.screenIndex], 0, 0, 640, 367, 0, 113, 640, 367);
+		draw.text(this.context, 'Star4000 Small', '24pt', '#ffffff', 100, 110, this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE), 2, 'center');
 
 		this.finishDraw();
 		this.setStatus(STATUS.loaded);
