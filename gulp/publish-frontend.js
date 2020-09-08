@@ -1,4 +1,4 @@
-const version = '2.2.0';
+const version = require('../version');
 
 const gulp = require('gulp');
 const concat = require('gulp-concat');
@@ -43,6 +43,7 @@ const js_sources = [
 	'server/scripts/modules/extendedforecast.js',
 	'server/scripts/modules/almanac.js',
 	'server/scripts/modules/radar.js',
+	'server/scripts/modules/progress.js',
 	'server/scripts/modules/navigation.js',
 ];
 gulp.task('compress_js', () =>
@@ -79,6 +80,7 @@ gulp.task('compress_html', () =>
 	gulp.src(html_sources)
 		.pipe(ejs({
 			production: version,
+			version,
 		}))
 		.pipe(rename({extname: '.html'}))
 		.pipe(htmlmin({collapseWhitespace: true}))

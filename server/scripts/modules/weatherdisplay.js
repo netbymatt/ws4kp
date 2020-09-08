@@ -90,8 +90,6 @@ class WeatherDisplay {
 		// refresh the canvas
 		this.canvas = document.getElementById(this.elemId+'Canvas');
 		this.context = this.canvas.getContext('2d');
-		// clear the canvas
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
 	finishDraw() {
@@ -136,7 +134,6 @@ class WeatherDisplay {
 		// if (OkToDrawCustomScrollText) DrawCustomScrollText(WeatherParameters, context);
 	}
 
-	// TODO: update clock automatically
 	drawCurrentDateTime(bottom) {
 		// only draw if canvas is active to conserve battery
 		if (!this.isActive()) return;
@@ -225,6 +222,9 @@ class WeatherDisplay {
 
 		// show the canvas
 		this.canvas.style.display = 'block';
+
+		// stop if timing has been disabled
+		if (!this.timing) return;
 
 		// reset timing
 		this.startNavCount(navigation.isPlaying());

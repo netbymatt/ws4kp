@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line no-unused-vars
 class LocalForecast extends WeatherDisplay {
-	constructor(navId,elemId,weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId, 'Local Forecast');
 
 		// set timings
@@ -12,9 +12,6 @@ class LocalForecast extends WeatherDisplay {
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
-
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	async getData(weatherParameters) {

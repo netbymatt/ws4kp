@@ -1,7 +1,7 @@
 'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
-/* globals utils, _StationInfo, STATUS, draw */
-/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar */
+/* globals utils, _StationInfo, STATUS */
+/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress */
 
 document.addEventListener('DOMContentLoaded', () => {
 	navigation.init();
@@ -18,7 +18,7 @@ const navigation = (() => {
 	let initialLoadDone = false;
 	let currentUnits = UNITS.english;
 	let playing = false;
-	let backgroundImage;
+	let progress;
 
 	const init = async () => {
 		// set up message receive and dispatch accordingly
@@ -47,8 +47,6 @@ const navigation = (() => {
 				console.error(`Unknown event ${data.type}`);
 			}
 		}, false);
-		backgroundImage = await utils.image.load('images/BackGround1_1.png');
-		drawProgressCanvas();
 	};
 
 	const postMessage = (type, message = {}) => {
@@ -109,15 +107,19 @@ const navigation = (() => {
 				new Almanac(6, 'almanac', weatherParameters),
 				new Radar(7, 'radar', weatherParameters),
 			];
-		} else {
-			// or just call for new data if the canvases already exist
-			displays.forEach(display => display.getData(weatherParameters));
 		}
+		// call for new data on each display
+		displays.forEach(display => display.getData(weatherParameters));
 
 		// GetMonthPrecipitation(this.weatherParameters);
 		// GetAirQuality3(this.weatherParameters);
 		// ShowDopplerMap(this.weatherParameters);
 		// GetWeatherHazards3(this.weatherParameters);
+
+		// draw the progress canvas
+		progress = new Progress(-1,'progress');
+		progress.drawCanvas();
+		progress.showCanvas();
 	};
 
 	// receive a status update from a module {id, value}
@@ -127,10 +129,10 @@ const navigation = (() => {
 		// test for loaded status
 		if (value.status !== STATUS.loaded) return;
 
-		drawProgressCanvas();
+		progress.drawCanvas(displays, countLoadedCanvases());
 
 		// send loaded messaged to parent
-		if (countLoadedCanvases < displays.length) return;
+		if (countLoadedCanvases() < displays.length) return;
 		postMessage('loaded');
 		// store the display number
 	};
@@ -236,50 +238,6 @@ const navigation = (() => {
 		default:
 			console.error(`Unknown navButton ${button}`);
 		}
-	};
-
-	const drawProgressCanvas = () => {
-		const canvas = document.getElementById('progressCanvas');
-		const context = canvas.getContext('2d');
-
-		context.drawImage(backgroundImage, 0, 100, 640, 300, 0, 100, 640, 300);
-		draw.horizontalGradientSingle(context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
-		draw.horizontalGradientSingle(context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-
-		displays.forEach((display, idx) => {
-			const y = 120 + idx*29;
-			const dots = Array(120 - Math.floor(display.name.length * 2.5)).join('.');
-			draw.text(context, 'Star4000 Extended', '19pt', '#ffffff', 70, y, display.name + dots, 2);
-
-			// Erase any dots that spill into the status text.
-			context.drawImage(backgroundImage, 475, y - 20, 165, 30, 475, y - 20, 165, 30);
-			draw.horizontalGradientSingle(context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-
-			let statusText;
-			let statusColor;
-			switch (display.status) {
-			case STATUS.loading:
-				statusText = 'Loading';
-				statusColor = '#ffff00';
-				break;
-			case STATUS.loaded:
-				statusText = 'Press Here';
-				statusColor = '#00ff00';
-				break;
-			case STATUS.failed:
-				statusText = 'Failed';
-				statusColor = '#ff0000';
-				break;
-			case STATUS.noData:
-				statusText = 'No Data';
-				statusColor = '#C0C0C0';
-				draw.box(context, 'rgb(33, 40, 90)', 475, y - 15, 75, 15);
-				break;
-			default:
-			}
-			draw.text(context, 'Star4000 Extended', '19pt', statusColor, 565, y, statusText, 2, 'end');
-
-		});
 	};
 
 	return {

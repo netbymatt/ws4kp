@@ -5,7 +5,7 @@
 
 // eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
-	constructor(navId,elemId, weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId,'Regional Forecast');
 
 		// pre-load background image (returns promise)
@@ -13,12 +13,8 @@ class RegionalForecast extends WeatherDisplay {
 
 		// timings
 		this.timing.totalScreens = 3;
-
-		// get the data and update the promise
-		this.getData(weatherParameters);
 	}
 
-	// get the data from the globally shared object
 	async getData(weatherParameters) {
 		super.getData();
 		// pre-load the base map (returns promise)

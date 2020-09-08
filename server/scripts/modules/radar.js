@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
-	constructor(navId,elemId,weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId,'Local Radar');
 
 		// set max images
@@ -14,9 +14,6 @@ class Radar extends WeatherDisplay {
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
-
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	async getData(weatherParameters) {

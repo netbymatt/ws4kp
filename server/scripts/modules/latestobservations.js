@@ -3,15 +3,13 @@
 
 // eslint-disable-next-line no-unused-vars
 class LatestObservations extends WeatherDisplay {
-	constructor(navId,elemId, weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId,'Latest Observations');
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 
 		// constants
 		this.MaximumRegionalStations = 7;
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	async getData(weatherParameters) {

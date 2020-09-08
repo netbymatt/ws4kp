@@ -1,36 +1,16 @@
 /* globals _StationInfo, luxon, _RegionalCities, utils, icons, _TravelCities, SunCalc */
-const {DateTime} = luxon;
 const _DayShortNames = { 'Sunday': 'Sun', 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat' };
-const _DayLongNameArray = Object.keys(_DayShortNames);
-const _DayLongNames = { 'Sun': 'Sunday', 'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday', 'Thu': 'Thursday', 'Fri': 'Friday', 'Sat': 'Saturday' };
-const _MonthLongNames = { 'Jan': 'January', 'Feb': 'February', 'Mar': 'March', 'Apr': 'April', 'May': 'May', 'Jun': 'June', 'Jul': 'July', 'Aug': 'August', 'Sep': 'September', 'Oct': 'October', 'Nov': 'November', 'Dec': 'December' };
 
 var canvasProgress;
 var divProgress;
 
-var divRegionalCurrentMap;
 var canvasRegionalObservations;
 
-var divRegionalForecastMap1;
-var divRegionalForecastMap2;
 var canvasRegionalForecast1;
 var canvasRegionalForecast2;
 
-var divDopplerRadarMap;
 var canvasLocalRadar;
 
-var divTemperature;
-var divStation;
-var divConditions;
-var divHumidity;
-var divIcon;
-var divDewpoint;
-var divCeiling;
-var divVisibility;
-var divWind;
-var divPressure;
-var divGust;
-var divHeatIndex;
 var canvasCurrentWeather;
 
 var canvasExtendedForecast1;
@@ -48,8 +28,6 @@ var canvasOutlook;
 var canvasMarineForecast;
 var canvasAirQuality;
 
-var tblTravelCities;
-var divTravelCitiesScroll;
 var canvasTravelForecast;
 
 var divOutlookTemp;
@@ -57,14 +35,10 @@ var cnvOutlookTemp;
 var divOutlookPrcp;
 var cnvOutlookPrcp;
 
-var tblRegionalObservations;
 var canvasLatestObservations;
 
 var _WeatherParameters = null;
 
-var _DopplerRadarInterval = null;
-var _DopplerRadarImageIndex = 0;
-var _DopplerRadarImageMax = 6;
 
 var LoadStatuses = {
 	Loading: 0,
@@ -73,7 +47,6 @@ var LoadStatuses = {
 	NoData: 3,
 };
 
-var _UpdateWeatherCanvasInterval = null;
 var _UpdateWeatherUpdateMs = 50;
 var canvasBackGroundDateTime = null;
 var canvasBackGroundCurrentConditions = null;
@@ -95,7 +68,6 @@ var _UpdateCustomScrollTextMs = 0;
 
 var _UpdateHazardsY = 0;
 
-var _UpdateLocalForecastIndex = 0;
 
 var CanvasTypes = {
 	Progress: 0,
@@ -117,33 +89,10 @@ var CanvasTypes = {
 	Hazards: 16,
 };
 var _FirstCanvasType = CanvasTypes.Progress;
-var _LastCanvasType = CanvasTypes.Hazards;
 var _CurrentCanvasType = _FirstCanvasType;
-var _CurrentPosition = 0.0;
-var _PreviousPosition = 0.0;
 
 var _IsPlaying = false;
-var _PlayIntervalId = null;
 
-var _IsAudioPlaying = false;
-var _AudioPlayIntervalId = null;
-var _AudioPlayInterval = 100;
-var _AudioFadeOutIntervalId = null;
-var _MusicUrls = [];
-var _MusicUrlsTemp = [];
-var audMusic = null;
-var _AudioContext = null;
-var _AudioBufferSource = null;
-var _AudioDuration = 0;
-var _AudioCurrentTime = 0;
-var _AudioGain = null;
-var _AudioRefreshIntervalId = null;
-
-var _IsNarrationPlaying = false;
-var _Utterance = false;
-var _CurrentUtterance = false;
-var _CurrentUtteranceId = null;
-var _IsSpeaking = false;
 
 const OperatingSystems = {
 	Unknown: 0,
@@ -698,80 +647,6 @@ $.fn.scrollIntoView = function () {
 };
 
 
-var _PlayInterval = 100;
-var _PlayMs = 0;
-var _PlayMsOffsets = {
-	Start: 0,
-	End: 0,
-	Length: 0,
-	CurrentWeather_Start: 0,
-	CurrentWeather_End: 10000,
-	CurrentWeather_Length: 10000,
-	CurrentWeather_Loaded: false,
-	LatestObservations_Start: 0,
-	LatestObservations_End: 0,
-	LatestObservations_Length: 10000,
-	LatestObservations_Loaded: false,
-	TravelForecast_Start: 0,
-	TravelForecast_End: 0,
-	TravelForecast_Length: 60000,
-	TravelForecast_Loaded: false,
-	RegionalForecast1_Start: 0,
-	RegionalForecast1_End: 0,
-	RegionalForecast1_Length: 10000,
-	RegionalForecast1_Loaded: false,
-	RegionalForecast2_Start: 0,
-	RegionalForecast2_End: 0,
-	RegionalForecast2_Length: 10000,
-	RegionalForecast2_Loaded: false,
-	RegionalObservations_Start: 0,
-	RegionalObservations_End: 0,
-	RegionalObservations_Length: 10000,
-	RegionalObservations_Loaded: false,
-	LocalForecast_Start: 0,
-	LocalForecast_End: 0,
-	LocalForecast_Length: 0,
-	LocalForecast_Loaded: false,
-	MarineForecast_Start: 0,
-	MarineForecast_End: 0,
-	MarineForecast_Length: 10000,
-	MarineForecast_Loaded: false,
-	AirQuality_Start: 0,
-	AirQuality_End: 0,
-	AirQuality_Length: 10000,
-	AirQuality_Loaded: false,
-	ExtendedForecast1_Start: 0,
-	ExtendedForecast1_End: 0,
-	ExtendedForecast1_Length: 10000,
-	ExtendedForecast1_Loaded: false,
-	ExtendedForecast2_Start: 0,
-	ExtendedForecast2_End: 0,
-	ExtendedForecast2_Length: 10000,
-	ExtendedForecast2_Loaded: false,
-	Almanac_Start: 0,
-	Almanac_End: 0,
-	Almanac_Length: 10000,
-	Almanac_Loaded: false,
-	AlmanacTides_Start: 0,
-	AlmanacTides_End: 0,
-	AlmanacTides_Length: 10000,
-	AlmanacTides_Loaded: false,
-	Outlook_Start: 0,
-	Outlook_End: 0,
-	Outlook_Length: 10000,
-	Outlook_Loaded: false,
-	LocalRadar_Start: 0,
-	LocalRadar_End: 0,
-	LocalRadar_Length: 15000,
-	LocalRadar_Loaded: false,
-	Hazards_Start: 0,
-	Hazards_End: 0,
-	Hazards_Length: 0,
-	Hazards_Loaded: false,
-};
-
-
-
 var canvasProgress_mousemove = function (e) {
 	canvasProgress.css('cursor', '');
 
@@ -883,23 +758,6 @@ var canvasProgress_click = function (e) {
 	}
 };
 
-
-String.prototype.centerText = function(numberOfSpaces) {
-	var text = this;
-	text = text.trim();
-	if (text.length > numberOfSpaces) {
-		return text;
-	}
-	var l = text.length;
-	var w2 = Math.floor(numberOfSpaces / 2);
-	var l2 = Math.floor(l / 2);
-	var s = new Array(w2 - l2).join(' ');
-	text = s + text + s;
-	if (text.length < numberOfSpaces) {
-		text += new Array(numberOfSpaces - text.length + 1).join(' ');
-	}
-	return text;
-};
 
 var PopulateHazardConditions = function (WeatherParameters) {
 	if (WeatherParameters === null || (_DontLoadGifs && WeatherParameters.Progress.Hazards !== LoadStatuses.Loaded)) {
@@ -1109,96 +967,6 @@ Number.prototype.pad = function(size) {
 
 
 const Progress = function (e) {
-
-
-	const _ProgressInterval = window.setInterval(() => {
-		gifProgress.get_canvas().width = (ProgressPercent / 100) * 530 + 1;
-
-		if (ProgressPercent > 0) {
-			gifProgress.setX(53);
-			gifProgress.setY(430);
-		}
-
-		_DisplayLoadingDetails();
-		if (ProgressPercent >= 100) {
-			gifProgress.pause();
-			window.clearInterval(_ProgressInterval);
-			if (typeof _CallBack === 'function') _CallBack({ Status: 'LOADED', LastUpdate: new Date() });
-		}
-
-	}, 250);
-
-	const _DisplayLoadingDetails = () => {
-		context.drawImage(BackGroundImage, 0, 100, 640, 300, 0, 100, 640, 300);
-		DrawHorizontalGradientSingle(context, 0, 90, 52, 399, _SideColor1, _SideColor2);
-		DrawHorizontalGradientSingle(context, 584, 90, 640, 399, _SideColor1, _SideColor2);
-
-		const __DrawText = (caption, status) => {
-			let StatusText;
-			let StatusColor;
-
-
-
-			OffsetY += 29;
-		};
-
-		__DrawText('Current Conditions', WeatherParameters.Progress.CurrentConditions);
-		__DrawText('Latest Observations', WeatherParameters.Progress.NearbyConditions);
-		__DrawText('Travel Forecast', WeatherParameters.Progress.TravelForecast);
-		__DrawText('Regional Forecast', WeatherParameters.Progress.TomorrowsRegionalMap);
-		__DrawText('Regional Observations', WeatherParameters.Progress.CurrentRegionalMap);
-		__DrawText('Local Forecast', WeatherParameters.Progress.WordedForecast);
-		__DrawText('Extended Forecast', WeatherParameters.Progress.FourDayForecast);
-		__DrawText('Almanac', WeatherParameters.Progress.Almanac);
-		__DrawText('Local Radar', WeatherParameters.Progress.DopplerRadar);
-		__DrawText('Hazardous Weather', WeatherParameters.Progress.Hazards);
-
-	};
-
-	this.DrawProgress = async () => {
-		const DontLoadGifs = _DontLoadGifs;
-
-		BackGroundImage = await utils.loadImg('images/BackGround1_1.png');
-		_self.Loaded = false;
-
-		if (!DontLoadGifs || !gifProgress) {
-			// Conditions Icon
-			gifProgress = await utils.SuperGifAsync({
-				src: 'images/Progress1.gif',
-				loop_delay: 100,
-				auto_play: true,
-				canvas: canvas,
-				x: 50,
-				y: 480,
-			});
-		}
-
-		context.drawImage(BackGroundImage, 0, 0);
-		DrawHorizontalGradientSingle(context, 0, 30, 500, 90, _TopColor1, _TopColor2);
-		DrawTriangle(context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-
-		canvasBackGroundDateTime[0].getContext('2d').drawImage(canvas, 410, 30, 175, 60, 0, 0, 175, 60);
-		canvasBackGroundCurrentConditions[0].getContext('2d').drawImage(canvas, 0, 405, 640, 75, 0, 0, 640, 75);
-
-		DrawTitleText(context, 'WeatherStar', '4000+ 2.00');
-
-		// Draw a box for the progress.
-		DrawBox(context, '#000000', 51, 428, 534, 22);
-		DrawBox(context, '#ffffff', 53, 430, 530, 18);
-
-		_DisplayLoadingDetails();
-
-		UpdateWeatherCanvas(WeatherParameters, canvasProgress);
-
-		_self.Loaded = true;
-
-		if (DontLoadGifs === false)e.OnLoad();
-
-	};
-	this.DrawProgress();
-};
-
-
 const DrawCustomScrollText = (WeatherParameters, context) => {
 	const font = 'Star4000';
 	const size = '24pt';
@@ -1215,9 +983,6 @@ const DrawCustomScrollText = (WeatherParameters, context) => {
 	context.drawImage(canvasBackGroundCurrentConditions[0], 0, 0, 640, 75, 0, 405, 640, 75);
 
 	const text = _ScrollText;
-	//text = "WELCOME TO THE WEATHER STAR 4000+! IF YOU ARE ENJOYING THIS SITE THEN YOU WILL LOVE THE WEATHER STAR 4000 SIMULATOR!";
-	//text = "Hello World!";
-	//text = "A";
 
 	x = 640 - ((_UpdateCustomScrollTextMs / _UpdateWeatherUpdateMs) * 5);
 	// Wait an extra 5 characters.

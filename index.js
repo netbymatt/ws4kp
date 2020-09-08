@@ -15,15 +15,19 @@ const radarPassThru = require('./cors/radar');
 app.get('/stations/*', corsPassThru);
 app.get('/Conus/*', radarPassThru);
 
+// version
+const version = require('./version');
 
 const index = (req, res) => {
 	res.render(path.join(__dirname, 'views/index'), {
 		production: false,
+		version,
 	});
 };
 const twc3 = (req, res) => {
 	res.render(path.join(__dirname, 'views/twc3'), {
 		production: false,
+		version,
 	});
 };
 

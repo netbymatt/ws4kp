@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line no-unused-vars
 class TravelForecast extends WeatherDisplay {
-	constructor(navId, elemId, weatherParameters) {
+	constructor(navId, elemId) {
 		// special height and width for scrolling
 		super(navId, elemId, 'Travel Forecast');
 		// pre-load background image (returns promise)
@@ -26,9 +26,6 @@ class TravelForecast extends WeatherDisplay {
 		if (extra !== 0) this.timing.delay.push(Math.round(this.extra*this.cityHeight));
 		// add the final 3 second delay
 		this.timing.delay.push(150);
-
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	async getData() {

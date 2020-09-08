@@ -3,13 +3,10 @@
 
 // eslint-disable-next-line no-unused-vars
 class CurrentWeather extends WeatherDisplay {
-	constructor(navId,elemId,weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId,'Current Conditions');
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
-
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	async getData(weatherParameters) {

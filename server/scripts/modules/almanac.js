@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line no-unused-vars
 class Almanac extends WeatherDisplay {
-	constructor(navId,elemId,weatherParameters) {
+	constructor(navId,elemId) {
 		super(navId,elemId,'Almanac');
 
 		// pre-load background image (returns promise)
@@ -19,9 +19,6 @@ class Almanac extends WeatherDisplay {
 		];
 
 		this.backgroundImage = utils.image.load('images/BackGround3_1.png');
-
-		// get the data
-		this.getData(weatherParameters);
 	}
 
 	getData(weatherParameters) {
