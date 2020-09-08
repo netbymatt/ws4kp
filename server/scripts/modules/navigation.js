@@ -183,6 +183,14 @@ const navigation = (() => {
 
 	// navigate to next or previous
 	const navTo = (direction) => {
+		// test for a current display
+		const current = currentDisplay();
+		if (!current) {
+			// special case for no active displays (typically on progress screen)
+			progress.hideCanvas();
+			displays[0].navNext(msg.command.firstFrame);
+			return;
+		}
 		if (direction === msg.command.nextFrame) currentDisplay().navNext();
 		if (direction === msg.command.previousFrame) currentDisplay().navPrev();
 	};
@@ -208,8 +216,6 @@ const navigation = (() => {
 	// get the current display index or value
 	const currentDisplayIndex = () => {
 		let index = displays.findIndex(display=>display.isActive());
-		// if there is no active display, default to the first one
-		if (index === -1) index = displays.length-1;
 		return index;
 	};
 	const currentDisplay = () => {
@@ -234,6 +240,11 @@ const navigation = (() => {
 		case 'previous':
 			setPlaying(false);
 			navTo(msg.command.previousFrame);
+			break;
+		case 'menu':
+			setPlaying(false);
+			progress.showCanvas();
+			hideAllCanvases();
 			break;
 		default:
 			console.error(`Unknown navButton ${button}`);

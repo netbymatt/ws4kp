@@ -49,15 +49,20 @@ class Radar extends WeatherDisplay {
 		}
 
 		// convert to an array of gif urls
-		const $list = $(radarHtml);
-		const gifs = $list.find('a[href]').map((i,elem) => elem.innerHTML).get();
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(radarHtml, 'text/html');
+		const anchors = xmlDoc.getElementsByTagName('a');
+		const gifs = [];
+		for (let idx in anchors) {
+			gifs.push(anchors[idx].innerHTML);
+		}
 
 		// filter for selected urls
-		let filter = /^Conus_\d/;
+		let filter = /Conus_\d/;
 		if (weatherParameters.State === 'HI') filter = /hawaii_\d/;
 
 		// get the last few images
-		const urlsFull = gifs.filter(gif => gif.match(filter));
+		const urlsFull = gifs.filter(gif => gif && gif.match(filter));
 		const urls = urlsFull.slice(-this.dopplerRadarImageMax);
 
 		// calculate offsets and sizes

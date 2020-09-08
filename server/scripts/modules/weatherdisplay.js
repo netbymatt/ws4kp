@@ -232,7 +232,7 @@ class WeatherDisplay {
 		// if there was a command the canvas has already been drawn
 		if (navCmd) return;
 
-		// refresh the canvas (incase the screen index changed)
+		// refresh the canvas (in case the screen index changed)
 		if (navCmd) this.drawCanvas();
 	}
 	hideCanvas() {
@@ -304,6 +304,7 @@ class WeatherDisplay {
 		} else {
 			this.screenIndexChange(this.screenIndex);
 		}
+		this.showCanvas();
 	}
 
 	// navigate to previous screen
@@ -329,6 +330,7 @@ class WeatherDisplay {
 		} else {
 			this.screenIndexChange(this.screenIndex);
 		}
+		this.showCanvas();
 	}
 
 	// calculate a baseCount from the screen index for the array timings
