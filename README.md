@@ -41,6 +41,7 @@ I've made several changes to this Weather Star 4000 simulation compared to the o
 * The nearby cities displayed on screens such as "Latest Observations" and "Regional Forecast" are likely not the same as they were in the 90's. The weather monitoring equipment at these stations move over time for one reason or another, and coming up with a simple formulaic way of finding nearby stations is sufficient to give the same look-and-feel as the original.
 * The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
 * "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units.
+* Radar displays the timestamp of the image.
 
 ## Wish list
 
