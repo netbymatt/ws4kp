@@ -127,8 +127,10 @@ class Radar extends WeatherDisplay {
 
 			// draw the entire image
 			if (weatherParameters.State === 'HI') {
+				workingContext.clearRect(0, 0, 571, 600);
 				workingContext.drawImage(imgBlob, 0, 0, 571, 600);
 			} else {
+				workingContext.clearRect(0, 0, 2550, 1600);
 				workingContext.drawImage(imgBlob, 0, 0, 2550, 1600);
 			}
 
@@ -138,8 +140,16 @@ class Radar extends WeatherDisplay {
 			// get the base map
 			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX*2, offsetY*2, 0, 0, 640, 367);
 
-			// put the radar on top
-			context.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
+			// crop the radar image
+			const cropCanvas = document.createElement('canvas');
+			cropCanvas.width = 640;
+			cropCanvas.height = 367;
+			const cropContext = cropCanvas.getContext('2d');
+			cropContext.imageSmoothingEnabled = false;
+			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
+
+			// merge the radar and map
+			this.mergeDopplerRadarImage(context, cropContext);
 
 			return canvas;
 		}));
@@ -348,5 +358,34 @@ class Radar extends WeatherDisplay {
 
 		// rewrite the image
 		RadarContext.putImageData(RadarImageData, 0, 0);
+	}
+
+	mergeDopplerRadarImage (mapContext, radarContext) {
+		var mapImageData = mapContext.getImageData(0, 0, mapContext.canvas.width, mapContext.canvas.height);
+		var radarImageData = radarContext.getImageData(0, 0, radarContext.canvas.width, radarContext.canvas.height);
+
+		// examine every pixel,
+		// change any old rgb to the new-rgb
+		for (var i = 0; i < radarImageData.data.length; i += 4) {
+			// i + 0 = red
+			// i + 1 = green
+			// i + 2 = blue
+			// i + 3 = alpha (0 = transparent, 255 = opaque)
+
+			// is this pixel the old rgb?
+			if ((mapImageData.data[i] < 116 && mapImageData.data[i + 1] < 116 && mapImageData.data[i + 2] < 116)) {
+				// change to your new rgb
+
+				// Transparent
+				radarImageData.data[i] = 0;
+				radarImageData.data[i + 1] = 0;
+				radarImageData.data[i + 2] = 0;
+				radarImageData.data[i + 3] = 0;
+			}
+		}
+
+		radarContext.putImageData(radarImageData, 0, 0);
+
+		mapContext.drawImage(radarContext.canvas, 0, 0);
 	}
 }
