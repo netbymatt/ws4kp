@@ -251,6 +251,9 @@ const navigation = (() => {
 		}
 	};
 
+	// return the specificed display
+	const getDisplay = (index) => displays[index];
+
 	return {
 		init,
 		updateStatus,
@@ -258,5 +261,6 @@ const navigation = (() => {
 		isPlaying,
 		displayNavMessage,
 		msg,
+		getDisplay,
 	};
 })();

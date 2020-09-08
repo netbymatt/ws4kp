@@ -1,6 +1,6 @@
 // regional forecast and observations
 
-/* globals WeatherDisplay, utils, STATUS, draw */
+/* globals WeatherDisplay, utils, STATUS, draw, navigation */
 
 // eslint-disable-next-line no-unused-vars
 class Progress extends WeatherDisplay {
@@ -93,6 +93,20 @@ class Progress extends WeatherDisplay {
 	}
 
 	canvasClick(e) {
-		console.log(e);
+		const x = e.offsetX;
+		const y = e.offsetY;
+		console.log(x,y);
+		// eliminate off canvas and outside area clicks
+		if (!this.isActive()) return;
+		if (y < 100 || y > 410) return;
+		if (x < 440 || x > 570) return;
+
+		// use the y value to determine an index
+		const index = Math.floor((y-100)/29);
+		const display = navigation.getDisplay(index);
+		if (display && display.status === STATUS.loaded) {
+			display.showCanvas(navigation.msg.command.firstFrame);
+			this.hideCanvas();
+		}
 	}
 }
