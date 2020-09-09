@@ -190,6 +190,7 @@ class Radar extends WeatherDisplay {
 		this.timing.totalScreens = radarInfo.length;
 		// store the images
 		this.data = radarInfo.map(radar=>radar.canvas);
+		
 		this.times = radarInfo.map(radar=>radar.time);
 		this.drawCanvas();
 	}
