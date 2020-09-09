@@ -27,7 +27,7 @@ class WeatherDisplay {
 			delay: 1, // 1*1second = 1 second total display time
 		};
 		this.navBaseCount = 0;
-		this.screenIndex = 0;
+		this.screenIndex = -1;	// special starting condition
 
 		this.setStatus(STATUS.loading);
 		this.createCanvas(elemId);
@@ -65,21 +65,8 @@ class WeatherDisplay {
 		// set status
 		this.setStatus(STATUS.loading);
 
-		// set up the timing delays
-		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'number') {
-			// array is defined as how long each screen should be displayed. This needs to be converted into total time for use here
-			if (!this.timing.fullDelay) {
-				let sum = 0;
-				this.timing.fullDelay = this.timing.delay.map(val => {
-					const calc = sum + val;
-					sum += val;
-					return calc;
-				});
-			}
-		}
-
-		// update total screens
-		if (Array.isArray(this.timing.delay)) this.timing.totalScreens = this.timing.delay.length;
+		// recalculate navigation timing (in case it was modified in the constructor)
+		this.calcNavTiming();
 	}
 
 	drawCanvas() {
@@ -104,9 +91,7 @@ class WeatherDisplay {
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
 		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
 		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast0') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast1') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast2') OkToDrawNoaaImage = false;
+		if (this.elemId === 'regionalForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'radar') {
 			OkToDrawCurrentConditions = false;
 			OkToDrawCurrentDateTime = false;
@@ -228,12 +213,6 @@ class WeatherDisplay {
 
 		// reset timing
 		this.startNavCount(navigation.isPlaying());
-
-		// if there was a command the canvas has already been drawn
-		if (navCmd) return;
-
-		// refresh the canvas (in case the screen index changed)
-		if (navCmd) this.drawCanvas();
 	}
 	hideCanvas() {
 		this.stopNavBaseCount(true);
@@ -263,21 +242,70 @@ class WeatherDisplay {
 		// call base count change if available for this function
 		if (this.baseCountChange) this.baseCountChange(this.navBaseCount);
 
-		// determine type of timing
-		// simple delay
-		if (typeof this.timing.delay === 'number') {
-			this.navNext();
+		// handle base count/screen index changes
+		this.updateScreenFromBaseCount();
+	}
+
+	updateScreenFromBaseCount() {
+		// get the next screen index
+		let nextScreenIndex = this.screenIndexFromBaseCount();
+
+		// special cases for first and last frame
+		// must compare with false as nextScreenIndex could be 0 which is valid
+		if (nextScreenIndex === false) {
+			this.sendNavDisplayMessage(navigation.msg.response.next);
+			this.stopNavBaseCount();
 			return;
 		}
 
-		// array of timing integers
-		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'number') {
-			// scan the array for a matching number and calculate new screen index from the number
-			const timingMatch = this.timing.fullDelay.indexOf(this.navBaseCount);
-			// if not found return
-			if (timingMatch < 0 && this.navBaseCount <= this.timing.fullDelay[this.timing.totalScreens-1]) return;
-			// navigate to the next screen
-			this.navNext();
+		// test for no change and exit early
+		if (nextScreenIndex === this.screenIndex) return;
+
+		this.screenIndex = nextScreenIndex;
+
+		// call the appropriate screen index change method
+		if (!this.screenIndexChange) {
+			this.drawCanvas();
+		} else {
+			this.screenIndexChange(this.screenIndex);
+		}
+	}
+
+	// take the three timing formats shown above and break them into arrays for consistent usage in navigation functions
+	// this.timing.fullDelay = [end of screen index 0 in base counts, end of screen index 1...]
+	// this.timing.screenIndexes = [screen index to use during this.timing.fullDelay[0], screen index to use during this.timing.fullDelay[1], ...]
+	calcNavTiming() {
+		// update total screens
+		if (Array.isArray(this.timing.delay)) this.timing.totalScreens = this.timing.delay.length;
+
+		// if the delay is provided as a single value, expand it to a series of the same value
+		let intermediateDelay = [];
+		if (typeof this.timing.delay === 'number') {
+			for (let i = 0; i < this.timing.totalScreens; i++) intermediateDelay.push(this.timing.delay);
+		} else {
+			// map just the delays to the intermediate block
+			intermediateDelay = this.timing.delay.map(delay => {
+				if (typeof delay === 'object') return delay.time;
+				return delay;
+			});
+		}
+
+		// calculate the cumulative end point of each delay
+		let sum = 0;
+		this.timing.fullDelay = intermediateDelay.map(val => {
+			const calc = sum + val;
+			sum += val;
+			return calc;
+		});
+
+		// generate a list of screen either sequentially if not provided in an object or from the object
+		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'object') {
+			// extract screen indexes from objects
+			this.timing.screenIndexes = this.timing.delay.map(delay => delay.si);
+		} else {
+			// generate sequential screen indexes
+			this.timing.screenIndexes = [];
+			for (let i = 0; i < this.timing.totalScreens; i++) this.timing.screenIndexes.push(i);
 		}
 	}
 
@@ -287,62 +315,40 @@ class WeatherDisplay {
 		if (command === navigation.msg.command.firstFrame) {
 			this.resetNavBaseCount();
 		} else {
-			// increment screen index
-			this.screenIndex++;
+			// set the base count to the next available frame
+			const newBaseCount = this.timing.fullDelay.find(delay => delay > this.navBaseCount);
+			this.navBaseCount = newBaseCount;
 		}
-		// test for end reached
-		if (this.screenIndex >= this.timing.totalScreens) {
-			this.screenIndex = this.timing.totalScreens - 1;
-			this.sendNavDisplayMessage(navigation.msg.response.next);
-			this.stopNavBaseCount();
-			return;
-		}
-		this.baseCountFromScreenIndex();
-		// if the end was not reached, update the canvas (typical), or run a callback (atypical)
-		if (!this.screenIndexChange) {
-			this.drawCanvas();
-		} else {
-			this.screenIndexChange(this.screenIndex);
-		}
-		this.showCanvas();
+		this.updateScreenFromBaseCount();
 	}
 
 	// navigate to previous screen
 	navPrev(command) {
 		// check for special 'last frame' command
 		if (command === navigation.msg.command.lastFrame) {
-			this.screenIndex = this.timing.totalScreens-1;
+			this.navBaseCount = this.timing.fullDelay[this.timing.totalScreens-1]-1;
 		} else {
-			// decrement screen index
-			this.screenIndex--;
+			// find the highest fullDelay that is less than the current base count
+			const newBaseCount = this.timing.fullDelay.reduce((acc, delay) => {
+				if (delay < this.navBaseCount) return delay;
+				return acc;
+			},0);
+			// if the new base count is zero then we're already at the first screen
+			if (newBaseCount === 0 && this.navBaseCount === 0) {
+				this.sendNavDisplayMessage(navigation.msg.response.previous);
+				return;
+			}
+			this.navBaseCount = newBaseCount;
 		}
-
-		// test for end reached
-		if (this.screenIndex < 0) {
-			this.screenIndex = 0;
-			this.sendNavDisplayMessage(navigation.msg.response.previous);
-			return;
-		}
-		this.baseCountFromScreenIndex();
-		// if the end was not reached, update the canvas (typical), or run a callback (atypical)
-		if (!this.screenIndexChange) {
-			this.drawCanvas();
-		} else {
-			this.screenIndexChange(this.screenIndex);
-		}
-		this.showCanvas();
+		this.updateScreenFromBaseCount();
 	}
 
-	// calculate a baseCount from the screen index for the array timings
-	baseCountFromScreenIndex() {
-		if (!Array.isArray(this.timing.delay)) return;
-		// first screen starts at zero
-		if (this.screenIndex === 0) {
-			this.navBaseCount = 0;
-			return;
-		}
-		// otherwise return one more than the previous sum
-		this.navBaseCount = this.timing.fullDelay[this.screenIndex];
+	// get the screen index for the current base count, returns false if past end of timing array (go to next screen, stop timing)
+	screenIndexFromBaseCount() {
+		// find the first timing in the timing array that is greater than the base count
+		const timingIndex = this.timing.fullDelay.findIndex(delay => delay > this.navBaseCount);
+		if (timingIndex === -1) return false;
+		return this.timing.screenIndexes[timingIndex];
 	}
 
 	// start and stop base counter
@@ -357,7 +363,7 @@ class WeatherDisplay {
 	}
 	resetNavBaseCount() {
 		this.navBaseCount = 0;
-		this.screenIndex = 0;
+		this.screenIndex = -1;
 	}
 
 	sendNavDisplayMessage(message) {

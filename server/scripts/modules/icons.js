@@ -227,7 +227,7 @@ const icons = (() => {
 		case 'tsra_hi':
 		case 'tsra_hi-n':
 		case 'hurricane':
-			return addPath('CC_TStorm');
+			return addPath('CC_TStorm.gif');
 
 		case 'wind_few':
 		case 'wind_sct':

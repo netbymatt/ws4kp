@@ -10,7 +10,29 @@ class Radar extends WeatherDisplay {
 		this.dopplerRadarImageMax = 6;
 		// update timing
 		this.timing.baseDelay = 350;
-		this.timing.delay = [4,1,1,1,1,1,12];
+		this.timing.delay = [
+			{time: 4, si: 0},
+			{time: 1, si: 1},
+			{time: 1, si: 2},
+			{time: 1, si: 3},
+			{time: 1, si: 4},
+			{time: 1, si: 5},
+			{time: 4, si: 6},
+			{time: 1, si: 0},
+			{time: 1, si: 1},
+			{time: 1, si: 2},
+			{time: 1, si: 3},
+			{time: 1, si: 4},
+			{time: 1, si: 5},
+			{time: 4, si: 6},
+			{time: 1, si: 0},
+			{time: 1, si: 1},
+			{time: 1, si: 2},
+			{time: 1, si: 3},
+			{time: 1, si: 4},
+			{time: 1, si: 5},
+			{time: 12, si: 6},
+		];
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
@@ -47,7 +69,7 @@ class Radar extends WeatherDisplay {
 		} catch (e) {
 			console.error('Unable to get list of radars');
 			console.error(e);
-			this.setStatus(STATUS.error);
+			this.setStatus(STATUS.failed);
 			return;
 		}
 
@@ -190,9 +212,8 @@ class Radar extends WeatherDisplay {
 		this.timing.totalScreens = radarInfo.length;
 		// store the images
 		this.data = radarInfo.map(radar=>radar.canvas);
-		
+
 		this.times = radarInfo.map(radar=>radar.time);
-		this.drawCanvas();
 	}
 
 	async drawCanvas() {

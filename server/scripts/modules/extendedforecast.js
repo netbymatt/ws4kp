@@ -35,12 +35,12 @@ class ExtendedForecast extends WeatherDisplay {
 		} catch (e) {
 			console.error('Unable to get extended forecast');
 			console.error(e);
-			this.setStatus(STATUS.error);
+			this.setStatus(STATUS.failed);
 			return;
 		}
 		// we only get here if there was no error above
 		this.data = this.parseExtendedForecast(forecast.properties.periods);
-		this.screnIndex = 0;
+		this.screenIndex = 0;
 		this.drawCanvas();
 
 	}

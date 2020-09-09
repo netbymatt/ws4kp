@@ -39,7 +39,7 @@ class CurrentWeather extends WeatherDisplay {
 		} catch (e) {
 			console.error('Unable to get current observations');
 			console.error(e);
-			this.setStatus(STATUS.error);
+			this.setStatus(STATUS.failed);
 			return;
 		}
 		// we only get here if there was no error above
