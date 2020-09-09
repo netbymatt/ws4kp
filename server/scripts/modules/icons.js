@@ -51,6 +51,7 @@ const icons = (() => {
 			return addPath('Mostly-Clear.gif');
 
 		case 'ovc':
+		case 'ovc-n':
 			return addPath('Cloudy.gif');
 
 		case 'fog':

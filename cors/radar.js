@@ -35,6 +35,7 @@ module.exports = (req, res) => {
 
 		// set headers
 		res.header('content-type', getRes.headers['content-type']);
+		res.header('last-modified', getRes.headers['last-modified']);
 		// pipe to response
 		getRes.pipe(res);
 

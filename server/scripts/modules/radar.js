@@ -62,11 +62,15 @@ class Radar extends WeatherDisplay {
 
 		// filter for selected urls
 		let filter = /Conus_\d/;
-		if (weatherParameters.State === 'HI') filter = /hawaii_\d/;
+		if (weatherParameters.state === 'HI') filter = /hawaii_\d/;
 
 		// get the last few images
 		const urlsFull = gifs.filter(gif => gif && gif.match(filter));
-		const urls = urlsFull.slice(-this.dopplerRadarImageMax);
+		const urls = urlsFull.slice(-(this.dopplerRadarImageMax-1));
+
+		// add additional 'latest.gif'
+		if (weatherParameters.state !== 'HI') urls.push('latest_radaronly.gif');
+		if (weatherParameters.state === 'HI') urls.push('hawaii_radaronly.gif');
 
 		// calculate offsets and sizes
 		let offsetX = 120;
@@ -109,8 +113,7 @@ class Radar extends WeatherDisplay {
 		}
 
 		// Load the most recent doppler radar images.
-		const radarTimes = [];
-		const radarCanvases = await Promise.all(urls.map(async (url) => {
+		const radarInfo = await Promise.all(urls.map(async (url) => {
 			// create destination context
 			const canvas = document.createElement('canvas');
 			canvas.width = 640;
@@ -118,26 +121,37 @@ class Radar extends WeatherDisplay {
 			const context = canvas.getContext('2d');
 			context.imageSmoothingEnabled = false;
 
-			// store the time
-			const [, year, month, day, hour, minute] = url.match(/_(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)_/);
-			radarTimes.push(DateTime.fromObject({
-				year,
-				month,
-				day,
-				hour,
-				minute,
-				zone: 'UTC',
-			}).setZone());
-
 			// get the image
-			const blob = await $.ajaxCORS({
-				type: 'GET',
-				url: baseUrl + url,
-				xhrFields: {
-					responseType: 'blob',
-				},
-				crossDomain: true,
-			});
+			const [blob, status, xhr] = await (()=>new Promise((resolve, reject) => {
+				$.ajaxCORS({
+					type: 'GET',
+					url: baseUrl + url,
+					xhrFields: {
+						responseType: 'blob',
+					},
+					crossDomain: true,
+					success: (blob, status, xhr) => resolve([blob,status,xhr]),
+					error: (xhr, status, e) => reject(e),
+				});
+
+			}))();
+
+			// store the time
+			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)_/);
+			let time;
+			if (timeMatch) {
+				const [, year, month, day, hour, minute] = timeMatch;
+				time = DateTime.fromObject({
+					year,
+					month,
+					day,
+					hour,
+					minute,
+					zone: 'UTC',
+				}).setZone();
+			} else {
+				time = DateTime.fromHTTP(xhr.getResponseHeader('Last-Modified')).setZone();
+			}
 
 			// assign to an html image element
 			const imgBlob = await utils.image.load(blob);
@@ -167,13 +181,16 @@ class Radar extends WeatherDisplay {
 			// merge the radar and map
 			this.mergeDopplerRadarImage(context, cropContext);
 
-			return canvas;
+			return {
+				canvas,
+				time,
+			};
 		}));
 		// set max length
-		this.timing.totalScreens = radarCanvases.length;
+		this.timing.totalScreens = radarInfo.length;
 		// store the images
-		this.data = radarCanvases;
-		this.times = radarTimes;
+		this.data = radarInfo.map(radar=>radar.canvas);
+		this.times = radarInfo.map(radar=>radar.time);
 		this.drawCanvas();
 	}
 
@@ -182,12 +199,12 @@ class Radar extends WeatherDisplay {
 		this.context.drawImage(await this.backgroundImage, 0, 0);
 		const {DateTime} = luxon;
 		// Title
-		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 65, 'Local', 2);
-		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 175, 100, 'Radar', 2);
+		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 60, 'Local', 2);
+		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 95, 'Radar', 2);
 
-		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 390, 49, 'PRECIP', 2);
-		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 298, 73, 'Light', 2);
-		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 517, 73, 'Heavy', 2);
+		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 438, 49, 'PRECIP', 2, 'center');
+		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 298, 73, 'Light', 2);
+		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 517, 73, 'Heavy', 2);
 
 		let x = 362;
 		const y = 52;
@@ -201,12 +218,8 @@ class Radar extends WeatherDisplay {
 		draw.box(this.context, 'rgb(171, 14, 14)', x, y, 17, 24); x += 19;
 		draw.box(this.context, 'rgb(115, 31, 4)', x, y, 17, 24); x += 19;
 
-		draw.box(this.context, 'rgb(143, 73, 95)', 318, 83, 32, 24);
-		draw.box(this.context, 'rgb(250, 122, 232)', 320, 85, 28, 20);
-		draw.text(this.context, 'Arial', 'bold 18pt', '#ffffff', 355, 105, '= Incomplete Data', 2);
-
 		this.context.drawImage(this.data[this.screenIndex], 0, 0, 640, 367, 0, 113, 640, 367);
-		draw.text(this.context, 'Star4000 Small', '24pt', '#ffffff', 100, 110, this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE), 2, 'center');
+		draw.text(this.context, 'Star4000 Small', '24pt', '#ffffff', 438, 105, this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE), 2, 'center');
 
 		this.finishDraw();
 		this.setStatus(STATUS.loaded);
