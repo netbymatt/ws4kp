@@ -30,6 +30,9 @@ The fork is a result of wanting a more manageable, modern code base to work with
 * Separation between weather display code and user interface
 * Use of a modern date parsing library [luxon](https://moment.github.io/luxon/)
 * Attempt to remove the need for a local server to bypass [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) issues with the various APIs used. This is almost workable but there are still some minor CORS issues with https://api.weather.gov.
+	* The necessary CORS pass through URLs have been rewritten so they can be deployed on Node.js using the included server or through S3/Cloudfront in a serverless environment.
+* Proper settings for static resource caching
+* Build system integration to reduce the number of scripts that need to be loaded
 
 ## What's different
 
@@ -53,8 +56,6 @@ As time allows I will be working on the following enhancements.
 And the following technical fixes.
 
 * Caching of the animated gifs, specifically after they are decompressed
-* Proper settings for static resource caching
-* Build system integration to reduce the number of scripts that need to be loaded
 
 ## Issue reporting and feature requests
 
