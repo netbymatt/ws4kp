@@ -55,6 +55,7 @@ const icons = (() => {
 			return addPath('Cloudy.gif');
 
 		case 'fog':
+		case 'fog-n':
 			return addPath('Fog.gif');
 
 		case 'rain_sleet':
@@ -124,7 +125,7 @@ const icons = (() => {
 			return addPath('Blowing Snow.gif');
 
 		default:
-			console.log(`Unable to locate regional icon for ${link} ${isNightTime}`);
+			console.log(`Unable to locate regional icon for ${conditionName} ${link} ${isNightTime}`);
 			return false;
 		}
 	};
@@ -245,7 +246,7 @@ const icons = (() => {
 			return addPath('Blowing-Snow.gif');
 
 		default:
-			console.log(`Unable to locate icon for ${link} ${isNightTime}`);
+			console.log(`Unable to locate icon for ${conditionName} ${link} ${isNightTime}`);
 			return false;
 		}
 	};

@@ -16,22 +16,19 @@ class Radar extends WeatherDisplay {
 			{time: 1, si: 2},
 			{time: 1, si: 3},
 			{time: 1, si: 4},
-			{time: 1, si: 5},
-			{time: 4, si: 6},
+			{time: 4, si: 5},
 			{time: 1, si: 0},
 			{time: 1, si: 1},
 			{time: 1, si: 2},
 			{time: 1, si: 3},
 			{time: 1, si: 4},
-			{time: 1, si: 5},
-			{time: 4, si: 6},
+			{time: 4, si: 5},
 			{time: 1, si: 0},
 			{time: 1, si: 1},
 			{time: 1, si: 2},
 			{time: 1, si: 3},
 			{time: 1, si: 4},
-			{time: 1, si: 5},
-			{time: 12, si: 6},
+			{time: 12, si: 5},
 		];
 
 		// pre-load background image (returns promise)
@@ -214,10 +211,12 @@ class Radar extends WeatherDisplay {
 		this.data = radarInfo.map(radar=>radar.canvas);
 
 		this.times = radarInfo.map(radar=>radar.time);
+		this.setStatus(STATUS.loaded);
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
+		if (this.screenIndex === -1) return;
 		this.context.drawImage(await this.backgroundImage, 0, 0);
 		const {DateTime} = luxon;
 		// Title
@@ -244,7 +243,6 @@ class Radar extends WeatherDisplay {
 		draw.text(this.context, 'Star4000 Small', '24pt', '#ffffff', 438, 105, this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE), 2, 'center');
 
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
 	}
 
 	// utility latitude/pixel conversions

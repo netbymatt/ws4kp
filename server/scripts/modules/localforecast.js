@@ -19,6 +19,11 @@ class LocalForecast extends WeatherDisplay {
 
 		// get raw data
 		const rawData = await this.getRawData(weatherParameters);
+		// check for data
+		if (!rawData) {
+			this.setStatus(STATUS.failed);
+			return;
+		}
 		// parse raw data
 		const conditions = this.parseLocalForecast(rawData);
 
@@ -78,7 +83,7 @@ class LocalForecast extends WeatherDisplay {
 
 		this.currentScreen = 0;
 		this.timing.totalScreens = this.screenTexts.length;
-		this.drawCanvas();
+		this.setStatus(STATUS.loaded);
 	}
 
 	// get the unformatted data (also used by extended forecast)
@@ -124,11 +129,7 @@ class LocalForecast extends WeatherDisplay {
 		this.screenTexts[this.screenIndex].split('\n').forEach((text, index) => {
 			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 75, 140+40*index, text, 2);
 		});
-
-
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
-
 	}
 
 	// format the forecast

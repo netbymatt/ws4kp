@@ -59,6 +59,14 @@ class TravelForecast extends WeatherDisplay {
 		// wait for all forecasts
 		const forecasts = await Promise.all(forecastPromises);
 		this.data = forecasts;
+
+		// test for some data available in at least one forecast
+		const hasData = this.data.reduce((acc,forecast) => acc || forecast.high, false);
+		if (!hasData) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+
 		this.drawCanvas(true);
 	}
 

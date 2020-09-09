@@ -50,6 +50,12 @@ class LatestObservations extends WeatherDisplay {
 		// cut down to the maximum of 7
 		this.data = actualConditions.slice(0,this.MaximumRegionalStations);
 
+		// test for at least one station
+		if (this.data.length < 1) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+
 		this.drawCanvas();
 	}
 

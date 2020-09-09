@@ -8016,13 +8016,6 @@ const _StationInfo = {
 		Latitude: 41.8666,
 		Longitude: -87.5833,
 	},
-	KIGQ: {
-		StationId: 'KIGQ',
-		City: 'Chicago/Lansing',
-		State: 'IL',
-		Latitude: 41.5333,
-		Longitude: -87.5333,
-	},
 	KZAU: {
 		StationId: 'KZAU',
 		City: 'Chicago/Artcc',
@@ -8050,13 +8043,6 @@ const _StationInfo = {
 		State: 'IL',
 		Latitude: 39.8333,
 		Longitude: -88.85,
-	},
-	KDKB: {
-		StationId: 'KDKB',
-		City: 'De Kalb',
-		State: 'IL',
-		Latitude: 41.9333,
-		Longitude: -88.7,
 	},
 	KC73: {
 		StationId: 'KC73',
@@ -8212,20 +8198,6 @@ const _StationInfo = {
 		Latitude: 41.45,
 		Longitude: -90.5166,
 	},
-	KC56: {
-		StationId: 'KC56',
-		City: 'Monee',
-		State: 'IL',
-		Latitude: 41.3833,
-		Longitude: -87.6833,
-	},
-	KC09: {
-		StationId: 'KC09',
-		City: 'Morris-Washburn',
-		State: 'IL',
-		Latitude: 41.4333,
-		Longitude: -88.4166,
-	},
 	KAJG: {
 		StationId: 'KAJG',
 		City: 'Mount Carmel',
@@ -8316,13 +8288,6 @@ const _StationInfo = {
 		State: 'IL',
 		Latitude: 42.2,
 		Longitude: -89.1,
-	},
-	KRPJ: {
-		StationId: 'KRPJ',
-		City: 'Rochelle/Koritz',
-		State: 'IL',
-		Latitude: 41.8833,
-		Longitude: -89.0833,
 	},
 	KLOT: {
 		StationId: 'KLOT',
@@ -23777,13 +23742,6 @@ const _StationInfo = {
 		Latitude: 43.4166,
 		Longitude: -88.7,
 	},
-	KENW: {
-		StationId: 'KENW',
-		City: 'Kenosha',
-		State: 'WI',
-		Latitude: 42.6,
-		Longitude: -87.9333,
-	},
 	KLSE: {
 		StationId: 'KLSE',
 		City: 'La Crosse',
@@ -24084,13 +24042,6 @@ const _StationInfo = {
 		State: 'WI',
 		Latitude: 43.1666,
 		Longitude: -88.7166,
-	},
-	KUES: {
-		StationId: 'KUES',
-		City: 'Waukesha Cnty',
-		State: 'WI',
-		Latitude: 43.05,
-		Longitude: -88.25,
 	},
 	KPCZ: {
 		StationId: 'KPCZ',

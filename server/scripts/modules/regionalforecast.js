@@ -115,6 +115,12 @@ class RegionalForecast extends WeatherDisplay {
 		// filter out any false (unavailable data)
 		const regionalData = regionalDataAll.filter(data => data);
 
+		// test for data present
+		if (regionalData.length === 0) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+
 		// return the weather data and offsets
 		this.data = {
 			regionalData,
@@ -123,7 +129,6 @@ class RegionalForecast extends WeatherDisplay {
 		};
 
 		this.setStatus(STATUS.loaded);
-		this.drawCanvas();
 	}
 
 	buildForecast (forecast, city, cityXY) {
