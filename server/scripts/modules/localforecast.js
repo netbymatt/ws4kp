@@ -81,8 +81,8 @@ class LocalForecast extends WeatherDisplay {
 			// }
 		});
 
-		this.currentScreen = 0;
 		this.timing.totalScreens = this.screenTexts.length;
+		this.calcNavTiming();
 		this.setStatus(STATUS.loaded);
 	}
 
