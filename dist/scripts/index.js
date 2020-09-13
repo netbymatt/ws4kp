@@ -17,18 +17,11 @@ let spanLastRefresh;
 let chkAutoRefresh;
 let spanRefreshCountDown;
 
-let spanCity;
-let spanState;
-let spanStationId;
-let spanRadarId;
-let spanZoneId;
-
 let frmScrollText;
 let chkScrollText;
 let txtScrollText;
 
 let _AutoSelectQuery = false;
-let _TwcDataUrl = '';
 let _IsPlaying = false;
 
 let _NoSleep = new NoSleep();
@@ -46,33 +39,10 @@ let _WindowWidth = 0;
 
 let latLon;
 
-let _canvasIds = [
-	'canvasProgress',
-	'canvasCurrentWeather',
-	'canvasLatestObservations',
-	'canvasTravelForecast',
-	'canvasRegionalForecast1',
-	'canvasRegionalForecast2',
-	'canvasRegionalObservations',
-	'canvasLocalForecast',
-	'canvasExtendedForecast1',
-	'canvasExtendedForecast2',
-	'canvasAlmanac',
-	'canvasAlmanacTides',
-	'canvasOutlook',
-	'canvasMarineForecast',
-	'canvasAirQuality',
-	'canvasLocalRadar',
-	'canvasHazards',
-];
-
 const FullScreenResize = () => {
-	const iframeDoc = $(iframeTwc[0].contentWindow.document);
 	const WindowWidth = $(window).width();
 	const WindowHeight = $(window).height();
 	const inFullScreen = InFullScreen();
-	let NewWidth;
-	let NewHeight;
 	let IFrameWidth;
 	let IFrameHeight;
 	let LeftWidth;
@@ -83,8 +53,6 @@ const FullScreenResize = () => {
 
 	if (inFullScreen) {
 		if ((WindowWidth / WindowHeight) >= 1.583333333333333) {
-			NewHeight = WindowHeight + 'px';
-			NewWidth = '';
 			divTwcTop.hide();
 			divTwcBottom.hide();
 			divTwcLeft.show();
@@ -107,12 +75,9 @@ const FullScreenResize = () => {
 			divTwcRight.css('visibility', 'visible');
 
 			IFrameWidth = WindowWidth - LeftWidth - RightWidth;
-			NewWidth = IFrameWidth + 'px';
 			iframeTwc.attr('style', 'width:' + IFrameWidth + 'px; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
 
 		} else {
-			NewHeight = '';
-			NewWidth = WindowWidth + 'px';
 			divTwcTop.show();
 			divTwcBottom.show();
 			divTwcLeft.hide();
@@ -133,15 +98,12 @@ const FullScreenResize = () => {
 			divTwcBottom.css('visibility', 'visible');
 
 			IFrameHeight = WindowHeight - TopHeight - BottomHeight;
-			NewHeight = IFrameHeight + 'px';
 			iframeTwc.attr('style', 'width:100%; height:' + IFrameHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
 			divTwcMiddle.attr('style', 'width:100%; height:' + IFrameHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
 		}
 	}
 
 	if (!inFullScreen) {
-		NewHeight = '';
-		NewWidth = '';
 		divTwcTop.hide();
 		divTwcBottom.hide();
 		divTwcLeft.hide();
@@ -154,11 +116,6 @@ const FullScreenResize = () => {
 		$(window).off('resize', FullScreenResize);
 	}
 
-	$(_canvasIds).each(function () {
-		const canvas = iframeDoc.find('#' + this.toString());
-		canvas.css('width', NewWidth);
-		canvas.css('height', NewHeight);
-	});
 
 	if (inFullScreen) {
 		$('body').css('overflow', 'hidden');
@@ -278,7 +235,6 @@ const LoadTwcData = () => {
 
 	postMessage('latLon', latLon);
 
-	iframeTwc.off('load');
 	FullScreenResize();
 
 	if (chkScrollText.is(':checked')) {
@@ -334,7 +290,7 @@ const AssignLastUpdate = () => {
 };
 
 const btnNavigateRefresh_click = () => {
-	LoadTwcData(_TwcDataUrl);
+	LoadTwcData();
 	UpdateFullScreenNavigate();
 
 	return false;
@@ -507,30 +463,21 @@ $(() => {
 
 	frmGetLatLng = $('#frmGetLatLng');
 	txtAddress = $('#txtAddress');
-	btnGetLatLng = $('#btnGetLatLng');
 	btnClearQuery = $('#btnClearQuery');
 	btnGetGps = $('#btnGetGps');
 
-	divLat = $('#divLat');
-	spanLat = $('#spanLat');
-	divLng = $('#divLng');
-	spanLng = $('#spanLng');
-
 	iframeTwc = $('#iframeTwc');
-	btnFullScreen = $('#btnFullScreen');
 	divTwc = $('#divTwc');
 	divTwcTop = $('#divTwcTop');
 	divTwcMiddle = $('#divTwcMiddle');
 	divTwcBottom = $('#divTwcBottom');
 	divTwcLeft = $('#divTwcLeft');
 	divTwcRight = $('#divTwcRight');
-	divTwcNav = $('#divTwcNav');
 	divTwcNavContainer = $('#divTwcNavContainer');
 
 	frmScrollText = $('#frmScrollText');
 	chkScrollText = $('#chkScrollText');
 	txtScrollText = $('#txtScrollText');
-	btnScrollText = $('#btnScrollText');
 
 	frmScrollText.on('submit', frmScrollText_submit);
 	txtScrollText.on('focus', function () {
@@ -578,20 +525,7 @@ $(() => {
 	const cats = categories.join(',');
 
 	const overrides = {
-		'08736, Manasquan, New Jersey, USA': { x: -74.037, y: 40.1128 },
-		'32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
-		'97003, Beaverton, Oregon, USA': { x: -122.8752489, y: 45.5050916 },
-		'99734, Prudhoe Bay, Alaska, USA': { x: -148.3372, y: 70.2552 },
-		'Guam, Oceania': { x: 144.74, y: 13.46 },
-		'Andover, Maine, United States': { x: -70.7525, y: 44.634167 },
-		'Bear Creek, Pennsylvania, United States': { x: -75.772809, y: 41.204074 },
-		'Bear Creek Village, Pennsylvania, United States': { x: -75.772809, y: 41.204074 },
-		'New York City, New York, United States': { x: -74.0059, y: 40.7142 },
-		'Pinnacles National Monument, San Benito County,California, United States': { x: -121.147278, y: 36.47075 },
-		'Pinnacles National Park, CA-146, Paicines, California': { x: -121.147278, y: 36.47075 },
-		'Welcome, Maryland, United States': { x: -77.081212, y: 38.4692469 },
-		'Tampa, Florida, United States (City)': { x: -82.5329, y: 27.9756 },
-		'San Francisco, California, United States': { x: -122.3758, y: 37.6188 },
+		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
 	};
 
 	const roundToPlaces = function (num, decimals) {
@@ -606,15 +540,15 @@ $(() => {
 		localStorage.setItem('TwcQuery', txtAddress.val());
 	};
 
-	let PreviousSeggestionValue = null;
-	let PreviousSeggestion = null;
+	let PreviousSuggestionValue = null;
+	let PreviousSuggestion = null;
 	const OnSelect = (suggestion) => {
 		let request;
 
 		// Do not auto get the same city twice.
-		if (PreviousSeggestionValue === suggestion.value)  return;
-		PreviousSeggestionValue = suggestion.value;
-		PreviousSeggestion = suggestion;
+		if (PreviousSuggestionValue === suggestion.value)  return;
+		PreviousSuggestionValue = suggestion.value;
+		PreviousSuggestion = suggestion;
 
 		if (overrides[suggestion.value]) {
 			doRedirectToGeometry(overrides[suggestion.value]);
@@ -681,9 +615,9 @@ $(() => {
 			$(ac.suggestionsContainer.children[0]).click();
 			return false;
 		}
-		if (PreviousSeggestion) {
-			PreviousSeggestionValue = null;
-			OnSelect(PreviousSeggestion);
+		if (PreviousSuggestion) {
+			PreviousSuggestionValue = null;
+			OnSelect(PreviousSuggestion);
 		}
 
 		return false;
@@ -715,11 +649,11 @@ $(() => {
 	}
 
 	btnClearQuery.on('click', () => {
-		spanCity.text('');
-		spanState.text('');
-		spanStationId.text('');
-		spanRadarId.text('');
-		spanZoneId.text('');
+		$('#spanCity').text('');
+		$('#spanState').text('');
+		$('#spanStationId').text('');
+		$('#spanRadarId').text('');
+		$('#spanZoneId').text('');
 
 		chkScrollText.prop('checked', '');
 		txtScrollText.val('');
@@ -732,13 +666,12 @@ $(() => {
 		$('#radEnglish').prop('checked', 'checked');
 		localStorage.removeItem('TwcUnits');
 
-		TwcCallBack({ Status: 'ISPLAYING', Value: false });
 		localStorage.removeItem('TwcPlay');
 		_IsPlaying = true;
 
 		localStorage.removeItem('TwcQuery');
-		PreviousSeggestionValue = null;
-		PreviousSeggestion = null;
+		PreviousSuggestionValue = null;
+		PreviousSuggestion = null;
 
 		LoadTwcData('');
 	});
@@ -759,10 +692,8 @@ $(() => {
 	});
 
 
-	divRefresh = $('#divRefresh');
 	spanLastRefresh = $('#spanLastRefresh');
 	chkAutoRefresh = $('#chkAutoRefresh');
-	lblRefreshCountDown = $('#lblRefreshCountDown');
 	spanRefreshCountDown = $('#spanRefreshCountDown');
 
 	chkAutoRefresh.on('change', (e) => {
@@ -785,13 +716,6 @@ $(() => {
 	} else {
 		chkAutoRefresh.prop('checked', '');
 	}
-
-	spanCity = $('#spanCity');
-	spanState = $('#spanState');
-	spanStationId = $('#spanStationId');
-	spanRadarId = $('#spanRadarId');
-	spanZoneId = $('#spanZoneId');
-
 
 });
 // read and dispatch an event from the iframe
@@ -847,7 +771,7 @@ const postMessage = (type, message = {}) => {
 };
 
 const StartAutoRefreshTimer = () => {
-	// Esnure that any previous timer has already stopped.
+	// Ensure that any previous timer has already stopped.
 	//StopAutoRefreshTimer();
 	if (_AutoRefreshIntervalId) {
 		// Timer is already running.
@@ -870,7 +794,7 @@ const StartAutoRefreshTimer = () => {
 		spanRefreshCountDown.html((dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes()) + ':' + (dt.getSeconds() < 10 ? '0' + dt.getSeconds() : dt.getSeconds()));
 
 		// Time has elapsed.
-		if (_AutoRefreshCountMs >= _AutoRefreshTotalIntervalMs) LoadTwcData(_TwcDataUrl);
+		if (_AutoRefreshCountMs >= _AutoRefreshTotalIntervalMs) LoadTwcData();
 	};
 	_AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, _AutoRefreshIntervalMs);
 	AutoRefreshTimer();
@@ -883,60 +807,56 @@ const StopAutoRefreshTimer = () => {
 	}
 };
 
-const btnGetGps_click = () => {
+const btnGetGps_click = async () => {
 	if (!navigator.geolocation) return;
 
-	const CurrentPosition = (position) => {
-		const latitude = position.coords.latitude;
-		const longitude = position.coords.longitude;
+	const position = await (() => {
+		return new Promise(resolve => {
+			navigator.geolocation.getCurrentPosition(resolve);
+		});
+	})();
+	const latitude = position.coords.latitude;
+	const longitude = position.coords.longitude;
 
-		console.log('Latitude: ' + latitude + '; Longitude: ' + longitude);
-
-		//http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?location=-72.971293%2C+40.850043&f=pjson
-		const request = $.ajax({
+	let data;
+	try {
+		data = await $.ajax({
 			url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode',
 			data: {
 				location: longitude + ',' + latitude,
-				distance: 1000, // Find location upto 1 KM.
+				distance: 1000, // Find location up to 1 KM.
 				f: 'json',
 			},
-			jsonp: 'callback',
-			dataType: 'jsonp',
 		});
-		request.done((data) => {
-			console.log(data);
+	} catch (e) {
+		console.error('Unable to fetch reverse geocode');
+		console.error(e);
+	}
+	const ZipCode = data.address.Postal;
+	const City = data.address.City;
+	const State = states.getTwoDigitCode(data.address.Region);
+	const Country = data.address.CountryCode;
+	const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
 
-			const ZipCode = data.address.Postal;
-			const City = data.address.City;
-			const State = states.getTwoDigitCode(data.address.Region);
-			const Country = data.address.CountryCode;
-			const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
+	txtAddress.val(TwcQuery);
+	txtAddress.blur();
+	txtAddress.focus();
 
-			txtAddress.val(TwcQuery);
-			txtAddress.blur();
-			txtAddress.focus();
-
-			// Save the query
-			localStorage.setItem('TwcQuery', TwcQuery);
-
-		});
-
-	};
-
-	navigator.geolocation.getCurrentPosition(CurrentPosition);
+	// Save the query
+	localStorage.setItem('TwcQuery', TwcQuery);
 };
 
 const populateWeatherParameters = (weatherParameters) => {
-	spanCity.text(weatherParameters.city + ', ');
-	spanState.text(weatherParameters.state);
-	spanStationId.text(weatherParameters.stationId);
-	spanRadarId.text(weatherParameters.radarId);
-	spanZoneId.text(weatherParameters.zoneId);
+
+	$('#spanCity').text(weatherParameters.city + ', ');
+	$('#spanState').text(weatherParameters.state);
+	$('#spanStationId').text(weatherParameters.stationId);
+	$('#spanRadarId').text(weatherParameters.radarId);
+	$('#spanZoneId').text(weatherParameters.zoneId);
 };
 
 const frmScrollText_submit = () => {
 	chkScrollText_change();
-
 	return false;
 };
 
