@@ -166,14 +166,6 @@ input, button
     position: absolute;
 }
 
-#iframeTwc
-{
-    width: 640px;
-    height: 480px;
-    overflow: hidden;
-    border: 0;
-}
-
 .HideCursor
 {
     cursor: none !important;
@@ -182,4 +174,91 @@ input, button
 #txtScrollText
 {
     width: 475px;
+}
+
+@font-face 
+{
+    font-family: "Star4000";
+    src: url('../fonts/Star4000.woff') format('woff');
+}
+@font-face 
+{
+    font-family: "Star 4 Radar";
+    src: url('../fonts/Star 4 Radar.woff') format('woff');
+}
+@font-face 
+{
+    font-family: 'Star4000 Extended';
+    src: url('../fonts/Star4000 Extended.woff') format('woff');
+}
+@font-face 
+{
+    font-family: 'Star4000LCN';
+    src: url('../fonts/Star4000LCN.woff') format('woff');
+}
+@font-face
+ {
+    font-family: 'Star4000 Large Compressed';
+    src: url('../fonts/Star4000 Large Compressed.woff') format('woff');
+}
+@font-face 
+{
+    font-family: 'Star4000 Large';
+    src: url('../fonts/Star4000 Large.woff') format('woff');
+}
+@font-face
+ {
+    font-family: 'Star4000 Small';
+    src: url('../fonts/Star4000 Small.woff') format('woff');
+}
+
+#display
+{
+    font-family: "Star4000";
+    margin: 0 0 0 0;
+	overflow: hidden;
+	width: 640px;
+	height: 480px;
+}
+
+jsgif
+{
+    display: none;
+}
+
+#Star4000
+{
+    font-family: 'Star4000';
+}
+#Star4000Extended
+{
+    font-family: 'Star4000 Extended';
+}
+#Star4000LargeCompressed
+{
+    font-family: 'Star4000 Large Compressed';
+}
+#Star4000Large
+{
+    font-family: 'Star4000 Large';
+}
+#Star4000LargeCompressedNumbers
+{
+    font-family: 'Star4000LCN';
+}
+#Star4000Small
+{
+    font-family: 'Star4000 Small';
+}
+#Star4Radar
+{
+    font-family: 'Star 4 Radar';
+}
+
+#container {
+	position: absolute;
+}
+
+#container canvas {
+	position: absolute;
 }

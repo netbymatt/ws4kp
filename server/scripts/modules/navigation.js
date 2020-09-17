@@ -21,32 +21,30 @@ const navigation = (() => {
 	let progress;
 
 	const init = async () => {
-		// set up message receive and dispatch accordingly
-		window.addEventListener('message', (event) => {
-		// test for trust
-			if (!event.isTrusted) return;
-			// get the data
-			const data = JSON.parse(event.data);
+		// nothing to do
+	};
 
-			// dispatch event
-			if (!data.type) return;
-			switch (data.type) {
-			case 'latLon':
-				getWeather(data.message);
-				break;
+	const message = (data) => {
 
-			case 'units':
-				setUnits(data.message);
-				break;
+		// dispatch event
+		if (!data.type) return;
+		switch (data.type) {
+		case 'latLon':
+			getWeather(data.message);
+			break;
 
-			case 'navButton':
-				handleNavButton(data.message);
-				break;
+		case 'units':
+			setUnits(data.message);
+			break;
 
-			default:
-				console.error(`Unknown event ${data.type}`);
-			}
-		}, false);
+		case 'navButton':
+			handleNavButton(data.message);
+			break;
+
+		default:
+			console.error(`Unknown event ${data.type}`);
+		}
+
 	};
 
 	const postMessage = (type, message = {}) => {
@@ -256,6 +254,7 @@ const navigation = (() => {
 
 	return {
 		init,
+		message,
 		updateStatus,
 		units,
 		isPlaying,
