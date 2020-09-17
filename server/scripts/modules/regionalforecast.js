@@ -139,6 +139,7 @@ class RegionalForecast extends WeatherDisplay {
 			icon: forecast.icon,
 			x: cityXY.x,
 			y: cityXY.y,
+			time: forecast.startTime,
 		};
 	}
 
@@ -341,13 +342,7 @@ class RegionalForecast extends WeatherDisplay {
 		if (this.screenIndex === 0) {
 			draw.titleText(this.context, 'Regional', 'Observations');
 		} else {
-			let forecastDate = DateTime.local();
-			// four conditions to evaluate based on whether the first forecast is for daytime and the requested period
-			const firstIsDay = data[0][1].daytime;
-			if (firstIsDay && this.screenIndex === 1) forecastDate = forecastDate.plus({days: 1});
-			if (firstIsDay && this.screenIndex === 2); // no change, shown for consistency
-			if (!firstIsDay && this.screenIndex === 1); // no change, shown for consistency
-			if (!firstIsDay && this.screenIndex === 2) forecastDate = forecastDate.plus({days: 1});
+			let forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
 
 			// get the name of the day
 			const dayName = forecastDate.toLocaleString({weekday: 'long'});
