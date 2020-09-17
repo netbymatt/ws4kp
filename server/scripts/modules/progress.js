@@ -95,12 +95,13 @@ class Progress extends WeatherDisplay {
 	canvasClick(e) {
 		const x = e.offsetX;
 		const y = e.offsetY;
-		console.log(x,y);
 		// eliminate off canvas and outside area clicks
 		if (!this.isActive()) return;
 		if (y < 100 || y > 410) return;
 		if (x < 440 || x > 570) return;
 
+		// stop playing
+		navigation.message('navButton', stop);
 		// use the y value to determine an index
 		const index = Math.floor((y-100)/29);
 		const display = navigation.getDisplay(index);

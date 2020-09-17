@@ -67,14 +67,11 @@ class TravelForecast extends WeatherDisplay {
 			return;
 		}
 
-		this.drawCanvas(true);
+		this.setStatus(STATUS.loaded);
+		this.drawLongCanvas();
 	}
 
-	async drawCanvas(newData) {
-		// there are technically 2 canvases: the standard canvas and the extra-long canvas that contains the complete
-		// list of cities. The second canvas is copied into the standard canvas to create the scroll
-		super.drawCanvas();
-
+	async drawLongCanvas () {
 		// create the "long" canvas if necessary
 		if (!this.longCanvas) {
 			this.longCanvas = document.createElement('canvas');
@@ -85,61 +82,67 @@ class TravelForecast extends WeatherDisplay {
 		// set up variables
 		const cities = this.data;
 
-		// draw the long canvas only if there is new data
-		if (newData) {
-			this.longContext.clearRect(0,0,this.longCanvas.width,this.longCanvas.height);
+		this.longContext.clearRect(0,0,this.longCanvas.width,this.longCanvas.height);
 
-			// draw the "long" canvas with all cities
-			draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, _TravelCities.length*this.cityHeight);
+		// draw the "long" canvas with all cities
+		draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, _TravelCities.length*this.cityHeight);
 
-			for (let i = 0; i <= 4; i++) {
-				const y = i * 346;
-				draw.horizontalGradient(this.longContext, 0, y, 640, y + 346, '#102080', '#001040');
-			}
+		for (let i = 0; i <= 4; i++) {
+			const y = i * 346;
+			draw.horizontalGradient(this.longContext, 0, y, 640, y + 346, '#102080', '#001040');
+		}
 
-			await Promise.all(cities.map(async (city, index) => {
+		await Promise.all(cities.map(async (city, index) => {
 			// calculate base y value
-				const y = 50+this.cityHeight*index;
+			const y = 50+this.cityHeight*index;
 
-				// city name
-				draw.text(this.longContext, 'Star4000 Large Compressed', '24pt', '#FFFF00', 80, y, city.name, 2);
+			// city name
+			draw.text(this.longContext, 'Star4000 Large Compressed', '24pt', '#FFFF00', 80, y, city.name, 2);
 
-				// check for forecast data
-				if (city.icon) {
+			// check for forecast data
+			if (city.icon) {
 				// get temperatures and convert if necessary
-					let {low, high} = city;
+				let {low, high} = city;
 
-					if (navigation.units() === UNITS.metric) {
-						low = utils.units.fahrenheitToCelsius(low);
-						high = utils.units.fahrenheitToCelsius(high);
-					}
-
-					// convert to strings with no decimal
-					const lowString = Math.round(low).toString();
-					const highString = Math.round(high).toString();
-
-					const xLow = (500 - (lowString.length * 20));
-					draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xLow, y, lowString, 2);
-
-					const xHigh = (560 - (highString.length * 20));
-					draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xHigh, y, highString, 2);
-
-					this.gifs.push(await utils.image.superGifAsync({
-						src: city.icon,
-						loop_delay: 100,
-						auto_play: true,
-						canvas: this.longCanvas,
-						x: 330,
-						y: y - 35,
-						max_width: 47,
-					}));
-				} else {
-					draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y - 18, 'NO TRAVEL', 2);
-					draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y, 'DATA AVAILABLE', 2);
+				if (navigation.units() === UNITS.metric) {
+					low = utils.units.fahrenheitToCelsius(low);
+					high = utils.units.fahrenheitToCelsius(high);
 				}
 
-			}));
-		}
+				// convert to strings with no decimal
+				const lowString = Math.round(low).toString();
+				const highString = Math.round(high).toString();
+
+				const xLow = (500 - (lowString.length * 20));
+				draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xLow, y, lowString, 2);
+
+				const xHigh = (560 - (highString.length * 20));
+				draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xHigh, y, highString, 2);
+
+				this.gifs.push(await utils.image.superGifAsync({
+					src: city.icon,
+					loop_delay: 100,
+					auto_play: true,
+					canvas: this.longCanvas,
+					x: 330,
+					y: y - 35,
+					max_width: 47,
+				}));
+			} else {
+				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y - 18, 'NO TRAVEL', 2);
+				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y, 'DATA AVAILABLE', 2);
+			}
+
+		}));
+	}
+
+	async drawCanvas() {
+		// there are technically 2 canvases: the standard canvas and the extra-long canvas that contains the complete
+		// list of cities. The second canvas is copied into the standard canvas to create the scroll
+		super.drawCanvas();
+
+		// set up variables
+		const cities = this.data;
 
 		// draw the standard context
 		this.context.drawImage(await this.backgroundImage, 0, 0);
@@ -155,7 +158,12 @@ class TravelForecast extends WeatherDisplay {
 		this.context.drawImage(this.longCanvas, 0, 0, 640, 289, 0, 110, 640, 289);
 
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
+	}
+
+	async showCanvas() {
+		// special to travel forecast to draw the remainder of the canvas
+		await this.drawCanvas();
+		super.showCanvas();
 	}
 
 	// screen index change callback just runs the base count callback

@@ -1,6 +1,6 @@
 'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
-/* globals utils, _StationInfo, STATUS */
+/* globals index, utils, _StationInfo, STATUS */
 /* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,6 @@ const UNITS = {
 const navigation = (() => {
 	let weatherParameters = {};
 	let displays = [];
-	let initialLoadDone = false;
 	let currentUnits = UNITS.english;
 	let playing = false;
 	let progress;
@@ -25,7 +24,6 @@ const navigation = (() => {
 	};
 
 	const message = (data) => {
-
 		// dispatch event
 		if (!data.type) return;
 		switch (data.type) {
@@ -48,14 +46,10 @@ const navigation = (() => {
 	};
 
 	const postMessage = (type, message = {}) => {
-		const parent = window.parent;
-		parent.postMessage(JSON.stringify({type, message}, window.location.origin));
+		index.message({type, message});
 	};
 
 	const getWeather = async (latLon) => {
-		// reset statuses
-		initialLoadDone = false;
-
 		// get initial weather data
 		const point = await utils.weather.getPoint(latLon.lat, latLon.lon);
 
@@ -93,6 +87,11 @@ const navigation = (() => {
 		// update the main process for display purposes
 		postMessage('weatherParameters', weatherParameters);
 
+		// draw the progress canvas
+		progress = new Progress(-1,'progress');
+		await progress.drawCanvas();
+		progress.showCanvas();
+
 		// start loading canvases if necessary
 		if (displays.length === 0) {
 			displays = [
@@ -114,25 +113,21 @@ const navigation = (() => {
 		// ShowDopplerMap(this.weatherParameters);
 		// GetWeatherHazards3(this.weatherParameters);
 
-		// draw the progress canvas
-		progress = new Progress(-1,'progress');
-		progress.drawCanvas();
-		progress.showCanvas();
 	};
 
 	// receive a status update from a module {id, value}
 	const updateStatus = (value) => {
-		// skip if initial load
-		if (initialLoadDone) return;
-		// test for loaded status
-		if (value.status !== STATUS.loaded) return;
-
+		if (value.id < 0) return;
 		progress.drawCanvas(displays, countLoadedCanvases());
+
+		// if this is the first display and we're playing, load it up so it starts playing
+		if (isPlaying() && value.id === 0 && value.status === STATUS.loaded) {
+			navTo(msg.command.firstFrame);
+		}
 
 		// send loaded messaged to parent
 		if (countLoadedCanvases() < displays.length) return;
 		postMessage('loaded');
-		// store the display number
 	};
 
 	const countLoadedCanvases = () => displays.reduce((acc, display) => {
@@ -183,9 +178,9 @@ const navigation = (() => {
 	const navTo = (direction) => {
 		// test for a current display
 		const current = currentDisplay();
+		progress.hideCanvas();
 		if (!current) {
 			// special case for no active displays (typically on progress screen)
-			progress.hideCanvas();
 			displays[0].navNext(msg.command.firstFrame);
 			return;
 		}
@@ -223,13 +218,22 @@ const navigation = (() => {
 	const setPlaying = (newValue) => {
 		playing = newValue;
 		postMessage('isPlaying', playing);
+		// if we're playing and on the progress screen jump to the next screen
+		if (!progress) return;
+		if (playing && !currentDisplay()) navTo(msg.command.firstFrame);
 	};
 
 	// handle all navigation buttons
 	const handleNavButton = (button) => {
 		switch (button) {
+		case 'play':
+			setPlaying(true);
+			break;
 		case 'playToggle':
 			setPlaying(!playing);
+			break;
+		case 'stop':
+			setPlaying(false);
 			break;
 		case 'next':
 			setPlaying(false);

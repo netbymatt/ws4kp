@@ -44,7 +44,7 @@ class CurrentWeather extends WeatherDisplay {
 		}
 		// we only get here if there was no error above
 		this.data = Object.assign({}, observations, {station: station});
-		this.drawCanvas();
+		this.setStatus(STATUS.loaded);
 	}
 
 	async drawCanvas () {
@@ -175,7 +175,6 @@ class CurrentWeather extends WeatherDisplay {
 		}));
 
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
 	}
 
 	shortConditions(condition) {

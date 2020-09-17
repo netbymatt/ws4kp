@@ -41,8 +41,7 @@ class ExtendedForecast extends WeatherDisplay {
 		// we only get here if there was no error above
 		this.data = this.parseExtendedForecast(forecast.properties.periods);
 		this.screenIndex = 0;
-		this.drawCanvas();
-
+		this.setStatus(STATUS.loaded);
 	}
 
 	// the api provides the forecast in 12 hour increments, flatten to day increments with high and low temperatures
@@ -166,6 +165,5 @@ class ExtendedForecast extends WeatherDisplay {
 		}));
 
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
 	}
 }

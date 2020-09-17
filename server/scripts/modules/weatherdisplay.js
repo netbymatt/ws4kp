@@ -225,6 +225,10 @@ class WeatherDisplay {
 		return document.getElementById(this.elemId+'Canvas').offsetParent !== null;
 	}
 
+	isEnabled() {
+		return true;
+	}
+
 	// navigation timings
 	// totalScreens = total number of screens that are available
 	// baseDelay = ms to delay before re-evaluating screenIndex
@@ -246,7 +250,7 @@ class WeatherDisplay {
 		this.updateScreenFromBaseCount();
 	}
 
-	updateScreenFromBaseCount() {
+	async updateScreenFromBaseCount() {
 		// get the next screen index
 		let nextScreenIndex = this.screenIndexFromBaseCount();
 
@@ -261,11 +265,17 @@ class WeatherDisplay {
 		// test for no change and exit early
 		if (nextScreenIndex === this.screenIndex) return;
 
-		this.screenIndex = nextScreenIndex;
+		// test for -1 (no screen displayed yet)
+		if (nextScreenIndex === -1) {
+			this.screenIndex = 0;
+		} else {
+			this.screenIndex = nextScreenIndex;
+		}
 
 		// call the appropriate screen index change method
 		if (!this.screenIndexChange) {
-			this.drawCanvas();
+			await this.drawCanvas();
+			this.showCanvas();
 		} else {
 			this.screenIndexChange(this.screenIndex);
 		}

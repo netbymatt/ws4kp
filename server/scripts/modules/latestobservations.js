@@ -55,8 +55,7 @@ class LatestObservations extends WeatherDisplay {
 			this.setStatus(STATUS.noData);
 			return;
 		}
-
-		this.drawCanvas();
+		this.setStatus(STATUS.loaded);
 	}
 
 	async drawCanvas() {
@@ -111,7 +110,6 @@ class LatestObservations extends WeatherDisplay {
 			y += 40;
 		});
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
 	}
 
 	shortenCurrentConditions(condition) {

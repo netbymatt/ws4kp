@@ -4,6 +4,13 @@ $(() => {
 });
 
 const index = (() => {
+	const overrides = {
+		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
+	};
+	const _AutoRefreshIntervalMs = 500;
+	const _AutoRefreshTotalIntervalMs = 600000; // 10 min.
+	const _NoSleep = new NoSleep();
+
 	let divTwc;
 	let divTwcTop;
 	let divTwcMiddle;
@@ -13,15 +20,11 @@ const index = (() => {
 	let divTwcNavContainer;
 	let txtScrollText;
 
-	const _NoSleep = new NoSleep();
 
 	let _AutoSelectQuery = false;
-	let _IsPlaying = false;
 
 	let _LastUpdate = null;
 	let _AutoRefreshIntervalId = null;
-	const _AutoRefreshIntervalMs = 500;
-	const _AutoRefreshTotalIntervalMs = 600000; // 10 min.
 	let _AutoRefreshCountMs = 0;
 
 	let _FullScreenOverride = false;
@@ -70,9 +73,6 @@ const index = (() => {
 		$('.ToggleFullScreen').on('click', btnFullScreen_click);
 		FullScreenResize();
 
-		// listen for messages (from iframe) and handle accordingly
-		window.addEventListener('message', messageHandler, false);
-
 		const categories = [
 			'Land Features',
 			'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
@@ -84,54 +84,6 @@ const index = (() => {
 			'Postal', 'Populated Place',
 		];
 		const cats = categories.join(',');
-
-		const overrides = {
-		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
-		};
-
-		const roundToPlaces = function (num, decimals) {
-			var n = Math.pow(10, decimals);
-			return Math.round((n * num).toFixed(decimals)) / n;
-		};
-
-		const doRedirectToGeometry = (geom) => {
-			const latLon = {lat:roundToPlaces(geom.y, 4), lon:roundToPlaces(geom.x, 4)};
-			LoadTwcData(latLon);
-			// Save the query
-			localStorage.setItem('TwcQuery', $('#txtAddress').val());
-		};
-
-		let PreviousSuggestionValue = null;
-		let PreviousSuggestion = null;
-		const OnSelect = (suggestion) => {
-			let request;
-
-			// Do not auto get the same city twice.
-			if (PreviousSuggestionValue === suggestion.value)  return;
-			PreviousSuggestionValue = suggestion.value;
-			PreviousSuggestion = suggestion;
-
-			if (overrides[suggestion.value]) {
-				doRedirectToGeometry(overrides[suggestion.value]);
-			} else {
-				request = $.ajax({
-					url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
-					data: {
-						text: suggestion.value,
-						magicKey: suggestion.data,
-						f: 'json',
-					},
-				});
-				request.done((data) => {
-					const loc = data.locations[0];
-					if (loc) {
-						doRedirectToGeometry(loc.feature.geometry);
-					} else {
-						alert('An unexpected error occurred. Please try a different search string.');
-					}
-				});
-			}
-		};
 
 		$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
 			serviceUrl: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -164,21 +116,13 @@ const index = (() => {
 			minChars: 3,
 			showNoSuggestionNotice: true,
 			noSuggestionNotice: 'No results found. Please try a different search string.',
-			onSelect: OnSelect,
+			onSelect: autocompleteOnSelect,
 			width: 490,
 		});
 
 		const ac = $('#frmGetLatLng #txtAddress').devbridgeAutocomplete();
-		$('#frmGetLatLng').submit(function () {
-			if (ac.suggestions[0]) {
-				$(ac.suggestionsContainer.children[0]).click();
-				return false;
-			}
-			if (PreviousSuggestion) {
-				PreviousSuggestionValue = null;
-				OnSelect(PreviousSuggestion);
-			}
-
+		$('#frmGetLatLng').submit(() => {
+			if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).click();
 			return false;
 		});
 
@@ -192,9 +136,7 @@ const index = (() => {
 		}
 
 		const TwcPlay = localStorage.getItem('TwcPlay');
-		if (!TwcPlay || TwcPlay === 'true') {
-			_IsPlaying = true;
-		}
+		if (TwcPlay === null || TwcPlay === 'true') postMessage('navButton', 'play');
 
 		const TwcScrollText = localStorage.getItem('TwcScrollText');
 		if (TwcScrollText) {
@@ -226,11 +168,9 @@ const index = (() => {
 			localStorage.removeItem('TwcUnits');
 
 			localStorage.removeItem('TwcPlay');
-			_IsPlaying = true;
+			postMessage('navButton', 'play');
 
 			localStorage.removeItem('TwcQuery');
-			PreviousSuggestionValue = null;
-			PreviousSuggestion = null;
 		});
 
 		const TwcUnits = localStorage.getItem('TwcUnits');
@@ -247,7 +187,6 @@ const index = (() => {
 			AssignLastUpdate();
 			postMessage('units', Units);
 		});
-
 
 		$('#chkAutoRefresh').on('change', (e) => {
 			const Checked = $(e.target).is(':checked');
@@ -270,6 +209,43 @@ const index = (() => {
 			$('#chkAutoRefresh').prop('checked', '');
 		}
 
+	};
+
+	const autocompleteOnSelect = (suggestion) => {
+		let request;
+
+		// Do not auto get the same city twice.
+		if (this.previousSuggestionValue === suggestion.value)  return;
+		this.previousSuggestionValue = suggestion.value;
+		PreviousSuggestion = suggestion;
+
+		if (overrides[suggestion.value]) {
+			doRedirectToGeometry(overrides[suggestion.value]);
+		} else {
+			request = $.ajax({
+				url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
+				data: {
+					text: suggestion.value,
+					magicKey: suggestion.data,
+					f: 'json',
+				},
+			});
+			request.done((data) => {
+				const loc = data.locations[0];
+				if (loc) {
+					doRedirectToGeometry(loc.feature.geometry);
+				} else {
+					alert('An unexpected error occurred. Please try a different search string.');
+				}
+			});
+		}
+	};
+
+	const doRedirectToGeometry = (geom) => {
+		const latLon = {lat:Math.round2(geom.y, 4), lon:Math.round2(geom.x, 4)};
+		LoadTwcData(latLon);
+		// Save the query
+		localStorage.setItem('TwcQuery', $('#txtAddress').val());
 	};
 
 	const FullScreenResize = () => {
@@ -402,7 +378,7 @@ const index = (() => {
 			ExitFullscreen();
 		}
 
-		if (_IsPlaying) {
+		if (navigation.isPlaying()) {
 			_NoSleep.enable();
 		} else {
 			_NoSleep.disable();
@@ -482,7 +458,6 @@ const index = (() => {
 		postMessage('units', $('input[type=\'radio\'][name=\'radUnits\']:checked').val());
 
 
-		if (_IsPlaying) postMessage('navButton', 'playToggle');
 		const display = $('#display');
 
 		display.on('mousemove', document_mousemove);
@@ -557,11 +532,7 @@ const index = (() => {
 		_WindowHeight = $window.height();
 		_WindowWidth = $window.width();
 
-		try {
-			postMessage('navButton', 'reset');
-		} catch (ex) {
-			console.log(ex);
-		}
+		postMessage('navButton', 'reset');
 
 		UpdateFullScreenNavigate();
 	};
@@ -582,7 +553,6 @@ const index = (() => {
 		}
 
 		_NavigateFadeIntervalId = window.setTimeout(() => {
-		//console.log("window_mousemove: TimeOut");
 			if (InFullScreen()) {
 				$('body').addClass('HideCursor');
 
@@ -695,12 +665,8 @@ const index = (() => {
 	};
 
 	// read and dispatch an event from the iframe
-	const messageHandler = (event) => {
+	const message = (data) => {
 	// test for trust
-		if (!event.isTrusted) return;
-		// get the data
-		const data = JSON.parse(event.data);
-
 		// dispatch event
 		if (!data.type) return;
 		switch (data.type) {
@@ -714,12 +680,10 @@ const index = (() => {
 			break;
 
 		case 'isPlaying':
-			_IsPlaying = data.message;
-			localStorage.setItem('TwcPlay', _IsPlaying);
+			localStorage.setItem('TwcPlay', navigation.isPlaying());
 
-			if (_IsPlaying) {
+			if (navigation.isPlaying()) {
 				_NoSleep.enable();
-
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('title', 'Pause');
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('src', 'images/nav/ic_pause_white_24dp_1x.png');
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_2x.png\']').attr('title', 'Pause');
@@ -850,6 +814,7 @@ const index = (() => {
 
 	return {
 		init,
+		message,
 	};
 
 })();
