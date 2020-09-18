@@ -67,6 +67,11 @@ class Progress extends WeatherDisplay {
 				statusColor = '#C0C0C0';
 				draw.box(this.context, 'rgb(33, 40, 90)', 475, y - 15, 75, 15);
 				break;
+			case STATUS.disabled:
+				statusText = 'Disabled';
+				statusColor = '#C0C0C0';
+				this.context.drawImage(backgroundImage, 470, y - 20, 45, 25, 470, y - 20, 45, 25);
+				break;
 			default:
 			}
 			// Erase any dots that spill into the status text.

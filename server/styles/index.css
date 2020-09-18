@@ -262,3 +262,13 @@ jsgif
 #container canvas {
 	position: absolute;
 }
+.heading {
+	font-weight: bold;
+	margin-top: 15px;
+}
+#enabledDisplays {
+	margin-bottom: 15px;
+}
+#enabledDisplays label {
+	display: block;
+}

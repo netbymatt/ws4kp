@@ -3,9 +3,9 @@
 
 // eslint-disable-next-line no-unused-vars
 class TravelForecast extends WeatherDisplay {
-	constructor(navId, elemId) {
+	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Travel Forecast');
+		super(navId, elemId, 'Travel Forecast', defaultActive);
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround6_1.png');
 
@@ -29,7 +29,8 @@ class TravelForecast extends WeatherDisplay {
 	}
 
 	async getData() {
-		super.getData();
+		// super checks for enabled
+		if (!super.getData()) return;
 		const forecastPromises = _TravelCities.map(async city => {
 			try {
 				// get point then forecast

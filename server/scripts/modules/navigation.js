@@ -95,14 +95,14 @@ const navigation = (() => {
 		// start loading canvases if necessary
 		if (displays.length === 0) {
 			displays = [
-				new CurrentWeather(0,'currentWeather', weatherParameters),
-				new LatestObservations(1, 'latestObservations', weatherParameters),
-				new TravelForecast(2, 'travelForecast', weatherParameters),
-				new RegionalForecast(3, 'regionalForecast', weatherParameters),
-				new LocalForecast(4, 'localForecast', weatherParameters),
-				new ExtendedForecast(5, 'extendedForecast', weatherParameters),
-				new Almanac(6, 'almanac', weatherParameters),
-				new Radar(7, 'radar', weatherParameters),
+				new CurrentWeather(0,'currentWeather'),
+				new LatestObservations(1, 'latestObservations'),
+				new TravelForecast(2, 'travelForecast', false),	// not active by default
+				new RegionalForecast(3, 'regionalForecast'),
+				new LocalForecast(4, 'localForecast'),
+				new ExtendedForecast(5, 'extendedForecast'),
+				new Almanac(6, 'almanac'),
+				new Radar(7, 'radar'),
 			];
 		}
 		// call for new data on each display

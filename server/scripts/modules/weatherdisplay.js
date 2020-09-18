@@ -7,11 +7,12 @@ const STATUS = {
 	loaded: Symbol('loaded'),
 	failed: Symbol('failed'),
 	noData: Symbol('noData'),
+	disabled: Symbol('disabled'),
 };
 
 // eslint-disable-next-line no-unused-vars
 class WeatherDisplay {
-	constructor(navId, elemId, name) {
+	constructor(navId, elemId, name, defaultEnabled) {
 		// navId is used in messaging
 		this.navId = navId;
 		this.elemId = undefined;
@@ -29,8 +30,37 @@ class WeatherDisplay {
 		this.navBaseCount = 0;
 		this.screenIndex = -1;	// special starting condition
 
-		this.setStatus(STATUS.loading);
+		if (elemId !== 'progress') this.addCheckbox(elemId, defaultEnabled);
+		if (this.enabled) {
+			this.setStatus(STATUS.loading);
+		} else {
+			this.setStatus(STATUS.disabled);
+		}
 		this.createCanvas(elemId);
+	}
+
+	addCheckbox(elemId, defaultEnabled = true) {
+		// get the saved status of the checkbox
+		let savedStatus = window.localStorage.getItem(`${elemId}Enabled`);
+		if (savedStatus === null) savedStatus = defaultEnabled;
+		if (savedStatus === 'true' || savedStatus === true) {
+			this.enabled = true;
+		} else {
+			this.enabled = false;
+		}
+
+		// create a checkbox in the selected displays area
+		const checkbox = `<label for="${elemId}Enabled">
+							<input type="checkbox" value="true" id="${elemId}Enabled" name="${elemId}Enabled"${this.enabled?' checked':''}/>
+						  ${this.name}</label>`;
+		const availableDisplays = document.getElementById('enabledDisplays');
+		availableDisplays.innerHTML += checkbox;
+		const checkboxElem = document.getElementById(`${elemId}Enabled`);
+		checkboxElem.addEventListener('click', this.checkboxChange);
+	}
+
+	checkboxChange(e) {
+		console.log(e);
 	}
 
 	// set data status and send update to navigation module
@@ -63,10 +93,17 @@ class WeatherDisplay {
 		// clear current data
 		this.data = undefined;
 		// set status
-		this.setStatus(STATUS.loading);
+
+		if (this.enabled) {
+			this.setStatus(STATUS.loading);
+		} else {
+			this.setStatus(STATUS.disabled);
+			return false;
+		}
 
 		// recalculate navigation timing (in case it was modified in the constructor)
 		this.calcNavTiming();
+		return true;
 	}
 
 	drawCanvas() {
@@ -226,7 +263,7 @@ class WeatherDisplay {
 	}
 
 	isEnabled() {
-		return true;
+		return this.enabled;
 	}
 
 	// navigation timings
