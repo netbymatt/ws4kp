@@ -30,6 +30,6 @@
     "gulp-terser": "^1.4.0"
   },
   "dependencies": {
-    "eslint": "^7.7.0"
+    "eslint": "^7.9.0"
   }
 }
