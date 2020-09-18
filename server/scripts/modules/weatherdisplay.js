@@ -30,18 +30,20 @@ class WeatherDisplay {
 		this.navBaseCount = 0;
 		this.screenIndex = -1;	// special starting condition
 
-		if (elemId !== 'progress') this.addCheckbox(elemId, defaultEnabled);
+		// create the canvas, also stores this.elemId
+		this.createCanvas(elemId);
+
+		if (elemId !== 'progress') this.addCheckbox(defaultEnabled);
 		if (this.enabled) {
 			this.setStatus(STATUS.loading);
 		} else {
 			this.setStatus(STATUS.disabled);
 		}
-		this.createCanvas(elemId);
 	}
 
-	addCheckbox(elemId, defaultEnabled = true) {
+	addCheckbox(defaultEnabled = true) {
 		// get the saved status of the checkbox
-		let savedStatus = window.localStorage.getItem(`${elemId}Enabled`);
+		let savedStatus = window.localStorage.getItem(`${this.elemId}Enabled`);
 		if (savedStatus === null) savedStatus = defaultEnabled;
 		if (savedStatus === 'true' || savedStatus === true) {
 			this.enabled = true;
@@ -49,18 +51,26 @@ class WeatherDisplay {
 			this.enabled = false;
 		}
 
+		// refresh (or initially store the state of the checkbox)
+		window.localStorage.setItem(`${this.elemId}Enabled`, this.enabled);
+
 		// create a checkbox in the selected displays area
-		const checkbox = `<label for="${elemId}Enabled">
-							<input type="checkbox" value="true" id="${elemId}Enabled" name="${elemId}Enabled"${this.enabled?' checked':''}/>
+		const checkbox = document.createElement('template');
+		checkbox.innerHTML = `<label for="${this.elemId}Enabled">
+							<input type="checkbox" value="true" id="${this.elemId}Enabled" name="${this.elemId}Enabled"${this.enabled?' checked':''}/>
 						  ${this.name}</label>`;
+		checkbox.content.firstChild.addEventListener('change', (e) => this.checkboxChange(e));
 		const availableDisplays = document.getElementById('enabledDisplays');
-		availableDisplays.innerHTML += checkbox;
-		const checkboxElem = document.getElementById(`${elemId}Enabled`);
-		checkboxElem.addEventListener('click', this.checkboxChange);
+		availableDisplays.appendChild(checkbox.content.firstChild);
 	}
 
 	checkboxChange(e) {
-		console.log(e);
+		// update the state
+		this.enabled = e.target.checked;
+		// store the value for the next load
+		window.localStorage.setItem(`${this.elemId}Enabled`, this.enabled);
+		// calling get data will update the status and actually get the data if we're set to enabled
+		this.getData();
 	}
 
 	// set data status and send update to navigation module
@@ -114,6 +124,9 @@ class WeatherDisplay {
 		// refresh the canvas
 		this.canvas = document.getElementById(this.elemId+'Canvas');
 		this.context = this.canvas.getContext('2d');
+
+		// clean up the first-run flag in screen index
+		if (this.screenIndex < 0) this.screenIndex = 0;
 	}
 
 	finishDraw() {

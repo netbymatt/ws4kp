@@ -271,4 +271,5 @@ jsgif
 }
 #enabledDisplays label {
 	display: block;
+	max-width: 300px;
 }

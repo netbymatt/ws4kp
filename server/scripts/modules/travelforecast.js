@@ -79,9 +79,15 @@ class TravelForecast extends WeatherDisplay {
 			this.longCanvas.width = 640;
 			this.longCanvas.height = 1728;
 			this.longContext = this.longCanvas.getContext('2d');
+			this.longCanvasGifs = [];
 		}
 		// set up variables
 		const cities = this.data;
+
+		// clean up existing gifs
+		this.gifs.forEach(gif => gif.pause());
+		// delete the gifs
+		this.gifs.length = 0;
 
 		this.longContext.clearRect(0,0,this.longCanvas.width,this.longCanvas.height);
 
@@ -120,7 +126,7 @@ class TravelForecast extends WeatherDisplay {
 				const xHigh = (560 - (highString.length * 20));
 				draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xHigh, y, highString, 2);
 
-				this.gifs.push(await utils.image.superGifAsync({
+				this.longCanvasGifs.push(await utils.image.superGifAsync({
 					src: city.icon,
 					loop_delay: 100,
 					auto_play: true,
