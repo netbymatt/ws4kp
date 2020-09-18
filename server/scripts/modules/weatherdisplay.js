@@ -39,6 +39,7 @@ class WeatherDisplay {
 		} else {
 			this.setStatus(STATUS.disabled);
 		}
+		this.startNavCount();
 	}
 
 	addCheckbox(defaultEnabled = true) {
@@ -126,7 +127,8 @@ class WeatherDisplay {
 		this.context = this.canvas.getContext('2d');
 
 		// clean up the first-run flag in screen index
-		if (this.screenIndex < 0) this.screenIndex = 0;
+		if (this.screenIndex < 0)
+			this.screenIndex = 0;
 	}
 
 	finishDraw() {
@@ -248,6 +250,7 @@ class WeatherDisplay {
 
 	// show/hide the canvas and start/stop the navigation timer
 	showCanvas(navCmd) {
+		// reset timing if enabled
 		// if a nav command is present call it to set the screen index
 		if (navCmd === navigation.msg.command.firstFrame) this.navNext(navCmd);
 		if (navCmd === navigation.msg.command.lastFrame) this.navPrev(navCmd);
@@ -260,9 +263,6 @@ class WeatherDisplay {
 
 		// stop if timing has been disabled
 		if (!this.timing) return;
-
-		// reset timing
-		this.startNavCount(navigation.isPlaying());
 	}
 	hideCanvas() {
 		this.stopNavBaseCount(true);
@@ -412,8 +412,7 @@ class WeatherDisplay {
 	}
 
 	// start and stop base counter
-	startNavCount(reset) {
-		if (reset) this.resetNavBaseCount();
+	startNavCount() {
 		if (!this.navInterval) this.navInterval = setInterval(()=>this.navBaseTime(), this.timing.baseDelay);
 	}
 	stopNavBaseCount(reset) {
