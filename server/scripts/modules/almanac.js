@@ -26,10 +26,9 @@ class Almanac extends WeatherDisplay {
 
 		// get images for outlook
 		const imagePromises = [
-			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_temp.gif'),
-			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_prcp.gif'),
+			utils.image.load('products/predictions/30day/off14_temp.gif'),
+			utils.image.load('products/predictions/30day/off14_prcp.gif'),
 		];
-
 
 		// get sun/moon data
 		const {sun, moon} = this.calcSunMoonData(weatherParameters);
@@ -38,7 +37,7 @@ class Almanac extends WeatherDisplay {
 		const [outlookTemp, outlookPrecip] = await Promise.all(imagePromises);
 
 		console.log(outlookTemp,outlookPrecip);
-		const outlook = 1;
+		const outlook = this.parseOutlooks(weatherParameters.latitude, weatherParameters.longitude, outlookTemp, outlookPrecip);
 
 		// store the data
 		this.data =  {
@@ -123,6 +122,114 @@ class Almanac extends WeatherDisplay {
 		} while (iterations < 1000);
 
 		return {phase: phaseName, date: moonDate};
+	}
+
+	// use the color of the pixel to determine the outlook
+	parseOutlooks(lat, lon, temp, precip) {
+		const {DateTime} = luxon;
+		const month = DateTime.local().toLocaleString({month: 'long'});
+
+		// draw the images on the canvases
+		const tempContext = utils.image.drawLocalCanvas(temp);
+		const precipContext = utils.image.drawLocalCanvas(precip);
+
+		// get the color from each canvas
+		const tempColor = this.getOutlookColor(lat, lon, tempContext);
+		const precipColor = this.getOutlookColor(lat, lon, precipContext);
+
+		return {
+			month,
+			temperature: this.getOutlookTemperatureIndicator(tempColor),
+			precipitation: this.getOutlookPrecipitationIndicator(precipColor),
+		};
+	}
+
+	getOutlookColor (lat, lon, context) {
+		let x = 0;
+		let y = 0;
+
+		// The height is in the range of latitude 75'N (top) - 15'N (bottom)
+		y = ((75 - lat) / 53) * 707;
+
+		if (lat < 48.83) {
+			y -= Math.abs(48.83 - lat) * 2.9;
+		}
+		if (lon < -100.46) {
+			y -= Math.abs(-100.46 - lon) * 1.7;
+		} else {
+			y -= Math.abs(-100.46 - lon) * 1.7;
+		}
+
+		// The width is in the range of the longitude ???
+		x = ((-155 - lon) / -110) * 719; // -155 - -40
+
+		if (lon < -100.46) {
+			x -= Math.abs(-100.46 - lon) * 1;
+
+			if (lat > 40) {
+				x += Math.abs(40 - lat) * 4;
+			} else {
+				x -= Math.abs(40 - lat) * 4;
+			}
+		} else {
+			x += Math.abs(-100.46 - lon) * 2;
+
+			if (lat < 36 && lon > -90) {
+				x += Math.abs(36 - lat) * 8;
+			} else {
+				x -= Math.abs(36 - lat) * 6;
+			}
+		}
+
+		// The further left and right from lat 45 and lon -97 the y increases
+		x = Math.round(x);
+		y = Math.round(y);
+
+		// Determine if there is any "non-white" colors around the area.
+		// Search a 16x16 region.
+		for (let colorX = x - 8; colorX <= x + 8; colorX++) {
+			for (let colorY = y - 8; colorY <= y + 8; colorY++) {
+				const pixelColor = this.getPixelColor(context, colorX, colorY);
+				if ((pixelColor.r !== 0 && pixelColor.g !== 0 && pixelColor.b !== 0) ||
+					(pixelColor.r !== 255 && pixelColor.g !== 255 && pixelColor.b !== 255)) {
+					return pixelColor;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	// get rgb values of a pixel
+	getPixelColor (context, x, y) {
+		const pixelData = context.getImageData(x, y, 1, 1).data;
+		return {
+			r: pixelData[0],
+			g: pixelData[1],
+			b: pixelData[2],
+		};
+	}
+
+	// get temperature outlook from color
+	getOutlookTemperatureIndicator(pixelColor) {
+		if (pixelColor.b > pixelColor.r) {
+			return 'B';
+		} else if (pixelColor.r > pixelColor.b) {
+			return 'A';
+		} else {
+			return 'N';
+		}
+	}
+
+	// get precipitation outlook from color
+	getOutlookPrecipitationIndicator (pixelColor) {
+		if (pixelColor.g > pixelColor.r) {
+			return 'A';
+		} else if (pixelColor.r > pixelColor.g) {
+			return 'B';
+		} else {
+			return 'N';
+		}
 	}
 
 	async drawCanvas() {
