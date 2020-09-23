@@ -271,7 +271,7 @@ class WeatherDisplay {
 		if (!this.timing) return;
 	}
 	hideCanvas() {
-		this.stopNavBaseCount(true);
+		this.resetNavBaseCount();
 
 		if (!this.canvas) return;
 		this.canvas.style.display = 'none';
@@ -314,7 +314,6 @@ class WeatherDisplay {
 		// must compare with false as nextScreenIndex could be 0 which is valid
 		if (nextScreenIndex === false) {
 			this.sendNavDisplayMessage(navigation.msg.response.next);
-			this.stopNavBaseCount();
 			return;
 		}
 
@@ -341,6 +340,7 @@ class WeatherDisplay {
 	// this.timing.fullDelay = [end of screen index 0 in base counts, end of screen index 1...]
 	// this.timing.screenIndexes = [screen index to use during this.timing.fullDelay[0], screen index to use during this.timing.fullDelay[1], ...]
 	calcNavTiming() {
+		if (this.timing === false) return;
 		// update total screens
 		if (Array.isArray(this.timing.delay)) this.timing.totalScreens = this.timing.delay.length;
 
@@ -412,6 +412,7 @@ class WeatherDisplay {
 	// get the screen index for the current base count, returns false if past end of timing array (go to next screen, stop timing)
 	screenIndexFromBaseCount() {
 		// find the first timing in the timing array that is greater than the base count
+		if (!this.timing.fullDelay) this.calcNavTiming();
 		const timingIndex = this.timing.fullDelay.findIndex(delay => delay > this.navBaseCount);
 		if (timingIndex === -1) return false;
 		return this.timing.screenIndexes[timingIndex];
@@ -421,14 +422,16 @@ class WeatherDisplay {
 	startNavCount() {
 		if (!this.navInterval) this.navInterval = setInterval(()=>this.navBaseTime(), this.timing.baseDelay);
 	}
-	stopNavBaseCount(reset) {
-		clearInterval(this.navInterval);
-		this.navInterval = undefined;
-		if (reset) this.resetNavBaseCount();
-	}
+
 	resetNavBaseCount() {
 		this.navBaseCount = 0;
 		this.screenIndex = -1;
+		// reset the timing so we don't short-change the first screen
+		if (this.navInterval) {
+			clearInterval(this.navInterval);
+			this.navInterval = undefined;
+		}
+		this.startNavCount();
 	}
 
 	sendNavDisplayMessage(message) {
