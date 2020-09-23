@@ -21,9 +21,37 @@ class Almanac extends WeatherDisplay {
 		this.backgroundImage = utils.image.load('images/BackGround3_1.png');
 	}
 
-	getData(weatherParameters) {
+	async getData(weatherParameters) {
 		super.getData();
 
+		// get images for outlook
+		const imagePromises = [
+			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_temp.gif'),
+			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_prcp.gif'),
+		];
+
+
+		// get sun/moon data
+		const {sun, moon} = this.calcSunMoonData(weatherParameters);
+
+		// process images for outlook
+		const [outlookTemp, outlookPrecip] = await Promise.all(imagePromises);
+
+		console.log(outlookTemp,outlookPrecip);
+		const outlook = 1;
+
+		// store the data
+		this.data =  {
+			sun,
+			moon,
+			outlook,
+		};
+		// draw the canvas
+		this.drawCanvas();
+
+	}
+
+	calcSunMoonData(weatherParameters) {
 		const {DateTime} = luxon;
 
 		const sun = [
@@ -53,14 +81,10 @@ class Almanac extends WeatherDisplay {
 			iterations++;
 		} while (iterations <= 30 && moon.length < 4);
 
-		// store the data
-		this.data =  {
+		return {
 			sun,
 			moon,
 		};
-		// draw the canvas
-		this.drawCanvas();
-
 	}
 
 	// get moon transition from one phase to the next by drilling down by hours, minutes and seconds

@@ -43,7 +43,7 @@ class CurrentWeather extends WeatherDisplay {
 			return;
 		}
 		// preload the icon
-		utils.image.preload(icons.getWeatherIconFromIconLink(observations.iconPath));
+		utils.image.preload(icons.getWeatherIconFromIconLink(observations.features[0].properties.icon));
 
 		// we only get here if there was no error above
 		this.data = Object.assign({}, observations, {station: station});
@@ -67,7 +67,7 @@ class CurrentWeather extends WeatherDisplay {
 		let WindChill = Math.round(observations.windChill.value);
 		let WindGust = Math.round(observations.windGust.value);
 		let Humidity = Math.round(observations.relativeHumidity.value);
-		const Icon = icons.getWeatherIconFromIconLink(observations.iconPath);
+		const Icon = icons.getWeatherIconFromIconLink(observations.icon);
 		let PressureDirection = '';
 		const TextConditions = observations.textDescription;
 
