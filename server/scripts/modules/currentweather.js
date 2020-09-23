@@ -38,10 +38,13 @@ class CurrentWeather extends WeatherDisplay {
 			// TODO: add retry for further stations if observations are unavailable
 		} catch (e) {
 			console.error('Unable to get current observations');
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			this.setStatus(STATUS.failed);
 			return;
 		}
+		// preload the icon
+		utils.image.preload(icons.getWeatherIconFromIconLink(observations.iconPath));
+
 		// we only get here if there was no error above
 		this.data = Object.assign({}, observations, {station: station});
 		this.setStatus(STATUS.loaded);
@@ -64,7 +67,7 @@ class CurrentWeather extends WeatherDisplay {
 		let WindChill = Math.round(observations.windChill.value);
 		let WindGust = Math.round(observations.windGust.value);
 		let Humidity = Math.round(observations.relativeHumidity.value);
-		const Icon = icons.getWeatherIconFromIconLink(observations.icon);
+		const Icon = icons.getWeatherIconFromIconLink(observations.iconPath);
 		let PressureDirection = '';
 		const TextConditions = observations.textDescription;
 

@@ -52,7 +52,7 @@ class TravelForecast extends WeatherDisplay {
 				};
 			} catch (e) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
-				console.error(e);
+				console.error(e.status, e.responseJSON);
 				return {name: city.Name};
 			}
 		});

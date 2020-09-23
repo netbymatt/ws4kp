@@ -146,7 +146,7 @@ const GetMonthPrecipitation = async (WeatherParameters) => {
 
 	} catch (e) {
 		console.error('GetMonthPrecipitation failed');
-		console.error(e);
+		console.error(e.status, e.responseJSON);
 		return false;
 	}
 

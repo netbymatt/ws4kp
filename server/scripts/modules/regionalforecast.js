@@ -93,6 +93,9 @@ class RegionalForecast extends WeatherDisplay {
 					y: cityXY.y,
 				};
 
+				// preload the icon
+				utils.image.preload(icons.getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime))
+
 				// return a pared-down forecast
 				// 0th object is the current conditions
 				// first object is the next period i.e. if it's daytime then it's the "tonight" forecast
@@ -105,7 +108,7 @@ class RegionalForecast extends WeatherDisplay {
 				];
 			} catch (e) {
 				console.log(`No regional forecast data for '${city.Name}'`);
-				console.error(e);
+				console.error(e.status, e.responseJSON);
 				return false;
 			}
 		});
@@ -162,11 +165,13 @@ class RegionalForecast extends WeatherDisplay {
 				dataType: 'json',
 				crossDomain: true,
 			});
+			// preload the image
+			utils.image.preload(icons.getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
 			// return the observation
 			return observation.properties;
 		} catch (e) {
 			console.log(`Unable to get regional observations for ${city.Name}`);
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			return false;
 		}
 	}

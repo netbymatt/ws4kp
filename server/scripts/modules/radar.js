@@ -66,7 +66,7 @@ class Radar extends WeatherDisplay {
 			});
 		} catch (e) {
 			console.error('Unable to get list of radars');
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			this.setStatus(STATUS.failed);
 			return;
 		}

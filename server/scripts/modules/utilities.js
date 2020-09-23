@@ -16,7 +16,7 @@ const utils = (() => {
 		} catch (e) {
 			console.error('Unable to get point');
 			console.error(lat,lon);
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			return false;
 		}
 	};
@@ -43,6 +43,19 @@ const utils = (() => {
 			const gif = new SuperGif(e);
 			gif.load(() => resolve(gif));
 		});
+	};
+
+	// preload an image
+	// the goal is to get it in the browser's cache so it is available more quickly when the browser needs it
+	// a list of cached icons is used to avoid hitting the cache multiple times
+	const cachedImages = [];
+	const preload = (src) => {
+		if (cachedImages.includes(src)) return false;
+		const img = new Image();
+		img.scr = src;
+		cachedImages.push(src);
+		console.log(cachedImages);
+		return true;
 	};
 
 	// *********************************** unit conversions ***********************
@@ -360,6 +373,7 @@ const utils = (() => {
 		image: {
 			load: loadImg,
 			superGifAsync,
+			preload,
 		},
 		weather: {
 			getPoint,

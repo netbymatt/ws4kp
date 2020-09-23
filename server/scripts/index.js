@@ -766,7 +766,7 @@ const index = (() => {
 			});
 		} catch (e) {
 			console.error('Unable to fetch reverse geocode');
-			console.error(e);
+			console.error(e.status, e.responseJSONe);
 		}
 		const ZipCode = data.address.Postal;
 		const City = data.address.City;

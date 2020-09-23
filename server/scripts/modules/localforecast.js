@@ -104,7 +104,7 @@ class LocalForecast extends WeatherDisplay {
 
 		} catch (e) {
 			console.error(`GetWeatherForecast failed: ${weatherParameters.forecast}`);
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			this.setStatus(STATUS.failed);
 			return false;
 		}

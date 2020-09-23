@@ -34,7 +34,7 @@ class ExtendedForecast extends WeatherDisplay {
 			});
 		} catch (e) {
 			console.error('Unable to get extended forecast');
-			console.error(e);
+			console.error(e.status, e.responseJSON);
 			this.setStatus(STATUS.failed);
 			return;
 		}
@@ -66,6 +66,9 @@ class ExtendedForecast extends WeatherDisplay {
 			fDay.icon = icons.getWeatherIconFromIconLink(period.icon);
 			fDay.text = this.shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = dates[destIndex];
+
+			// preload the icon
+			utils.image.preload(fDay.icon);
 
 			if (period.isDaytime) {
 			// day time is the high temperature
