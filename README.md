@@ -43,14 +43,13 @@ I've made several changes to this Weather Star 4000 simulation compared to the o
 * Marine forecast (tides) is not available as it is not part of the new API.
 * The nearby cities displayed on screens such as "Latest Observations" and "Regional Forecast" are likely not the same as they were in the 90's. The weather monitoring equipment at these stations move over time for one reason or another, and coming up with a simple formulaic way of finding nearby stations is sufficient to give the same look-and-feel as the original.
 * The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
-* "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units.
+* "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and a checkboxes can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
 * Radar displays the timestamp of the image.
 
 ## Wish list
 
 As time allows I will be working on the following enhancements.
 
-* On/off selection of the displays that are used when in "play" mode.
 * Better error reporting when api.weather.gov is down (happens more often than you would think)
 
 And the following technical fixes.
