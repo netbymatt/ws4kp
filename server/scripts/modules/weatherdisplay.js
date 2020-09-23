@@ -95,8 +95,14 @@ class WeatherDisplay {
 		// only create it once
 		if (this.elemId) return;
 		this.elemId = elemId;
+
+		// create a canvas
+		const canvas = document.createElement('template');
+		canvas.innerHTML = `<canvas id='${elemId+'Canvas'}' width='${width}' height='${height}'/ style='display: none;'>`;
+
+		// add to the page
 		const container = document.getElementById('container');
-		container.innerHTML += `<canvas id='${elemId+'Canvas'}' width='${width}' height='${height}'/ style='display: none;'>`;
+		container.appendChild(canvas.content.firstChild);
 	}
 
 	// get necessary data for this display
