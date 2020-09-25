@@ -28,8 +28,8 @@ class LocalForecast extends WeatherDisplay {
 		const conditions = this.parseLocalForecast(rawData);
 
 		// split this forecast into the correct number of screens
-		const MaxRows = 7;
-		const MaxCols = 32;
+		const maxRows = 7;
+		const maxCols = 32;
 
 		this.screenTexts = [];
 
@@ -43,23 +43,23 @@ class LocalForecast extends WeatherDisplay {
 			}
 			text += conditionText.toUpperCase().replace('...', ' ');
 
-			text = text.wordWrap(MaxCols, '\n');
-			const Lines = text.split('\n');
-			const LineCount = Lines.length;
+			text = utils.string.wordWrap(text, maxCols, '\n');
+			const lines = text.split('\n');
+			const lineCount = lines.length;
 			let ScreenText = '';
-			const MaxRowCount = MaxRows;
-			let RowCount = 0;
+			const maxRowCount = maxRows;
+			let rowCount = 0;
 
 
 			// if (PrependAlert) {
 			// 	ScreenText = LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1];
-			// 	RowCount = ScreenText.split('\n').length - 1;
+			// 	rowCount = ScreenText.split('\n').length - 1;
 			// }
 
-			for (let i = 0; i <= LineCount - 1; i++) {
-				if (Lines[i] === '') continue;
+			for (let i = 0; i <= lineCount - 1; i++) {
+				if (lines[i] === '') continue;
 
-				if (RowCount > MaxRowCount - 1) {
+				if (rowCount > maxRowCount - 1) {
 					// if (PrependAlert) {
 					// 	LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1] = ScreenText;
 					// 	PrependAlert = false;
@@ -67,11 +67,11 @@ class LocalForecast extends WeatherDisplay {
 					this.screenTexts.push(ScreenText);
 					// }
 					ScreenText = '';
-					RowCount = 0;
+					rowCount = 0;
 				}
 
-				ScreenText += Lines[i] + '\n';
-				RowCount++;
+				ScreenText += lines[i] + '\n';
+				rowCount++;
 			}
 			// if (PrependAlert) {
 			// 	this.screenTexts[this.screenTexts.length - 1] = ScreenText;

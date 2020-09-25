@@ -1,9 +1,6 @@
 /* globals _StationInfo, luxon, _RegionalCities, utils, icons, _TravelCities, SunCalc */
 const _DayShortNames = { 'Sunday': 'Sun', 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat' };
 
-var canvasProgress;
-var divProgress;
-
 var canvasRegionalObservations;
 
 var canvasRegionalForecast1;
@@ -39,82 +36,16 @@ var canvasLatestObservations;
 
 var _WeatherParameters = null;
 
-
-var LoadStatuses = {
-	Loading: 0,
-	Loaded: 1,
-	Failed: 2,
-	NoData: 3,
-};
-
 var _UpdateWeatherUpdateMs = 50;
 var canvasBackGroundDateTime = null;
 var canvasBackGroundCurrentConditions = null;
 
-var CurrentConditionTypes = {
-	Title: 0,
-	Conditions: 1,
-	Temperature: 2,
-	HumidityDewpoint: 3,
-	BarometricPressure: 4,
-	Wind: 5,
-	VisibilityCeiling: 6,
-	MonthPrecipitation: 7,
-};
 var _UpdateWeatherCurrentConditionType = CurrentConditionTypes.Title;
 var _UpdateWeatherCurrentConditionCounterMs = 0;
 
 var _UpdateCustomScrollTextMs = 0;
 
 var _UpdateHazardsY = 0;
-
-
-var CanvasTypes = {
-	Progress: 0,
-	CurrentWeather: 1,
-	LatestObservations: 2,
-	TravelForecast: 3,
-	RegionalForecast1: 4,
-	RegionalForecast2: 5,
-	RegionalObservations: 6,
-	LocalForecast: 7,
-	MarineForecast: 8,
-	ExtendedForecast1: 9,
-	ExtendedForecast2: 10,
-	Almanac: 11,
-	AlmanacTides: 12,
-	AirQuality: 13,
-	Outlook: 14,
-	LocalRadar: 15,
-	Hazards: 16,
-};
-var _FirstCanvasType = CanvasTypes.Progress;
-var _CurrentCanvasType = _FirstCanvasType;
-
-var _IsPlaying = false;
-
-
-const OperatingSystems = {
-	Unknown: 0,
-	Windows: 1,
-	MacOS: 2,
-	Linux: 3,
-	Unix: 4,
-	iOS: 5,
-	Andriod: 6,
-	WindowsPhone: 7,
-};
-let _OperatingSystem = OperatingSystems.Unknown;
-const _UserAgent = window.navigator.userAgent;
-if (_UserAgent.indexOf('Win') !== -1) _OperatingSystem = OperatingSystems.Windows;
-if (_UserAgent.indexOf('Mac') !== -1) _OperatingSystem = OperatingSystems.MacOS;
-if (_UserAgent.indexOf('X11') !== -1) _OperatingSystem = OperatingSystems.Unix;
-if (_UserAgent.indexOf('Linux') !== -1) _OperatingSystem = OperatingSystems.Linux;
-if (_UserAgent.indexOf('iPad') !== -1) _OperatingSystem = OperatingSystems.iOS;
-if (_UserAgent.indexOf('iPhone') !== -1) _OperatingSystem = OperatingSystems.iOS;
-if (_UserAgent.indexOf('iPod') !== -1) _OperatingSystem = OperatingSystems.iOS;
-if (_UserAgent.toLowerCase().indexOf('android') !== -1) _OperatingSystem = OperatingSystems.Andriod;
-if (_UserAgent.indexOf('Windows Phone') !== -1) _OperatingSystem = OperatingSystems.WindowsPhone;
 
 const GetMonthPrecipitation = async (WeatherParameters) => {
 	const DateTime = luxon.DateTime;
@@ -151,13 +82,6 @@ const GetMonthPrecipitation = async (WeatherParameters) => {
 	}
 
 };
-
-String.prototype.capitalize = function () {
-	return this.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-		return letter.toUpperCase();
-	});
-};
-
 
 Date.prototype.stdTimezoneOffset = function () {
 	var jan = new Date(this.getFullYear(), 0, 1);
@@ -397,104 +321,6 @@ var canvasProgress_mousemove = function (e) {
 		}
 	}
 };
-var canvasProgress_click = function (e) {
-	var Hazards = _WeatherParameters.WeatherHazardConditions.Hazards;
-
-	var RatioX = canvasProgress.width() / 640;
-	var RatioY = canvasProgress.height() / 480;
-
-	if (e.offsetX >= (70 * RatioX) && e.offsetX <= (565 * RatioX)) {
-		if (e.offsetY >= (100 * RatioY) && e.offsetY < (129 * RatioY)) {
-			if (_WeatherParameters.Progress.CurrentConditions === LoadStatuses.Loaded) {
-				// Current Conditions
-				_CurrentCanvasType = CanvasTypes.CurrentWeather;
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aCurrentWeather";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (129 * RatioY) && e.offsetY < (158 * RatioY)) {
-			// Latest Observations
-			if (_WeatherParameters.Progress.NearbyConditions === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.LatestObservations;
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aLatestObservations";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (158 * RatioY) && e.offsetY < (187 * RatioY)) {
-			// Travel Forecast
-			if (_WeatherParameters.Progress.TravelForecast === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.TravelForecast;
-				UpdateTravelCities(0);
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aTravelForecast";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (187 * RatioY) && e.offsetY < (216 * RatioY)) {
-			// Regional Forecast
-			if (_WeatherParameters.Progress.TomorrowsRegionalMap === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.RegionalForecast1;
-				//window.location.hash = "#aRegionalForecast";
-				AssignPlayMsOffsets();
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (216 * RatioY) && e.offsetY < (245 * RatioY)) {
-			if (_WeatherParameters.Progress.CurrentRegionalMap === LoadStatuses.Loaded) {
-				// Regional Observations
-				_CurrentCanvasType = CanvasTypes.RegionalObservations;
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aRegionalObservations";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (245 * RatioY) && e.offsetY < (274 * RatioY)) {
-			// Local Forecast
-			if (_WeatherParameters.Progress.WordedForecast === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.LocalForecast;
-				UpdateLocalForecast(0);
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aLocalForecast";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (274 * RatioY) && e.offsetY < (303 * RatioY)) {
-			// Extended Forecast
-			if (_WeatherParameters.Progress.FourDayForecast === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.ExtendedForecast1;
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aExtendedForecast";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (303 * RatioY) && e.offsetY < (332 * RatioY)) {
-			// Almanac
-			if (_WeatherParameters.Progress.Almanac === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.Almanac;
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aAlmanac";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (332 * RatioY) && e.offsetY < (361 * RatioY)) {
-			// Local Radar
-			if (_WeatherParameters.Progress.DopplerRadar === LoadStatuses.Loaded) {
-				_CurrentCanvasType = CanvasTypes.LocalRadar;
-				UpdateDopplarRadarImage(0);
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aLocalRadar";
-				NavigateReset();
-			}
-		} else if (e.offsetY >= (361 * RatioY) && e.offsetY < (390 * RatioY)) {
-			// Hazards
-			if (_WeatherParameters.Progress.Hazards === LoadStatuses.Loaded && Hazards.length > 0) {
-				_CurrentCanvasType = CanvasTypes.Hazards;
-				UpdateHazards(0);
-				AssignPlayMsOffsets();
-				//window.location.hash = "#aHazards";
-				NavigateReset();
-			}
-		}
-
-
-	}
-};
-
-
 var PopulateHazardConditions = function (WeatherParameters) {
 	if (WeatherParameters === null || (_DontLoadGifs && WeatherParameters.Progress.Hazards !== LoadStatuses.Loaded)) {
 		return;
@@ -688,17 +514,6 @@ var UpdateHazards = function (Offset) {
 const WeatherMonthlyTotalsParser = (text) => {
 	return +text.match(/MONTH TO DATE\s*(\d{1,2}\.\d\d)/)[1];
 };
-
-Number.prototype.pad = function(size) {
-	var s = String(this);
-	while (s.length < (size || 1)) {
-		s = '0' + s;
-	}
-	return s;
-};
-
-
-
 
 
 
