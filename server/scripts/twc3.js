@@ -152,58 +152,6 @@ const GetMonthPrecipitation = async (WeatherParameters) => {
 
 };
 
-var PopulateOutlook = function (WeatherParameters) {
-	if (WeatherParameters === null || (_DontLoadGifs && WeatherParameters.Progress.Almanac !== LoadStatuses.Loaded)) {
-		return;
-	}
-
-	var Outlook = WeatherParameters.Outlook;
-
-	// Draw canvas
-	var canvas = canvasOutlook[0];
-	var context = canvas.getContext('2d');
-
-	var BackGroundImage = new Image();
-	BackGroundImage.onload = function () {
-		context.drawImage(BackGroundImage, 0, 0);
-		DrawHorizontalGradientSingle(context, 0, 30, 500, 90, _TopColor1, _TopColor2);
-		DrawTriangle(context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		DrawHorizontalGradientSingle(context, 0, 90, 52, 399, _SideColor1, _SideColor2);
-		DrawHorizontalGradientSingle(context, 584, 90, 640, 399, _SideColor1, _SideColor2);
-
-		DrawTitleText(context, 'Almanac', 'Outlook');
-
-		DrawText(context, 'Star4000', '24pt', '#FFFFFF', 320, 180, '30 Day Outlook', 2, 'center');
-
-		var DateRange = 'MID-' + Outlook.From.toUpperCase() + ' TO MID-' + Outlook.To.toUpperCase();
-		DrawText(context, 'Star4000', '24pt', '#FFFFFF', 320, 220, DateRange, 2, 'center');
-
-		var Temperature = GetOutlookDescription(Outlook.Temperature);
-		DrawText(context, 'Star4000', '24pt', '#FFFFFF', 70, 300, 'Temperatures:  ' + Temperature, 2);
-
-		var Precipitation = GetOutlookDescription(Outlook.Precipitation);
-		DrawText(context, 'Star4000', '24pt', '#FFFFFF', 70, 380, 'Precipitation: ' + Precipitation, 2);
-
-		UpdateWeatherCanvas(WeatherParameters, canvasOutlook);
-	};
-	//BackGroundImage.src = "images/BackGround1_" + _Themes.toString() + ".png";
-	BackGroundImage.src = 'images/BackGround1_1.png';
-};
-
-var GetOutlookDescription = function (OutlookIndicator) {
-	switch (OutlookIndicator) {
-	case 'N':
-		return 'Normal';
-	case 'A':
-		return 'Above Normal';
-	case 'B':
-		return 'Below Normal';
-	default:
-	}
-};
-
-
-
 String.prototype.capitalize = function () {
 	return this.toLowerCase().replace(/\b[a-z]/g, function (letter) {
 		return letter.toUpperCase();

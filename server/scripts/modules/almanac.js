@@ -7,8 +7,9 @@ class Almanac extends WeatherDisplay {
 	constructor(navId,elemId) {
 		super(navId,elemId,'Almanac');
 
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
+		// pre-load background images (returns promises)
+		this.backgroundImage0 = utils.image.load('images/BackGround3_1.png');
+		this.backgroundImage1 = utils.image.load('images/BackGround1_1.png');
 
 		// load all images in parallel (returns promises)
 		this.moonImages = [
@@ -20,7 +21,6 @@ class Almanac extends WeatherDisplay {
 
 		this.timing.totalScreens = 2;
 
-		this.backgroundImage = utils.image.load('images/BackGround3_1.png');
 	}
 
 	async getData(weatherParameters) {
@@ -129,7 +129,9 @@ class Almanac extends WeatherDisplay {
 	// use the color of the pixel to determine the outlook
 	parseOutlooks(lat, lon, temp, precip) {
 		const {DateTime} = luxon;
-		const month = DateTime.local().toLocaleString({month: 'long'});
+		const month = DateTime.local();
+		const thisMonth = month.toLocaleString({month: 'short'});
+		const nextMonth = month.plus({months: 1}).toLocaleString({month: 'short'});
 
 		// draw the images on the canvases
 		const tempContext = utils.image.drawLocalCanvas(temp);
@@ -140,7 +142,8 @@ class Almanac extends WeatherDisplay {
 		const precipColor = this.getOutlookColor(lat, lon, precipContext);
 
 		return {
-			month,
+			thisMonth,
+			nextMonth,
 			temperature: this.getOutlookTemperatureIndicator(tempColor),
 			precipitation: this.getOutlookPrecipitationIndicator(precipColor),
 		};
@@ -215,22 +218,22 @@ class Almanac extends WeatherDisplay {
 	// get temperature outlook from color
 	getOutlookTemperatureIndicator(pixelColor) {
 		if (pixelColor.b > pixelColor.r) {
-			return 'B';
+			return 'Below Normal';
 		} else if (pixelColor.r > pixelColor.b) {
-			return 'A';
+			return 'Above Normal';
 		} else {
-			return 'N';
+			return 'Normal';
 		}
 	}
 
 	// get precipitation outlook from color
 	getOutlookPrecipitationIndicator (pixelColor) {
 		if (pixelColor.g > pixelColor.r) {
-			return 'A';
+			return 'Above Normal';
 		} else if (pixelColor.r > pixelColor.g) {
-			return 'B';
+			return 'Below Normal';
 		} else {
-			return 'N';
+			return 'Normal';
 		}
 	}
 
@@ -238,56 +241,82 @@ class Almanac extends WeatherDisplay {
 		super.drawCanvas();
 		const info = this.data;
 		const {DateTime} = luxon;
+		const Today = DateTime.local();
+		const Tomorrow = Today.plus({days: 1});
 
 		// extract moon images
 		const [FullMoonImage, LastMoonImage, NewMoonImage, FirstMoonImage] = await Promise.all(this.moonImages);
 
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 640, 190, draw.sideColor1, draw.sideColor2);
+		switch (this.screenIndex) {
+		case 0:
+		default:
+			// sun and moon data
+			this.context.drawImage(await this.backgroundImage0, 0, 0);
+			draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
+			draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
+			draw.horizontalGradientSingle(this.context, 0, 90, 640, 190, draw.sideColor1, draw.sideColor2);
 
-		draw.titleText(this.context, 'Almanac', 'Astronomical');
+			draw.titleText(this.context, 'Almanac', 'Astronomical');
 
-		const Today = DateTime.local();
-		const Tomorrow = Today.plus({days: 1});
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 320, 120, Today.toLocaleString({weekday: 'long'}), 2, 'center');
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 500, 120, Tomorrow.toLocaleString({weekday: 'long'}), 2, 'center');
+			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 320, 120, Today.toLocaleString({weekday: 'long'}), 2, 'center');
+			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 500, 120, Tomorrow.toLocaleString({weekday: 'long'}), 2, 'center');
 
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 150, 'Sunrise:', 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 150, DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 150, DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 150, 'Sunrise:', 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 150, DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 150, DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
 
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 180, ' Sunset:', 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 180, DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 180, DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 180, ' Sunset:', 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 180, DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 180, DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
 
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 70, 220, 'Moon Data:', 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 70, 220, 'Moon Data:', 2);
 
 
-		info.moon.forEach((MoonPhase, Index) => {
-			const date = MoonPhase.date.toLocaleString({month: 'short', day: 'numeric'});
+			info.moon.forEach((MoonPhase, Index) => {
+				const date = MoonPhase.date.toLocaleString({month: 'short', day: 'numeric'});
 
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+Index*130, 260, MoonPhase.phase, 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+Index*130, 390, date, 2, 'center');
+				draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+Index*130, 260, MoonPhase.phase, 2, 'center');
+				draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+Index*130, 390, date, 2, 'center');
 
-			const image = (() => {
-				switch (MoonPhase.phase) {
-				case 'Full':
-					return FullMoonImage;
-				case 'Last':
-					return LastMoonImage;
-				case 'New':
-					return NewMoonImage;
-				case 'First':
-				default:
-					return FirstMoonImage;
-				}
-			})();
-			this.context.drawImage(image, 75+Index*130, 270);
-		});
+				const image = (() => {
+					switch (MoonPhase.phase) {
+					case 'Full':
+						return FullMoonImage;
+					case 'Last':
+						return LastMoonImage;
+					case 'New':
+						return NewMoonImage;
+					case 'First':
+					default:
+						return FirstMoonImage;
+					}
+				})();
+				this.context.drawImage(image, 75+Index*130, 270);
+			});
 
-		this.finishDraw();
-		this.setStatus(STATUS.loaded);
+			this.finishDraw();
+			this.setStatus(STATUS.loaded);
+			break;
+
+		case 1:
+			this.context.drawImage(await this.backgroundImage1, 0, 0);
+			draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
+			draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
+			draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
+			draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
+
+			draw.titleText(this.context, 'Almanac', 'Outlook');
+
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 180, '30 Day Outlook', 2, 'center');
+
+			var DateRange = 'MID-' + info.outlook.thisMonth.toUpperCase() + ' TO MID-' + info.outlook.nextMonth.toUpperCase();
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 220, DateRange, 2, 'center');
+
+			var Temperature = info.outlook.temperature;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 300, 'Temperatures:  ' + Temperature, 2);
+
+			var Precipitation = info.outlook.precipitation;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 380, 'Precipitation: ' + Precipitation, 2);
+		}
 	}
 }
