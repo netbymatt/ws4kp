@@ -69,7 +69,7 @@ const navigation = (() => {
 		let city = point.properties.relativeLocation.properties.city;
 
 		if (StationId in _StationInfo) {
-			city = _StationInfo[StationId].City;
+			city = _StationInfo[StationId].city;
 			city = city.split('/')[0];
 		}
 

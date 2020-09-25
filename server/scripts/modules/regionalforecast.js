@@ -44,7 +44,7 @@ class RegionalForecast extends WeatherDisplay {
 		if (weatherParameters.State === 'HI') targetDistance = 1;
 
 		// make station info into an array
-		const stationInfoArray = Object.keys(_StationInfo).map(key => Object.assign({}, _StationInfo[key], {Name: _StationInfo[key].City, targetDistance}));
+		const stationInfoArray = Object.keys(_StationInfo).map(key => Object.assign({}, _StationInfo[key], {targetDistance}));
 		// combine regional cities with station info for additional stations
 		// stations are intentionally after cities to allow cities priority when drawing the map
 		const combinedCities = [..._RegionalCities, ...stationInfoArray];
@@ -52,13 +52,13 @@ class RegionalForecast extends WeatherDisplay {
 		// Determine which cities are within the max/min latitude/longitude.
 		const regionalCities = [];
 		combinedCities.forEach(city => {
-			if (city.Latitude > minMaxLatLon.minLat && city.Latitude < minMaxLatLon.maxLat &&
-						city.Longitude > minMaxLatLon.minLon && city.Longitude < minMaxLatLon.maxLon - 1) {
+			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat &&
+						city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
 				// default to 1 for cities loaded from _RegionalCities, use value calculate above for remaining stations
 				const targetDistance = city.targetDistance || 1;
 				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
 				const okToAddCity = regionalCities.reduce((acc, testCity) => {
-					const distance = utils.calc.distance(city.Longitude, city.Latitude, testCity.Longitude, testCity.Latitude);
+					const distance = utils.calc.distance(city.lon, city.lat, testCity.lon, testCity.lat);
 					return acc && distance >= targetDistance;
 				}, true);
 				if (okToAddCity) regionalCities.push(city);
@@ -69,7 +69,7 @@ class RegionalForecast extends WeatherDisplay {
 		const regionalForecastPromises = regionalCities.map(async city => {
 			try {
 				// get the point first, then break down into forecast and observations
-				const point = await utils.weather.getPoint(city.Latitude, city.Longitude);
+				const point = await utils.weather.getPoint(city.lat, city.lon);
 
 				// start off the observation task
 				const observationPromise = this.getRegionalObservation(point, city);
@@ -89,7 +89,7 @@ class RegionalForecast extends WeatherDisplay {
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),
 					temperature: utils.units.celsiusToFahrenheit(observation.temperature.value),
-					name: city.Name,
+					name: this.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,
 					y: cityXY.y,
@@ -140,7 +140,7 @@ class RegionalForecast extends WeatherDisplay {
 		return {
 			daytime: forecast.isDaytime,
 			temperature: forecast.temperature||0,
-			name: city.Name,
+			name: city.city,
 			icon: forecast.icon,
 			x: cityXY.x,
 			y: cityXY.y,
@@ -294,8 +294,8 @@ class RegionalForecast extends WeatherDisplay {
 	getXYForCity (City, MaxLatitude, MinLongitude, state) {
 		if (state === 'AK') this.getXYForCityAK(...arguments);
 		if (state === 'HI') this.getXYForCityHI(...arguments);
-		let x = (City.Longitude - MinLongitude) * 57;
-		let y = (MaxLatitude - City.Latitude) * 70;
+		let x = (City.lon - MinLongitude) * 57;
+		let y = (MaxLatitude - City.lat) * 70;
 
 		if (y < 30) y = 30;
 		if (y > 282) y = 282;
@@ -307,8 +307,8 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	getXYForCityAK (City, MaxLatitude, MinLongitude) {
-		let x = (City.Longitude - MinLongitude) * 37;
-		let y = (MaxLatitude - City.Latitude) * 70;
+		let x = (City.lon - MinLongitude) * 37;
+		let y = (MaxLatitude - City.lat) * 70;
 
 		if (y < 30) y = 30;
 		if (y > 282) y = 282;
@@ -319,8 +319,8 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	getXYForCityHI (City, MaxLatitude, MinLongitude) {
-		let x = (City.Longitude - MinLongitude) * 57;
-		let y = (MaxLatitude - City.Latitude) * 70;
+		let x = (City.lon - MinLongitude) * 57;
+		let y = (MaxLatitude - City.lat) * 70;
 
 		if (y < 30) y = 30;
 		if (y > 282) y = 282;
@@ -329,6 +329,11 @@ class RegionalForecast extends WeatherDisplay {
 		if (x > 580) x = 580;
 
 		return { x, y };
+	}
+
+	// to fit on the map, remove anything after punctuation and then limit to 15 characters
+	formatCity(city) {
+		return city.match(/[^-;/\\,]*/)[0].substr(0,12)
 	}
 
 	async drawCanvas() {

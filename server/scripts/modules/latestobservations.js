@@ -19,7 +19,7 @@ class LatestObservations extends WeatherDisplay {
 		// calculate distance to each station
 		const stationsByDistance = Object.keys(_StationInfo).map(key => {
 			const station = _StationInfo[key];
-			const distance = utils.calc.distance(station.Latitude, station.Longitude, weatherParameters.latitude, weatherParameters.longitude);
+			const distance = utils.calc.distance(station.lat, station.lon, weatherParameters.latitude, weatherParameters.longitude);
 			return Object.assign({}, station, {distance});
 		});
 
@@ -33,17 +33,17 @@ class LatestObservations extends WeatherDisplay {
 			try {
 				const data = await $.ajax({
 					type: 'GET',
-					url: `https://api.weather.gov/stations/${station.StationId}/observations/latest`,
+					url: `https://api.weather.gov/stations/${station.id}/observations/latest`,
 					dataType: 'json',
 					crossDomain: true,
 				});
 				// format the return values
 				return Object.assign({}, data.properties, {
-					StationId: station.StationId,
-					City: station.City,
+					StationId: station.id,
+					city: station.city,
 				});
 			} catch (e) {
-				console.log(`Unable to get latest observations for ${station.StationId}`);
+				console.log(`Unable to get latest observations for ${station.id}`);
 				return;
 			}
 		}));
@@ -95,7 +95,7 @@ class LatestObservations extends WeatherDisplay {
 				WindSpeed = utils.units.kphToMph(WindSpeed);
 			}
 
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 65, y, condition.City.substr(0, 14), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 65, y, condition.city.substr(0, 14), 2);
 			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 345, y, this.shortenCurrentConditions(condition.textDescription).substr(0, 9), 2);
 
 			if (WindSpeed > 0) {

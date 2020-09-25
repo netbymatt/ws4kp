@@ -4,6 +4,7 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
+		
 		{
 			"name": "Frontend",
 			"request": "launch",
@@ -14,6 +15,15 @@
 				"<node_internals>/**",
 				"**/*.min.js",
 			]
+		},
+		{
+			"name": "Data:stations",
+			"program": "${workspaceFolder}/datagenerators/stations.js",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node"
 		},
 		{
 			"type": "node",
