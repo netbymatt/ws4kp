@@ -422,8 +422,10 @@ class WeatherDisplay {
 
 	// get the screen index for the current base count, returns false if past end of timing array (go to next screen, stop timing)
 	screenIndexFromBaseCount() {
+		// test for timing enabled
+		if (!this.timing) return 0;
 		// find the first timing in the timing array that is greater than the base count
-		if (!this.timing.fullDelay) this.calcNavTiming();
+		if (this.timing && !this.timing.fullDelay) this.calcNavTiming();
 		const timingIndex = this.timing.fullDelay.findIndex(delay => delay > this.navBaseCount);
 		if (timingIndex === -1) return false;
 		return this.timing.screenIndexes[timingIndex];

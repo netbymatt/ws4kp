@@ -293,8 +293,6 @@ class Almanac extends WeatherDisplay {
 				})();
 				this.context.drawImage(image, 75+Index*130, 270);
 			});
-
-			this.finishDraw();
 			break;
 
 		case 1:
@@ -317,5 +315,7 @@ class Almanac extends WeatherDisplay {
 			var Precipitation = info.outlook.precipitation;
 			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 380, 'Precipitation: ' + Precipitation, 2);
 		}
+
+		this.finishDraw();
 	}
 }
