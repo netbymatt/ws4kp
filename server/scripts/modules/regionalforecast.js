@@ -140,7 +140,7 @@ class RegionalForecast extends WeatherDisplay {
 		return {
 			daytime: forecast.isDaytime,
 			temperature: forecast.temperature||0,
-			name: city.city,
+			name: this.formatCity(city.city),
 			icon: forecast.icon,
 			x: cityXY.x,
 			y: cityXY.y,
