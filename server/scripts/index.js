@@ -379,9 +379,9 @@ const index = (() => {
 		}
 
 		if (navigation.isPlaying()) {
-			_NoSleep.enable();
+			noSleepEnable();
 		} else {
-			_NoSleep.disable();
+			noSleepDisable();
 		}
 
 		UpdateFullScreenNavigate();
@@ -683,13 +683,13 @@ const index = (() => {
 			localStorage.setItem('TwcPlay', navigation.isPlaying());
 
 			if (navigation.isPlaying()) {
-				_NoSleep.enable();
+				noSleepEnable();
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('title', 'Pause');
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('src', 'images/nav/ic_pause_white_24dp_1x.png');
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_2x.png\']').attr('title', 'Pause');
 				$('img[src=\'images/nav/ic_play_arrow_white_24dp_2x.png\']').attr('src', 'images/nav/ic_pause_white_24dp_2x.png');
 			} else {
-				_NoSleep.disable();
+				noSleepDisable();
 
 				$('img[src=\'images/nav/ic_pause_white_24dp_1x.png\']').attr('title', 'Play');
 				$('img[src=\'images/nav/ic_pause_white_24dp_1x.png\']').attr('src', 'images/nav/ic_play_arrow_white_24dp_1x.png');
@@ -810,6 +810,18 @@ const index = (() => {
 			ScrollText = '';
 		}
 		postMessage('assignScrollText', ScrollText);
+	};
+
+	// track state of nosleep locally to avoid a null case error when nosleep.disable is called without first calling .enable
+	let wakeLock = false;
+	const noSleepEnable = () => {
+		_NoSleep.enable();
+		wakeLock = true;
+	};
+	const noSleepDisable = () => {
+		if (!wakeLock) return;
+		_NoSleep.disable();
+		wakeLock = false;
 	};
 
 	return {

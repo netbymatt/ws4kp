@@ -10,9 +10,8 @@ const htmlmin = require('gulp-htmlmin');
 const del = require('del');
 const s3Upload = require('gulp-s3-upload');
 
-gulp.task('clean', () =>
-	del(['./dist**']),
-);
+const clean = () =>
+	del(['./dist**']);
 
 const js_sources_data = [
 	'server/scripts/data/travelcities.js',
@@ -28,14 +27,14 @@ gulp.task('compress_js_data', () =>
 );
 
 const js_sources = [
-	'server/scripts/vendor/jquery-3.5.1.min.js',
+	'server/scripts/vendor/auto/jquery.js',
 	'server/scripts/vendor/jquery.autocomplete.min.js',
-	'server/scripts/vendor/nosleep.min.js',
-	'server/scripts/vendor/jquery.touchSwipe.min.js',
+	'server/scripts/vendor/auto/nosleep.js',
+	'server/scripts/vendor/jquery.touchswipe.min.js',
 	'server/scripts/index.js',
-	'server/scripts/vendor/libgif.js',
-	'server/scripts/vendor/luxon.js',
-	'server/scripts/vendor/suncalc.js',
+	'server/scripts/libgif.js',
+	'server/scripts/vendor/auto/luxon.js',
+	'server/scripts/vendor/auto/suncalc.js',
 	'server/scripts/modules/draw.js',
 	'server/scripts/modules/weatherdisplay.js',
 	'server/scripts/modules/icons.js',
@@ -131,4 +130,4 @@ gulp.task('invalidate', async () => {
 	}).promise();
 });
 
-module.exports = gulp.series('clean', gulp.parallel('compress_js','compress_js_data','compress_css','compress_html', 'copy_other_files'), 'upload', 'invalidate');
+module.exports = gulp.series(clean, gulp.parallel('compress_js','compress_js_data','compress_css','compress_html', 'copy_other_files'), 'upload', 'invalidate');
