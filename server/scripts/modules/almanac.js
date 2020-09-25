@@ -38,7 +38,6 @@ class Almanac extends WeatherDisplay {
 		// process images for outlook
 		const [outlookTemp, outlookPrecip] = await Promise.all(imagePromises);
 
-		console.log(outlookTemp,outlookPrecip);
 		const outlook = this.parseOutlooks(weatherParameters.latitude, weatherParameters.longitude, outlookTemp, outlookPrecip);
 
 		// store the data
@@ -47,8 +46,8 @@ class Almanac extends WeatherDisplay {
 			moon,
 			outlook,
 		};
-		// draw the canvas
-		this.drawCanvas();
+		// update status
+		this.setStatus(STATUS.loaded);
 
 	}
 
@@ -295,7 +294,6 @@ class Almanac extends WeatherDisplay {
 			});
 
 			this.finishDraw();
-			this.setStatus(STATUS.loaded);
 			break;
 
 		case 1:

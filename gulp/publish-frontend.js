@@ -40,6 +40,7 @@ const js_sources = [
 	'server/scripts/modules/icons.js',
 	'server/scripts/modules/utilities.js',
 	'server/scripts/modules/currentweather.js',
+	'server/scripts/modules/currentweatherscroll.js',
 	'server/scripts/modules/latestobservations.js',
 	'server/scripts/modules/travelforecast.js',
 	'server/scripts/modules/regionalforecast.js',

@@ -11,6 +11,7 @@
 			"**/*.code-search": true,
 			"dist/**": true,
 			"**/*.min.js": true,
+			"**/vendor": true,
 		},
 		"cSpell.enabled": true,
 		"cSpell.words": [
@@ -22,6 +23,16 @@
 			"arcgis",
 			"devbridge",
 			"nosleep"
+		],
+		"cSpell.ignorePaths": [
+			"**/package-lock.json",
+			"**/node_modules/**",
+			"**/vscode-extension/**",
+			"**/.git/objects/**",
+			".vscode",
+			".vscode-insiders",
+			"**/vendor/auto/**",
+			"**/twc3.js",
 		],
 	},
 }

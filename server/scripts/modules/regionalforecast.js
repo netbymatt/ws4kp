@@ -386,7 +386,6 @@ class RegionalForecast extends WeatherDisplay {
 		}));
 
 		this.finishDraw();
-		this.setStatus(STATUS.loaded);
 
 	}
 }

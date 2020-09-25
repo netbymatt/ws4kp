@@ -1,5 +1,4 @@
-/* globals _StationInfo, luxon, _RegionalCities, utils, icons, _TravelCities, SunCalc */
-const _DayShortNames = { 'Sunday': 'Sun', 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat' };
+/* globals luxon, _TravelCities */
 
 var canvasRegionalObservations;
 
@@ -28,9 +27,7 @@ var canvasAirQuality;
 var canvasTravelForecast;
 
 var divOutlookTemp;
-var cnvOutlookTemp;
 var divOutlookPrcp;
-var cnvOutlookPrcp;
 
 var canvasLatestObservations;
 
@@ -81,16 +78,6 @@ const GetMonthPrecipitation = async (WeatherParameters) => {
 		return false;
 	}
 
-};
-
-Date.prototype.stdTimezoneOffset = function () {
-	var jan = new Date(this.getFullYear(), 0, 1);
-	var jul = new Date(this.getFullYear(), 6, 1);
-	return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-};
-
-Date.prototype.dst = function () {
-	return this.getTimezoneOffset() < this.stdTimezoneOffset();
 };
 
 var GetWeatherHazards3 = function (WeatherParameters) {
@@ -259,53 +246,6 @@ $(() => {
 		WeatherParameters: _WeatherParameters,
 	});
 });
-
-var NavigateMenu = function () {
-	if (_IsPlaying) {
-		NavigatePlayToggle();
-	}
-	Navigate(0);
-	_PlayMs = 0;
-};
-
-
-
-$.fn.scrollIntoView = function () {
-	const $self = this;
-	const OkToFadeOut = true;
-
-	_WeatherParameters.WeatherCanvases.forEach($WeatherCanvas => {
-
-		if (!$WeatherCanvas.is($self)) {
-			if ($WeatherCanvas.is(':visible')) {
-				$WeatherCanvas.css('z-index', '9999');
-				if (!OkToFadeOut) {
-					$WeatherCanvas.hide();
-				} else {
-					$WeatherCanvas.fadeOut({
-						progress: () => {
-							UpdateWeatherCanvas(_WeatherParameters, $WeatherCanvas);
-							UpdateWeatherCanvas(_WeatherParameters, $self);
-						},
-					});
-				}
-			}
-		} else {
-			if (!$WeatherCanvas.is(':visible')) {
-				$WeatherCanvas.css('z-index', '');
-				$WeatherCanvas.show();
-			}
-			$WeatherCanvas.stop();
-			$WeatherCanvas.css('opacity', '');
-			UpdateWeatherCanvas(_WeatherParameters, $WeatherCanvas);
-		}
-	});
-
-	_RefreshGifs = true;
-	window.setTimeout(function () { _RefreshGifs = false; }, 200);
-
-};
-
 
 var canvasProgress_mousemove = function (e) {
 	canvasProgress.css('cursor', '');
@@ -517,7 +457,7 @@ const WeatherMonthlyTotalsParser = (text) => {
 
 
 
-const Progress = function (e) {
+
 const DrawCustomScrollText = (WeatherParameters, context) => {
 	const font = 'Star4000';
 	const size = '24pt';
@@ -552,5 +492,118 @@ const AssignScrollText = (e) => {
 	_UpdateCustomScrollTextMs = 0;
 	_UpdateWeatherCurrentConditionType = CurrentConditionTypes.Title;
 	_UpdateWeatherCurrentConditionCounterMs = 0;
+};
+
+var DrawCurrentConditions = function (WeatherParameters, context) {
+	var Humidity;
+	var DewPoint;
+	var Temperature;
+	var TemperatureUnit;
+	var HeatIndex;
+	var WindChill;
+	var Pressure;
+	var PressureDirection;
+	var WindSpeed;
+	var WindDirection;
+	var WindGust;
+	var WindUnit;
+	var Visibility;
+	var VisibilityUnit;
+	var Ceiling;
+	var CeilingUnit;
+	var PrecipitationTotal;
+	var PrecipitationTotalUnit;
+
+	var text;
+
+	if (WeatherParameters.Progress.GetTotalPercentage() != 100) {
+		return;
+	}
+
+	// Clear the date and time area.
+	context.drawImage(canvasBackGroundCurrentConditions[0], 0, 0, 640, 75, 0, 405, 640, 75);
+
+	var WeatherCurrentConditions = WeatherParameters.WeatherCurrentConditions;
+	var WeatherMonthlyTotals = WeatherParameters.WeatherMonthlyTotals;
+
+
+	if (_UpdateWeatherCurrentConditionCounterMs >= 4000) {
+		_UpdateWeatherCurrentConditionCounterMs = 0;
+		_UpdateWeatherCurrentConditionType++;
+		if (_UpdateWeatherCurrentConditionType > CurrentConditionTypes.MonthPrecipitation) {
+			_UpdateWeatherCurrentConditionType = CurrentConditionTypes.Title;
+		}
+	}
+
+	switch(_UpdateWeatherCurrentConditionType) {
+	case CurrentConditionTypes.Title:
+		// mjb 06/01/19 text = "Conditions at " + WeatherCurrentConditions.StationName;
+		text = 'Conditions at ' + WeatherCurrentConditions.StationName.substr(0, 20); // mjb 06/01/19
+		break;
+	case CurrentConditionTypes.Conditions:
+		text = WeatherCurrentConditions.Conditions;
+		break;
+	case CurrentConditionTypes.Temperature:
+		text = 'Temp: ' + Temperature + String.fromCharCode(176) + TemperatureUnit;
+		if (HeatIndex != Temperature) {
+			text += '    ';
+			text += 'Heat Index: ' + HeatIndex + String.fromCharCode(176) + TemperatureUnit;
+		} else if (WindChill != '' && WindChill < Temperature) {
+			text += '    ';
+			text += 'Wind Chill: ' + WindChill + String.fromCharCode(176) + TemperatureUnit;
+		}
+		break;
+	case CurrentConditionTypes.HumidityDewpoint:
+		text = 'Humidity: ' + Humidity + '%';
+		text += '  ';
+		text += 'Dewpoint: ' + DewPoint + String.fromCharCode(176) + TemperatureUnit;
+		break;
+	case CurrentConditionTypes.BarometricPressure:
+		text = 'Barometric Pressure: ' + Pressure + ' ' + PressureDirection;
+		break;
+	case CurrentConditionTypes.Wind:
+		if (WindSpeed > 0) {
+			text = 'Wind: ' + WindDirection + ' ' + WindSpeed + WindUnit;
+		} else if (WindSpeed == 'NA') {
+			text = 'Wind: NA';
+		} else {
+			text = 'Wind: Calm';
+		}
+		if (WindGust != '') {
+			text += '  ';
+			text += 'Gusts to ' + WindGust;
+		}
+		break;
+	case CurrentConditionTypes.VisibilityCeiling:
+		text = 'Visib: ' + parseInt(Visibility).toString() + VisibilityUnit;
+		text += '  ';
+		text += 'Ceiling: ' + (Ceiling == '' ? 'Unlimited' : Ceiling + CeilingUnit);
+		break;
+	case CurrentConditionTypes.MonthPrecipitation:
+		if (PrecipitationTotal.toString() == '') {
+			_UpdateWeatherCurrentConditionCounterMs += 4000;
+			DrawCurrentConditions(WeatherParameters, context);
+			return;
+		}
+
+		// mjb 10/02/19 Begin
+		//text = WeatherMonthlyTotals.MonthName + " Precipitation: " + PrecipitationTotal.toString() + PrecipitationTotalUnit;
+
+		if (PrecipitationTotal.toString() == 'T') {
+			text = WeatherMonthlyTotals.MonthName + ' Precipitation: Trace';
+		} else {
+			text = WeatherMonthlyTotals.MonthName + ' Precipitation: ' + PrecipitationTotal.toString() + PrecipitationTotalUnit;
+		}
+
+		// mjb 10/02/19 End
+		break;
+	default:
+	}
+
+	// Draw the current condition.
+	DrawText(context, font, size, color, x, y, text, shadow);
+
+	//_UpdateWeatherCurrentConditionCounterMs += _UpdateWeatherUpdateMs;
+	//console.log(_UpdateWeatherUpdateMs);
 };
 

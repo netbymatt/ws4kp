@@ -1,6 +1,6 @@
 // base weather display class
 
-/* globals navigation, utils, draw, UNITS, luxon */
+/* globals navigation, utils, draw, UNITS, luxon, currentWeatherScroll */
 
 const STATUS = {
 	loading: Symbol('loading'),
@@ -150,6 +150,10 @@ class WeatherDisplay {
 		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
 		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'regionalForecast') OkToDrawNoaaImage = false;
+		if (this.elemId === 'progress') {
+			OkToDrawCurrentConditions = false;
+			OkToDrawNoaaImage = false;
+		}
 		if (this.elemId === 'radar') {
 			OkToDrawCurrentConditions = false;
 			OkToDrawCurrentDateTime = false;
@@ -171,8 +175,12 @@ class WeatherDisplay {
 		}
 		if (OkToDrawLogoImage) this.drawLogoImage();
 		if (OkToDrawNoaaImage) this.drawNoaaImage();
-		// TODO: fix current conditions scroll
-		// if (OkToDrawCurrentConditions) DrawCurrentConditions(WeatherParameters, this.context);
+		if (OkToDrawCurrentConditions) {
+			currentWeatherScroll.start(this.context);
+		} else {
+			// cause a reset if the progress screen is displayed
+			currentWeatherScroll.stop(this.elemId === 'progress');
+		}
 		// TODO: add custom scroll text
 		// if (OkToDrawCustomScrollText) DrawCustomScrollText(WeatherParameters, context);
 	}

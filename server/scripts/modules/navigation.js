@@ -1,7 +1,7 @@
 'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
 /* globals index, utils, _StationInfo, STATUS */
-/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress */
+/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress, currentWeatherScroll */
 
 document.addEventListener('DOMContentLoaded', () => {
 	navigation.init();
@@ -18,6 +18,9 @@ const navigation = (() => {
 	let currentUnits = UNITS.english;
 	let playing = false;
 	let progress;
+
+	// current conditions are made available from the display below
+	let currentWeather;
 
 	const init = async () => {
 		// nothing to do
@@ -94,8 +97,9 @@ const navigation = (() => {
 
 		// start loading canvases if necessary
 		if (displays.length === 0) {
+			currentWeather = new CurrentWeather(0,'currentWeather');
 			displays = [
-				new CurrentWeather(0,'currentWeather'),
+				currentWeather,
 				new LatestObservations(1, 'latestObservations'),
 				new TravelForecast(2, 'travelForecast', false),	// not active by default
 				new RegionalForecast(3, 'regionalForecast'),
@@ -107,6 +111,8 @@ const navigation = (() => {
 		}
 		// call for new data on each display
 		displays.forEach(display => display.getData(weatherParameters));
+		// pass the information to the bottom scroll
+		currentWeatherScroll.setStation(weatherParameters);
 
 		// GetMonthPrecipitation(this.weatherParameters);
 		// GetAirQuality3(this.weatherParameters);
@@ -256,6 +262,12 @@ const navigation = (() => {
 	// return the specificed display
 	const getDisplay = (index) => displays[index];
 
+	// get current conditions
+	const getCurrentWeather = () => {
+		if (!currentWeather) return false;
+		return currentWeather.getCurrentWeather();
+	};
+
 	return {
 		init,
 		message,
@@ -265,5 +277,6 @@ const navigation = (() => {
 		displayNavMessage,
 		msg,
 		getDisplay,
+		getCurrentWeather,
 	};
 })();

@@ -56,7 +56,6 @@ const utils = (() => {
 		const img = new Image();
 		img.scr = src;
 		cachedImages.push(src);
-		console.log(cachedImages);
 		return true;
 	};
 

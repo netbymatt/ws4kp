@@ -216,8 +216,6 @@ const index = (() => {
 
 		// Do not auto get the same city twice.
 		if (this.previousSuggestionValue === suggestion.value)  return;
-		this.previousSuggestionValue = suggestion.value;
-		PreviousSuggestion = suggestion;
 
 		if (overrides[suggestion.value]) {
 			doRedirectToGeometry(overrides[suggestion.value]);
