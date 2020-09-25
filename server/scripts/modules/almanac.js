@@ -28,8 +28,8 @@ class Almanac extends WeatherDisplay {
 
 		// get images for outlook
 		const imagePromises = [
-			utils.image.load('products/predictions/30day/off14_temp.gif'),
-			utils.image.load('products/predictions/30day/off14_prcp.gif'),
+			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_temp.gif', true),
+			utils.image.load('https://www.cpc.ncep.noaa.gov/products/predictions/30day/off14_prcp.gif', true),
 		];
 
 		// get sun/moon data

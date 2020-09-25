@@ -1,7 +1,7 @@
 'use strict';
 // radar utilities
 
-/* globals _Units, Units, SuperGif */
+/* globals SuperGif */
 // eslint-disable-next-line no-unused-vars
 const utils = (() => {
 	// ****************************** weather data ********************************
@@ -23,7 +23,7 @@ const utils = (() => {
 
 	// ****************************** load images *********************************
 	// load an image from a blob or url
-	const loadImg = (imgData) => {
+	const loadImg = (imgData, cors = false) => {
 		return new Promise(resolve => {
 			const img = new Image();
 			img.onload = (e) => {
@@ -32,7 +32,9 @@ const utils = (() => {
 			if (imgData instanceof Blob) {
 				img.src = window.URL.createObjectURL(imgData);
 			} else {
-				img.src = imgData;
+				let url = imgData;
+				if (cors) url = rewriteUrl(imgData);
+				img.src = url;
 			}
 		});
 	};
@@ -172,6 +174,14 @@ const utils = (() => {
 
 		return r.join('\n').replace(/\n /g, '\n');
 	};
+	// ********************************* cors ********************************************
+	// rewrite some urls for local server
+	const rewriteUrl = (url) => {
+		url = url.replace('https://api.weather.gov/', '');
+		url = url.replace('https://radar.weather.gov/', '');
+		url = url.replace('https://www.cpc.ncep.noaa.gov/', '');
+		return url;
+	};
 
 	// return an orderly object
 	return {
@@ -207,13 +217,16 @@ const utils = (() => {
 		string: {
 			wordWrap,
 		},
+		cors: {
+			rewriteUrl,
+		},
 	};
 })();
 
 // pass data through local server as CORS workaround
 $.ajaxCORS = function (e) {
 	// modify the URL
-	e.url = e.url.replace('https://api.weather.gov/', '');
+	e.url = utils.cors.rewriteUrl(e.url);
 
 	// call the ajax function
 	return $.ajax(e);

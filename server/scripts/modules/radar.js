@@ -53,12 +53,12 @@ class Radar extends WeatherDisplay {
 		if (weatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';
 		this.baseMap = await utils.image.load(src);
 
-		const baseUrl = 'Conus/RadarImg/';
+		const baseUrl = 'https://radar.weather.gov/Conus/RadarImg/';
 
 		let radarHtml;
 		try {
 			// get a list of available radars
-			radarHtml = await $.ajax({
+			radarHtml = await $.ajaxCORS({
 				type: 'GET',
 				url: baseUrl,
 				dataType: 'text',
