@@ -93,7 +93,7 @@ class CurrentWeather extends WeatherDisplay {
 			data.VisibilityUnit = ' mi.';
 			data.WindSpeed = utils.units.kphToMph(data.WindSpeed);
 			data.WindUnit = 'MPH';
-			data.Pressure = utils.units.pascalToInHg(data.Pressure);
+			data.Pressure = utils.units.pascalToInHg(data.Pressure).toFixed(2);
 			data.HeatIndex = utils.units.celsiusToFahrenheit(data.HeatIndex);
 			data.WindChill = utils.units.celsiusToFahrenheit(data.WindChill);
 			data.WindGust = utils.units.kphToMph(data.WindGust);

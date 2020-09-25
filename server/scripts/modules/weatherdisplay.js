@@ -98,7 +98,7 @@ class WeatherDisplay {
 
 		// create a canvas
 		const canvas = document.createElement('template');
-		canvas.innerHTML = `<canvas id='${elemId+'Canvas'}' width='${width}' height='${height}'/ style='display: none;'>`;
+		canvas.innerHTML = `<canvas id='${elemId+'Canvas'}' width='${width}' height='${height}' style='display: none;' />`;
 
 		// add to the page
 		const container = document.getElementById('container');

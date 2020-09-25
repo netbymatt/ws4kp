@@ -63,11 +63,6 @@ const index = (() => {
 
 		$('#btnGetGps').on('click', btnGetGps_click);
 
-		$(window).on('resize', OnFullScreen);
-		$(window).on('resize', window_resize);
-		$(document).on('mousemove', document_mousemove);
-		$(document).on('mousedown', document_mousemove);
-		divTwc.on('mousedown', document_mousemove);
 		$(document).on('keydown', document_keydown);
 		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
 		$('.ToggleFullScreen').on('click', btnFullScreen_click);
@@ -247,130 +242,12 @@ const index = (() => {
 	};
 
 	const FullScreenResize = () => {
-		const WindowWidth = $(window).width();
-		const WindowHeight = $(window).height();
-		const inFullScreen = InFullScreen();
-		let IFrameWidth;
-		let IFrameHeight;
-		let LeftWidth;
-		let RightWidth;
-		let TopHeight;
-		let BottomHeight;
-		let Offset;
-
-		if (inFullScreen) {
-			if ((WindowWidth / WindowHeight) >= 1.583333333333333) {
-				divTwcTop.hide();
-				divTwcBottom.hide();
-				divTwcLeft.show();
-				divTwcRight.show();
-
-				divTwcMiddle.attr('style', 'width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-
-				LeftWidth = ((WindowWidth - (WindowHeight * 1.33333333333333333333)) / 2);
-				if (LeftWidth < 60) {
-					LeftWidth = 60;
-				}
-				divTwcLeft.attr('style', 'width:' + LeftWidth + 'px; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-				divTwcLeft.css('visibility', 'visible');
-
-				RightWidth = ((WindowWidth - (WindowHeight * 1.33333333333333333333)) / 2);
-				if (RightWidth < 60) {
-					RightWidth = 60;
-				}
-				divTwcRight.attr('style', 'width:' + RightWidth + 'px; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-				divTwcRight.css('visibility', 'visible');
-
-				IFrameWidth = WindowWidth - LeftWidth - RightWidth;
-				$('#display').attr('style', 'width:' + IFrameWidth + 'px; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-
-			} else {
-				divTwcTop.show();
-				divTwcBottom.show();
-				divTwcLeft.hide();
-				divTwcRight.hide();
-				Offset = 0;
-
-				TopHeight = ((WindowHeight - ((WindowWidth - Offset) * 0.75)) / 2);
-				if (TopHeight < 0) {
-					TopHeight = 0;
-				}
-				divTwcTop.attr('style', 'width:100%; height:' + TopHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-
-				BottomHeight = ((WindowHeight - ((WindowWidth - Offset) * 0.75)) / 2);
-				if (BottomHeight < 30) {
-					BottomHeight = 30;
-				}
-				divTwcBottom.attr('style', 'width:100%; height:' + BottomHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-				divTwcBottom.css('visibility', 'visible');
-
-				IFrameHeight = WindowHeight - TopHeight - BottomHeight;
-				$('#display').attr('style', 'width:100%; height:' + IFrameHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-				divTwcMiddle.attr('style', 'width:100%; height:' + IFrameHeight + 'px; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-			}
-		}
-
-		if (!inFullScreen) {
-			divTwcTop.hide();
-			divTwcBottom.hide();
-			divTwcLeft.hide();
-			divTwcRight.hide();
-
-			divTwc.attr('style', '');
-			divTwcMiddle.attr('style', '');
-
-			$(window).off('resize', FullScreenResize);
-		}
-
-
-		if (inFullScreen) {
-			$('body').css('overflow', 'hidden');
-			$('.ToggleFullScreen').val('Exit Full Screen');
-
-			if (!GetFullScreenElement()) {
-				EnterFullScreen();
-			}
-		} else {
-			$('body').css('overflow', '');
-			$('.ToggleFullScreen').val('Full Screen');
-		}
-
 		divTwcNavContainer.show();
-	};
-
-	const _lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-	const _unlockOrientation = screen.unlockOrientation || screen.mozUnlockOrientation || screen.msUnlockOrientation || (screen.orientation && screen.orientation.unlock);
-
-	const OnFullScreen = () => {
-		if (InFullScreen()) {
-			divTwc.attr('style', 'position:fixed; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;');
-			FullScreenResize();
-
-			$(window).on('resize', FullScreenResize);
-			//FullScreenResize();
-
-			if (_lockOrientation) try { _lockOrientation('landscape-primary'); } catch (ex) { console.log('Unable to lock screen orientation.'); }
-		} else {
-			divTwc.attr('style', '');
-			divTwcMiddle.attr('style', '');
-
-			$(window).off('resize', FullScreenResize);
-			FullScreenResize();
-
-			if (_unlockOrientation) try { _unlockOrientation(); } catch (ex) { console.log('Unable to unlock screen orientation.'); }
-		}
-	};
-
-	const InFullScreen = () => ((_FullScreenOverride) || (GetFullScreenElement()) || (window.innerHeight === screen.height) || (window.innerHeight === (screen.height - 1)));
-
-	const GetFullScreenElement = () => {
-		if (_FullScreenOverride) return document.body;
-		return (document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 	};
 
 	const btnFullScreen_click = () => {
 
-		if (!InFullScreen()) {
+		if (!document.fullScreenElement) {
 			EnterFullScreen();
 		} else {
 			ExitFullscreen();
@@ -388,7 +265,7 @@ const index = (() => {
 	};
 
 	const EnterFullScreen = () => {
-		const element = document.body;
+		const element = document.getElementById('divTwc');
 
 		// Supports most browsers and their versions.
 		const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
@@ -457,9 +334,6 @@ const index = (() => {
 
 
 		const display = $('#display');
-
-		display.on('mousemove', document_mousemove);
-		display.on('mousedown', document_mousemove);
 		display.on('keydown', document_keydown);
 
 		const SwipeCallBack = (event, direction) => {
@@ -522,19 +396,6 @@ const index = (() => {
 		return false;
 	};
 
-	const window_resize = () => {
-		const $window = $(window);
-
-		if ($window.height() === _WindowHeight || $window.width() === _WindowWidth) return;
-
-		_WindowHeight = $window.height();
-		_WindowWidth = $window.width();
-
-		postMessage('navButton', 'reset');
-
-		UpdateFullScreenNavigate();
-	};
-
 	let _NavigateFadeIntervalId = null;
 
 	const UpdateFullScreenNavigate = () => {
@@ -551,7 +412,7 @@ const index = (() => {
 		}
 
 		_NavigateFadeIntervalId = window.setTimeout(() => {
-			if (InFullScreen()) {
+			if (document.fullScreenElement) {
 				$('body').addClass('HideCursor');
 
 				divTwcLeft.fadeOut2();
@@ -562,16 +423,11 @@ const index = (() => {
 		}, 2000);
 	};
 
-	const document_mousemove = (e) => {
-		if (InFullScreen() && (e.originalEvent.movementX === 0 && e.originalEvent.movementY === 0 && e.originalEvent.buttons === 0)) return;
-		UpdateFullScreenNavigate();
-	};
-
 	const document_keydown = (e) => {
 
 		const code = (e.keyCode || e.which);
 
-		if (InFullScreen() || document.activeElement === document.body) {
+		if (document.fullScreenElement || document.activeElement === document.body) {
 			switch (code) {
 			case 32: // Space
 				btnNavigatePlay_click();

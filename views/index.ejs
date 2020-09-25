@@ -16,7 +16,7 @@
     <meta name="author" content="Matt Walsh" />
     <meta name="application-name" content="WeatherStar 4000+" />
 
-    <meta name="viewport" content="width=660,user-scalable=no" />
+    <meta name="viewport" content="width=500,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="manifest.json" />
@@ -132,8 +132,6 @@
                 <a id="aRefreshBottom" href="#" class="NavigateRefresh"><img src="images/nav/ic_refresh_white_24dp_1x.png" title="Refresh" /></a>
             </div>
             <div id="divTwcBottomRight">
-                <a id="aVolumeBottom" href="#" class="ToggleVolume"><img src="images/nav/ic_volume_off_white_24dp_1x.png" title="Mute" /></a>
-                <a id="aNarrationBottom" href="#" class="ToggleNarration"><img src="images/nav/ic_no_hearing_white_24dp_1x.png" title="Turn on Narration" /></a>
                 <a id="aFullScreenBottom" href="#" class="ToggleFullScreen"><img src="images/nav/ic_fullscreen_exit_white_24dp_1x.png" title="Exit Fullscreen" /></a>
             </div>
         </div>
@@ -173,30 +171,16 @@
         Zone Id: <span id="spanZoneId"></span><br />
     </div>
 
-    <br />
-
     <div id="divRefresh">
         Last Update: <span id="spanLastRefresh">(None)</span><br />
         <input id="chkAutoRefresh" name="chkAutoRefresh" type="checkbox" /><label id="lblRefreshCountDown" for="chkAutoRefresh">Auto Refresh: <span id="spanRefreshCountDown">--:--</span></label>
     </div>
-
-    <br />
 
     <div id="divUnits">
         Units:
         <input id="radEnglish" name="radUnits" type="radio" value="ENGLISH" /><label for="radEnglish">English</label>
         <input id="radMetric" name="radUnits" type="radio" value="METRIC" /><label for="radMetric">Metric</label>
     </div>
-
-    <br />
-
-    <div id="divScrollText">
-        <form id="frmScrollText">
-            <input id="chkScrollText" name="chkScrollText" type="checkbox" /><label id="lblScrollText" for="chkScrollText">Scroll Text: </label><input id="txtScrollText" autocomplete="off" value="" /><input id="btnScrollText" type="submit" value="Set" />
-        </form>
-    </div>
-
-    <br />
 
 </body>
 </html>
