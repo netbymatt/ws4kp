@@ -158,7 +158,6 @@ class ExtendedForecast extends WeatherDisplay {
 			// draw the icon
 			this.gifs.push(await utils.image.superGifAsync({
 				src: Day.icon,
-				loop_delay: 100,
 				auto_play: true,
 				canvas: this.canvas,
 				x: 70 + Index*195,

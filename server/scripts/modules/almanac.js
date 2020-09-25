@@ -1,6 +1,6 @@
 // display sun and moon data
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation, SunCalc, luxon */
+/* globals WeatherDisplay, utils, STATUS, draw, SunCalc, luxon */
 
 // eslint-disable-next-line no-unused-vars
 class Almanac extends WeatherDisplay {
@@ -17,6 +17,8 @@ class Almanac extends WeatherDisplay {
 			utils.image.load('images/2/New-Moon.gif'),
 			utils.image.load('images/2/First-Quarter.gif'),
 		];
+
+		this.timing.totalScreens = 2;
 
 		this.backgroundImage = utils.image.load('images/BackGround3_1.png');
 	}

@@ -128,7 +128,6 @@ class TravelForecast extends WeatherDisplay {
 
 				this.longCanvasGifs.push(await utils.image.superGifAsync({
 					src: city.icon,
-					loop_delay: 100,
 					auto_play: true,
 					canvas: this.longCanvas,
 					x: 330,

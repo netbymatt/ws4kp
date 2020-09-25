@@ -169,7 +169,6 @@ class CurrentWeather extends WeatherDisplay {
 		// get main icon
 		this.gifs.push(await utils.image.superGifAsync({
 			src: Icon,
-			loop_delay: 100,
 			auto_play: true,
 			canvas: this.canvas,
 			x: 140,

@@ -369,7 +369,6 @@ class RegionalForecast extends WeatherDisplay {
 				this.gifs.push(await utils.image.superGifAsync({
 					src: icon,
 					max_width: 42,
-					loop_delay: 100,
 					auto_play: true,
 					canvas: this.canvas,
 					x: period.x,
