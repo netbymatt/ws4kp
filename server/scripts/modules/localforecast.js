@@ -15,7 +15,9 @@ class LocalForecast extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
+
 
 		// get raw data
 		const rawData = await this.getRawData(weatherParameters);

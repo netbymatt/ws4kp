@@ -4,6 +4,9 @@
 
 // eslint-disable-next-line no-unused-vars
 const currentWeatherScroll = (() => {
+	// constants
+	const degree = String.fromCharCode(176);
+
 	// local variables
 	let context;	// currently active context
 	let blankDrawArea;	// original state of context
@@ -28,7 +31,7 @@ const currentWeatherScroll = (() => {
 
 		// set up the interval if needed
 		if (!interval) {
-			interval = setInterval(incrementInterval, 700);
+			interval = setInterval(incrementInterval, 4000);
 		}
 
 		// draw the data
@@ -50,7 +53,7 @@ const currentWeatherScroll = (() => {
 
 	// increment interval, roll over
 	const incrementInterval = () => {
-		screenIndex = (screenIndex+1)%2;
+		screenIndex = (screenIndex+1)%(screens.length);
 		// draw new text
 		drawScreen();
 	};
@@ -66,16 +69,48 @@ const currentWeatherScroll = (() => {
 		// clean up any old text
 		context.putImageData(blankDrawArea, 0, 405);
 
-		switch (screenIndex) {
-		case 0:
-		default:
-			drawCondition(`Conditions at ${station.name.substr(0,20)}`);
-			break;
-		case 1:
-			drawCondition(`Page 2`);
-			break;
-		}
+		drawCondition(screens[screenIndex](data));
 	};
+
+	// the "screens" are stored in an array for easy addition and removal
+	const screens = [
+		// station name
+		() => `Conditions at ${station.name.substr(0,20)}`,
+
+		// temperature
+		(data) => {
+			let text = `Temp: ${data.Temperature}${degree} ${data.TemperatureUnit}`;
+			if (data.HeatIndex !== data.Temperature) {
+				text += `    Heat Index: ${data.HeatIndex}${degree} ${data.TemperatureUnit}`;
+			} else if (data.WindChill !== '' && data.WindChill < data.Temperature) {
+				text += `    Wind Chill: ${data.WindChill}${degree} ${data.TemperatureUnit}`;
+			}
+			return text;
+		},
+
+		// humidity
+		(data) => `Humidity: ${data.Humidity}${degree} ${data.TemperatureUnit}  Dewpoint: ${data.DewPoint}${degree} ${data.TemperatureUnit}`,
+
+		// barometric pressure
+		(data) => `Barometric Pressure: ${data.Pressure} ${data.PressureDirection}`,
+
+		// wind
+		(data) => {
+			let text = '';
+			if (data.WindSpeed > 0) {
+				text = `Wind: ${data.WindDirection} ${data.WindSpeed} ${data.WindUnit}`;
+			} else {
+				text = 'Wind: Calm';
+			}
+			if (data.WindGust > 0) {
+				text += `  Gusts to ${data.WindGust}`;
+			}
+			return text;
+		},
+
+		// visibility
+		(data) => `Visib: ${data.Visibility} ${data.VisibilityUnit}  Ceiling: ${data.Ceiling===0?'Unlimited':`${data.Ceiling} ${data.CeilingUnit}`}`,
+	];
 
 	// internal draw function with preset parameters
 	const drawCondition = (text) => {

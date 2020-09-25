@@ -16,7 +16,9 @@ class ExtendedForecast extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
+
 
 		// request us or si units
 		let units = 'us';

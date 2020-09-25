@@ -24,7 +24,7 @@ class WeatherDisplay {
 		// default navigation timing
 		this.timing = {
 			totalScreens: 1,
-			baseDelay: 5000, // 5 seconds
+			baseDelay: 9000, // 5 seconds
 			delay: 1, // 1*1second = 1 second total display time
 		};
 		this.navBaseCount = 0;
@@ -106,11 +106,14 @@ class WeatherDisplay {
 	}
 
 	// get necessary data for this display
-	getData() {
+	getData(weatherParameters) {
 		// clear current data
 		this.data = undefined;
-		// set status
 
+		// store weatherParameters locally in case we need them later
+		if (weatherParameters) this.weatherParameters = weatherParameters;
+
+		// set status
 		if (this.enabled) {
 			this.setStatus(STATUS.loading);
 		} else {

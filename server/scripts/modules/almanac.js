@@ -24,7 +24,8 @@ class Almanac extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
 
 		// get images for outlook
 		const imagePromises = [

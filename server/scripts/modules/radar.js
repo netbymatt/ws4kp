@@ -37,7 +37,8 @@ class Radar extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
 
 		// ALASKA ISN'T SUPPORTED!
 		if (weatherParameters.state === 'AK') {

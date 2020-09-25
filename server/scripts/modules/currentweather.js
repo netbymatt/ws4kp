@@ -10,7 +10,9 @@ class CurrentWeather extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
+
 		// Load the observations
 		let observations, station;
 		try {
@@ -58,6 +60,7 @@ class CurrentWeather extends WeatherDisplay {
 		// values from api are provided in metric
 		data.observations = observations;
 		data.Temperature = Math.round(observations.temperature.value);
+		data.TemperatureUnit = 'C';
 		data.DewPoint = Math.round(observations.dewpoint.value);
 		data.Ceiling = Math.round(observations.cloudLayers[0].base.value);
 		data.CeilingUnit = 'm.';
@@ -69,6 +72,7 @@ class CurrentWeather extends WeatherDisplay {
 		data.HeatIndex = Math.round(observations.heatIndex.value);
 		data.WindChill = Math.round(observations.windChill.value);
 		data.WindGust = Math.round(observations.windGust.value);
+		data.WindUnit = 'KPH';
 		data.Humidity = Math.round(observations.relativeHumidity.value);
 		data.Icon = icons.getWeatherIconFromIconLink(observations.icon);
 		data.PressureDirection = '';
@@ -81,12 +85,14 @@ class CurrentWeather extends WeatherDisplay {
 
 		if (navigation.units() === UNITS.english) {
 			data.Temperature = utils.units.celsiusToFahrenheit(data.Temperature);
+			data.TemperatureUnit = 'F';
 			data.DewPoint = utils.units.celsiusToFahrenheit(data.DewPoint);
 			data.Ceiling = Math.round(utils.units.metersToFeet(data.Ceiling)/100)*100;
 			data.CeilingUnit = 'ft.';
 			data.Visibility = utils.units.kilometersToMiles(observations.visibility.value/1000);
 			data.VisibilityUnit = ' mi.';
 			data.WindSpeed = utils.units.kphToMph(data.WindSpeed);
+			data.WindUnit = 'MPH';
 			data.Pressure = utils.units.pascalToInHg(data.Pressure);
 			data.HeatIndex = utils.units.celsiusToFahrenheit(data.HeatIndex);
 			data.WindChill = utils.units.celsiusToFahrenheit(data.WindChill);

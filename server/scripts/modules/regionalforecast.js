@@ -16,7 +16,9 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		super.getData();
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
+
 		// pre-load the base map (returns promise)
 		let src = 'images/Basemap2.png';
 		if (weatherParameters.State === 'HI') {
