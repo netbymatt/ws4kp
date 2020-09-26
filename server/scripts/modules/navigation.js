@@ -90,7 +90,8 @@ const navigation = (() => {
 		// update the main process for display purposes
 		postMessage('weatherParameters', weatherParameters);
 
-		// draw the progress canvas
+		// draw the progress canvas and hide others
+		hideAllCanvases();
 		progress = new Progress(-1,'progress');
 		await progress.drawCanvas();
 		progress.showCanvas();

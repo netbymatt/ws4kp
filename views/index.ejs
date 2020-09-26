@@ -16,7 +16,7 @@
     <meta name="author" content="Matt Walsh" />
     <meta name="application-name" content="WeatherStar 4000+" />
 
-    <meta name="viewport" content="width=500,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="manifest.json" />
@@ -77,50 +77,13 @@
 
     <img id="imgPause1x" src="images/nav/ic_pause_white_24dp_1x.png" />
     <img id="imgPause2x" src="images/nav/ic_pause_white_24dp_2x.png" />
+	<div id="version" style="display:none"><%- version %> </div>
 
     <div id="divTwc">
-        <div id="divTwcTop"></div>
-        <div id="divTwcMiddle">
-            <div id="divTwcLeft">
-                <div>
-                    <div>
-                        <a id="aMenuLeft" href="#" class="NavigateMenu"><img src="images/nav/ic_menu_white_24dp_2x.png" title="Menu" /></a>
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        <a id="aPreviousLeft" href="#" class="NavigatePrevious"><img src="images/nav/ic_skip_previous_white_24dp_2x.png" title="Previous" /></a>
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        <a id="aNextLeft" href="#" class="NavigateNext"><img src="images/nav/ic_skip_next_white_24dp_2x.png" title="Next" /></a>
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        <a id="aPlayLeft" href="#" class="NavigatePlay"><img src="images/nav/ic_play_arrow_white_24dp_2x.png" title="Play" /></a>
-                    </div>
-                </div>
-            </div>
-            <div id='display'>
-				<div id="version" style="display:none"><%- version %> </div>
-				<div id="container">
-				</div>
+		<div id='display'>
+			<div id="container">
 			</div>
-            <div id="divTwcRight">
-                <div>
-                    <div>
-                        <a id="aRefreshRight" href="#" class="NavigateRefresh"><img src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" /></a>
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        <a id="aFullScreenRight" href="#" class="ToggleFullScreen"><img src="images/nav/ic_fullscreen_exit_white_24dp_2x.png" title="Exit Fullscreen" /></a>
-                    </div>
-                </div>
-            </div>
-        </div>
+		</div>
         <div id="divTwcBottom">
             <div id="divTwcBottomLeft">
                 <a id="aMenuBottom" href="#" class="NavigateMenu"><img src="images/nav/ic_menu_white_24dp_1x.png" title="Menu" /></a>
@@ -133,22 +96,6 @@
             </div>
             <div id="divTwcBottomRight">
                 <a id="aFullScreenBottom" href="#" class="ToggleFullScreen"><img src="images/nav/ic_fullscreen_exit_white_24dp_1x.png" title="Exit Fullscreen" /></a>
-            </div>
-        </div>
-    </div>
-    <div id="divTwcNavContainer">
-        <div id="divTwcNav">
-            <div id="divTwcNavLeft">
-                <a id="aMenu" href="#" class="NavigateMenu"><img src="images/nav/ic_menu_white_24dp_1x.png" title="Menu" /></a>
-                <a id="aPrevious" href="#" class="NavigatePrevious"><img src="images/nav/ic_skip_previous_white_24dp_1x.png" title="Previous" /></a>
-                <a id="aNext" href="#" class="NavigateNext"><img src="images/nav/ic_skip_next_white_24dp_1x.png" title="Next" /></a>
-                <a id="aPlay" href="#" class="NavigatePlay"><img src="images/nav/ic_play_arrow_white_24dp_1x.png" title="Play" /></a>
-            </div>
-            <div id="divTwcNavMiddle">
-                <a id="aRefresh" href="#" class="NavigateRefresh"><img src="images/nav/ic_refresh_white_24dp_1x.png" title="Refresh" /></a>
-            </div>
-            <div id="divTwcNavRight">
-                <a id="aFullScreen" href="#" class="ToggleFullScreen"><img src="images/nav/ic_fullscreen_white_24dp_1x.png" title="Fullscreen" /></a>
             </div>
         </div>
     </div>

@@ -96,7 +96,7 @@ class RegionalForecast extends WeatherDisplay {
 				};
 
 				// preload the icon
-				utils.image.preload(icons.getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime))
+				utils.image.preload(icons.getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime));
 
 				// return a pared-down forecast
 				// 0th object is the current conditions
@@ -333,7 +333,7 @@ class RegionalForecast extends WeatherDisplay {
 
 	// to fit on the map, remove anything after punctuation and then limit to 15 characters
 	formatCity(city) {
-		return city.match(/[^-;/\\,]*/)[0].substr(0,12)
+		return city.match(/[^-;/\\,]*/)[0].substr(0,12);
 	}
 
 	async drawCanvas() {

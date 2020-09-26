@@ -11,15 +11,7 @@ const index = (() => {
 	const _AutoRefreshTotalIntervalMs = 600000; // 10 min.
 	const _NoSleep = new NoSleep();
 
-	let divTwc;
-	let divTwcTop;
-	let divTwcMiddle;
 	let divTwcBottom;
-	let divTwcLeft;
-	let divTwcRight;
-	let divTwcNavContainer;
-	let txtScrollText;
-
 
 	let _AutoSelectQuery = false;
 
@@ -29,28 +21,8 @@ const index = (() => {
 
 	let _FullScreenOverride = false;
 
-	let _WindowHeight = 0;
-	let _WindowWidth = 0;
-
 	const init = () => {
-		_WindowHeight = $(window).height();
-		_WindowWidth = $(window).width();
-
-		divTwc = $('#divTwc');
-		divTwcTop = $('#divTwcTop');
-		divTwcMiddle = $('#divTwcMiddle');
 		divTwcBottom = $('#divTwcBottom');
-		divTwcLeft = $('#divTwcLeft');
-		divTwcRight = $('#divTwcRight');
-		divTwcNavContainer = $('#divTwcNavContainer');
-		txtScrollText = $('#txtScrollText');
-
-		$('#frmScrollText').on('submit', frmScrollText_submit);
-		txtScrollText.on('focus', (e) => {
-			$(e.target).select();
-		});
-		$('#chkScrollText').on('change', chkScrollText_change);
-
 		$('#txtAddress').on('focus', (e) => {
 			$(e.target).select();
 		}).focus();
@@ -63,10 +35,13 @@ const index = (() => {
 
 		$('#btnGetGps').on('click', btnGetGps_click);
 
+		$('#divTwc').on('click', (e) => {
+			if (document.fullscreenElement) UpdateFullScreenNavigate(e);
+		});
+
 		$(document).on('keydown', document_keydown);
 		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
 		$('.ToggleFullScreen').on('click', btnFullScreen_click);
-		FullScreenResize();
 
 		const categories = [
 			'Land Features',
@@ -133,17 +108,6 @@ const index = (() => {
 		const TwcPlay = localStorage.getItem('TwcPlay');
 		if (TwcPlay === null || TwcPlay === 'true') postMessage('navButton', 'play');
 
-		const TwcScrollText = localStorage.getItem('TwcScrollText');
-		if (TwcScrollText) {
-			txtScrollText.val(TwcScrollText);
-		}
-		const TwcScrollTextChecked = localStorage.getItem('TwcScrollTextChecked');
-		if (TwcScrollTextChecked && TwcScrollTextChecked === 'true') {
-			$('#chkScrollText').prop('checked', 'checked');
-		} else {
-			$('#chkScrollText').prop('checked', '');
-		}
-
 		$('#btnClearQuery').on('click', () => {
 			$('#spanCity').text('');
 			$('#spanState').text('');
@@ -151,8 +115,6 @@ const index = (() => {
 			$('#spanRadarId').text('');
 			$('#spanZoneId').text('');
 
-			$('#chkScrollText').prop('checked', '');
-			txtScrollText.val('');
 			localStorage.removeItem('TwcScrollText');
 			localStorage.removeItem('TwcScrollTextChecked');
 
@@ -241,13 +203,9 @@ const index = (() => {
 		localStorage.setItem('TwcQuery', $('#txtAddress').val());
 	};
 
-	const FullScreenResize = () => {
-		divTwcNavContainer.show();
-	};
-
 	const btnFullScreen_click = () => {
 
-		if (!document.fullScreenElement) {
+		if (!document.fullscreenElement) {
 			EnterFullScreen();
 		} else {
 			ExitFullscreen();
@@ -324,14 +282,7 @@ const index = (() => {
 
 		postMessage('latLon', latLon);
 
-		FullScreenResize();
-
-		if ($('#chkScrollText').is(':checked')) {
-			postMessage('assignScrollText', txtScrollText.val());
-		}
-
 		postMessage('units', $('input[type=\'radio\'][name=\'radUnits\']:checked').val());
-
 
 		const display = $('#display');
 		display.on('keydown', document_keydown);
@@ -400,23 +351,15 @@ const index = (() => {
 
 	const UpdateFullScreenNavigate = () => {
 		$(document.activeElement).blur();
-
-		$('body').removeClass('HideCursor');
-		divTwcLeft.fadeIn2();
-		divTwcRight.fadeIn2();
 		divTwcBottom.fadeIn2();
 
 		if (_NavigateFadeIntervalId) {
-			window.clearTimeout(_NavigateFadeIntervalId);
+			clearTimeout(_NavigateFadeIntervalId);
 			_NavigateFadeIntervalId = null;
 		}
 
-		_NavigateFadeIntervalId = window.setTimeout(() => {
-			if (document.fullScreenElement) {
-				$('body').addClass('HideCursor');
-
-				divTwcLeft.fadeOut2();
-				divTwcRight.fadeOut2();
+		_NavigateFadeIntervalId = setTimeout(() => {
+			if (document.fullscreenElement) {
 				divTwcBottom.fadeOut2();
 			}
 
@@ -427,7 +370,7 @@ const index = (() => {
 
 		const code = (e.keyCode || e.which);
 
-		if (document.fullScreenElement || document.activeElement === document.body) {
+		if (document.fullscreenElement || document.activeElement === document.body) {
 			switch (code) {
 			case 32: // Space
 				btnNavigatePlay_click();
@@ -643,27 +586,6 @@ const index = (() => {
 		$('#spanStationId').text(weatherParameters.stationId);
 		$('#spanRadarId').text(weatherParameters.radarId);
 		$('#spanZoneId').text(weatherParameters.zoneId);
-	};
-
-	const frmScrollText_submit = () => {
-		chkScrollText_change();
-		return false;
-	};
-
-	const chkScrollText_change = (e) => {
-		const chkScrollText = $(e.target);
-		txtScrollText.blur();
-
-		let ScrollText = txtScrollText.val();
-		localStorage.setItem('TwcScrollText', ScrollText);
-
-		const ScrollTextChecked = chkScrollText.is(':checked');
-		localStorage.setItem('TwcScrollTextChecked', ScrollTextChecked);
-
-		if (chkScrollText.is(':checked') === false) {
-			ScrollText = '';
-		}
-		postMessage('assignScrollText', ScrollText);
 	};
 
 	// track state of nosleep locally to avoid a null case error when nosleep.disable is called without first calling .enable
