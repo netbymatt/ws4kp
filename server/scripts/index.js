@@ -99,7 +99,7 @@ const index = (() => {
 		if (TwcQuery) {
 			_AutoSelectQuery = true;
 			const txtAddress = document.getElementById('txtAddress');
-			txtAddress.val(TwcQuery);
+			txtAddress.value = TwcQuery;
 			txtAddress.blur();
 			txtAddress.focus();
 		}

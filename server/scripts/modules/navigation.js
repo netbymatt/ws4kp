@@ -57,12 +57,12 @@ const navigation = (() => {
 		const point = await utils.weather.getPoint(latLon.lat, latLon.lon);
 
 		// get stations
-		const stations = await $.ajax({
+		const stationsResponse = await fetch(point.properties.observationStations, {
+			method: 'GET',
+			mode: 'cors',
 			type: 'GET',
-			url: point.properties.observationStations,
-			dataType: 'json',
-			crossDomain: true,
 		});
+		const stations = await stationsResponse.json();
 
 		const StationId = stations.features[0].properties.stationIdentifier;
 
