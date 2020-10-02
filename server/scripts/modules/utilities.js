@@ -182,6 +182,18 @@ const utils = (() => {
 		return url;
 	};
 
+	// ********************************* fetch ********************************************
+	const json = async (url) => {
+		const response = await fetch(url, {
+			method: 'GET',
+			mode: 'cors',
+			type: 'GET',
+		});
+
+		if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${url}`);
+		return await response.json();
+	};
+
 	// return an orderly object
 	return {
 		image: {
@@ -219,6 +231,9 @@ const utils = (() => {
 		cors: {
 			rewriteUrl,
 		},
+		fetch: {
+			json,
+		}
 	};
 })();
 

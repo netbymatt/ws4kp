@@ -57,12 +57,7 @@ const navigation = (() => {
 		const point = await utils.weather.getPoint(latLon.lat, latLon.lon);
 
 		// get stations
-		const stationsResponse = await fetch(point.properties.observationStations, {
-			method: 'GET',
-			mode: 'cors',
-			type: 'GET',
-		});
-		const stations = await stationsResponse.json();
+		const stations = utils.fetch.json(point.properties.observationStations);
 
 		const StationId = stations.features[0].properties.stationIdentifier;
 
