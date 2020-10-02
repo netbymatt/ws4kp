@@ -24,7 +24,7 @@
 
 	<% if (production) { %>
 		<link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-		<script type="text/javascript" src="resources/data.min.js"></script>
+		<script type="text/javascript" src="resources/data.min.js?_=<%=production%>"></script>
 		<script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>	
 	<% } else { %>
 		<link rel="stylesheet" type="text/css" href="styles/index.css" />

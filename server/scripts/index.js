@@ -180,7 +180,7 @@ const index = (() => {
 			doRedirectToGeometry(overrides[suggestion.value]);
 		} else {
 			request = $.ajax({
-				url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
+				url: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
 				data: {
 					text: suggestion.value,
 					magicKey: suggestion.data,
