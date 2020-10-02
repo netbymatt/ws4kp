@@ -57,7 +57,7 @@ const navigation = (() => {
 		const point = await utils.weather.getPoint(latLon.lat, latLon.lon);
 
 		// get stations
-		const stations = utils.fetch.json(point.properties.observationStations);
+		const stations = await utils.fetch.json(point.properties.observationStations);
 
 		const StationId = stations.features[0].properties.stationIdentifier;
 
@@ -67,7 +67,6 @@ const navigation = (() => {
 			city = _StationInfo[StationId].city;
 			city = city.split('/')[0];
 		}
-
 
 		// populate the weather parameters
 		weatherParameters.latitude = latLon.lat;

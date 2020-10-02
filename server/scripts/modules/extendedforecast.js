@@ -25,14 +25,10 @@ class ExtendedForecast extends WeatherDisplay {
 		if (navigation.units() === UNITS.metric) units = 'si';
 		let forecast;
 		try {
-			forecast = await $.ajax({
-				type: 'GET',
-				url: weatherParameters.forecast,
+			forecast = await utils.fetch.json(weatherParameters.forecast,{
 				data: {
 					units,
 				},
-				dataType: 'json',
-				crossDomain: true,
 			});
 		} catch (e) {
 			console.error('Unable to get extended forecast');

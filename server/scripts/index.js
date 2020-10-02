@@ -1,5 +1,5 @@
 'use strict';
-/* globals NoSleep, states, navigation, UNITS */
+/* globals NoSleep, states, navigation, UNITS, utils */
 document.addEventListener('DOMContentLoaded', () => {
 	index.init();
 });
@@ -170,35 +170,27 @@ const index = (() => {
 		postMessage('units', Units);
 	};
 
-	const autocompleteOnSelect = (suggestion) => {
-		let request;
-
+	const autocompleteOnSelect = async (suggestion) => {
 		// Do not auto get the same city twice.
 		if (this.previousSuggestionValue === suggestion.value)  return;
 
 		if (overrides[suggestion.value]) {
 			doRedirectToGeometry(overrides[suggestion.value]);
 		} else {
-			request = $.ajax({
-<<<<<<< Updated upstream
-				url: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
-=======
-				url: location.protocol + 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
->>>>>>> Stashed changes
+			const data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 				data: {
 					text: suggestion.value,
 					magicKey: suggestion.data,
 					f: 'json',
 				},
 			});
-			request.done((data) => {
-				const loc = data.locations[0];
-				if (loc) {
-					doRedirectToGeometry(loc.feature.geometry);
-				} else {
-					alert('An unexpected error occurred. Please try a different search string.');
-				}
-			});
+
+			const loc = data.locations[0];
+			if (loc) {
+				doRedirectToGeometry(loc.feature.geometry);
+			} else {
+				alert('An unexpected error occurred. Please try a different search string.');
+			}
 		}
 	};
 
@@ -501,8 +493,7 @@ const index = (() => {
 
 		let data;
 		try {
-			data = await $.ajax({
-				url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode',
+			data = await utils.fetch.json(location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
 				data: {
 					location: longitude + ',' + latitude,
 					distance: 1000, // Find location up to 1 KM.

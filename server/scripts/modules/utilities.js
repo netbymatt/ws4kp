@@ -7,16 +7,10 @@ const utils = (() => {
 	// ****************************** weather data ********************************
 	const getPoint = async (lat, lon) => {
 		try {
-			return await $.ajax({
-				type: 'GET',
-				url: `https://api.weather.gov/points/${lat},${lon}`,
-				dataType: 'json',
-				crossDomain: true,
-			});
+			return await json(`https://api.weather.gov/points/${lat},${lon}`);
 		} catch (e) {
-			console.error('Unable to get point');
-			console.error(lat,lon);
-			console.error(e.status, e.responseJSON);
+			console.log(`Unable to get point ${lat}, ${lon}`);
+			console.error(e);
 			return false;
 		}
 	};
@@ -176,22 +170,56 @@ const utils = (() => {
 	// ********************************* cors ********************************************
 	// rewrite some urls for local server
 	const rewriteUrl = (url) => {
-		url = url.replace('https://api.weather.gov/', '');
-		url = url.replace('https://radar.weather.gov/', '');
-		url = url.replace('https://www.cpc.ncep.noaa.gov/', '');
+		url = url.replace('https://api.weather.gov/', window.location.href);
+		url = url.replace('https://radar.weather.gov/', window.location.href);
+		url = url.replace('https://www.cpc.ncep.noaa.gov/', window.location.href);
 		return url;
 	};
 
 	// ********************************* fetch ********************************************
-	const json = async (url) => {
-		const response = await fetch(url, {
+	const json = (url, params) => fetchAsync(url, 'json', params);
+	const text = (url, params) => fetchAsync(url, 'text', params);
+	const raw = (url, params) => fetchAsync(url, '', params);
+	const blob = (url, params) => fetchAsync(url, 'blob', params);
+
+	const fetchAsync = async (_url, responseType, _params={}) => {
+		// combine default and provided parametersutils
+		const params = Object.assign({}, {
 			method: 'GET',
 			mode: 'cors',
 			type: 'GET',
-		});
+		},
+		_params);
+		// build a url, including the rewrite for cors if necessary
+		let corsUrl = _url;
+		if (params.cors === true) corsUrl = rewriteUrl(_url);
+		const url = new URL(corsUrl);
+		// add parameters if necessary
+		if (params.data) {
+			Object.keys(params.data).forEach((key) => {
+				// get the value
+				const value = params.data[key];
+				// add to the url
+				url.searchParams.append(key, value);
+			});
+		}
 
-		if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${url}`);
-		return await response.json();
+		// make the request
+		const response = await fetch(url, params);
+
+		// check for ok response
+		if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${response.url}`);
+		// return the requested response
+		switch (responseType) {
+		case 'json':
+			return await response.json();
+		case 'text':
+			return await response.text();
+		case 'blob':
+			return await response.blob();
+		default:
+			return response;
+		}
 	};
 
 	// return an orderly object
@@ -233,15 +261,9 @@ const utils = (() => {
 		},
 		fetch: {
 			json,
-		}
+			text,
+			raw,
+			blob,
+		},
 	};
 })();
-
-// pass data through local server as CORS workaround
-$.ajaxCORS = function (e) {
-	// modify the URL
-	e.url = utils.cors.rewriteUrl(e.url);
-
-	// call the ajax function
-	return $.ajax(e);
-};

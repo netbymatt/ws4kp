@@ -74,11 +74,7 @@ class RegionalForecast extends WeatherDisplay {
 				// start off the observation task
 				const observationPromise = this.getRegionalObservation(point, city);
 
-				const forecast = await $.ajax({
-					url: point.properties.forecast,
-					dataType: 'json',
-					crossDomain: true,
-				});
+				const forecast = await utils.fetch.json(point.properties.forecast);
 
 				// get XY on map for city
 				const cityXY = this.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
@@ -109,8 +105,8 @@ class RegionalForecast extends WeatherDisplay {
 					this.buildForecast(forecast.properties.periods[2], city, cityXY),
 				];
 			} catch (e) {
-				console.log(`No regional forecast data for '${city.Name}'`);
-				console.error(e.status, e.responseJSON);
+				console.log(`No regional forecast data for '${city.name}'`);
+				console.log(e);
 				return false;
 			}
 		});
@@ -151,22 +147,12 @@ class RegionalForecast extends WeatherDisplay {
 	async getRegionalObservation (point, city) {
 		try {
 			// get stations
-			const stations = await $.ajax({
-				type: 'GET',
-				url: point.properties.observationStations,
-				dataType: 'json',
-				crossDomain: true,
-			});
+			const stations = await utils.fetch.json(point.properties.observationStations);
 
 			// get the first station
 			const station = stations.features[0].id;
 			// get the observation data
-			const observation = await $.ajax({
-				type: 'GET',
-				url: `${station}/observations/latest`,
-				dataType: 'json',
-				crossDomain: true,
-			});
+			const observation = await utils.fetch.json(`${station}/observations/latest`);
 			// preload the image
 			utils.image.preload(icons.getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
 			// return the observation

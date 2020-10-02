@@ -31,12 +31,7 @@ class LatestObservations extends WeatherDisplay {
 		// get data for regional stations
 		const allConditions = await Promise.all(regionalStations.map(async station => {
 			try {
-				const data = await $.ajax({
-					type: 'GET',
-					url: `https://api.weather.gov/stations/${station.id}/observations/latest`,
-					dataType: 'json',
-					crossDomain: true,
-				});
+				const data = await utils.fetch.json(`https://api.weather.gov/stations/${station.id}/observations/latest`);
 				// format the return values
 				return Object.assign({}, data.properties, {
 					StationId: station.id,
