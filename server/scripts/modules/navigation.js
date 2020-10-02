@@ -86,6 +86,7 @@ const navigation = (() => {
 
 		// draw the progress canvas and hide others
 		hideAllCanvases();
+		document.getElementById('loading').style.display = 'none';
 		progress = new Progress(-1,'progress');
 		await progress.drawCanvas();
 		progress.showCanvas();

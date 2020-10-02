@@ -20,6 +20,18 @@ const index = (() => {
 
 	let _FullScreenOverride = false;
 
+	const categories = [
+		'Land Features',
+		'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
+		'Amusement Park', 'Historical Monument', 'Landmark', 'Tourist Attraction', 'Zoo', // POI/Arts and Entertainment
+		'College', // POI/Education
+		'Beach', 'Campground', 'Golf Course', 'Harbor', 'Nature Reserve', 'Other Parks and Outdoors', 'Park', 'Racetrack',
+		'Scenic Overlook', 'Ski Resort', 'Sports Center', 'Sports Field', 'Wildlife Reserve', // POI/Parks and Outdoors
+		'Airport', 'Ferry', 'Marina', 'Pier', 'Port', 'Resort', // POI/Travel
+		'Postal', 'Populated Place',
+	];
+	const cats = categories.join(',');
+
 	const init = () => {
 		document.getElementById('txtAddress').addEventListener('focus', (e) => {
 			e.target.select();
@@ -39,19 +51,6 @@ const index = (() => {
 
 		document.addEventListener('keydown', document_keydown);
 		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
-
-
-		const categories = [
-			'Land Features',
-			'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
-			'Amusement Park', 'Historical Monument', 'Landmark', 'Tourist Attraction', 'Zoo', // POI/Arts and Entertainment
-			'College', // POI/Education
-			'Beach', 'Campground', 'Golf Course', 'Harbor', 'Nature Reserve', 'Other Parks and Outdoors', 'Park', 'Racetrack',
-			'Scenic Overlook', 'Ski Resort', 'Sports Center', 'Sports Field', 'Wildlife Reserve', // POI/Parks and Outdoors
-			'Airport', 'Ferry', 'Marina', 'Pier', 'Port', 'Resort', // POI/Travel
-			'Postal', 'Populated Place',
-		];
-		const cats = categories.join(',');
 
 		$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
 			serviceUrl: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',

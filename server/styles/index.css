@@ -254,9 +254,26 @@ jsgif
 #container {
 	position: relative;
 	width: 100%;
-	max-width: 640px;
+    max-width: 640px;
+    background-image: url(http://localhost:8080/images/BackGround1_1.png);
 }
-
+#loading {
+    width: 640px;
+    height: 480px;
+    max-width: 100%;
+    text-shadow: 4px 4px black;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+#loading .title {
+    font-family: Star4000 Large;
+    font-size: 36px;
+    color:  yellow;
+    margin-bottom: 40px;
+}
+#loading .instructions {font-size: 18pt;}
 #container canvas {
 	/* position: absolute; */
 	width: 100%;
@@ -280,6 +297,7 @@ jsgif
 	display:flex;
 	align-items: center;
 	justify-content: center;
+	align-content: center;
 }
 
 #divTwc:fullscreen #display {
