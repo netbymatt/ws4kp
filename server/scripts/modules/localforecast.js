@@ -94,14 +94,10 @@ class LocalForecast extends WeatherDisplay {
 		let units = 'us';
 		if (navigation.units() === UNITS.metric) units = 'si';
 		try {
-			return await $.ajax({
-				type: 'GET',
-				url: weatherParameters.forecast,
+			return await utils.fetch.json(weatherParameters.forecast, {
 				data: {
 					units,
 				},
-				dataType: 'json',
-				crossDomain: true,
 			});
 
 		} catch (e) {

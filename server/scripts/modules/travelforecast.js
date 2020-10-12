@@ -35,11 +35,7 @@ class TravelForecast extends WeatherDisplay {
 			try {
 				// get point then forecast
 				const point = await utils.weather.getPoint(city.Latitude, city.Longitude);
-				const forecast = await $.ajax({
-					url: point.properties.forecast,
-					dataType: 'json',
-					crossDomain: true,
-				});
+				const forecast = await utils.fetch.json(point.properties.forecast);
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime? 0:1;
 				// return a pared-down forecast

@@ -24,7 +24,7 @@
 
 	<% if (production) { %>
 		<link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-		<script type="text/javascript" src="resources/data.min.js"></script>
+		<script type="text/javascript" src="resources/data.min.js?_=<%=production%>"></script>
 		<script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>	
 	<% } else { %>
 		<link rel="stylesheet" type="text/css" href="styles/index.css" />
@@ -80,22 +80,26 @@
 	<div id="version" style="display:none"><%- version %> </div>
 
     <div id="divTwc">
-		<div id='display'>
-			<div id="container">
-			</div>
+        <div id="container">
+            <div id="loading" width="640" height="480">
+                <div>
+                    <div class="title">WeatherStar 4000+</div>
+                    <div class="instructions">Enter your location above to continue</div>
+                </div>
+            </div>
 		</div>
         <div id="divTwcBottom">
             <div id="divTwcBottomLeft">
-                <a id="aMenuBottom" href="#" class="NavigateMenu"><img src="images/nav/ic_menu_white_24dp_1x.png" title="Menu" /></a>
-                <a id="aPreviousBottom" href="#" class="NavigatePrevious"><img src="images/nav/ic_skip_previous_white_24dp_1x.png" title="Previous" /></a>
-                <a id="aNextBottom" href="#" class="NavigateNext"><img src="images/nav/ic_skip_next_white_24dp_1x.png" title="Next" /></a>
-                <a id="aPlayBottom" href="#" class="NavigatePlay"><img src="images/nav/ic_play_arrow_white_24dp_1x.png" title="Play" /></a>
+                <img id="NavigateMenu" class="navButton" src="images/nav/ic_menu_white_24dp_1x.png" title="Menu" />
+                <img id="NavigatePrevious" class="navButton" src="images/nav/ic_skip_previous_white_24dp_1x.png" title="Previous" />
+                <img id="NavigateNext" class="navButton" src="images/nav/ic_skip_next_white_24dp_1x.png" title="Next" />
+                <img id="NavigatePlay" class="navButton" src="images/nav/ic_play_arrow_white_24dp_1x.png" title="Play" />
             </div>
             <div id="divTwcBottomMiddle">
-                <a id="aRefreshBottom" href="#" class="NavigateRefresh"><img src="images/nav/ic_refresh_white_24dp_1x.png" title="Refresh" /></a>
+                <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_1x.png" title="Refresh" />
             </div>
             <div id="divTwcBottomRight">
-                <a id="aFullScreenBottom" href="#" class="ToggleFullScreen"><img src="images/nav/ic_fullscreen_exit_white_24dp_1x.png" title="Exit Fullscreen" /></a>
+                <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_exit_white_24dp_1x.png" title="Exit Fullscreen" />
             </div>
         </div>
     </div>

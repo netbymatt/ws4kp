@@ -17,22 +17,14 @@ class CurrentWeather extends WeatherDisplay {
 		let observations, station;
 		try {
 		// station observations
-			const observationsPromise = $.ajaxCORS({
-				type: 'GET',
-				url: `https://api.weather.gov/stations/${weatherParameters.stationId}/observations`,
+			const observationsPromise = utils.fetch.json(`https://api.weather.gov/stations/${weatherParameters.stationId}/observations`,{
+				cors: true,
 				data: {
 					limit: 2,
 				},
-				dataType: 'json',
-				crossDomain: true,
 			});
 			// station info
-			const stationPromise = $.ajax({
-				type: 'GET',
-				url: `https://api.weather.gov/stations/${weatherParameters.stationId}`,
-				dataType: 'json',
-				crossDomain: true,
-			});
+			const stationPromise = utils.fetch.json(`https://api.weather.gov/stations/${weatherParameters.stationId}`);
 
 			// wait for the promises to resolve
 			[observations, station] = await Promise.all([observationsPromise, stationPromise]);
@@ -40,7 +32,7 @@ class CurrentWeather extends WeatherDisplay {
 			// TODO: add retry for further stations if observations are unavailable
 		} catch (e) {
 			console.error('Unable to get current observations');
-			console.error(e.status, e.responseJSON);
+			console.error(e);
 			this.setStatus(STATUS.failed);
 			return;
 		}

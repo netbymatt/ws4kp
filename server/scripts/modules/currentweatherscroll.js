@@ -80,9 +80,9 @@ const currentWeatherScroll = (() => {
 		// temperature
 		(data) => {
 			let text = `Temp: ${data.Temperature}${degree} ${data.TemperatureUnit}`;
-			if (data.HeatIndex !== data.Temperature) {
+			if (data.observations.heatIndex.value) {
 				text += `    Heat Index: ${data.HeatIndex}${degree} ${data.TemperatureUnit}`;
-			} else if (data.WindChill !== '' && data.WindChill < data.Temperature) {
+			} else if (data.observations.windChill.value) {
 				text += `    Wind Chill: ${data.WindChill}${degree} ${data.TemperatureUnit}`;
 			}
 			return text;

@@ -1,5 +1,6 @@
-/* globals NoSleep, states, navigation */
-$(() => {
+'use strict';
+/* globals NoSleep, states, navigation, UNITS, utils */
+document.addEventListener('DOMContentLoaded', () => {
 	index.init();
 });
 
@@ -11,8 +12,6 @@ const index = (() => {
 	const _AutoRefreshTotalIntervalMs = 600000; // 10 min.
 	const _NoSleep = new NoSleep();
 
-	let divTwcBottom;
-
 	let _AutoSelectQuery = false;
 
 	let _LastUpdate = null;
@@ -21,39 +20,37 @@ const index = (() => {
 
 	let _FullScreenOverride = false;
 
+	const categories = [
+		'Land Features',
+		'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
+		'Amusement Park', 'Historical Monument', 'Landmark', 'Tourist Attraction', 'Zoo', // POI/Arts and Entertainment
+		'College', // POI/Education
+		'Beach', 'Campground', 'Golf Course', 'Harbor', 'Nature Reserve', 'Other Parks and Outdoors', 'Park', 'Racetrack',
+		'Scenic Overlook', 'Ski Resort', 'Sports Center', 'Sports Field', 'Wildlife Reserve', // POI/Parks and Outdoors
+		'Airport', 'Ferry', 'Marina', 'Pier', 'Port', 'Resort', // POI/Travel
+		'Postal', 'Populated Place',
+	];
+	const cats = categories.join(',');
+
 	const init = () => {
-		divTwcBottom = $('#divTwcBottom');
-		$('#txtAddress').on('focus', (e) => {
-			$(e.target).select();
-		}).focus();
-
-		$('.NavigateMenu').on('click', btnNavigateMenu_click);
-		$('.NavigateRefresh').on('click', btnNavigateRefresh_click);
-		$('.NavigateNext').on('click', btnNavigateNext_click);
-		$('.NavigatePrevious').on('click', btnNavigatePrevious_click);
-		$('.NavigatePlay').on('click', btnNavigatePlay_click);
-
-		$('#btnGetGps').on('click', btnGetGps_click);
-
-		$('#divTwc').on('click', (e) => {
-			if (document.fullscreenElement) UpdateFullScreenNavigate(e);
+		document.getElementById('txtAddress').addEventListener('focus', (e) => {
+			e.target.select();
 		});
 
-		$(document).on('keydown', document_keydown);
-		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
-		$('.ToggleFullScreen').on('click', btnFullScreen_click);
+		document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenu_click);
+		document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefresh_click);
+		document.getElementById('NavigateNext').addEventListener('click', btnNavigateNext_click);
+		document.getElementById('NavigatePrevious').addEventListener('click', btnNavigatePrevious_click);
+		document.getElementById('NavigatePlay').addEventListener('click', btnNavigatePlay_click);
+		document.getElementById('ToggleFullScreen').addEventListener('click', btnFullScreen_click);
+		document.getElementById('btnGetGps').addEventListener('click', btnGetGps_click);
 
-		const categories = [
-			'Land Features',
-			'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
-			'Amusement Park', 'Historical Monument', 'Landmark', 'Tourist Attraction', 'Zoo', // POI/Arts and Entertainment
-			'College', // POI/Education
-			'Beach', 'Campground', 'Golf Course', 'Harbor', 'Nature Reserve', 'Other Parks and Outdoors', 'Park', 'Racetrack',
-			'Scenic Overlook', 'Ski Resort', 'Sports Center', 'Sports Field', 'Wildlife Reserve', // POI/Parks and Outdoors
-			'Airport', 'Ferry', 'Marina', 'Pier', 'Port', 'Resort', // POI/Travel
-			'Postal', 'Populated Place',
-		];
-		const cats = categories.join(',');
+		document.getElementById('divTwc').addEventListener('click', () => {
+			if (document.fullscreenElement) UpdateFullScreenNavigate();
+		});
+
+		document.addEventListener('keydown', document_keydown);
+		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
 
 		$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
 			serviceUrl: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -100,28 +97,29 @@ const index = (() => {
 		const TwcQuery = localStorage.getItem('TwcQuery');
 		if (TwcQuery) {
 			_AutoSelectQuery = true;
-			$('#txtAddress').val(TwcQuery)
-				.blur()
-				.focus();
+			const txtAddress = document.getElementById('txtAddress');
+			txtAddress.value = TwcQuery;
+			txtAddress.blur();
+			txtAddress.focus();
 		}
 
 		const TwcPlay = localStorage.getItem('TwcPlay');
 		if (TwcPlay === null || TwcPlay === 'true') postMessage('navButton', 'play');
 
-		$('#btnClearQuery').on('click', () => {
-			$('#spanCity').text('');
-			$('#spanState').text('');
-			$('#spanStationId').text('');
-			$('#spanRadarId').text('');
-			$('#spanZoneId').text('');
+		document.getElementById('btnClearQuery').addEventListener('click', () => {
+			document.getElementById('spanCity').innerHTML = '';
+			document.getElementById('spanState').innerHTML = '';
+			document.getElementById('spanStationId').innerHTML = '';
+			document.getElementById('spanRadarId').innerHTML = '';
+			document.getElementById('spanZoneId').innerHTML = '';
 
 			localStorage.removeItem('TwcScrollText');
 			localStorage.removeItem('TwcScrollTextChecked');
 
-			$('#chkAutoRefresh').prop('checked', 'checked');
+			document.getElementById('chkAutoRefresh').checked = true;
 			localStorage.removeItem('TwcAutoRefresh');
 
-			$('#radEnglish').prop('checked', 'checked');
+			document.getElementById('radEnglish').checked = true;
 			localStorage.removeItem('TwcUnits');
 
 			localStorage.removeItem('TwcPlay');
@@ -132,21 +130,16 @@ const index = (() => {
 
 		const TwcUnits = localStorage.getItem('TwcUnits');
 		if (!TwcUnits || TwcUnits === 'ENGLISH') {
-			$('#radEnglish').prop('checked', 'checked');
+			document.getElementById('radEnglish').checked = true;
 		} else if (TwcUnits === 'METRIC') {
-			$('#radMetric').prop('checked', 'checked');
+			document.getElementById('radMetric').checked = true;
 		}
 
-		$('input[type=\'radio\'][name=\'radUnits\']').on('change', (e) => {
-			const Units = $(e.target).val();
-			e;
-			localStorage.setItem('TwcUnits', Units);
-			AssignLastUpdate();
-			postMessage('units', Units);
-		});
+		document.getElementById('radEnglish').addEventListener('change', changeUnits);
+		document.getElementById('radMetric').addEventListener('change', changeUnits);
 
-		$('#chkAutoRefresh').on('change', (e) => {
-			const Checked = $(e.target).is(':checked');
+		document.getElementById('chkAutoRefresh').addEventListener('change', (e) => {
+			const Checked = e.target.checked;
 
 			if (_LastUpdate) {
 				if (Checked) {
@@ -161,38 +154,42 @@ const index = (() => {
 
 		const TwcAutoRefresh = localStorage.getItem('TwcAutoRefresh');
 		if (!TwcAutoRefresh || TwcAutoRefresh === 'true') {
-			$('#chkAutoRefresh').prop('checked', 'checked');
+			document.getElementById('chkAutoRefresh').checked = true;
 		} else {
-			$('#chkAutoRefresh').prop('checked', '');
+			document.getElementById('chkAutoRefresh').checked = false;
 		}
 
 	};
 
-	const autocompleteOnSelect = (suggestion) => {
-		let request;
+	const changeUnits = (e) => {
+		const Units = e.target.value;
+		e;
+		localStorage.setItem('TwcUnits', Units);
+		AssignLastUpdate();
+		postMessage('units', Units);
+	};
 
+	const autocompleteOnSelect = async (suggestion) => {
 		// Do not auto get the same city twice.
 		if (this.previousSuggestionValue === suggestion.value)  return;
 
 		if (overrides[suggestion.value]) {
 			doRedirectToGeometry(overrides[suggestion.value]);
 		} else {
-			request = $.ajax({
-				url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find',
+			const data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 				data: {
 					text: suggestion.value,
 					magicKey: suggestion.data,
 					f: 'json',
 				},
 			});
-			request.done((data) => {
-				const loc = data.locations[0];
-				if (loc) {
-					doRedirectToGeometry(loc.feature.geometry);
-				} else {
-					alert('An unexpected error occurred. Please try a different search string.');
-				}
-			});
+
+			const loc = data.locations[0];
+			if (loc) {
+				doRedirectToGeometry(loc.feature.geometry);
+			} else {
+				alert('An unexpected error occurred. Please try a different search string.');
+			}
 		}
 	};
 
@@ -200,7 +197,7 @@ const index = (() => {
 		const latLon = {lat:Math.round2(geom.y, 4), lon:Math.round2(geom.x, 4)};
 		LoadTwcData(latLon);
 		// Save the query
-		localStorage.setItem('TwcQuery', $('#txtAddress').val());
+		localStorage.setItem('TwcQuery', document.getElementById('txtAddress').value);
 	};
 
 	const btnFullScreen_click = () => {
@@ -235,7 +232,6 @@ const index = (() => {
 		// iOS doesn't support FullScreen API.
 			window.scrollTo(0, 0);
 			_FullScreenOverride = true;
-			$(window).resize();
 		}
 
 		UpdateFullScreenNavigate();
@@ -246,7 +242,6 @@ const index = (() => {
 
 		if (_FullScreenOverride) {
 			_FullScreenOverride = false;
-			$(window).resize();
 		}
 
 		if (document.exitFullscreen) {
@@ -275,17 +270,12 @@ const index = (() => {
 		// if there's no data stop
 		if (!latLon) return;
 
-		$('#txtAddress').blur();
+		document.getElementById('txtAddress').blur();
 		StopAutoRefreshTimer();
 		_LastUpdate = null;
 		AssignLastUpdate();
 
 		postMessage('latLon', latLon);
-
-		postMessage('units', $('input[type=\'radio\'][name=\'radUnits\']:checked').val());
-
-		const display = $('#display');
-		display.on('keydown', document_keydown);
 
 		const SwipeCallBack = (event, direction) => {
 			switch (direction) {
@@ -300,19 +290,19 @@ const index = (() => {
 			}
 		};
 
-		display.swipe({
-		//Generic swipe handler for all directions
-			swipeRight: SwipeCallBack,
-			swipeLeft: SwipeCallBack,
-		});
+		// display.swipe({
+		// //Generic swipe handler for all directions
+		// 	swipeRight: SwipeCallBack,
+		// 	swipeLeft: SwipeCallBack,
+		// });
 	};
 
 	const AssignLastUpdate = () => {
 		let LastUpdate = '(None)';
 
 		if (_LastUpdate) {
-			switch ($('input[type=\'radio\'][name=\'radUnits\']:checked').val()) {
-			case 'ENGLISH':
+			switch (navigation.units()) {
+			case UNITS.english:
 				LastUpdate = _LastUpdate.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' });
 				break;
 			default:
@@ -321,9 +311,9 @@ const index = (() => {
 			}
 		}
 
-		$('#spanLastRefresh').html(LastUpdate);
+		document.getElementById('spanLastRefresh').innerHTML = LastUpdate;
 
-		if (_LastUpdate && $('#chkAutoRefresh').is(':checked')) StartAutoRefreshTimer();
+		if (_LastUpdate && document.getElementById('chkAutoRefresh').checked) StartAutoRefreshTimer();
 	};
 
 	const btnNavigateRefresh_click = () => {
@@ -350,8 +340,9 @@ const index = (() => {
 	let _NavigateFadeIntervalId = null;
 
 	const UpdateFullScreenNavigate = () => {
-		$(document.activeElement).blur();
-		divTwcBottom.fadeIn2();
+		document.activeElement.blur();
+		document.getElementById('divTwcBottom').classList.remove('hidden');
+		document.getElementById('divTwcBottom').classList.add('visible');
 
 		if (_NavigateFadeIntervalId) {
 			clearTimeout(_NavigateFadeIntervalId);
@@ -360,7 +351,8 @@ const index = (() => {
 
 		_NavigateFadeIntervalId = setTimeout(() => {
 			if (document.fullscreenElement) {
-				divTwcBottom.fadeOut2();
+				document.getElementById('divTwcBottom').classList.remove('visible');
+				document.getElementById('divTwcBottom').classList.add('hidden');
 			}
 
 		}, 2000);
@@ -403,55 +395,6 @@ const index = (() => {
 		}
 	};
 
-	$.fn.fadeIn2 = function () {
-		const _self = this;
-		let opacity = 0.0;
-		let IntervalId = null;
-
-		if (_self.css('opacity') !== '0') return;
-
-		_self.css('visibility', 'visible');
-		_self.css('opacity', '0.0');
-
-		IntervalId = window.setInterval(() => {
-			opacity += 0.1;
-			opacity = Math.round2(opacity, 1);
-			_self.css('opacity', opacity.toString());
-
-			if (opacity === 1.0) {
-			//_self.css("visibility", "");
-				_self.css('visibility', 'visible');
-				window.clearInterval(IntervalId);
-			}
-		}, 50);
-
-		return _self;
-	};
-
-	$.fn.fadeOut2 = function () {
-		const _self = this;
-		let opacity = 1.0;
-		let IntervalId = null;
-
-		if (_self.css('opacity') !== '1')  return;
-
-		_self.css('visibility', 'visible');
-		_self.css('opacity', '1.0');
-
-		IntervalId = window.setInterval(() => {
-			opacity -= 0.2;
-			opacity = Math.round2(opacity, 1);
-			_self.css('opacity', opacity.toString());
-
-			if (opacity === 0) {
-				_self.css('visibility', 'hidden');
-				window.clearInterval(IntervalId);
-			}
-		}, 50);
-
-		return _self;
-	};
-
 	Math.round2 = (value, decimals) => Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
 
 	const btnNavigatePlay_click = () => {
@@ -463,7 +406,7 @@ const index = (() => {
 
 	// read and dispatch an event from the iframe
 	const message = (data) => {
-	// test for trust
+		const playButton = document.getElementById('NavigatePlay');
 		// dispatch event
 		if (!data.type) return;
 		switch (data.type) {
@@ -479,19 +422,15 @@ const index = (() => {
 		case 'isPlaying':
 			localStorage.setItem('TwcPlay', navigation.isPlaying());
 
+
 			if (navigation.isPlaying()) {
 				noSleepEnable();
-				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('title', 'Pause');
-				$('img[src=\'images/nav/ic_play_arrow_white_24dp_1x.png\']').attr('src', 'images/nav/ic_pause_white_24dp_1x.png');
-				$('img[src=\'images/nav/ic_play_arrow_white_24dp_2x.png\']').attr('title', 'Pause');
-				$('img[src=\'images/nav/ic_play_arrow_white_24dp_2x.png\']').attr('src', 'images/nav/ic_pause_white_24dp_2x.png');
+				playButton.title = 'Pause';
+				playButton.src = 'images/nav/ic_pause_white_24dp_1x.png';
 			} else {
 				noSleepDisable();
-
-				$('img[src=\'images/nav/ic_pause_white_24dp_1x.png\']').attr('title', 'Play');
-				$('img[src=\'images/nav/ic_pause_white_24dp_1x.png\']').attr('src', 'images/nav/ic_play_arrow_white_24dp_1x.png');
-				$('img[src=\'images/nav/ic_pause_white_24dp_2x.png\']').attr('title', 'Play');
-				$('img[src=\'images/nav/ic_pause_white_24dp_2x.png\']').attr('src', 'images/nav/ic_play_arrow_white_24dp_2x.png');
+				playButton.title = 'Play';
+				playButton.src = 'images/nav/ic_play_arrow_white_24dp_1x.png';
 			}
 			break;
 
@@ -524,7 +463,7 @@ const index = (() => {
 				RemainingMs = 0;
 			}
 			const dt = new Date(RemainingMs);
-			$('#spanRefreshCountDown').html((dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes()) + ':' + (dt.getSeconds() < 10 ? '0' + dt.getSeconds() : dt.getSeconds()));
+			document.getElementById('spanRefreshCountDown').innerHTML = (dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes()) + ':' + (dt.getSeconds() < 10 ? '0' + dt.getSeconds() : dt.getSeconds());
 
 			// Time has elapsed.
 			if (_AutoRefreshCountMs >= _AutoRefreshTotalIntervalMs) LoadTwcData();
@@ -535,7 +474,7 @@ const index = (() => {
 	const StopAutoRefreshTimer = () => {
 		if (_AutoRefreshIntervalId) {
 			window.clearInterval(_AutoRefreshIntervalId);
-			$('#spanRefreshCountDown').html('--:--');
+			document.getElementById('spanRefreshCountDown').innerHTML = '--:--';
 			_AutoRefreshIntervalId = null;
 		}
 	};
@@ -553,8 +492,7 @@ const index = (() => {
 
 		let data;
 		try {
-			data = await $.ajax({
-				url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode',
+			data = await utils.fetch.json(location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
 				data: {
 					location: longitude + ',' + latitude,
 					distance: 1000, // Find location up to 1 KM.
@@ -571,9 +509,10 @@ const index = (() => {
 		const Country = data.address.CountryCode;
 		const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
 
-		$('#txtAddress').val(TwcQuery)
-			.blur()
-			.focus();
+		const txtAddress = document.getElementById('txtAddress');
+		txtAddress.value = TwcQuery;
+		txtAddress.blur();
+		txtAddress.focus();
 
 		// Save the query
 		localStorage.setItem('TwcQuery', TwcQuery);
@@ -581,11 +520,11 @@ const index = (() => {
 
 	const populateWeatherParameters = (weatherParameters) => {
 
-		$('#spanCity').text(weatherParameters.city + ', ');
-		$('#spanState').text(weatherParameters.state);
-		$('#spanStationId').text(weatherParameters.stationId);
-		$('#spanRadarId').text(weatherParameters.radarId);
-		$('#spanZoneId').text(weatherParameters.zoneId);
+		document.getElementById('spanCity').innerHTML = weatherParameters.city + ', ';
+		document.getElementById('spanState').innerHTML = weatherParameters.state;
+		document.getElementById('spanStationId').innerHTML = weatherParameters.stationId;
+		document.getElementById('spanRadarId').innerHTML = weatherParameters.radarId;
+		document.getElementById('spanZoneId').innerHTML = weatherParameters.zoneId;
 	};
 
 	// track state of nosleep locally to avoid a null case error when nosleep.disable is called without first calling .enable

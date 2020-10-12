@@ -59,15 +59,10 @@ class Radar extends WeatherDisplay {
 		let radarHtml;
 		try {
 			// get a list of available radars
-			radarHtml = await $.ajaxCORS({
-				type: 'GET',
-				url: baseUrl,
-				dataType: 'text',
-				crossDomain: true,
-			});
+			radarHtml = await utils.fetch.text(baseUrl, {cors: true});
 		} catch (e) {
-			console.error('Unable to get list of radars');
-			console.error(e.status, e.responseJSON);
+			console.log('Unable to get list of radars');
+			console.error(e);
 			this.setStatus(STATUS.failed);
 			return;
 		}
@@ -143,19 +138,13 @@ class Radar extends WeatherDisplay {
 			context.imageSmoothingEnabled = false;
 
 			// get the image
-			const [blob, status, xhr] = await (()=>new Promise((resolve, reject) => {
-				$.ajaxCORS({
-					type: 'GET',
-					url: baseUrl + url,
-					xhrFields: {
-						responseType: 'blob',
-					},
-					crossDomain: true,
-					success: (blob, status, xhr) => resolve([blob,status,xhr]),
-					error: (xhr, status, e) => reject(e),
-				});
+			const response = await fetch(utils.cors.rewriteUrl(baseUrl + url));
 
-			}))();
+			// test response
+			if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
+
+			// get the blob
+			const blob = await response.blob();
 
 			// store the time
 			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)_/);
@@ -171,7 +160,7 @@ class Radar extends WeatherDisplay {
 					zone: 'UTC',
 				}).setZone();
 			} else {
-				time = DateTime.fromHTTP(xhr.getResponseHeader('Last-Modified')).setZone();
+				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone();
 			}
 
 			// assign to an html image element
