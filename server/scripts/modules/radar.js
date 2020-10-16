@@ -51,7 +51,7 @@ class Radar extends WeatherDisplay {
 
 		// get the base map
 		let src = 'images/4000RadarMap2.jpg';
-		if (weatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';
+		if (weatherParameters.state === 'HI') src = 'images/HawaiiRadarMap2.png';
 		this.baseMap = await utils.image.load(src);
 
 		const baseUrl = 'https://radar.weather.gov/Conus/RadarImg/';
@@ -94,7 +94,7 @@ class Radar extends WeatherDisplay {
 		let sourceXY;
 		let width;
 		let height;
-		if (weatherParameters.State === 'HI') {
+		if (weatherParameters.state === 'HI') {
 			width = 600;
 			height = 571;
 			sourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
@@ -120,7 +120,7 @@ class Radar extends WeatherDisplay {
 		let radarSourceX = radarSourceXY.x / 2;
 		let radarSourceY = radarSourceXY.y / 2;
 
-		if (weatherParameters.State === 'HI') {
+		if (weatherParameters.state === 'HI') {
 			radarOffsetX = 120;
 			radarOffsetY = 69;
 			radarSourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
@@ -167,7 +167,7 @@ class Radar extends WeatherDisplay {
 			const imgBlob = await utils.image.load(blob);
 
 			// draw the entire image
-			if (weatherParameters.State === 'HI') {
+			if (weatherParameters.state === 'HI') {
 				workingContext.clearRect(0, 0, 571, 600);
 				workingContext.drawImage(imgBlob, 0, 0, 571, 600);
 			} else {

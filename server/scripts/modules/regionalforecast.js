@@ -21,9 +21,9 @@ class RegionalForecast extends WeatherDisplay {
 
 		// pre-load the base map (returns promise)
 		let src = 'images/Basemap2.png';
-		if (weatherParameters.State === 'HI') {
+		if (weatherParameters.state === 'HI') {
 			src = 'images/HawaiiRadarMap4.png';
-		} else if (weatherParameters.State === 'AK') {
+		} else if (weatherParameters.state === 'AK') {
 			src = 'images/AlaskaRadarMap6.png';
 		}
 		this.baseMap = utils.image.load(src);
@@ -41,7 +41,7 @@ class RegionalForecast extends WeatherDisplay {
 
 		// get a target distance
 		let targetDistance = 2.5;
-		if (weatherParameters.State === 'HI') targetDistance = 1;
+		if (weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
 		const stationInfoArray = Object.keys(_StationInfo).map(key => Object.assign({}, _StationInfo[key], {targetDistance}));
