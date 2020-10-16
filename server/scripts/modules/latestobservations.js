@@ -32,6 +32,10 @@ class LatestObservations extends WeatherDisplay {
 		const allConditions = await Promise.all(regionalStations.map(async station => {
 			try {
 				const data = await utils.fetch.json(`https://api.weather.gov/stations/${station.id}/observations/latest`);
+				// test for temperature, weather and wind values present
+				if (data.properties.temperature.value === null ||
+					data.properties.textDescription === '' ||
+					data.properties.windSpeed.value === null) return;
 				// format the return values
 				return Object.assign({}, data.properties, {
 					StationId: station.id,

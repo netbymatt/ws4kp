@@ -53,7 +53,7 @@ const index = (() => {
 		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
 
 		$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
-			serviceUrl: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
+			serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 			deferRequestBy: 300,
 			paramName: 'text',
 			params: {
@@ -492,7 +492,7 @@ const index = (() => {
 
 		let data;
 		try {
-			data = await utils.fetch.json(location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
+			data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
 				data: {
 					location: longitude + ',' + latitude,
 					distance: 1000, // Find location up to 1 KM.

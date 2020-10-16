@@ -15,24 +15,37 @@ class CurrentWeather extends WeatherDisplay {
 
 		// Load the observations
 		let observations, station;
-		try {
-		// station observations
-			const observationsPromise = utils.fetch.json(`https://api.weather.gov/stations/${weatherParameters.stationId}/observations`,{
-				cors: true,
-				data: {
-					limit: 2,
-				},
-			});
-			// station info
-			const stationPromise = utils.fetch.json(`https://api.weather.gov/stations/${weatherParameters.stationId}`);
+		// station number counter
+		let stationNum = 0;
+		while (!observations && stationNum < weatherParameters.stations.length) {
+			// get the station
+			station = weatherParameters.stations[stationNum];
+			stationNum++;
+			try {
+				// station observations
+				observations = await utils.fetch.json(`${station.id}/observations`,{
+					cors: true,
+					data: {
+						limit: 2,
+					},
+				});
 
-			// wait for the promises to resolve
-			[observations, station] = await Promise.all([observationsPromise, stationPromise]);
+				// test data quality
+				if (observations.features[0].properties.temperature.value === null ||
+					observations.features[0].properties.windSpeed.value === null ||
+					observations.features[0].properties.textDescription === null) {
+					observations = undefined;
+					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
+				}
 
 			// TODO: add retry for further stations if observations are unavailable
-		} catch (e) {
-			console.error('Unable to get current observations');
-			console.error(e);
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		// test for data received
+		if (!observations) {
+			console.error('All current weather stations exhausted');
 			this.setStatus(STATUS.failed);
 			return;
 		}
