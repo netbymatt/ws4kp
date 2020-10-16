@@ -82,6 +82,7 @@ class CurrentWeather extends WeatherDisplay {
 		data.Icon = icons.getWeatherIconFromIconLink(observations.icon);
 		data.PressureDirection = '';
 		data.TextConditions = observations.textDescription;
+		data.station = this.data.station;
 
 		// difference since last measurement (pascals, looking for difference of more than 150)
 		const pressureDiff = (observations.barometricPressure.value - this.data.features[1].properties.barometricPressure.value);

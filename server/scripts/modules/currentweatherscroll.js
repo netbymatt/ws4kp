@@ -64,7 +64,6 @@ const currentWeatherScroll = (() => {
 
 		// nothing to do if there's no data yet
 		if (!data) return;
-		if (!station) return;
 
 		// clean up any old text
 		context.putImageData(blankDrawArea, 0, 405);
@@ -75,7 +74,7 @@ const currentWeatherScroll = (() => {
 	// the "screens" are stored in an array for easy addition and removal
 	const screens = [
 		// station name
-		() => `Conditions at ${station.name.substr(0,20)}`,
+		(data) => `Conditions at ${data.station.properties.name.substr(0,20)}`,
 
 		// temperature
 		(data) => {
@@ -117,15 +116,9 @@ const currentWeatherScroll = (() => {
 		draw.text(context, 'Star4000', '24pt', '#ffffff', 70, 430, text, 2);
 	};
 
-	// store the latest station data
-	const setStation = (weatherParameters) => {
-		station = weatherParameters.stations[0].properties;
-	};
-
 	// return the api
 	return {
 		start,
 		stop,
-		setStation,
 	};
 })();

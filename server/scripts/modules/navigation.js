@@ -107,8 +107,6 @@ const navigation = (() => {
 		}
 		// call for new data on each display
 		displays.forEach(display => display.getData(weatherParameters));
-		// pass the information to the bottom scroll
-		currentWeatherScroll.setStation(weatherParameters);
 
 		// GetMonthPrecipitation(this.weatherParameters);
 		// GetAirQuality3(this.weatherParameters);
