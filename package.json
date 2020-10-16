@@ -33,7 +33,8 @@
     "jquery-touchswipe": "^1.6.19",
     "luxon": "^1.25.0",
     "nosleep.js": "^0.11.0",
-    "suncalc": "^1.8.0"
+    "suncalc": "^1.8.0",
+    "swiped-events": "^1.1.4"
   },
   "dependencies": {}
 }

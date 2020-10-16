@@ -30,6 +30,7 @@ const js_sources = [
 	'server/scripts/vendor/auto/jquery.js',
 	'server/scripts/vendor/jquery.autocomplete.min.js',
 	'server/scripts/vendor/auto/nosleep.js',
+	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/index.js',
 	'server/scripts/libgif.js',
 	'server/scripts/vendor/auto/luxon.js',

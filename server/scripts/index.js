@@ -159,6 +159,10 @@ const index = (() => {
 			document.getElementById('chkAutoRefresh').checked = false;
 		}
 
+		// swipe functionality
+		document.getElementById('container').addEventListener('swiped-left', () => swipeCallBack('left'));
+		document.getElementById('container').addEventListener('swiped-right', () => swipeCallBack('right'));
+
 	};
 
 	const changeUnits = (e) => {
@@ -277,24 +281,20 @@ const index = (() => {
 
 		postMessage('latLon', latLon);
 
-		const SwipeCallBack = (event, direction) => {
-			switch (direction) {
-			case 'left':
-				btnNavigateNext_click();
-				break;
 
-			case 'right':
-			default:
-				btnNavigatePrevious_click();
-				break;
-			}
-		};
+	};
 
-		// display.swipe({
-		// //Generic swipe handler for all directions
-		// 	swipeRight: SwipeCallBack,
-		// 	swipeLeft: SwipeCallBack,
-		// });
+	const swipeCallBack = (direction) => {
+		switch (direction) {
+		case 'left':
+			btnNavigateNext_click();
+			break;
+
+		case 'right':
+		default:
+			btnNavigatePrevious_click();
+			break;
+		}
 	};
 
 	const AssignLastUpdate = () => {
