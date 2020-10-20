@@ -26,20 +26,13 @@ const index = (req, res) => {
 		version,
 	});
 };
-const twc3 = (req, res) => {
-	res.render(path.join(__dirname, 'views/twc3'), {
-		production: false,
-		version,
-	});
-};
 
-// two html pages
+// main page
 app.get('/index.html', index);
 app.get('/', index);
-app.get('/twc3.html', twc3);
 
 // fallback
-app.get('*', express.static('./server'));
+app.get('*', express.static(path.join(__dirname, './server')));
 
 const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
