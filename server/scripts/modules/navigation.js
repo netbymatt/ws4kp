@@ -1,7 +1,7 @@
 'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
 /* globals index, utils, _StationInfo, STATUS */
-/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress, currentWeatherScroll */
+/* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress, Hourly */
 
 document.addEventListener('DOMContentLoaded', () => {
 	navigation.init();
@@ -19,8 +19,9 @@ const navigation = (() => {
 	let playing = false;
 	let progress;
 
-	// current conditions are made available from the display below
+	// current conditions and sunrise/sunset are made available from the display below
 	let currentWeather;
+	let almanac;
 
 	const init = async () => {
 		// nothing to do
@@ -79,6 +80,7 @@ const navigation = (() => {
 		weatherParameters.state = point.properties.relativeLocation.properties.state;
 		weatherParameters.timeZone = point.properties.relativeLocation.properties.timeZone;
 		weatherParameters.forecast = point.properties.forecast;
+		weatherParameters.forecastGridData = point.properties.forecastGridData;
 		weatherParameters.stations = stations.features;
 
 		// update the main process for display purposes
@@ -94,24 +96,21 @@ const navigation = (() => {
 		// start loading canvases if necessary
 		if (displays.length === 0) {
 			currentWeather = new CurrentWeather(0,'currentWeather');
+			almanac = new Almanac(7, 'almanac');
 			displays = [
 				currentWeather,
 				new LatestObservations(1, 'latestObservations'),
-				new TravelForecast(2, 'travelForecast', false),	// not active by default
-				new RegionalForecast(3, 'regionalForecast'),
-				new LocalForecast(4, 'localForecast'),
-				new ExtendedForecast(5, 'extendedForecast'),
-				new Almanac(6, 'almanac'),
-				new Radar(7, 'radar'),
+				new Hourly(2, 'hourly'),
+				new TravelForecast(3, 'travelForecast', false),	// not active by default
+				new RegionalForecast(4, 'regionalForecast'),
+				new LocalForecast(5, 'localForecast'),
+				new ExtendedForecast(6, 'extendedForecast'),
+				almanac,
+				new Radar(8, 'radar'),
 			];
 		}
 		// call for new data on each display
 		displays.forEach(display => display.getData(weatherParameters));
-
-		// GetMonthPrecipitation(this.weatherParameters);
-		// GetAirQuality3(this.weatherParameters);
-		// ShowDopplerMap(this.weatherParameters);
-		// GetWeatherHazards3(this.weatherParameters);
 
 	};
 
@@ -262,6 +261,12 @@ const navigation = (() => {
 		return currentWeather.getCurrentWeather();
 	};
 
+	// get sunrise/sunset
+	const getSun = () => {
+		if (!almanac) return false;
+		return almanac.getSun();
+	};
+
 	return {
 		init,
 		message,
@@ -272,5 +277,6 @@ const navigation = (() => {
 		msg,
 		getDisplay,
 		getCurrentWeather,
+		getSun,
 	};
 })();

@@ -251,8 +251,39 @@ const icons = (() => {
 		}
 	};
 
+	const getHourlyIcon = (skyCover, visibility, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed, isNight = false) => {
+		// internal function to add path to returned icon
+		const addPath = (icon) => `images/r/${icon}`;
+
+		// first item in list is highest priority, units are metric where applicable
+		if (iceAccumulation > 0) return addPath('Freezing-Rain-1992.gif');
+		if (snowfallAmount > 10) {
+			if (windSpeed > 30) return addPath('Blowing Snow.gif');
+			return addPath('Heavy-Snow-1994.gif');
+		}
+		if (snowfallAmount > 0) return addPath('Light-Snow.gif');
+		if (probabilityOfPrecipitation > 70) return addPath('Rain-1992.gif');
+		if (probabilityOfPrecipitation > 50) return addPath('Shower.gif');
+		if (probabilityOfPrecipitation > 30) {
+			if (!isNight) return addPath('Scattered-Showers-1994.gif');
+			return addPath('Scattered-Showers-Night.gif');
+		}
+		if (skyCover > 70) return addPath('Cloudy.gif');
+		if (skyCover > 50) {
+			if (!isNight) return addPath('Mostly-Cloudy-1994.gif');
+			return addPath('Partly-Clear-1994.gif');
+		}
+		if (skyCover > 30) {
+			if (!isNight) return addPath('Partly-Cloudy.gif');
+			return addPath('Mostly-Clear.gif');
+		}
+		if (isNight) return addPath('Clear-1992.gif');
+		return addPath('Sunny.gif');
+	};
+
 	return {
 		getWeatherIconFromIconLink,
 		getWeatherRegionalIconFromIconLink,
+		getHourlyIcon,
 	};
 })();

@@ -318,4 +318,9 @@ class Almanac extends WeatherDisplay {
 
 		this.finishDraw();
 	}
+
+	// make sun and moon data available outside this class
+	getSun() {
+		return this.data;
+	}
 }

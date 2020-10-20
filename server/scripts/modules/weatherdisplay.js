@@ -152,6 +152,7 @@ class WeatherDisplay {
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
 		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
 		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
+		if (this.elemId === 'hourly') OkToDrawNoaaImage = false;
 		if (this.elemId === 'regionalForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'progress') {
 			OkToDrawCurrentConditions = false;

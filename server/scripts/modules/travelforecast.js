@@ -77,6 +77,12 @@ class TravelForecast extends WeatherDisplay {
 			this.longContext = this.longCanvas.getContext('2d');
 			this.longCanvasGifs = [];
 		}
+
+		// stop all gifs
+		this.longCanvasGifs.forEach(gif => gif.pause());
+		// delete the gifs
+		this.longCanvasGifs.length = 0;
+
 		// set up variables
 		const cities = this.data;
 
