@@ -20,7 +20,7 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 
 The fork is a result of wanting a more manageable, modern code base to work with. Part of it is an exercise in my education in JavaScript. There are several technical changes that were made behind the scenes.
 
-* Make use of the new API available at https://api.weather.gov ([documentation](https://www.weather.gov/documentation/services-web-api)). This caused the removal of some of the original WeatherStar 4000 displays.
+* Make use of the new API available at https://api.weather.gov ([documentation](https://www.weather.gov/documentation/services-web-api)). This caused the removal of some of the original WeatherStar 4000 displays, and allowed for new displays to be created.
 * Changed code to make extensive use of ES6 functionality including:
 	* Arrow functions
 	* Promises
@@ -45,6 +45,7 @@ I've made several changes to this Weather Star 4000 simulation compared to the o
 * The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
 * "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and a checkboxes can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
 * Radar displays the timestamp of the image.
+* A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast.
 
 ## Wish list
 
