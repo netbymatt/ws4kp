@@ -70,6 +70,7 @@ const icons = (() => {
 			return addPath('Scattered-Showers-Night-1994-2.gif');
 
 		case 'rain':
+		case 'rain-n':
 			return addPath('Rain-1992.gif');
 
 			// case 'snow':

@@ -58,9 +58,9 @@ const currentWeatherScroll = (() => {
 		drawScreen();
 	};
 
-	const drawScreen = () => {
+	const drawScreen = async () => {
 		// get the conditions
-		const data = navigation.getCurrentWeather();
+		const data = await navigation.getCurrentWeather();
 
 		// nothing to do if there's no data yet
 		if (!data) return;

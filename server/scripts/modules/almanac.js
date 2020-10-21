@@ -50,6 +50,9 @@ class Almanac extends WeatherDisplay {
 		// update status
 		this.setStatus(STATUS.loaded);
 
+		// share data
+		this.getDataCallback();
+
 	}
 
 	calcSunMoonData(weatherParameters) {
@@ -320,7 +323,12 @@ class Almanac extends WeatherDisplay {
 	}
 
 	// make sun and moon data available outside this class
-	getSun() {
-		return this.data;
+	// promise allows for data to be requested before it is available
+	async getSun() {
+		return new Promise((resolve) => {
+			if (this.data) resolve(this.data);
+			// data not available, put it into the data callback queue
+			this.getDataCallbacks.push(resolve);
+		});
 	}
 }

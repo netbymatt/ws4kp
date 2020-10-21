@@ -55,6 +55,8 @@ class CurrentWeather extends WeatherDisplay {
 		// we only get here if there was no error above
 		this.data = Object.assign({}, observations, {station: station});
 		this.setStatus(STATUS.loaded);
+
+		this.getDataCallback();
 	}
 
 	// format the data for use outside this function
@@ -201,9 +203,14 @@ class CurrentWeather extends WeatherDisplay {
 		this.finishDraw();
 	}
 
-	// return the latest gathered information if available
-	getCurrentWeather() {
-		return this.parseData();
+	// make data available outside this class
+	// promise allows for data to be requested before it is available
+	async getCurrentWeather() {
+		return new Promise((resolve) => {
+			if (this.data) resolve(this.parseData());
+			// data not available, put it into the data callback queue
+			this.getDataCallbacks.push(() => resolve(this.parseData()));
+		});
 	}
 
 	shortConditions(condition) {

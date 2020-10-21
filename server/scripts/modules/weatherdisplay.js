@@ -20,6 +20,7 @@ class WeatherDisplay {
 		this.data = undefined;
 		this.loadingStatus = STATUS.loading;
 		this.name = name?name:elemId;
+		this.getDataCallbacks = [];
 
 		// default navigation timing
 		this.timing = {
@@ -124,6 +125,14 @@ class WeatherDisplay {
 		// recalculate navigation timing (in case it was modified in the constructor)
 		this.calcNavTiming();
 		return true;
+	}
+
+	// return any data requested before it was available
+	getDataCallback() {
+		// call each callback
+		this.getDataCallbacks.forEach(fxn => fxn(this.data));
+		// clear the callbacks
+		this.getDataCallbacks = [];
 	}
 
 	drawCanvas() {
