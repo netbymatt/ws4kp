@@ -252,7 +252,7 @@ const icons = (() => {
 		}
 	};
 
-	const getHourlyIcon = (skyCover, visibility, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed, isNight = false) => {
+	const getHourlyIcon = (skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed, isNight = false) => {
 		// internal function to add path to returned icon
 		const addPath = (icon) => `images/r/${icon}`;
 

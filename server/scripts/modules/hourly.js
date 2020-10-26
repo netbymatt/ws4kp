@@ -50,12 +50,12 @@ class Hourly extends WeatherDisplay {
 		const windSpeed = this.expand(data.windSpeed.values);
 		const windDirection = this.expand(data.windDirection.values);
 		const skyCover = this.expand(data.skyCover.values);	// cloud icon
-		const visibility = this.expand(data.visibility.values);	// fog icon
+		const weather = this.expand(data.weather.values);	// fog icon
 		const iceAccumulation = this.expand(data.iceAccumulation.values); 	// ice icon
 		const probabilityOfPrecipitation = this.expand(data.probabilityOfPrecipitation.values);	// rain icon
 		const snowfallAmount = this.expand(data.snowfallAmount.values);	// snow icon
 
-		const icons = await this.determineIcon(skyCover, visibility, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
+		const icons = await this.determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
 		return temperature.map((val, idx) => {
 			if (navigation.units === UNITS.metric) return {
@@ -78,7 +78,7 @@ class Hourly extends WeatherDisplay {
 	}
 
 	// given forecast paramaters determine a suitable icon
-	async determineIcon(skyCover, visibility, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) {
+	async determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) {
 		const startOfHour = luxon.DateTime.local().startOf('hour');
 		const sunTimes = (await navigation.getSun()).sun;
 		const overnight = luxon.Interval.fromDateTimes(luxon.DateTime.fromJSDate(sunTimes[0].sunset), luxon.DateTime.fromJSDate(sunTimes[1].sunrise));
@@ -86,7 +86,7 @@ class Hourly extends WeatherDisplay {
 		return skyCover.map((val, idx) => {
 			const hour = startOfHour.plus({hours: idx});
 			const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-			return icons.getHourlyIcon(skyCover[idx], visibility[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
+			return icons.getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
 		});
 	}
 
