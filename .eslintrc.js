@@ -1,35 +1,39 @@
 module.exports = {
-	'env': {
-		'browser': true,
-		'commonjs': true,
-		'es6': true,
-		'node': true,
-		'jquery': true,
+	env: {
+		browser: true,
+		commonjs: true,
+		es6: true,
+		node: true,
+		jquery: true,
 	},
-	'extends': 'eslint:recommended',
-	'globals': {
-		'Atomics': 'readonly',
-		'SharedArrayBuffer': 'readonly'
+	extends: 'airbnb-base',
+	globals: {
+		Atomics: 'readonly',
+		SharedArrayBuffer: 'readonly',
 	},
-	'parserOptions': {
-		'ecmaVersion': 2018
+	parserOptions: {
+		ecmaVersion: 2020,
 	},
-	'rules': {
-		'indent': [
+	rules: {
+		indent: [
 			'error',
-			'tab'
+			'tab',
 		],
+		'no-tabs': 0,
+		'no-use-before-define': 0,
+		'no-console': 0,
 		'linebreak-style': [
 			'error',
-			'unix'
+			'unix',
 		],
-		'quotes': [
+		'max-len': 0,
+		quotes: [
 			'error',
-			'single'
+			'single',
 		],
-		'semi': [
+		semi: [
 			'error',
-			'always'
+			'always',
 		],
 		'no-prototype-builtins': 0,
 		'comma-dangle': ['error', 'always-multiline'],
@@ -37,14 +41,14 @@ module.exports = {
 		'default-case': ['error'],
 		'default-param-last': ['error'],
 		'dot-location': ['error', 'property'],
-		'eqeqeq': ['error'],
+		eqeqeq: ['error'],
 		'no-eval': ['error'],
 		'no-eq-null': ['error'],
 		'no-floating-decimal': ['error'],
 		'no-trailing-spaces': ['error'],
-		'brace-style': [2, '1tbs', { 'allowSingleLine': true }],
+		'brace-style': [2, '1tbs', { allowSingleLine: true }],
 	},
-	'ignorePatterns': [
-		'*.min.js'
+	ignorePatterns: [
+		'*.min.js',
 	],
 };

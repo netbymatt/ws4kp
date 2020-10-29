@@ -35,5 +35,6 @@
 			"**/vendor/auto/**",
 			"**/twc3.js",
 		],
+		"editor.tabSize": 2,
 	},
 }

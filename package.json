@@ -17,9 +17,11 @@
   },
   "homepage": "https://github.com/netbymatt/ws4kp#readme",
   "devDependencies": {
-    "del": "^5.1.0",
+    "del": "^6.0.0",
     "ejs": "^3.1.5",
-    "eslint": "^7.11.0",
+    "eslint": "^7.12.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",

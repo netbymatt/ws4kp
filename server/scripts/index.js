@@ -1,4 +1,3 @@
-'use strict';
 /* globals NoSleep, states, navigation, UNITS, utils */
 document.addEventListener('DOMContentLoaded', () => {
 	index.init();
@@ -8,17 +7,16 @@ const index = (() => {
 	const overrides = {
 		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
 	};
-	const _AutoRefreshIntervalMs = 500;
-	const _AutoRefreshTotalIntervalMs = 600000; // 10 min.
-	const _NoSleep = new NoSleep();
+	const AutoRefreshIntervalMs = 500;
+	const AutoRefreshTotalIntervalMs = 600000; // 10 min.
 
-	let _AutoSelectQuery = false;
+	let AutoSelectQuery = false;
 
-	let _LastUpdate = null;
-	let _AutoRefreshIntervalId = null;
-	let _AutoRefreshCountMs = 0;
+	let LastUpdate = null;
+	let AutoRefreshIntervalId = null;
+	let AutoRefreshCountMs = 0;
 
-	let _FullScreenOverride = false;
+	let FullScreenOverride = false;
 
 	const categories = [
 		'Land Features',
@@ -37,20 +35,20 @@ const index = (() => {
 			e.target.select();
 		});
 
-		document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenu_click);
-		document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefresh_click);
-		document.getElementById('NavigateNext').addEventListener('click', btnNavigateNext_click);
-		document.getElementById('NavigatePrevious').addEventListener('click', btnNavigatePrevious_click);
-		document.getElementById('NavigatePlay').addEventListener('click', btnNavigatePlay_click);
-		document.getElementById('ToggleFullScreen').addEventListener('click', btnFullScreen_click);
-		document.getElementById('btnGetGps').addEventListener('click', btnGetGps_click);
+		document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenuClick);
+		document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
+		document.getElementById('NavigateNext').addEventListener('click', btnNavigateNextClick);
+		document.getElementById('NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
+		document.getElementById('NavigatePlay').addEventListener('click', btnNavigatePlayClick);
+		document.getElementById('ToggleFullScreen').addEventListener('click', btnFullScreenClick);
+		document.getElementById('btnGetGps').addEventListener('click', btnGetGpsClick);
 
 		document.getElementById('divTwc').addEventListener('click', () => {
 			if (document.fullscreenElement) UpdateFullScreenNavigate();
 		});
 
-		document.addEventListener('keydown', document_keydown);
-		document.addEventListener('touchmove', e => { if (_FullScreenOverride) e.preventDefault(); });
+		document.addEventListener('keydown', documentKeydown);
+		document.addEventListener('touchmove', (e) => { if (FullScreenOverride) e.preventDefault(); });
 
 		$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
 			serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -58,26 +56,24 @@ const index = (() => {
 			paramName: 'text',
 			params: {
 				f: 'json',
-				countryCode: 'USA', //'USA,PRI,VIR,GUM,ASM',
+				countryCode: 'USA', // 'USA,PRI,VIR,GUM,ASM',
 				category: cats,
 				maxSuggestions: 10,
 			},
 			dataType: 'json',
 			transformResult: (response) => {
-				if (_AutoSelectQuery) {
-					_AutoSelectQuery = false;
+				if (AutoSelectQuery) {
+					AutoSelectQuery = false;
 					window.setTimeout(() => {
 						$(ac.suggestionsContainer.children[0]).click();
 					}, 1);
 				}
 
 				return {
-					suggestions: $.map(response.suggestions, function (i) {
-						return {
-							value: i.text,
-							data: i.magicKey,
-						};
-					}),
+					suggestions: $.map(response.suggestions, (i) => ({
+						value: i.text,
+						data: i.magicKey,
+					})),
 				};
 			},
 			minChars: 3,
@@ -96,7 +92,7 @@ const index = (() => {
 		// Auto load the previous query
 		const TwcQuery = localStorage.getItem('TwcQuery');
 		if (TwcQuery) {
-			_AutoSelectQuery = true;
+			AutoSelectQuery = true;
 			const txtAddress = document.getElementById('txtAddress');
 			txtAddress.value = TwcQuery;
 			txtAddress.blur();
@@ -141,7 +137,7 @@ const index = (() => {
 		document.getElementById('chkAutoRefresh').addEventListener('change', (e) => {
 			const Checked = e.target.checked;
 
-			if (_LastUpdate) {
+			if (LastUpdate) {
 				if (Checked) {
 					StartAutoRefreshTimer();
 				} else {
@@ -162,12 +158,10 @@ const index = (() => {
 		// swipe functionality
 		document.getElementById('container').addEventListener('swiped-left', () => swipeCallBack('left'));
 		document.getElementById('container').addEventListener('swiped-right', () => swipeCallBack('right'));
-
 	};
 
 	const changeUnits = (e) => {
 		const Units = e.target.value;
-		e;
 		localStorage.setItem('TwcUnits', Units);
 		AssignLastUpdate();
 		postMessage('units', Units);
@@ -175,7 +169,7 @@ const index = (() => {
 
 	const autocompleteOnSelect = async (suggestion) => {
 		// Do not auto get the same city twice.
-		if (this.previousSuggestionValue === suggestion.value)  return;
+		if (this.previousSuggestionValue === suggestion.value) return;
 
 		if (overrides[suggestion.value]) {
 			doRedirectToGeometry(overrides[suggestion.value]);
@@ -192,20 +186,19 @@ const index = (() => {
 			if (loc) {
 				doRedirectToGeometry(loc.feature.geometry);
 			} else {
-				alert('An unexpected error occurred. Please try a different search string.');
+				console.error('An unexpected error occurred. Please try a different search string.');
 			}
 		}
 	};
 
 	const doRedirectToGeometry = (geom) => {
-		const latLon = {lat:Math.round2(geom.y, 4), lon:Math.round2(geom.x, 4)};
+		const latLon = { lat: Math.round2(geom.y, 4), lon: Math.round2(geom.x, 4) };
 		LoadTwcData(latLon);
 		// Save the query
 		localStorage.setItem('TwcQuery', document.getElementById('txtAddress').value);
 	};
 
-	const btnFullScreen_click = () => {
-
+	const btnFullScreenClick = () => {
 		if (!document.fullscreenElement) {
 			EnterFullScreen();
 		} else {
@@ -213,9 +206,9 @@ const index = (() => {
 		}
 
 		if (navigation.isPlaying()) {
-			noSleepEnable();
+			noSleep(true);
 		} else {
-			noSleepDisable();
+			noSleep(false);
 		}
 
 		UpdateFullScreenNavigate();
@@ -227,7 +220,8 @@ const index = (() => {
 		const element = document.getElementById('divTwc');
 
 		// Supports most browsers and their versions.
-		const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
+		const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
+			|| element.mozRequestFullScreen || element.msRequestFullscreen;
 
 		if (requestMethod) {
 		// Native full screen.
@@ -235,7 +229,7 @@ const index = (() => {
 		} else {
 		// iOS doesn't support FullScreen API.
 			window.scrollTo(0, 0);
-			_FullScreenOverride = true;
+			FullScreenOverride = true;
 		}
 
 		UpdateFullScreenNavigate();
@@ -244,8 +238,8 @@ const index = (() => {
 	const ExitFullscreen = () => {
 	// exit full-screen
 
-		if (_FullScreenOverride) {
-			_FullScreenOverride = false;
+		if (FullScreenOverride) {
+			FullScreenOverride = false;
 		}
 
 		if (document.exitFullscreen) {
@@ -260,7 +254,7 @@ const index = (() => {
 		}
 	};
 
-	const btnNavigateMenu_click = () => {
+	const btnNavigateMenuClick = () => {
 		postMessage('navButton', 'menu');
 		UpdateFullScreenNavigate();
 		return false;
@@ -270,134 +264,133 @@ const index = (() => {
 		// if latlon is provided store it locally
 		if (_latLon) LoadTwcData.latLon = _latLon;
 		// get the data
-		const latLon = LoadTwcData.latLon;
+		const { latLon } = LoadTwcData;
 		// if there's no data stop
 		if (!latLon) return;
 
 		document.getElementById('txtAddress').blur();
 		StopAutoRefreshTimer();
-		_LastUpdate = null;
+		LastUpdate = null;
 		AssignLastUpdate();
 
 		postMessage('latLon', latLon);
-
-
 	};
 
 	const swipeCallBack = (direction) => {
 		switch (direction) {
 		case 'left':
-			btnNavigateNext_click();
+			btnNavigateNextClick();
 			break;
 
 		case 'right':
 		default:
-			btnNavigatePrevious_click();
+			btnNavigatePreviousClick();
 			break;
 		}
 	};
 
 	const AssignLastUpdate = () => {
-		let LastUpdate = '(None)';
-
-		if (_LastUpdate) {
+		if (LastUpdate) {
 			switch (navigation.units()) {
 			case UNITS.english:
-				LastUpdate = _LastUpdate.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' });
+				LastUpdate = LastUpdate.toLocaleString('en-US', {
+					weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
+				});
 				break;
 			default:
-				LastUpdate = _LastUpdate.toLocaleString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' });
+				LastUpdate = LastUpdate.toLocaleString('en-GB', {
+					weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
+				});
 				break;
 			}
 		}
 
 		document.getElementById('spanLastRefresh').innerHTML = LastUpdate;
 
-		if (_LastUpdate && document.getElementById('chkAutoRefresh').checked) StartAutoRefreshTimer();
+		if (LastUpdate && document.getElementById('chkAutoRefresh').checked) StartAutoRefreshTimer();
 	};
 
-	const btnNavigateRefresh_click = () => {
+	const btnNavigateRefreshClick = () => {
 		LoadTwcData();
 		UpdateFullScreenNavigate();
 
 		return false;
 	};
 
-	const btnNavigateNext_click = () => {
+	const btnNavigateNextClick = () => {
 		postMessage('navButton', 'next');
 		UpdateFullScreenNavigate();
 
 		return false;
 	};
 
-	const btnNavigatePrevious_click = () => {
+	const btnNavigatePreviousClick = () => {
 		postMessage('navButton', 'previous');
 		UpdateFullScreenNavigate();
 
 		return false;
 	};
 
-	let _NavigateFadeIntervalId = null;
+	let NavigateFadeIntervalId = null;
 
 	const UpdateFullScreenNavigate = () => {
 		document.activeElement.blur();
 		document.getElementById('divTwcBottom').classList.remove('hidden');
 		document.getElementById('divTwcBottom').classList.add('visible');
 
-		if (_NavigateFadeIntervalId) {
-			clearTimeout(_NavigateFadeIntervalId);
-			_NavigateFadeIntervalId = null;
+		if (NavigateFadeIntervalId) {
+			clearTimeout(NavigateFadeIntervalId);
+			NavigateFadeIntervalId = null;
 		}
 
-		_NavigateFadeIntervalId = setTimeout(() => {
+		NavigateFadeIntervalId = setTimeout(() => {
 			if (document.fullscreenElement) {
 				document.getElementById('divTwcBottom').classList.remove('visible');
 				document.getElementById('divTwcBottom').classList.add('hidden');
 			}
-
 		}, 2000);
 	};
 
-	const document_keydown = (e) => {
-
+	const documentKeydown = (e) => {
 		const code = (e.keyCode || e.which);
 
 		if (document.fullscreenElement || document.activeElement === document.body) {
 			switch (code) {
 			case 32: // Space
-				btnNavigatePlay_click();
+				btnNavigatePlayClick();
 				return false;
 
 			case 39: // Right Arrow
 			case 34: // Page Down
-				btnNavigateNext_click();
+				btnNavigateNextClick();
 				return false;
 
 			case 37: // Left Arrow
 			case 33: // Page Up
-				btnNavigatePrevious_click();
+				btnNavigatePreviousClick();
 				return false;
 
 			case 36: // Home
-				btnNavigateMenu_click();
+				btnNavigateMenuClick();
 				return false;
 
 			case 48: // Restart
-				btnNavigateRefresh_click();
+				btnNavigateRefreshClick();
 				return false;
 
 			case 70: // F
-				btnFullScreen_click();
+				btnFullScreenClick();
 				return false;
 
 			default:
 			}
 		}
+		return false;
 	};
 
-	Math.round2 = (value, decimals) => Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+	Math.round2 = (value, decimals) => Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
 
-	const btnNavigatePlay_click = () => {
+	const btnNavigatePlayClick = () => {
 		postMessage('navButton', 'playToggle');
 		UpdateFullScreenNavigate();
 
@@ -411,7 +404,7 @@ const index = (() => {
 		if (!data.type) return;
 		switch (data.type) {
 		case 'loaded':
-			_LastUpdate = new Date();
+			LastUpdate = new Date();
 			AssignLastUpdate();
 			break;
 
@@ -422,18 +415,16 @@ const index = (() => {
 		case 'isPlaying':
 			localStorage.setItem('TwcPlay', navigation.isPlaying());
 
-
 			if (navigation.isPlaying()) {
-				noSleepEnable();
+				noSleep(true);
 				playButton.title = 'Pause';
 				playButton.src = 'images/nav/ic_pause_white_24dp_1x.png';
 			} else {
-				noSleepDisable();
+				noSleep(false);
 				playButton.title = 'Play';
 				playButton.src = 'images/nav/ic_play_arrow_white_24dp_1x.png';
 			}
 			break;
-
 
 		default:
 			console.error(`Unknown event '${data.eventType}`);
@@ -441,60 +432,57 @@ const index = (() => {
 	};
 
 	// post a message to the iframe
-	const postMessage = (type, message = {}) => {
-		navigation.message({type, message});
+	const postMessage = (type, myMessage = {}) => {
+		navigation.message({ type, message: myMessage });
 	};
 
 	const StartAutoRefreshTimer = () => {
 	// Ensure that any previous timer has already stopped.
 		// check if timer is running
-		if (_AutoRefreshIntervalId) return;
+		if (AutoRefreshIntervalId) return;
 
 		// Reset the time elapsed.
-		_AutoRefreshCountMs = 0;
+		AutoRefreshCountMs = 0;
 
 		const AutoRefreshTimer = () => {
 		// Increment the total time elapsed.
-			_AutoRefreshCountMs += _AutoRefreshIntervalMs;
+			AutoRefreshCountMs += AutoRefreshIntervalMs;
 
 			// Display the count down.
-			let RemainingMs = (_AutoRefreshTotalIntervalMs - _AutoRefreshCountMs);
+			let RemainingMs = (AutoRefreshTotalIntervalMs - AutoRefreshCountMs);
 			if (RemainingMs < 0) {
 				RemainingMs = 0;
 			}
 			const dt = new Date(RemainingMs);
-			document.getElementById('spanRefreshCountDown').innerHTML = (dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes()) + ':' + (dt.getSeconds() < 10 ? '0' + dt.getSeconds() : dt.getSeconds());
+			document.getElementById('spanRefreshCountDown').innerHTML = `${dt.getMinutes() < 10 ? `0${dt.getMinutes()}` : dt.getMinutes()}:${dt.getSeconds() < 10 ? `0${dt.getSeconds()}` : dt.getSeconds()}`;
 
 			// Time has elapsed.
-			if (_AutoRefreshCountMs >= _AutoRefreshTotalIntervalMs) LoadTwcData();
+			if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs) LoadTwcData();
 		};
-		_AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, _AutoRefreshIntervalMs);
+		AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, AutoRefreshIntervalMs);
 		AutoRefreshTimer();
 	};
 	const StopAutoRefreshTimer = () => {
-		if (_AutoRefreshIntervalId) {
-			window.clearInterval(_AutoRefreshIntervalId);
+		if (AutoRefreshIntervalId) {
+			window.clearInterval(AutoRefreshIntervalId);
 			document.getElementById('spanRefreshCountDown').innerHTML = '--:--';
-			_AutoRefreshIntervalId = null;
+			AutoRefreshIntervalId = null;
 		}
 	};
 
-	const btnGetGps_click = async () => {
+	const btnGetGpsClick = async () => {
 		if (!navigator.geolocation) return;
 
-		const position = await (() => {
-			return new Promise(resolve => {
-				navigator.geolocation.getCurrentPosition(resolve);
-			});
-		})();
-		const latitude = position.coords.latitude;
-		const longitude = position.coords.longitude;
+		const position = await (() => new Promise((resolve) => {
+			navigator.geolocation.getCurrentPosition(resolve);
+		}))();
+		const { latitude, longitude } = position.coords;
 
 		let data;
 		try {
 			data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
 				data: {
-					location: longitude + ',' + latitude,
+					location: `${longitude},${latitude}`,
 					distance: 1000, // Find location up to 1 KM.
 					f: 'json',
 				},
@@ -504,7 +492,7 @@ const index = (() => {
 			console.error(e.status, e.responseJSONe);
 		}
 		const ZipCode = data.address.Postal;
-		const City = data.address.City;
+		const { City } = data.address;
 		const State = states.getTwoDigitCode(data.address.Region);
 		const Country = data.address.CountryCode;
 		const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
@@ -519,29 +507,30 @@ const index = (() => {
 	};
 
 	const populateWeatherParameters = (weatherParameters) => {
-
-		document.getElementById('spanCity').innerHTML = weatherParameters.city + ', ';
+		document.getElementById('spanCity').innerHTML = `${weatherParameters.city}, `;
 		document.getElementById('spanState').innerHTML = weatherParameters.state;
 		document.getElementById('spanStationId').innerHTML = weatherParameters.stationId;
 		document.getElementById('spanRadarId').innerHTML = weatherParameters.radarId;
 		document.getElementById('spanZoneId').innerHTML = weatherParameters.zoneId;
 	};
 
-	// track state of nosleep locally to avoid a null case error when nosleep.disable is called without first calling .enable
+	// track state of nosleep locally to avoid a null case error
+	// when nosleep.disable is called without first calling .enable
 	let wakeLock = false;
-	const noSleepEnable = () => {
-		_NoSleep.enable();
-		wakeLock = true;
-	};
-	const noSleepDisable = () => {
-		if (!wakeLock) return;
-		_NoSleep.disable();
-		wakeLock = false;
+	const noSleep = (enable = false) => {
+		// get a nosleep controller
+		if (!noSleep.controller) noSleep.controller = new NoSleep();
+		// don't call anything if the states match
+		if (wakeLock === enable) return false;
+		// store the value
+		wakeLock = enable;
+		// call the function
+		if (enable) return noSleep.controller.enable();
+		return noSleep.controller.disable();
 	};
 
 	return {
 		init,
 		message,
 	};
-
 })();

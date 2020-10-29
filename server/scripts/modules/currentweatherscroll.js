@@ -1,5 +1,3 @@
-'use strict';
-
 /* globals draw, navigation */
 
 // eslint-disable-next-line no-unused-vars
@@ -10,7 +8,6 @@ const currentWeatherScroll = (() => {
 	// local variables
 	let context;	// currently active context
 	let blankDrawArea;	// original state of context
-	let station;
 	let interval;
 	let screenIndex = 0;
 
@@ -36,7 +33,6 @@ const currentWeatherScroll = (() => {
 
 		// draw the data
 		drawScreen();
-
 	};
 
 	const stop = (reset) => {
@@ -53,7 +49,7 @@ const currentWeatherScroll = (() => {
 
 	// increment interval, roll over
 	const incrementInterval = () => {
-		screenIndex = (screenIndex+1)%(screens.length);
+		screenIndex = (screenIndex + 1) % (screens.length);
 		// draw new text
 		drawScreen();
 	};
@@ -74,7 +70,7 @@ const currentWeatherScroll = (() => {
 	// the "screens" are stored in an array for easy addition and removal
 	const screens = [
 		// station name
-		(data) => `Conditions at ${data.station.properties.name.substr(0,20)}`,
+		(data) => `Conditions at ${data.station.properties.name.substr(0, 20)}`,
 
 		// temperature
 		(data) => {
@@ -108,7 +104,7 @@ const currentWeatherScroll = (() => {
 		},
 
 		// visibility
-		(data) => `Visib: ${data.Visibility} ${data.VisibilityUnit}  Ceiling: ${data.Ceiling===0?'Unlimited':`${data.Ceiling} ${data.CeilingUnit}`}`,
+		(data) => `Visib: ${data.Visibility} ${data.VisibilityUnit}  Ceiling: ${data.Ceiling === 0 ? 'Unlimited' : `${data.Ceiling} ${data.CeilingUnit}`}`,
 	];
 
 	// internal draw function with preset parameters

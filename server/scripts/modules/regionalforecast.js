@@ -1,12 +1,12 @@
 // regional forecast and observations
 // type 0 = observations, 1 = first forecast, 2 = second forecast
 
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, draw, navigation, luxon, _StationInfo, _RegionalCities */
+/* globals WeatherDisplay, utils, STATUS, icons, UNITS, draw, navigation, luxon, StationInfo, RegionalCities */
 
 // eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
-	constructor(navId,elemId) {
-		super(navId,elemId,'Regional Forecast');
+	constructor(navId, elemId) {
+		super(navId, elemId, 'Regional Forecast');
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround5_1.png');
@@ -15,9 +15,9 @@ class RegionalForecast extends WeatherDisplay {
 		this.timing.totalScreens = 3;
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// pre-load the base map (returns promise)
 		let src = 'images/Basemap2.png';
@@ -44,35 +44,35 @@ class RegionalForecast extends WeatherDisplay {
 		if (weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
-		const stationInfoArray = Object.keys(_StationInfo).map(key => Object.assign({}, _StationInfo[key], {targetDistance}));
+		const stationInfoArray = Object.values(StationInfo).map((value) => ({ ...value, targetDistance }));
 		// combine regional cities with station info for additional stations
 		// stations are intentionally after cities to allow cities priority when drawing the map
-		const combinedCities = [..._RegionalCities, ...stationInfoArray];
+		const combinedCities = [...RegionalCities, ...stationInfoArray];
 
 		// Determine which cities are within the max/min latitude/longitude.
 		const regionalCities = [];
-		combinedCities.forEach(city => {
-			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat &&
-						city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
-				// default to 1 for cities loaded from _RegionalCities, use value calculate above for remaining stations
-				const targetDistance = city.targetDistance || 1;
+		combinedCities.forEach((city) => {
+			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat
+						&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
+				// default to 1 for cities loaded from RegionalCities, use value calculate above for remaining stations
+				const targetDist = city.targetDistance || 1;
 				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
 				const okToAddCity = regionalCities.reduce((acc, testCity) => {
 					const distance = utils.calc.distance(city.lon, city.lat, testCity.lon, testCity.lat);
-					return acc && distance >= targetDistance;
+					return acc && distance >= targetDist;
 				}, true);
 				if (okToAddCity) regionalCities.push(city);
 			}
 		});
 
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
-		const regionalForecastPromises = regionalCities.map(async city => {
+		const regionalForecastPromises = regionalCities.map(async (city) => {
 			try {
 				// get the point first, then break down into forecast and observations
 				const point = await utils.weather.getPoint(city.lat, city.lon);
 
 				// start off the observation task
-				const observationPromise = this.getRegionalObservation(point, city);
+				const observationPromise = RegionalForecast.getRegionalObservation(point, city);
 
 				const forecast = await utils.fetch.json(point.properties.forecast);
 
@@ -85,7 +85,7 @@ class RegionalForecast extends WeatherDisplay {
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),
 					temperature: utils.units.celsiusToFahrenheit(observation.temperature.value),
-					name: this.formatCity(city.city),
+					name: RegionalForecast.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,
 					y: cityXY.y,
@@ -101,8 +101,8 @@ class RegionalForecast extends WeatherDisplay {
 				// always skip the first forecast index because it's what's going on right now
 				return [
 					regionalObservation,
-					this.buildForecast(forecast.properties.periods[1], city, cityXY),
-					this.buildForecast(forecast.properties.periods[2], city, cityXY),
+					RegionalForecast.buildForecast(forecast.properties.periods[1], city, cityXY),
+					RegionalForecast.buildForecast(forecast.properties.periods[2], city, cityXY),
 				];
 			} catch (e) {
 				console.log(`No regional forecast data for '${city.name}'`);
@@ -114,7 +114,7 @@ class RegionalForecast extends WeatherDisplay {
 		// wait for the forecasts
 		const regionalDataAll = await Promise.all(regionalForecastPromises);
 		// filter out any false (unavailable data)
-		const regionalData = regionalDataAll.filter(data => data);
+		const regionalData = regionalDataAll.filter((data) => data);
 
 		// test for data present
 		if (regionalData.length === 0) {
@@ -132,11 +132,11 @@ class RegionalForecast extends WeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
-	buildForecast (forecast, city, cityXY) {
+	static buildForecast(forecast, city, cityXY) {
 		return {
 			daytime: forecast.isDaytime,
-			temperature: forecast.temperature||0,
-			name: this.formatCity(city.city),
+			temperature: forecast.temperature || 0,
+			name: RegionalForecast.formatCity(city.city),
 			icon: forecast.icon,
 			x: cityXY.x,
 			y: cityXY.y,
@@ -144,7 +144,7 @@ class RegionalForecast extends WeatherDisplay {
 		};
 	}
 
-	async getRegionalObservation (point, city) {
+	static async getRegionalObservation(point, city) {
 		try {
 			// get stations
 			const stations = await utils.fetch.json(point.properties.observationStations);
@@ -165,9 +165,9 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	// utility latitude/pixel conversions
-	getXYFromLatitudeLongitude (Latitude, Longitude, OffsetX, OffsetY, state) {
-		if (state === 'AK') return this.getXYFromLatitudeLongitudeAK(...arguments);
-		if (state === 'HI') return this.getXYFromLatitudeLongitudeHI(...arguments);
+	getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
+		if (state === 'AK') return this.getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY);
+		if (state === 'HI') return this.getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY);
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 1600;
@@ -194,7 +194,7 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYFromLatitudeLongitudeAK (Latitude, Longitude, OffsetX, OffsetY) {
+	static getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY) {
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 1142;
@@ -221,7 +221,7 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYFromLatitudeLongitudeHI (Latitude, Longitude, OffsetX, OffsetY) {
+	static getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY) {
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 571;
@@ -248,38 +248,44 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getMinMaxLatitudeLongitude (X, Y, OffsetX, OffsetY, state) {
-		if (state === 'AK') return this.getMinMaxLatitudeLongitudeAK(...arguments);
-		if (state === 'HI') return this.getMinMaxLatitudeLongitudeHI(...arguments);
+	getMinMaxLatitudeLongitude(X, Y, OffsetX, OffsetY, state) {
+		if (state === 'AK') return this.getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY);
+		if (state === 'HI') return this.getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY);
 		const maxLat = ((Y / 55.2) - 50.5) * -1;
 		const minLat = (((Y + (OffsetY * 2)) / 55.2) - 50.5) * -1;
 		const minLon = (((X * -1) / 41.775) + 127.5) * -1;
 		const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 127.5) * -1;
 
-		return { minLat, maxLat, minLon, maxLon };
+		return {
+			minLat, maxLat, minLon, maxLon,
+		};
 	}
 
-	getMinMaxLatitudeLongitudeAK (X, Y, OffsetX, OffsetY) {
+	static getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY) {
 		const maxLat = ((Y / 56) - 73.0) * -1;
 		const minLat = (((Y + (OffsetY * 2)) / 56) - 73.0) * -1;
 		const minLon = (((X * -1) / 25) + 175.0) * -1;
 		const maxLon = ((((X + (OffsetX * 2)) * -1) / 25) + 175.0) * -1;
 
-		return { minLat, maxLat, minLon, maxLon };
+		return {
+			minLat, maxLat, minLon, maxLon,
+		};
 	}
 
-	getMinMaxLatitudeLongitudeHI (X, Y, OffsetX, OffsetY) {
+	static getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY) {
 		const maxLat = ((Y / 55.2) - 25) * -1;
 		const minLat = (((Y + (OffsetY * 2)) / 55.2) - 25) * -1;
 		const minLon = (((X * -1) / 41.775) + 164.5) * -1;
 		const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 164.5) * -1;
 
-		return { minLat, maxLat, minLon, maxLon };
+		return {
+			minLat, maxLat, minLon, maxLon,
+		};
 	}
 
-	getXYForCity (City, MaxLatitude, MinLongitude, state) {
-		if (state === 'AK') this.getXYForCityAK(...arguments);
-		if (state === 'HI') this.getXYForCityHI(...arguments);
+	getXYForCity(City, MaxLatitude, MinLongitude, state) {
+		if (state === 'AK') this.getXYForCityAK(City, MaxLatitude, MinLongitude);
+		if (state === 'HI') this.getXYForCityHI(City, MaxLatitude, MinLongitude);
 		let x = (City.lon - MinLongitude) * 57;
 		let y = (MaxLatitude - City.lat) * 70;
 
@@ -292,7 +298,7 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYForCityAK (City, MaxLatitude, MinLongitude) {
+	static getXYForCityAK(City, MaxLatitude, MinLongitude) {
 		let x = (City.lon - MinLongitude) * 37;
 		let y = (MaxLatitude - City.lat) * 70;
 
@@ -304,7 +310,7 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYForCityHI (City, MaxLatitude, MinLongitude) {
+	static getXYForCityHI(City, MaxLatitude, MinLongitude) {
 		let x = (City.lon - MinLongitude) * 57;
 		let y = (MaxLatitude - City.lat) * 70;
 
@@ -318,19 +324,19 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	// to fit on the map, remove anything after punctuation and then limit to 15 characters
-	formatCity(city) {
-		return city.match(/[^-;/\\,]*/)[0].substr(0,12);
+	static formatCity(city) {
+		return city.match(/[^-;/\\,]*/)[0].substr(0, 12);
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
 		// break up data into useful values
-		const {regionalData: data, sourceXY, offsetXY} = this.data;
+		const { regionalData: data, sourceXY, offsetXY } = this.data;
 
 		// fixed offset for all y values when drawing to the map
 		const mapYOff = 90;
 
-		const {DateTime} = luxon;
+		const { DateTime } = luxon;
 		// draw the header graphics
 		this.context.drawImage(await this.backgroundImage, 0, 0);
 		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
@@ -340,21 +346,21 @@ class RegionalForecast extends WeatherDisplay {
 		if (this.screenIndex === 0) {
 			draw.titleText(this.context, 'Regional', 'Observations');
 		} else {
-			let forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
+			const forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
 
 			// get the name of the day
-			const dayName = forecastDate.toLocaleString({weekday: 'long'});
+			const dayName = forecastDate.toLocaleString({ weekday: 'long' });
 			// draw the title
 			if (data[0][this.screenIndex].daytime) {
 				draw.titleText(this.context, 'Forecast for', dayName);
 			} else {
-				draw.titleText(this.context, 'Forecast for', dayName + ' Night');
+				draw.titleText(this.context, 'Forecast for', `${dayName} Night`);
 			}
 		}
 
 		// draw the map
 		this.context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, (offsetXY.x * 2), (offsetXY.y * 2), 0, mapYOff, 640, 312);
-		await Promise.all(data.map(async city => {
+		await Promise.all(data.map(async (city) => {
 			const period = city[this.screenIndex];
 			// draw the icon if possible
 			const icon = icons.getWeatherRegionalIconFromIconLink(period.icon, !period.daytime);
@@ -365,20 +371,19 @@ class RegionalForecast extends WeatherDisplay {
 					auto_play: true,
 					canvas: this.canvas,
 					x: period.x,
-					y: period.y - 15+mapYOff,
+					y: period.y - 15 + mapYOff,
 				}));
 			}
 
 			// City Name
-			draw.text(this.context, 'Star4000', '20px', '#ffffff', period.x - 40, period.y - 15+mapYOff, period.name, 2);
+			draw.text(this.context, 'Star4000', '20px', '#ffffff', period.x - 40, period.y - 15 + mapYOff, period.name, 2);
 
 			// Temperature
-			let temperature = period.temperature;
+			let { temperature } = period;
 			if (navigation.units() === UNITS.metric) temperature = Math.round(utils.units.fahrenheitToCelsius(temperature));
-			draw.text(this.context, 'Star4000 Large Compressed', '28px', '#ffff00', period.x - (temperature.toString().length * 15), period.y + 20+mapYOff, temperature, 2);
+			draw.text(this.context, 'Star4000 Large Compressed', '28px', '#ffff00', period.x - (temperature.toString().length * 15), period.y + 20 + mapYOff, temperature, 2);
 		}));
 
 		this.finishDraw();
-
 	}
 }

@@ -1,6 +1,5 @@
-'use strict';
 // navigation handles progress, next/previous and initial load messages from the parent frame
-/* globals index, utils, _StationInfo, STATUS */
+/* globals index, utils, StationInfo, STATUS */
 /* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress, Hourly */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,11 +12,11 @@ const UNITS = {
 };
 
 const navigation = (() => {
-	let weatherParameters = {};
 	let displays = [];
 	let currentUnits = UNITS.english;
 	let playing = false;
 	let progress;
+	const weatherParameters = {};
 
 	// current conditions and sunrise/sunset are made available from the display below
 	let currentWeather;
@@ -46,11 +45,10 @@ const navigation = (() => {
 		default:
 			console.error(`Unknown event ${data.type}`);
 		}
-
 	};
 
-	const postMessage = (type, message = {}) => {
-		index.message({type, message});
+	const postMessage = (type, myMessage = {}) => {
+		index.message({ type, message: myMessage });
 	};
 
 	const getWeather = async (latLon) => {
@@ -62,11 +60,11 @@ const navigation = (() => {
 
 		const StationId = stations.features[0].properties.stationIdentifier;
 
-		let city = point.properties.relativeLocation.properties.city;
+		let { city } = point.properties.relativeLocation.properties;
 
-		if (StationId in _StationInfo) {
-			city = _StationInfo[StationId].city;
-			city = city.split('/')[0];
+		if (StationId in StationInfo) {
+			city = StationInfo[StationId].city;
+			[city] = city.split('/');
 		}
 
 		// populate the weather parameters
@@ -89,13 +87,13 @@ const navigation = (() => {
 		// draw the progress canvas and hide others
 		hideAllCanvases();
 		document.getElementById('loading').style.display = 'none';
-		progress = new Progress(-1,'progress');
+		progress = new Progress(-1, 'progress');
 		await progress.drawCanvas();
 		progress.showCanvas();
 
 		// start loading canvases if necessary
 		if (displays.length === 0) {
-			currentWeather = new CurrentWeather(0,'currentWeather');
+			currentWeather = new CurrentWeather(0, 'currentWeather');
 			almanac = new Almanac(7, 'almanac');
 			displays = [
 				currentWeather,
@@ -110,8 +108,7 @@ const navigation = (() => {
 			];
 		}
 		// call for new data on each display
-		displays.forEach(display => display.getData(weatherParameters));
-
+		displays.forEach((display) => display.getData(weatherParameters));
 	};
 
 	// receive a status update from a module {id, value}
@@ -130,12 +127,12 @@ const navigation = (() => {
 	};
 
 	const countLoadedCanvases = () => displays.reduce((acc, display) => {
-		if (display.status !== STATUS.loading) return acc+1;
+		if (display.status !== STATUS.loading) return acc + 1;
 		return acc;
-	},0);
+	}, 0);
 
 	const hideAllCanvases = () => {
-		displays.forEach(display => display.hideCanvas());
+		displays.forEach((display) => display.hideCanvas());
 	};
 
 	const units = () => currentUnits;
@@ -168,9 +165,9 @@ const navigation = (() => {
 	};
 
 	// receive navigation messages from displays
-	const displayNavMessage = (message) => {
-		if (message.type === msg.response.previous) loadDisplay(-1);
-		if (message.type === msg.response.next) loadDisplay(1);
+	const displayNavMessage = (myMessage) => {
+		if (myMessage.type === msg.response.previous) loadDisplay(-1);
+		if (myMessage.type === msg.response.next) loadDisplay(1);
 	};
 
 	// navigate to next or previous
@@ -192,9 +189,9 @@ const navigation = (() => {
 		const totalDisplays = displays.length;
 		const curIdx = currentDisplayIndex();
 		let idx;
-		for (let i = 0; i < totalDisplays; i++) {
+		for (let i = 0; i < totalDisplays; i += 1) {
 			// convert form simple 0-10 to start at current display index +/-1 and wrap
-			idx = utils.calc.wrap(curIdx+(i+1)*direction,totalDisplays);
+			idx = utils.calc.wrap(curIdx + (i + 1) * direction, totalDisplays);
 			if (displays[idx].status === STATUS.loaded) break;
 		}
 		const newDisplay = displays[idx];
@@ -207,12 +204,10 @@ const navigation = (() => {
 
 	// get the current display index or value
 	const currentDisplayIndex = () => {
-		let index = displays.findIndex(display=>display.isActive());
+		const index = displays.findIndex((display) => display.isActive());
 		return index;
 	};
-	const currentDisplay = () => {
-		return displays[currentDisplayIndex()];
-	};
+	const currentDisplay = () => displays[currentDisplayIndex()];
 
 	const setPlaying = (newValue) => {
 		playing = newValue;

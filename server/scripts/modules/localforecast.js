@@ -1,23 +1,22 @@
 // display text based local forecast
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation*/
+/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation */
 
 // eslint-disable-next-line no-unused-vars
 class LocalForecast extends WeatherDisplay {
-	constructor(navId,elemId) {
-		super(navId,elemId, 'Local Forecast');
+	constructor(navId, elemId) {
+		super(navId, elemId, 'Local Forecast');
 
 		// set timings
-		this.timing.baseDelay= 5000;
+		this.timing.baseDelay = 5000;
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
-
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// get raw data
 		const rawData = await this.getRawData(weatherParameters);
@@ -27,7 +26,7 @@ class LocalForecast extends WeatherDisplay {
 			return;
 		}
 		// parse raw data
-		const conditions = this.parseLocalForecast(rawData);
+		const conditions = LocalForecast.parse(rawData);
 
 		// split this forecast into the correct number of screens
 		const maxRows = 7;
@@ -36,9 +35,9 @@ class LocalForecast extends WeatherDisplay {
 		this.screenTexts = [];
 
 		// read each text
-		conditions.forEach(condition => {
+		conditions.forEach((condition) => {
 			// process the text
-			let text = condition.DayName.toUpperCase() + '...';
+			let text = `${condition.DayName.toUpperCase()}...`;
 			let conditionText = condition.Text;
 			if (navigation.units() === UNITS.metric) {
 				conditionText = condition.TextC;
@@ -52,28 +51,27 @@ class LocalForecast extends WeatherDisplay {
 			const maxRowCount = maxRows;
 			let rowCount = 0;
 
-
 			// if (PrependAlert) {
 			// 	ScreenText = LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1];
 			// 	rowCount = ScreenText.split('\n').length - 1;
 			// }
 
-			for (let i = 0; i <= lineCount - 1; i++) {
-				if (lines[i] === '') continue;
-
-				if (rowCount > maxRowCount - 1) {
+			for (let i = 0; i <= lineCount - 1; i += 1) {
+				if (lines[i] !== '') {
+					if (rowCount > maxRowCount - 1) {
 					// if (PrependAlert) {
 					// 	LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1] = ScreenText;
 					// 	PrependAlert = false;
 					// } else {
-					this.screenTexts.push(ScreenText);
-					// }
-					ScreenText = '';
-					rowCount = 0;
-				}
+						this.screenTexts.push(ScreenText);
+						// }
+						ScreenText = '';
+						rowCount = 0;
+					}
 
-				ScreenText += lines[i] + '\n';
-				rowCount++;
+					ScreenText += `${lines[i]}\n`;
+					rowCount += 1;
+				}
 			}
 			// if (PrependAlert) {
 			// 	this.screenTexts[this.screenTexts.length - 1] = ScreenText;
@@ -99,7 +97,6 @@ class LocalForecast extends WeatherDisplay {
 					units,
 				},
 			});
-
 		} catch (e) {
 			console.error(`GetWeatherForecast failed: ${weatherParameters.forecast}`);
 			console.error(e.status, e.responseJSON);
@@ -125,15 +122,15 @@ class LocalForecast extends WeatherDisplay {
 		draw.box(this.context, 'rgb(33, 40, 90)', 65, 105, 505, 280);
 		// Draw the text.
 		this.screenTexts[this.screenIndex].split('\n').forEach((text, index) => {
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 75, 140+40*index, text, 2);
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 75, 140 + 40 * index, text, 2);
 		});
 		this.finishDraw();
 	}
 
 	// format the forecast
-	parseLocalForecast (forecast) {
+	static parse(forecast) {
 		// only use the first 6 lines
-		return forecast.properties.periods.slice(0,6).map(text => ({
+		return forecast.properties.periods.slice(0, 6).map((text) => ({
 			// format day and text
 			DayName: text.name.toUpperCase(),
 			Text: text.detailedForecast,

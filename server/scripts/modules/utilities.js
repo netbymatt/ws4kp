@@ -1,4 +1,3 @@
-'use strict';
 // radar utilities
 
 /* globals SuperGif */
@@ -17,29 +16,25 @@ const utils = (() => {
 
 	// ****************************** load images *********************************
 	// load an image from a blob or url
-	const loadImg = (imgData, cors = false) => {
-		return new Promise(resolve => {
-			const img = new Image();
-			img.onload = (e) => {
-				resolve(e.target);
-			};
-			if (imgData instanceof Blob) {
-				img.src = window.URL.createObjectURL(imgData);
-			} else {
-				let url = imgData;
-				if (cors) url = rewriteUrl(imgData);
-				img.src = url;
-			}
-		});
-	};
+	const loadImg = (imgData, cors = false) => new Promise((resolve) => {
+		const img = new Image();
+		img.onload = (e) => {
+			resolve(e.target);
+		};
+		if (imgData instanceof Blob) {
+			img.src = window.URL.createObjectURL(imgData);
+		} else {
+			let url = imgData;
+			if (cors) url = rewriteUrl(imgData);
+			img.src = url;
+		}
+	});
 
 	// async version of SuperGif
-	const superGifAsync = (e) => {
-		return new Promise(resolve => {
-			const gif = new SuperGif(e);
-			gif.load(() => resolve(gif));
-		});
-	};
+	const superGifAsync = (e) => new Promise((resolve) => {
+		const gif = new SuperGif(e);
+		gif.load(() => resolve(gif));
+	});
 
 	// preload an image
 	// the goal is to get it in the browser's cache so it is available more quickly when the browser needs it
@@ -65,24 +60,24 @@ const utils = (() => {
 		context.imageSmoothingEnabled = false;
 
 		// draw the image
-		context.drawImage(img, 0,0);
+		context.drawImage(img, 0, 0);
 		return context;
 	};
 
 	// *********************************** unit conversions ***********************
 
-	Math.round2 = (value, decimals) => Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+	Math.round2 = (value, decimals) => Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
 
 	const mphToKph = (Mph) => Math.round(Mph * 1.60934);
 	const kphToMph = (Kph) => Math.round(Kph / 1.60934);
-	const celsiusToFahrenheit = (Celsius) => Math.round(Celsius * 9 / 5 + 32);
-	const fahrenheitToCelsius = (Fahrenheit) => Math.round2(((Fahrenheit) - 32) * 5 / 9, 1);
+	const celsiusToFahrenheit = (Celsius) => Math.round((Celsius * 9) / 5 + 32);
+	const fahrenheitToCelsius = (Fahrenheit) => Math.round2((((Fahrenheit) - 32) * 5) / 9, 1);
 	const milesToKilometers = (Miles) => Math.round(Miles * 1.60934);
 	const kilometersToMiles = (Kilometers) => Math.round(Kilometers / 1.60934);
 	const feetToMeters = (Feet) => Math.round(Feet * 0.3048);
 	const metersToFeet = (Meters) => Math.round(Meters / 0.3048);
 	const inchesToCentimeters = (Inches) => Math.round2(Inches * 2.54, 2);
-	const pascalToInHg = (Pascal) => Math.round2(Pascal*0.0002953,2);
+	const pascalToInHg = (Pascal) => Math.round2(Pascal * 0.0002953, 2);
 
 	// ***************************** calculations **********************************
 
@@ -125,7 +120,7 @@ const utils = (() => {
 		const T = Temperature;
 		const V = WindSpeed;
 
-		return Math.round(35.74 + (0.6215 * T) - (35.75 * Math.pow(V, 0.16)) + (0.4275 * T * Math.pow(V, 0.16)));
+		return Math.round(35.74 + (0.6215 * T) - (35.75 * (V ** 0.16)) + (0.4275 * T * (V ** 0.16)));
 	};
 
 	// wind direction
@@ -135,20 +130,22 @@ const utils = (() => {
 		return arr[(val % 16)];
 	};
 
-	const distance = (x1 ,y1, x2, y2) => Math.sqrt((x2-=x1)*x2 + (y2-=y1)*y2);
+	const distance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
 	// wrap a number to 0-m
-	const wrap = (x,m) => (x%m + m)%m;
+	const wrap = (x, m) => ((x % m) + m) % m;
 
 	// ********************************* strings *********************************************
-	const wordWrap = (str, ...rest) => {
-		let m = ((rest.length >= 1) ? rest[0] : 75);
-		let b = ((rest.length >= 2) ? rest[1] : '\n');
-		let c = ((rest.length >= 3) ? rest[2] : false);
+	const wordWrap = (str = '', ...rest) => {
+		const m = ((rest.length >= 1) ? rest[0] : 75);
+		const b = ((rest.length >= 2) ? rest[1] : '\n');
+		const c = ((rest.length >= 3) ? rest[2] : false);
 
-		let i, j, l, s, r;
-
-		str += '';
+		let i;
+		let j;
+		let l;
+		let s;
+		let r;
 
 		if (m < 1) {
 			return str;
@@ -160,8 +157,8 @@ const utils = (() => {
 				r[i] += s.slice(0, j) + ((s = s.slice(j)).length ? b : '')) {
 				j = c === 2 || (j = s.slice(0, m + 1).match(/\S*(\s)?$/))[1]
 					? m
-					: j.input.length - j[0].length || c === true && m ||
-						j.input.length + (j = s.slice(m).match(/^\S*/))[0].length;
+					: ((j.input.length - j[0].length || c === true) && m)
+						|| j.input.length + (j = s.slice(m).match(/^\S*/))[0].length;
 			}
 		}
 
@@ -169,7 +166,8 @@ const utils = (() => {
 	};
 	// ********************************* cors ********************************************
 	// rewrite some urls for local server
-	const rewriteUrl = (url) => {
+	const rewriteUrl = (_url) => {
+		let url = _url;
 		url = url.replace('https://api.weather.gov/', window.location.href);
 		url = url.replace('https://radar.weather.gov/', window.location.href);
 		url = url.replace('https://www.cpc.ncep.noaa.gov/', window.location.href);
@@ -182,14 +180,14 @@ const utils = (() => {
 	const raw = (url, params) => fetchAsync(url, '', params);
 	const blob = (url, params) => fetchAsync(url, 'blob', params);
 
-	const fetchAsync = async (_url, responseType, _params={}) => {
-		// combine default and provided parametersutils
-		const params = Object.assign({}, {
+	const fetchAsync = async (_url, responseType, _params = {}) => {
+		// combine default and provided parameters
+		const params = {
 			method: 'GET',
 			mode: 'cors',
 			type: 'GET',
-		},
-		_params);
+			..._params,
+		};
 		// build a url, including the rewrite for cors if necessary
 		let corsUrl = _url;
 		if (params.cors === true) corsUrl = rewriteUrl(_url);
@@ -212,11 +210,11 @@ const utils = (() => {
 		// return the requested response
 		switch (responseType) {
 		case 'json':
-			return await response.json();
+			return response.json();
 		case 'text':
-			return await response.text();
+			return response.text();
 		case 'blob':
-			return await response.blob();
+			return response.blob();
 		default:
 			return response;
 		}

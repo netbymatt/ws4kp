@@ -3,27 +3,28 @@
 
 // eslint-disable-next-line no-unused-vars
 class CurrentWeather extends WeatherDisplay {
-	constructor(navId,elemId) {
-		super(navId,elemId,'Current Conditions');
+	constructor(navId, elemId) {
+		super(navId, elemId, 'Current Conditions');
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// Load the observations
-		let observations, station;
+		let observations; let
+			station;
 		// station number counter
 		let stationNum = 0;
 		while (!observations && stationNum < weatherParameters.stations.length) {
 			// get the station
 			station = weatherParameters.stations[stationNum];
-			stationNum++;
+			stationNum += 1;
 			try {
 				// station observations
-				observations = await utils.fetch.json(`${station.id}/observations`,{
+				observations = await utils.fetch.json(`${station.id}/observations`, {
 					cors: true,
 					data: {
 						limit: 2,
@@ -31,9 +32,9 @@ class CurrentWeather extends WeatherDisplay {
 				});
 
 				// test data quality
-				if (observations.features[0].properties.temperature.value === null ||
-					observations.features[0].properties.windSpeed.value === null ||
-					observations.features[0].properties.textDescription === null) {
+				if (observations.features[0].properties.temperature.value === null
+					|| observations.features[0].properties.windSpeed.value === null
+					|| observations.features[0].properties.textDescription === null) {
 					observations = undefined;
 					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
 				}
@@ -53,7 +54,7 @@ class CurrentWeather extends WeatherDisplay {
 		utils.image.preload(icons.getWeatherIconFromIconLink(observations.features[0].properties.icon));
 
 		// we only get here if there was no error above
-		this.data = Object.assign({}, observations, {station: station});
+		this.data = { ...observations, station };
 		this.setStatus(STATUS.loaded);
 
 		this.getDataCallback();
@@ -71,7 +72,7 @@ class CurrentWeather extends WeatherDisplay {
 		data.DewPoint = Math.round(observations.dewpoint.value);
 		data.Ceiling = Math.round(observations.cloudLayers[0].base.value);
 		data.CeilingUnit = 'm.';
-		data.Visibility = Math.round(observations.visibility.value/1000);
+		data.Visibility = Math.round(observations.visibility.value / 1000);
 		data.VisibilityUnit = ' km.';
 		data.WindSpeed = Math.round(observations.windSpeed.value);
 		data.WindDirection = utils.calc.directionToNSEW(observations.windDirection.value);
@@ -95,9 +96,9 @@ class CurrentWeather extends WeatherDisplay {
 			data.Temperature = utils.units.celsiusToFahrenheit(data.Temperature);
 			data.TemperatureUnit = 'F';
 			data.DewPoint = utils.units.celsiusToFahrenheit(data.DewPoint);
-			data.Ceiling = Math.round(utils.units.metersToFeet(data.Ceiling)/100)*100;
+			data.Ceiling = Math.round(utils.units.metersToFeet(data.Ceiling) / 100) * 100;
 			data.CeilingUnit = 'ft.';
-			data.Visibility = utils.units.kilometersToMiles(observations.visibility.value/1000);
+			data.Visibility = utils.units.kilometersToMiles(observations.visibility.value / 1000);
 			data.VisibilityUnit = ' mi.';
 			data.WindSpeed = utils.units.kphToMph(data.WindSpeed);
 			data.WindUnit = 'MPH';
@@ -109,7 +110,7 @@ class CurrentWeather extends WeatherDisplay {
 		return data;
 	}
 
-	async drawCanvas () {
+	async drawCanvas() {
 		super.drawCanvas();
 		// parse each time to deal with a change in units if necessary
 		const data = this.parseData();
@@ -131,14 +132,14 @@ class CurrentWeather extends WeatherDisplay {
 		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 195, 170, Conditions, 2, 'center');
 
 		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 80, 330, 'Wind:', 2);
-		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 300, 330, data.WindDirection + ' ' + data.WindSpeed, 2, 'right');
+		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 300, 330, `${data.WindDirection} ${data.WindSpeed}`, 2, 'right');
 
-		if (data.WindGust) draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 80, 375, 'Gusts to ' + data.WindGust, 2);
+		if (data.WindGust) draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 80, 375, `Gusts to ${data.WindGust}`, 2);
 
 		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFF00', 315, 120, this.data.station.properties.name.substr(0, 20), 2);
 
 		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 165, 'Humidity:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 165, data.Humidity + '%', 2, 'right');
+		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 165, `${data.Humidity}%`, 2, 'right');
 
 		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 205, 'Dewpoint:', 2);
 		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 205, data.DewPoint + String.fromCharCode(176), 2, 'right');
@@ -213,7 +214,8 @@ class CurrentWeather extends WeatherDisplay {
 		});
 	}
 
-	shortConditions(condition) {
+	static shortConditions(_condition) {
+		let condition = _condition;
 		condition = condition.replace(/Light/g, 'L');
 		condition = condition.replace(/Heavy/g, 'H');
 		condition = condition.replace(/Partly/g, 'P');
@@ -230,5 +232,4 @@ class CurrentWeather extends WeatherDisplay {
 		condition = condition.replace(/ with /g, '/');
 		return condition;
 	}
-
 }

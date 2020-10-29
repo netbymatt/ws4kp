@@ -46,17 +46,17 @@ const draw = (() => {
 		}
 	};
 
-	const text = (context, font, size, color, x, y, text, shadow = 0, align = 'start') => {
+	const text = (context, font, size, color, x, y, myText, shadow = 0, align = 'start') => {
 		context.textAlign = align;
-		context.font = size + ` '${font}'`;
+		context.font = `${size} '${font}'`;
 		context.shadowColor = '#000000';
 		context.shadowOffsetX = shadow;
 		context.shadowOffsetY = shadow;
 		context.strokeStyle = '#000000';
 		context.lineWidth = 2;
-		context.strokeText(text, x, y);
+		context.strokeText(myText, x, y);
 		context.fillStyle = color;
-		context.fillText(text, x, y);
+		context.fillText(myText, x, y);
 		context.fillStyle = '';
 		context.strokeStyle = '';
 		context.shadowOffsetX = 0;

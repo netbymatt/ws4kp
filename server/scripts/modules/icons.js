@@ -1,11 +1,9 @@
-'use strict';
 /* spell-checker: disable */
 // eslint-disable-next-line no-unused-vars
 const icons = (() => {
-
-	const getWeatherRegionalIconFromIconLink = (link, isNightTime) => {
+	const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 		// extract day or night if not provided
-		if (isNightTime === undefined) isNightTime = link.indexOf('/night/') >=0;
+		const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
 		// internal function to add path to returned icon
 		const addPath = (icon) => `images/r/${icon}`;
 
@@ -16,12 +14,11 @@ const icons = (() => {
 		// if a 'DualImage' is captured, adjust to just the j parameter
 		if (conditionName === 'dualimage') {
 			const match = link.match(/&j=(.*)&/);
-			conditionName = match[1];
+			[, conditionName] = match;
 		}
 
-
 		// find the icon
-		switch (conditionName + (isNightTime?'-n':'')) {
+		switch (conditionName + (isNightTime ? '-n' : '')) {
 		case 'skc':
 		case 'hot':
 		case 'haze':
@@ -132,11 +129,11 @@ const icons = (() => {
 		}
 	};
 
-	const getWeatherIconFromIconLink = function (link, isNightTime = false) {
+	const getWeatherIconFromIconLink = (link, _isNightTime) => {
 		// internal function to add path to returned icon
 		const addPath = (icon) => `images/${icon}`;
 		// extract day or night if not provided
-		if (isNightTime === undefined) isNightTime = link.indexOf('/night/') >=0;
+		const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
 
 		// grab everything after the last slash ending at any of these: ?&,
 		const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
@@ -145,12 +142,11 @@ const icons = (() => {
 		// if a 'DualImage' is captured, adjust to just the j parameter
 		if (conditionName === 'dualimage') {
 			const match = link.match(/&j=(.*)&/);
-			conditionName = match[1];
+			[, conditionName] = match;
 		}
 
-
 		// find the icon
-		switch (conditionName + (isNightTime?'-n':'')) {
+		switch (conditionName + (isNightTime ? '-n' : '')) {
 		case 'skc':
 		case 'hot':
 		case 'haze':
@@ -262,12 +258,11 @@ const icons = (() => {
 		let thunder = false;
 		let snow = false;
 		let ice = false;
-		let fog  = false;
+		let fog = false;
 		let wind = false;
 
 		// test the phenomenon for various value if it is provided.
-		weather.forEach(phenomenon => {
-			console.log(phenomenon.weather);
+		weather.forEach((phenomenon) => {
 			if (!phenomenon.weather) return;
 			if (phenomenon.weather.toLowerCase().includes('thunder')) thunder = true;
 			if (phenomenon.weather.toLowerCase().includes('snow')) snow = true;
@@ -284,7 +279,7 @@ const icons = (() => {
 		}
 		if ((snowfallAmount > 0 || snow) && thunder) return addPath('ThunderSnow.gif');
 		if (snowfallAmount > 0 || snow) return addPath('Light-Snow.gif');
-		if (thunder) return(addPath('Thunderstorm.gif'));
+		if (thunder) return (addPath('Thunderstorm.gif'));
 		if (probabilityOfPrecipitation > 70) return addPath('Rain-1992.gif');
 		if (probabilityOfPrecipitation > 50) return addPath('Shower.gif');
 		if (probabilityOfPrecipitation > 30) {

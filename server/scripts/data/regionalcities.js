@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-const _RegionalCities = [
+const RegionalCities = [
 	{
 		city: 'Atlanta',
 		lat: 33.749,

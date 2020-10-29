@@ -5,8 +5,8 @@
 
 // eslint-disable-next-line no-unused-vars
 class ExtendedForecast extends WeatherDisplay {
-	constructor(navId,elemId) {
-		super(navId,elemId,'Extended Forecast');
+	constructor(navId, elemId) {
+		super(navId, elemId, 'Extended Forecast');
 
 		// set timings
 		this.timing.totalScreens = 2;
@@ -15,17 +15,16 @@ class ExtendedForecast extends WeatherDisplay {
 		this.backgroundImage = utils.image.load('images/BackGround2_1.png');
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
-
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// request us or si units
 		let units = 'us';
 		if (navigation.units() === UNITS.metric) units = 'si';
 		let forecast;
 		try {
-			forecast = await utils.fetch.json(weatherParameters.forecast,{
+			forecast = await utils.fetch.json(weatherParameters.forecast, {
 				data: {
 					units,
 				},
@@ -37,32 +36,36 @@ class ExtendedForecast extends WeatherDisplay {
 			return;
 		}
 		// we only get here if there was no error above
-		this.data = this.parseExtendedForecast(forecast.properties.periods);
+		this.data = ExtendedForecast.parse(forecast.properties.periods);
 		this.screenIndex = 0;
 		this.setStatus(STATUS.loaded);
 	}
 
 	// the api provides the forecast in 12 hour increments, flatten to day increments with high and low temperatures
-	parseExtendedForecast(fullForecast) {
+	static parse(fullForecast) {
 	// create a list of days starting with today
-		const _Days = [0, 1, 2, 3, 4, 5, 6];
+		const Days = [0, 1, 2, 3, 4, 5, 6];
 
-		const dates = _Days.map(shift => {
-			const date = luxon.DateTime.local().startOf('day').plus({days:shift});
-			return date.toLocaleString({weekday: 'short'});
+		const dates = Days.map((shift) => {
+			const date = luxon.DateTime.local().startOf('day').plus({ days: shift });
+			return date.toLocaleString({ weekday: 'short' });
 		});
 
 		// track the destination forecast index
 		let destIndex = 0;
 		const forecast = [];
-		fullForecast.forEach(period => {
+		fullForecast.forEach((period) => {
 		// create the destination object if necessary
-			if (!forecast[destIndex]) forecast.push({dayName:'', low: undefined, high: undefined, text: undefined, icon: undefined});
+			if (!forecast[destIndex]) {
+				forecast.push({
+					dayName: '', low: undefined, high: undefined, text: undefined, icon: undefined,
+				});
+			}
 			// get the object to modify/populate
 			const fDay = forecast[destIndex];
 			// high temperature will always be last in the source array so it will overwrite the low values assigned below
 			fDay.icon = icons.getWeatherIconFromIconLink(period.icon);
-			fDay.text = this.shortenExtendedForecastText(period.shortForecast);
+			fDay.text = ExtendedForecast.shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = dates[destIndex];
 
 			// preload the icon
@@ -71,7 +74,7 @@ class ExtendedForecast extends WeatherDisplay {
 			if (period.isDaytime) {
 			// day time is the high temperature
 				fDay.high = period.temperature;
-				destIndex++;
+				destIndex += 1;
 			} else {
 			// low temperature
 				fDay.low = period.temperature;
@@ -81,7 +84,7 @@ class ExtendedForecast extends WeatherDisplay {
 		return forecast;
 	}
 
-	shortenExtendedForecastText(long) {
+	static shortenExtendedForecastText(long) {
 		let short = long;
 		short = short.replace(/ and /g, ' ');
 		short = short.replace(/Slight /g, '');
@@ -112,7 +115,7 @@ class ExtendedForecast extends WeatherDisplay {
 		}
 		short = short1;
 		if (short2 !== '') {
-			short += ' ' + short2;
+			short += ` ${short2}`;
 		}
 
 		return [short, short1, short2];
@@ -123,7 +126,7 @@ class ExtendedForecast extends WeatherDisplay {
 
 		// determine bounds
 		// grab the first three or second set of three array elements
-		const forecast = this.data.slice(0+3*this.screenIndex, 3+this.screenIndex*3);
+		const forecast = this.data.slice(0 + 3 * this.screenIndex, 3 + this.screenIndex * 3);
 
 		const backgroundImage = await this.backgroundImage;
 
@@ -138,27 +141,27 @@ class ExtendedForecast extends WeatherDisplay {
 		draw.titleText(this.context, 'Extended', 'Forecast');
 
 		await Promise.all(forecast.map(async (Day, Index) => {
-			const offset = Index*195;
-			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 100+offset, 135, Day.dayName.toUpperCase(), 2);
-			draw.text(this.context, 'Star4000', '24pt', '#8080FF', 85+offset, 345, 'Lo', 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 165+offset, 345, 'Hi', 2, 'center');
-			let  low = Day.low;
+			const offset = Index * 195;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 100 + offset, 135, Day.dayName.toUpperCase(), 2);
+			draw.text(this.context, 'Star4000', '24pt', '#8080FF', 85 + offset, 345, 'Lo', 2, 'center');
+			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 165 + offset, 345, 'Hi', 2, 'center');
+			let { low } = Day;
 			if (low !== undefined) {
-				if (navigation.units() === UNITS.metric) low = utils.units.rahrenheitToCelsius(low);
-				draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 85+offset, 385, low, 2, 'center');
+				if (navigation.units() === UNITS.metric) low = utils.units.fahrenheitToCelsius(low);
+				draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 85 + offset, 385, low, 2, 'center');
 			}
-			let high = Day.high;
-			if (navigation.units() === UNITS.metric) high = utils.units.rahrenheitToCelsius(high);
-			draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 165+offset, 385, high, 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+offset, 270, Day.text[1], 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120+offset, 310, Day.text[2], 2, 'center');
+			let { high } = Day;
+			if (navigation.units() === UNITS.metric) high = utils.units.fahrenheitToCelsius(high);
+			draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 165 + offset, 385, high, 2, 'center');
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + offset, 270, Day.text[1], 2, 'center');
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + offset, 310, Day.text[2], 2, 'center');
 
 			// draw the icon
 			this.gifs.push(await utils.image.superGifAsync({
 				src: Day.icon,
 				auto_play: true,
 				canvas: this.canvas,
-				x: 70 + Index*195,
+				x: 70 + Index * 195,
 				y: 150,
 				max_height: 75,
 			}));

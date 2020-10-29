@@ -1,4 +1,4 @@
-const _StationInfo = {
+const StationInfo = {
 	MADC: {
 		id: 'MADC',
 		city: 'Durango Complex',

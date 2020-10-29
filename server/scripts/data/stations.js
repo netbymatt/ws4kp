@@ -1,4 +1,6 @@
-const _StationInfo = {
+// cspell: disable
+// eslint-disable-next-line no-unused-vars
+const StationInfo = {
 	MADC: {
 		id: 'MADC',
 		city: 'Durango Complex',

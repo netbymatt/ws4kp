@@ -1,5 +1,5 @@
 // travel forecast display
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation, icons, luxon, _TravelCities */
+/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation, icons, luxon, TravelCities */
 
 // eslint-disable-next-line no-unused-vars
 class TravelForecast extends WeatherDisplay {
@@ -15,15 +15,15 @@ class TravelForecast extends WeatherDisplay {
 		// set up the timing
 		this.timing.baseDelay = 20;
 		// page sizes are 4 cities, calculate the number of pages necessary plus overflow
-		const pagesFloat = _TravelCities.length/4;
+		const pagesFloat = TravelCities.length / 4;
 		const pages = Math.floor(pagesFloat) - 2; // first page is already displayed, last page doesn't happen
-		const extra = pages%1;
-		const timingStep = this.cityHeight*4;
-		this.timing.delay = [150+timingStep];
+		const extra = pages % 1;
+		const timingStep = this.cityHeight * 4;
+		this.timing.delay = [150 + timingStep];
 		// add additional pages
-		for (let i = 0; i < pages; i++) this.timing.delay.push(timingStep);
+		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
 		// add the extra (not exactly 4 pages portion)
-		if (extra !== 0) this.timing.delay.push(Math.round(this.extra*this.cityHeight));
+		if (extra !== 0) this.timing.delay.push(Math.round(this.extra * this.cityHeight));
 		// add the final 3 second delay
 		this.timing.delay.push(150);
 	}
@@ -31,25 +31,25 @@ class TravelForecast extends WeatherDisplay {
 	async getData() {
 		// super checks for enabled
 		if (!super.getData()) return;
-		const forecastPromises = _TravelCities.map(async city => {
+		const forecastPromises = TravelCities.map(async (city) => {
 			try {
 				// get point then forecast
 				const point = await utils.weather.getPoint(city.Latitude, city.Longitude);
 				const forecast = await utils.fetch.json(point.properties.forecast);
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
-				const todayShift = forecast.properties.periods[0].isDaytime? 0:1;
+				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
 				// return a pared-down forecast
 				return {
 					today: todayShift === 0,
 					high: forecast.properties.periods[todayShift].temperature,
-					low: forecast.properties.periods[todayShift+1].temperature,
+					low: forecast.properties.periods[todayShift + 1].temperature,
 					name: city.Name,
 					icon: icons.getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
 				};
 			} catch (e) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
 				console.error(e.status, e.responseJSON);
-				return {name: city.Name};
+				return { name: city.Name };
 			}
 		});
 
@@ -58,7 +58,7 @@ class TravelForecast extends WeatherDisplay {
 		this.data = forecasts;
 
 		// test for some data available in at least one forecast
-		const hasData = this.data.reduce((acc,forecast) => acc || forecast.high, false);
+		const hasData = this.data.reduce((acc, forecast) => acc || forecast.high, false);
 		if (!hasData) {
 			this.setStatus(STATUS.noData);
 			return;
@@ -68,7 +68,7 @@ class TravelForecast extends WeatherDisplay {
 		this.drawLongCanvas();
 	}
 
-	async drawLongCanvas () {
+	async drawLongCanvas() {
 		// create the "long" canvas if necessary
 		if (!this.longCanvas) {
 			this.longCanvas = document.createElement('canvas');
@@ -79,7 +79,7 @@ class TravelForecast extends WeatherDisplay {
 		}
 
 		// stop all gifs
-		this.longCanvasGifs.forEach(gif => gif.pause());
+		this.longCanvasGifs.forEach((gif) => gif.pause());
 		// delete the gifs
 		this.longCanvasGifs.length = 0;
 
@@ -87,23 +87,23 @@ class TravelForecast extends WeatherDisplay {
 		const cities = this.data;
 
 		// clean up existing gifs
-		this.gifs.forEach(gif => gif.pause());
+		this.gifs.forEach((gif) => gif.pause());
 		// delete the gifs
 		this.gifs.length = 0;
 
-		this.longContext.clearRect(0,0,this.longCanvas.width,this.longCanvas.height);
+		this.longContext.clearRect(0, 0, this.longCanvas.width, this.longCanvas.height);
 
 		// draw the "long" canvas with all cities
-		draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, _TravelCities.length*this.cityHeight);
+		draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, TravelCities.length * this.cityHeight);
 
-		for (let i = 0; i <= 4; i++) {
+		for (let i = 0; i <= 4; i += 1) {
 			const y = i * 346;
 			draw.horizontalGradient(this.longContext, 0, y, 640, y + 346, '#102080', '#001040');
 		}
 
 		await Promise.all(cities.map(async (city, index) => {
 			// calculate base y value
-			const y = 50+this.cityHeight*index;
+			const y = 50 + this.cityHeight * index;
 
 			// city name
 			draw.text(this.longContext, 'Star4000 Large Compressed', '24pt', '#FFFF00', 80, y, city.name, 2);
@@ -111,7 +111,7 @@ class TravelForecast extends WeatherDisplay {
 			// check for forecast data
 			if (city.icon) {
 				// get temperatures and convert if necessary
-				let {low, high} = city;
+				let { low, high } = city;
 
 				if (navigation.units() === UNITS.metric) {
 					low = utils.units.fahrenheitToCelsius(low);
@@ -140,7 +140,6 @@ class TravelForecast extends WeatherDisplay {
 				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y - 18, 'NO TRAVEL', 2);
 				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y, 'DATA AVAILABLE', 2);
 			}
-
 		}));
 	}
 
@@ -157,7 +156,7 @@ class TravelForecast extends WeatherDisplay {
 		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
 		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
 
-		draw.titleText(this.context, 'Travel Forecast', 'For ' + this.getTravelCitiesDayName(cities));
+		draw.titleText(this.context, 'Travel Forecast', `For ${TravelForecast.getTravelCitiesDayName(cities)}`);
 
 		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFF00', 455, 105, 'LOW', 2);
 		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFF00', 510, 105, 'HIGH', 2);
@@ -185,7 +184,7 @@ class TravelForecast extends WeatherDisplay {
 		const longCanvas = this.getLongCanvas();
 
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(longCanvas.height-289, (count-150));
+		let offsetY = Math.min(longCanvas.height - 289, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
@@ -194,15 +193,15 @@ class TravelForecast extends WeatherDisplay {
 		this.context.drawImage(longCanvas, 0, offsetY, 640, 289, 0, 110, 640, 289);
 	}
 
-	getTravelCitiesDayName(cities) {
-		const {DateTime} = luxon;
+	static getTravelCitiesDayName(cities) {
+		const { DateTime } = luxon;
 		// effectively returns early on the first found date
 		return cities.reduce((dayName, city) => {
 			if (city && dayName === '') {
 				// today or tomorrow
-				const day = DateTime.local().plus({days: (city.today)?0:1});
+				const day = DateTime.local().plus({ days: (city.today) ? 0 : 1 });
 				// return the day
-				return day.toLocaleString({weekday: 'long'});
+				return day.toLocaleString({ weekday: 'long' });
 			}
 			return dayName;
 		}, '');

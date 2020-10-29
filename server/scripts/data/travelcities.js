@@ -1,30 +1,5 @@
-//Atlanta
-//Boston
-//Chicago
-//Cleveland
-//Dallas
-//Denver
-//Detroit
-//Hartford
-//Houston
-//Indianapolis
-//Los Angeles
-//Miami
-//Minneapolis
-//New York
-//Norfolk
-//Orlando
-//Philadelphia
-//Pittsburgh
-//St. Louis
-//San Francisco
-//Seattle
-//Syracuse
-//Tampa
-//Washington DC
-
 // eslint-disable-next-line no-unused-vars
-const _TravelCities = [
+const TravelCities = [
 	{
 		Name: 'Atlanta',
 		Latitude: 33.749,
@@ -146,4 +121,3 @@ const _TravelCities = [
 		Longitude: -77.0364,
 	},
 ];
-

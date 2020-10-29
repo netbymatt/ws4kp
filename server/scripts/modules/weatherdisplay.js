@@ -19,7 +19,7 @@ class WeatherDisplay {
 		this.gifs = [];
 		this.data = undefined;
 		this.loadingStatus = STATUS.loading;
-		this.name = name?name:elemId;
+		this.name = name ?? elemId;
 		this.getDataCallbacks = [];
 
 		// default navigation timing
@@ -59,7 +59,7 @@ class WeatherDisplay {
 		// create a checkbox in the selected displays area
 		const checkbox = document.createElement('template');
 		checkbox.innerHTML = `<label for="${this.elemId}Enabled">
-							<input type="checkbox" value="true" id="${this.elemId}Enabled" name="${this.elemId}Enabled"${this.enabled?' checked':''}/>
+							<input type="checkbox" value="true" id="${this.elemId}Enabled" name="${this.elemId}Enabled"${this.enabled ? ' checked' : ''}/>
 						  ${this.name}</label>`;
 		checkbox.content.firstChild.addEventListener('change', (e) => this.checkboxChange(e));
 		const availableDisplays = document.getElementById('enabledDisplays');
@@ -99,7 +99,7 @@ class WeatherDisplay {
 
 		// create a canvas
 		const canvas = document.createElement('template');
-		canvas.innerHTML = `<canvas id='${elemId+'Canvas'}' width='${width}' height='${height}' style='display: none;' />`;
+		canvas.innerHTML = `<canvas id='${`${elemId}Canvas`}' width='${width}' height='${height}' style='display: none;' />`;
 
 		// add to the page
 		const container = document.getElementById('container');
@@ -130,23 +130,22 @@ class WeatherDisplay {
 	// return any data requested before it was available
 	getDataCallback() {
 		// call each callback
-		this.getDataCallbacks.forEach(fxn => fxn(this.data));
+		this.getDataCallbacks.forEach((fxn) => fxn(this.data));
 		// clear the callbacks
 		this.getDataCallbacks = [];
 	}
 
 	drawCanvas() {
 		// stop all gifs
-		this.gifs.forEach(gif => gif.pause());
+		this.gifs.forEach((gif) => gif.pause());
 		// delete the gifs
 		this.gifs.length = 0;
 		// refresh the canvas
-		this.canvas = document.getElementById(this.elemId+'Canvas');
+		this.canvas = document.getElementById(`${this.elemId}Canvas`);
 		this.context = this.canvas.getContext('2d');
 
 		// clean up the first-run flag in screen index
-		if (this.screenIndex < 0)
-			this.screenIndex = 0;
+		if (this.screenIndex < 0) this.screenIndex = 0;
 	}
 
 	finishDraw() {
@@ -155,7 +154,7 @@ class WeatherDisplay {
 		let OkToDrawCurrentDateTime = true;
 		let OkToDrawLogoImage = true;
 		// let OkToDrawCustomScrollText = false;
-		let bottom = undefined;
+		let bottom;
 
 		// visibility tests
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
@@ -201,7 +200,7 @@ class WeatherDisplay {
 	drawCurrentDateTime(bottom) {
 		// only draw if canvas is active to conserve battery
 		if (!this.isActive()) return;
-		const {DateTime} = luxon;
+		const { DateTime } = luxon;
 		const font = 'Star4000 Small';
 		const size = '24pt';
 		const color = '#ffffff';
@@ -226,10 +225,10 @@ class WeatherDisplay {
 		// Get the current date and time.
 		const now = DateTime.local();
 
-		//time = "11:35:08 PM";
-		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11,' ');
+		// time = "11:35:08 PM";
+		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11, ' ');
 
-		let x,y;
+		let x; let y;
 		if (bottom) {
 			x = 400;
 			y = 402;
@@ -241,9 +240,9 @@ class WeatherDisplay {
 			x += 45;
 		}
 
-		draw.text(this.context, font, size, color, x, y, time.toUpperCase(), shadow); //y += 20;
+		draw.text(this.context, font, size, color, x, y, time.toUpperCase(), shadow); // y += 20;
 
-		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2,' ');
+		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
 
 		if (bottom) {
 			x = 55;
@@ -255,7 +254,7 @@ class WeatherDisplay {
 		draw.text(this.context, font, size, color, x, y, date.toUpperCase(), shadow);
 	}
 
-	async drawNoaaImage () {
+	async drawNoaaImage() {
 		// load the image and store locally
 		if (!this.drawNoaaImage.image) {
 			this.drawNoaaImage.image = utils.image.load('images/noaa5.gif');
@@ -265,7 +264,7 @@ class WeatherDisplay {
 		this.context.drawImage(img, 356, 39);
 	}
 
-	async drawLogoImage () {
+	async drawLogoImage() {
 		// load the image and store locally
 		if (!this.drawLogoImage.image) {
 			this.drawLogoImage.image = utils.image.load('images/Logo3.png');
@@ -287,10 +286,9 @@ class WeatherDisplay {
 
 		// show the canvas
 		this.canvas.style.display = 'block';
-
-		// stop if timing has been disabled
-		if (!this.timing) return;
+		return false;
 	}
+
 	hideCanvas() {
 		this.resetNavBaseCount();
 
@@ -299,7 +297,7 @@ class WeatherDisplay {
 	}
 
 	isActive() {
-		return document.getElementById(this.elemId+'Canvas').offsetParent !== null;
+		return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
 	}
 
 	isEnabled() {
@@ -318,7 +316,7 @@ class WeatherDisplay {
 		// see if play is active and screen is active
 		if (!navigation.isPlaying() || !this.isActive()) return;
 		// increment the base count
-		this.navBaseCount++;
+		this.navBaseCount += 1;
 
 		// call base count change if available for this function
 		if (this.baseCountChange) this.baseCountChange(this.navBaseCount);
@@ -329,7 +327,7 @@ class WeatherDisplay {
 
 	async updateScreenFromBaseCount() {
 		// get the next screen index
-		let nextScreenIndex = this.screenIndexFromBaseCount();
+		const nextScreenIndex = this.screenIndexFromBaseCount();
 
 		// special cases for first and last frame
 		// must compare with false as nextScreenIndex could be 0 which is valid
@@ -368,10 +366,10 @@ class WeatherDisplay {
 		// if the delay is provided as a single value, expand it to a series of the same value
 		let intermediateDelay = [];
 		if (typeof this.timing.delay === 'number') {
-			for (let i = 0; i < this.timing.totalScreens; i++) intermediateDelay.push(this.timing.delay);
+			for (let i = 0; i < this.timing.totalScreens; i += 1) intermediateDelay.push(this.timing.delay);
 		} else {
 			// map just the delays to the intermediate block
-			intermediateDelay = this.timing.delay.map(delay => {
+			intermediateDelay = this.timing.delay.map((delay) => {
 				if (typeof delay === 'object') return delay.time;
 				return delay;
 			});
@@ -379,7 +377,7 @@ class WeatherDisplay {
 
 		// calculate the cumulative end point of each delay
 		let sum = 0;
-		this.timing.fullDelay = intermediateDelay.map(val => {
+		this.timing.fullDelay = intermediateDelay.map((val) => {
 			const calc = sum + val;
 			sum += val;
 			return calc;
@@ -388,11 +386,11 @@ class WeatherDisplay {
 		// generate a list of screen either sequentially if not provided in an object or from the object
 		if (Array.isArray(this.timing.delay) && typeof this.timing.delay[0] === 'object') {
 			// extract screen indexes from objects
-			this.timing.screenIndexes = this.timing.delay.map(delay => delay.si);
+			this.timing.screenIndexes = this.timing.delay.map((delay) => delay.si);
 		} else {
 			// generate sequential screen indexes
 			this.timing.screenIndexes = [];
-			for (let i = 0; i < this.timing.totalScreens; i++) this.timing.screenIndexes.push(i);
+			for (let i = 0; i < this.timing.totalScreens; i += 1) this.timing.screenIndexes.push(i);
 		}
 	}
 
@@ -403,7 +401,7 @@ class WeatherDisplay {
 			this.resetNavBaseCount();
 		} else {
 			// set the base count to the next available frame
-			const newBaseCount = this.timing.fullDelay.find(delay => delay > this.navBaseCount);
+			const newBaseCount = this.timing.fullDelay.find((delay) => delay > this.navBaseCount);
 			this.navBaseCount = newBaseCount;
 		}
 		this.updateScreenFromBaseCount();
@@ -413,13 +411,13 @@ class WeatherDisplay {
 	navPrev(command) {
 		// check for special 'last frame' command
 		if (command === navigation.msg.command.lastFrame) {
-			this.navBaseCount = this.timing.fullDelay[this.timing.totalScreens-1]-1;
+			this.navBaseCount = this.timing.fullDelay[this.timing.totalScreens - 1] - 1;
 		} else {
 			// find the highest fullDelay that is less than the current base count
 			const newBaseCount = this.timing.fullDelay.reduce((acc, delay) => {
 				if (delay < this.navBaseCount) return delay;
 				return acc;
-			},0);
+			}, 0);
 			// if the new base count is zero then we're already at the first screen
 			if (newBaseCount === 0 && this.navBaseCount === 0) {
 				this.sendNavDisplayMessage(navigation.msg.response.previous);
@@ -436,14 +434,14 @@ class WeatherDisplay {
 		if (!this.timing) return 0;
 		// find the first timing in the timing array that is greater than the base count
 		if (this.timing && !this.timing.fullDelay) this.calcNavTiming();
-		const timingIndex = this.timing.fullDelay.findIndex(delay => delay > this.navBaseCount);
+		const timingIndex = this.timing.fullDelay.findIndex((delay) => delay > this.navBaseCount);
 		if (timingIndex === -1) return false;
 		return this.timing.screenIndexes[timingIndex];
 	}
 
 	// start and stop base counter
 	startNavCount() {
-		if (!this.navInterval) this.navInterval = setInterval(()=>this.navBaseTime(), this.timing.baseDelay);
+		if (!this.navInterval) this.navInterval = setInterval(() => this.navBaseTime(), this.timing.baseDelay);
 	}
 
 	resetNavBaseCount() {

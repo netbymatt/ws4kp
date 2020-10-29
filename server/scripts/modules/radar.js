@@ -3,42 +3,42 @@
 
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
-	constructor(navId,elemId) {
-		super(navId,elemId,'Local Radar');
+	constructor(navId, elemId) {
+		super(navId, elemId, 'Local Radar');
 
 		// set max images
 		this.dopplerRadarImageMax = 6;
 		// update timing
 		this.timing.baseDelay = 350;
 		this.timing.delay = [
-			{time: 4, si: 5},
-			{time: 1, si: 0},
-			{time: 1, si: 1},
-			{time: 1, si: 2},
-			{time: 1, si: 3},
-			{time: 1, si: 4},
-			{time: 4, si: 5},
-			{time: 1, si: 0},
-			{time: 1, si: 1},
-			{time: 1, si: 2},
-			{time: 1, si: 3},
-			{time: 1, si: 4},
-			{time: 4, si: 5},
-			{time: 1, si: 0},
-			{time: 1, si: 1},
-			{time: 1, si: 2},
-			{time: 1, si: 3},
-			{time: 1, si: 4},
-			{time: 12, si: 5},
+			{ time: 4, si: 5 },
+			{ time: 1, si: 0 },
+			{ time: 1, si: 1 },
+			{ time: 1, si: 2 },
+			{ time: 1, si: 3 },
+			{ time: 1, si: 4 },
+			{ time: 4, si: 5 },
+			{ time: 1, si: 0 },
+			{ time: 1, si: 1 },
+			{ time: 1, si: 2 },
+			{ time: 1, si: 3 },
+			{ time: 1, si: 4 },
+			{ time: 4, si: 5 },
+			{ time: 1, si: 0 },
+			{ time: 1, si: 1 },
+			{ time: 1, si: 2 },
+			{ time: 1, si: 3 },
+			{ time: 1, si: 4 },
+			{ time: 12, si: 5 },
 		];
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// ALASKA ISN'T SUPPORTED!
 		if (weatherParameters.state === 'AK') {
@@ -47,7 +47,7 @@ class Radar extends WeatherDisplay {
 		}
 
 		// date and time parsing
-		const {DateTime} = luxon;
+		const { DateTime } = luxon;
 
 		// get the base map
 		let src = 'images/4000RadarMap2.jpg';
@@ -59,9 +59,9 @@ class Radar extends WeatherDisplay {
 		let radarHtml;
 		try {
 			// get a list of available radars
-			radarHtml = await utils.fetch.text(baseUrl, {cors: true});
+			radarHtml = await utils.fetch.text(baseUrl, { cors: true });
 		} catch (e) {
-			console.log('Unable to get list of radars');
+			console.error('Unable to get list of radars');
 			console.error(e);
 			this.setStatus(STATUS.failed);
 			return;
@@ -72,17 +72,17 @@ class Radar extends WeatherDisplay {
 		const xmlDoc = parser.parseFromString(radarHtml, 'text/html');
 		const anchors = xmlDoc.getElementsByTagName('a');
 		const gifs = [];
-		for (let idx in anchors) {
-			gifs.push(anchors[idx].innerHTML);
-		}
+		Object.values(anchors).forEach((a) => {
+			gifs.push(a.innerHTML);
+		});
 
 		// filter for selected urls
 		let filter = /Conus_\d/;
 		if (weatherParameters.state === 'HI') filter = /hawaii_\d/;
 
 		// get the last few images
-		const urlsFull = gifs.filter(gif => gif && gif.match(filter));
-		const urls = urlsFull.slice(-(this.dopplerRadarImageMax-1));
+		const urlsFull = gifs.filter((gif) => gif && gif.match(filter));
+		const urls = urlsFull.slice(-(this.dopplerRadarImageMax - 1));
 
 		// add additional 'latest.gif'
 		if (weatherParameters.state !== 'HI') urls.push('latest_radaronly.gif');
@@ -97,13 +97,13 @@ class Radar extends WeatherDisplay {
 		if (weatherParameters.state === 'HI') {
 			width = 600;
 			height = 571;
-			sourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+			sourceXY = Radar.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		} else {
 			width = 2550;
 			height = 1600;
 			offsetX *= 2;
 			offsetY *= 2;
-			sourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+			sourceXY = Radar.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		}
 
 		// create working context for manipulation
@@ -116,7 +116,7 @@ class Radar extends WeatherDisplay {
 		// calculate radar offsets
 		let radarOffsetX = 117;
 		let radarOffsetY = 60;
-		let radarSourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+		let radarSourceXY = Radar.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		let radarSourceX = radarSourceXY.x / 2;
 		let radarSourceY = radarSourceXY.y / 2;
 
@@ -176,7 +176,7 @@ class Radar extends WeatherDisplay {
 			}
 
 			// get the base map
-			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX*2, offsetY*2, 0, 0, 640, 367);
+			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
 
 			// crop the radar image
 			const cropCanvas = document.createElement('canvas');
@@ -186,10 +186,10 @@ class Radar extends WeatherDisplay {
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
 			// clean the image
-			this.removeDopplerRadarImageNoise(cropContext);
+			Radar.removeDopplerRadarImageNoise(cropContext);
 
 			// merge the radar and map
-			this.mergeDopplerRadarImage(context, cropContext);
+			Radar.mergeDopplerRadarImage(context, cropContext);
 
 			return {
 				canvas,
@@ -199,9 +199,9 @@ class Radar extends WeatherDisplay {
 		// set max length
 		this.timing.totalScreens = radarInfo.length;
 		// store the images
-		this.data = radarInfo.map(radar=>radar.canvas);
+		this.data = radarInfo.map((radar) => radar.canvas);
 
-		this.times = radarInfo.map(radar=>radar.time);
+		this.times = radarInfo.map((radar) => radar.time);
 		this.setStatus(STATUS.loaded);
 	}
 
@@ -209,7 +209,7 @@ class Radar extends WeatherDisplay {
 		super.drawCanvas();
 		if (this.screenIndex === -1) return;
 		this.context.drawImage(await this.backgroundImage, 0, 0);
-		const {DateTime} = luxon;
+		const { DateTime } = luxon;
 		// Title
 		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 60, 'Local', 2);
 		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 95, 'Radar', 2);
@@ -237,7 +237,7 @@ class Radar extends WeatherDisplay {
 	}
 
 	// utility latitude/pixel conversions
-	getXYFromLatitudeLongitude (Latitude, Longitude, OffsetX, OffsetY, state) {
+	getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
 		if (state === 'HI') return this.getXYFromLatitudeLongitudeHI(...arguments);
 		let y = 0;
 		let x = 0;
@@ -265,7 +265,7 @@ class Radar extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY) {
+	static getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY) {
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 571;
@@ -292,7 +292,7 @@ class Radar extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getXYFromLatitudeLongitudeDoppler (Latitude, Longitude, OffsetX, OffsetY) {
+	static getXYFromLatitudeLongitudeDoppler(Latitude, Longitude, OffsetX, OffsetY) {
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 3200;
@@ -319,7 +319,7 @@ class Radar extends WeatherDisplay {
 		return { x: x * 2, y: y * 2 };
 	}
 
-	removeDopplerRadarImageNoise (RadarContext) {
+	static removeDopplerRadarImageNoise(RadarContext) {
 		const RadarImageData = RadarContext.getImageData(0, 0, RadarContext.canvas.width, RadarContext.canvas.height);
 
 		// examine every pixel,
@@ -329,7 +329,7 @@ class Radar extends WeatherDisplay {
 			// i + 1 = green
 			// i + 2 = blue
 			// i + 3 = alpha (0 = transparent, 255 = opaque)
-			let [R, G, B, A] = RadarImageData.data.slice(i,i+4);
+			let [R, G, B, A] = RadarImageData.data.slice(i, i + 4);
 
 			// is this pixel the old rgb?
 			if ((R === 1 && G === 159 && B === 244)
@@ -402,13 +402,13 @@ class Radar extends WeatherDisplay {
 		RadarContext.putImageData(RadarImageData, 0, 0);
 	}
 
-	mergeDopplerRadarImage (mapContext, radarContext) {
-		var mapImageData = mapContext.getImageData(0, 0, mapContext.canvas.width, mapContext.canvas.height);
-		var radarImageData = radarContext.getImageData(0, 0, radarContext.canvas.width, radarContext.canvas.height);
+	static mergeDopplerRadarImage(mapContext, radarContext) {
+		const mapImageData = mapContext.getImageData(0, 0, mapContext.canvas.width, mapContext.canvas.height);
+		const radarImageData = radarContext.getImageData(0, 0, radarContext.canvas.width, radarContext.canvas.height);
 
 		// examine every pixel,
 		// change any old rgb to the new-rgb
-		for (var i = 0; i < radarImageData.data.length; i += 4) {
+		for (let i = 0; i < radarImageData.data.length; i += 4) {
 			// i + 0 = red
 			// i + 1 = green
 			// i + 2 = blue
