@@ -23,7 +23,9 @@
 			"Visib",
 			"arcgis",
 			"devbridge",
-			"nosleep"
+			"ltrim",
+			"nosleep",
+			"rtrim"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
