@@ -257,7 +257,7 @@ jsgif
 	/* max-width: 640px; */
 	height: 100%;
 	max-height: 480;
-	background-image: url(http://localhost:8080/images/BackGround1_1.png);
+	background-image: url(../images/BackGround1_1.png);
 }
 #divTwc:fullscreen #container {
     background-image: none;
