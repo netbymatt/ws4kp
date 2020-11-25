@@ -177,6 +177,7 @@ const icons = (() => {
 			return addPath('CC_Cloudy.gif');
 
 		case 'fog':
+		case 'fog-n':
 			return addPath('CC_Fog.gif');
 
 		case 'rain_sleet':
@@ -203,6 +204,7 @@ const icons = (() => {
 			// 	break;
 
 		case 'snow':
+		case 'snow-n':
 			return addPath('CC_Snow.gif');
 
 		case 'rain_snow':
