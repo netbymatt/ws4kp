@@ -192,6 +192,7 @@ const icons = (() => {
 			return addPath('CC_Showers.gif');
 
 		case 'rain':
+		case 'rain-n':
 			return addPath('CC_Rain.gif');
 
 			// case 'snow':
