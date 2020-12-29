@@ -80,19 +80,27 @@ const icons = (() => {
 			// 	break;
 
 		case 'snow':
+		case 'snow-n':
 			return addPath('Heavy-Snow-1994-2.gif');
 
 		case 'rain_snow':
 			return addPath('Rain-Snow-1992.gif');
 
 		case 'snow_fzra':
+		case 'snow_fzra-n':
 			return addPath('Freezing-Rain-Snow-1992.gif');
 
 		case 'fzra':
+		case 'fzra-n':
 			return addPath('Freezing-Rain-1992.gif');
 
 		case 'snow_sleet':
-			return addPath('Wintry-Mix-1992.gif');
+		case 'snow_sleet-n':
+			return addPath('Snow and Sleet.gif');
+
+		case 'sleet':
+		case 'sleet-n':
+			return addPath('Sleet.gif');
 
 		case 'tsra_sct':
 		case 'tsra':
@@ -212,7 +220,9 @@ const icons = (() => {
 			return addPath('CC_RainSnow.gif');
 
 		case 'snow_fzra':
+		case 'snow_fzra-n':
 		case 'fzra':
+		case 'fzra-n':
 			return addPath('CC_FreezingRain.gif');
 
 		case 'snow_sleet':

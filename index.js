@@ -1,7 +1,8 @@
 // express
 const express = require('express');
+
 const app = express();
-const port = 8080;
+const port = process.env.WS4KP_PORT ?? 8080;
 const path = require('path');
 
 // template engine
