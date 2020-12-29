@@ -234,7 +234,6 @@ const utils = (() => {
 	const rewriteUrl = (_url) => {
 		let url = _url;
 		url = url.replace('https://api.weather.gov/', window.location.href);
-		url = url.replace('https://radar.weather.gov/', window.location.href);
 		url = url.replace('https://www.cpc.ncep.noaa.gov/', window.location.href);
 		return url;
 	};

@@ -20,13 +20,9 @@ module.exports = {
 			'tab',
 		],
 		'no-tabs': 0,
-		'no-use-before-define': 0,
 		'no-console': 0,
-		'linebreak-style': [
-			'error',
-			'unix',
-		],
 		'max-len': 0,
+		'linebreak-style': 0,
 		quotes: [
 			'error',
 			'single',
@@ -47,6 +43,18 @@ module.exports = {
 		'no-floating-decimal': ['error'],
 		'no-trailing-spaces': ['error'],
 		'brace-style': [2, '1tbs', { allowSingleLine: true }],
+		'no-mixed-operators': [
+			'error',
+			{
+				groups: [
+					['&', '|', '^', '~', '<<', '>>', '>>>'],
+					['==', '!=', '===', '!==', '>', '>=', '<', '<='],
+					['&&', '||'],
+					['in', 'instanceof'],
+				],
+				allowSamePrecedence: true,
+			},
+		],
 	},
 	ignorePatterns: [
 		'*.min.js',

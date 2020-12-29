@@ -36,12 +36,12 @@ class Radar extends WeatherDisplay {
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
 	}
 
-	async getData(_weatherParameters) {
-		super.getData(_weatherParameters);
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters) {
+		super.getData(weatherParameters);
+		if (!weatherParameters) weatherParameters = this.weatherParameters;
 
-		// ALASKA ISN'T SUPPORTED!
-		if (weatherParameters.state === 'AK') {
+		// ALASKA AND HAWAII AREN'T SUPPORTED!
+		if (weatherParameters.state === 'AK' || weatherParameters.state === 'HI') {
 			this.setStatus(STATUS.noData);
 			return;
 		}
@@ -51,30 +51,50 @@ class Radar extends WeatherDisplay {
 
 		// get the base map
 		let src = 'images/4000RadarMap2.jpg';
-		if (weatherParameters.state === 'HI') src = 'images/HawaiiRadarMap2.png';
+		if (weatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';
 		this.baseMap = await utils.image.load(src);
 
-		const baseUrl = 'https://radar.weather.gov/Conus/RadarImg/';
+		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
+		const baseUrlEnd = '/GIS/uscomp';
+		const baseUrls = [];
+		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
 
-		let radarHtml;
-		try {
-			// get a list of available radars
-			radarHtml = await utils.fetch.text(baseUrl, { cors: true });
-		} catch (e) {
-			console.error('Unable to get list of radars');
-			console.error(e);
-			this.setStatus(STATUS.failed);
-			return;
+		// make urls for yesterday, today and tomorrow
+		while (date <= DateTime.utc().plus({ days: 1 }).startOf('day')) {
+			baseUrls.push(`${baseUrl}${date.toFormat('yyyy/LL/dd')}${baseUrlEnd}`);
+			date = date.plus({ days: 1 });
 		}
 
+		const lists = (await Promise.all(baseUrls.map(async (url) => {
+			try {
+			// get a list of available radars
+				const radarHtml = await utils.fetch.text(url, { cors: true });
+				return radarHtml;
+			} catch (e) {
+				console.log('Unable to get list of radars');
+				console.error(e);
+				this.setStatus(STATUS.failed);
+				return false;
+			}
+		}))).filter((d) => d);
+
 		// convert to an array of gif urls
-		const parser = new DOMParser();
-		const xmlDoc = parser.parseFromString(radarHtml, 'text/html');
-		const anchors = xmlDoc.getElementsByTagName('a');
-		const gifs = [];
-		Object.values(anchors).forEach((a) => {
-			gifs.push(a.innerHTML);
-		});
+		const pngs = lists.map((html, htmlIdx) => {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(html, 'text/html');
+			// add the base url
+			const base = xmlDoc.createElement('base');
+			base.href = baseUrls[htmlIdx];
+			xmlDoc.head.append(base);
+			const anchors = xmlDoc.getElementsByTagName('a');
+			const gifs = [];
+			for (const idx in anchors) {
+				if (anchors[idx].innerHTML?.includes('png') && anchors[idx].innerHTML?.includes('n0r_'))	{
+					gifs.push(anchors[idx].href);
+				}
+			}
+			return gifs;
+		}).flat();
 
 		// filter for selected urls
 		let filter = /Conus_\d/;
@@ -94,16 +114,16 @@ class Radar extends WeatherDisplay {
 		let sourceXY;
 		let width;
 		let height;
-		if (weatherParameters.state === 'HI') {
+		if (weatherParameters.State === 'HI') {
 			width = 600;
 			height = 571;
-			sourceXY = Radar.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+			sourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		} else {
 			width = 2550;
 			height = 1600;
 			offsetX *= 2;
 			offsetY *= 2;
-			sourceXY = Radar.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+			sourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		}
 
 		// create working context for manipulation
@@ -116,11 +136,11 @@ class Radar extends WeatherDisplay {
 		// calculate radar offsets
 		let radarOffsetX = 117;
 		let radarOffsetY = 60;
-		let radarSourceXY = Radar.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
+		let radarSourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
 		let radarSourceX = radarSourceXY.x / 2;
 		let radarSourceY = radarSourceXY.y / 2;
 
-		if (weatherParameters.state === 'HI') {
+		if (weatherParameters.State === 'HI') {
 			radarOffsetX = 120;
 			radarOffsetY = 69;
 			radarSourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
@@ -167,7 +187,7 @@ class Radar extends WeatherDisplay {
 			const imgBlob = await utils.image.load(blob);
 
 			// draw the entire image
-			if (weatherParameters.state === 'HI') {
+			if (weatherParameters.State === 'HI') {
 				workingContext.clearRect(0, 0, 571, 600);
 				workingContext.drawImage(imgBlob, 0, 0, 571, 600);
 			} else {
@@ -186,10 +206,10 @@ class Radar extends WeatherDisplay {
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
 			// clean the image
-			Radar.removeDopplerRadarImageNoise(cropContext);
+			this.removeDopplerRadarImageNoise(cropContext);
 
 			// merge the radar and map
-			Radar.mergeDopplerRadarImage(context, cropContext);
+			this.mergeDopplerRadarImage(context, cropContext);
 
 			return {
 				canvas,
@@ -292,26 +312,30 @@ class Radar extends WeatherDisplay {
 		return { x, y };
 	}
 
-	static getXYFromLatitudeLongitudeDoppler(Latitude, Longitude, OffsetX, OffsetY) {
+	static GetXYFromLatitudeLongitudeDoppler(pos, offsetX, offsetY) {
 		let y = 0;
 		let x = 0;
-		const ImgHeight = 3200;
-		const ImgWidth = 5100;
+		const imgHeight = 6000;
+		const imgWidth = 2800;
 
-		y = (51.75 - Latitude) * 55.2;
-		y -= OffsetY; // Centers map.
+		y = (51 - pos.latitude) * 61.4481;
+		// center map
+		y -= offsetY;
+
 		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
+		if (y > (imgHeight - (offsetY * 2))) {
+			y = imgHeight - (offsetY * 2);
 		} else if (y < 0) {
 			y = 0;
 		}
 
-		x = ((-130.37 - Longitude) * 41.775) * -1;
-		x -= OffsetX; // Centers map.
+		x = ((-129.138 - pos.longitude) * 42.1768) * -1;
+		// center map
+		x -= offsetX;
+
 		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
+		if (x > (imgWidth - (offsetX * 2))) {
+			x = imgWidth - (offsetX * 2);
 		} else if (x < 0) {
 			x = 0;
 		}
