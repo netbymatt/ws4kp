@@ -55,12 +55,12 @@ class Radar extends WeatherDisplay {
 		this.baseMap = await utils.image.load(src);
 
 		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
-		const baseUrlEnd = '/GIS/uscomp';
+		const baseUrlEnd = '/GIS/uscomp/';
 		const baseUrls = [];
 		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
 
-		// make urls for yesterday, today and tomorrow
-		while (date <= DateTime.utc().plus({ days: 1 }).startOf('day')) {
+		// make urls for yesterday and today
+		while (date <= DateTime.utc().startOf('day')) {
 			baseUrls.push(`${baseUrl}${date.toFormat('yyyy/LL/dd')}${baseUrlEnd}`);
 			date = date.plus({ days: 1 });
 		}
@@ -87,44 +87,27 @@ class Radar extends WeatherDisplay {
 			base.href = baseUrls[htmlIdx];
 			xmlDoc.head.append(base);
 			const anchors = xmlDoc.getElementsByTagName('a');
-			const gifs = [];
-			for (const idx in anchors) {
-				if (anchors[idx].innerHTML?.includes('png') && anchors[idx].innerHTML?.includes('n0r_'))	{
-					gifs.push(anchors[idx].href);
+			const urls = [];
+			Array.from(anchors).forEach((elem) => {
+				if (elem.innerHTML?.includes('.png') && elem.innerHTML?.includes('n0r_'))	{
+					urls.push(elem.href);
 				}
-			}
-			return gifs;
+			});
+			return urls;
 		}).flat();
 
-		// filter for selected urls
-		let filter = /Conus_\d/;
-		if (weatherParameters.state === 'HI') filter = /hawaii_\d/;
-
 		// get the last few images
-		const urlsFull = gifs.filter((gif) => gif && gif.match(filter));
-		const urls = urlsFull.slice(-(this.dopplerRadarImageMax - 1));
-
-		// add additional 'latest.gif'
-		if (weatherParameters.state !== 'HI') urls.push('latest_radaronly.gif');
-		if (weatherParameters.state === 'HI') urls.push('hawaii_radaronly.gif');
+		const sortedPngs = pngs.sort((a, b) => (Date(a) < Date(b) ? -1 : 1));
+		const urls = sortedPngs.slice(-(this.dopplerRadarImageMax));
 
 		// calculate offsets and sizes
 		let offsetX = 120;
 		let offsetY = 69;
-		let sourceXY;
-		let width;
-		let height;
-		if (weatherParameters.State === 'HI') {
-			width = 600;
-			height = 571;
-			sourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
-		} else {
-			width = 2550;
-			height = 1600;
-			offsetX *= 2;
-			offsetY *= 2;
-			sourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
-		}
+		const width = 2550;
+		const height = 1600;
+		offsetX *= 2;
+		offsetY *= 2;
+		const sourceXY = Radar.getXYFromLatitudeLongitudeMap(weatherParameters, offsetX, offsetY);
 
 		// create working context for manipulation
 		const workingCanvas = document.createElement('canvas');
@@ -134,19 +117,11 @@ class Radar extends WeatherDisplay {
 		workingContext.imageSmoothingEnabled = false;
 
 		// calculate radar offsets
-		let radarOffsetX = 117;
-		let radarOffsetY = 60;
-		let radarSourceXY = this.getXYFromLatitudeLongitudeDoppler(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
-		let radarSourceX = radarSourceXY.x / 2;
-		let radarSourceY = radarSourceXY.y / 2;
-
-		if (weatherParameters.State === 'HI') {
-			radarOffsetX = 120;
-			radarOffsetY = 69;
-			radarSourceXY = this.getXYFromLatitudeLongitudeHI(weatherParameters.latitude, weatherParameters.longitude, offsetX, offsetY);
-			radarSourceX = radarSourceXY.x;
-			radarSourceY = radarSourceXY.y;
-		}
+		const radarOffsetX = 120;
+		const radarOffsetY = 70;
+		const radarSourceXY = Radar.getXYFromLatitudeLongitudeDoppler(weatherParameters, offsetX, offsetY);
+		const radarSourceX = radarSourceXY.x / 2;
+		const radarSourceY = radarSourceXY.y / 2;
 
 		// Load the most recent doppler radar images.
 		const radarInfo = await Promise.all(urls.map(async (url) => {
@@ -158,7 +133,7 @@ class Radar extends WeatherDisplay {
 			context.imageSmoothingEnabled = false;
 
 			// get the image
-			const response = await fetch(utils.cors.rewriteUrl(baseUrl + url));
+			const response = await fetch(utils.cors.rewriteUrl(url));
 
 			// test response
 			if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
@@ -167,7 +142,7 @@ class Radar extends WeatherDisplay {
 			const blob = await response.blob();
 
 			// store the time
-			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)_/);
+			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
 			let time;
 			if (timeMatch) {
 				const [, year, month, day, hour, minute] = timeMatch;
@@ -187,13 +162,9 @@ class Radar extends WeatherDisplay {
 			const imgBlob = await utils.image.load(blob);
 
 			// draw the entire image
-			if (weatherParameters.State === 'HI') {
-				workingContext.clearRect(0, 0, 571, 600);
-				workingContext.drawImage(imgBlob, 0, 0, 571, 600);
-			} else {
-				workingContext.clearRect(0, 0, 2550, 1600);
-				workingContext.drawImage(imgBlob, 0, 0, 2550, 1600);
-			}
+
+			workingContext.clearRect(0, 0, width, 1600);
+			workingContext.drawImage(imgBlob, 0, 0, width, 1600);
 
 			// get the base map
 			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
@@ -206,10 +177,10 @@ class Radar extends WeatherDisplay {
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
 			// clean the image
-			this.removeDopplerRadarImageNoise(cropContext);
+			Radar.removeDopplerRadarImageNoise(cropContext);
 
 			// merge the radar and map
-			this.mergeDopplerRadarImage(context, cropContext);
+			Radar.mergeDopplerRadarImage(context, cropContext);
 
 			return {
 				canvas,
@@ -256,63 +227,38 @@ class Radar extends WeatherDisplay {
 		this.finishDraw();
 	}
 
-	// utility latitude/pixel conversions
-	getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
-		if (state === 'HI') return this.getXYFromLatitudeLongitudeHI(...arguments);
+	static getXYFromLatitudeLongitudeMap(pos, offsetX, offsetY) {
 		let y = 0;
 		let x = 0;
-		const ImgHeight = 1600;
-		const ImgWidth = 2550;
+		const imgHeight = 3200;
+		const imgWidth = 5100;
 
-		y = (50.5 - Latitude) * 55.2;
-		y -= OffsetY; // Centers map.
+		y = (51.75 - pos.latitude) * 55.2;
+		// center map
+		y -= offsetY;
+
 		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
+		if (y > (imgHeight - (offsetY * 2))) {
+			y = imgHeight - (offsetY * 2);
 		} else if (y < 0) {
 			y = 0;
 		}
 
-		x = ((-127.5 - Longitude) * 41.775) * -1;
-		x -= OffsetX; // Centers map.
+		x = ((-130.37 - pos.longitude) * 41.775) * -1;
+		// center map
+		x -= offsetX;
+
 		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
+		if (x > (imgWidth - (offsetX * 2))) {
+			x = imgWidth - (offsetX * 2);
 		} else if (x < 0) {
 			x = 0;
 		}
 
-		return { x, y };
+		return { x: x * 2, y: y * 2 };
 	}
 
-	static getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY) {
-		let y = 0;
-		let x = 0;
-		const ImgHeight = 571;
-		const ImgWidth = 600;
-
-		y = (25 - Latitude) * 55.2;
-		y -= OffsetY; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
-		} else if (y < 0) {
-			y = 0;
-		}
-
-		x = ((-164.5 - Longitude) * 41.775) * -1;
-		x -= OffsetX; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
-		} else if (x < 0) {
-			x = 0;
-		}
-
-		return { x, y };
-	}
-
-	static GetXYFromLatitudeLongitudeDoppler(pos, offsetX, offsetY) {
+	static getXYFromLatitudeLongitudeDoppler(pos, offsetX, offsetY) {
 		let y = 0;
 		let x = 0;
 		const imgHeight = 6000;
@@ -353,61 +299,68 @@ class Radar extends WeatherDisplay {
 			// i + 1 = green
 			// i + 2 = blue
 			// i + 3 = alpha (0 = transparent, 255 = opaque)
-			let [R, G, B, A] = RadarImageData.data.slice(i, i + 4);
+			let R = RadarImageData.data[i];
+			let G = RadarImageData.data[i + 1];
+			let B = RadarImageData.data[i + 2];
+			let A = RadarImageData.data[i + 3];
 
 			// is this pixel the old rgb?
-			if ((R === 1 && G === 159 && B === 244)
-				|| (R >= 200 && G >= 200 && B >= 200)
-				|| (R === 4 && G === 233 && B === 231)
-				|| (R === 3 && G === 0 && B === 244)) {
+			if ((R === 0 && G === 0 && B === 0)
+            || (R === 0 && G === 236 && B === 236)
+            || (R === 1 && G === 160 && B === 246)
+            || (R === 0 && G === 0 && B === 246)) {
+				// change to your new rgb
+
 				// Transparent
 				R = 0;
 				G = 0;
 				B = 0;
 				A = 0;
-			} else if (R === 2 && G === 253 && B === 2) {
+			} else if ((R === 0 && G === 255 && B === 0)) {
 				// Light Green 1
 				R = 49;
 				G = 210;
 				B = 22;
 				A = 255;
-			} else if (R === 1 && G === 197 && B === 1) {
+			} else if ((R === 0 && G === 200 && B === 0)) {
 				// Light Green 2
 				R = 0;
 				G = 142;
 				B = 0;
 				A = 255;
-			} else if (R === 0 && G === 142 && B === 0) {
+			} else if ((R === 0 && G === 144 && B === 0)) {
 				// Dark Green 1
 				R = 20;
 				G = 90;
 				B = 15;
 				A = 255;
-			} else if (R === 253 && G === 248 && B === 2) {
+			} else if ((R === 255 && G === 255 && B === 0)) {
 				// Dark Green 2
 				R = 10;
 				G = 40;
 				B = 10;
 				A = 255;
-			} else if (R === 229 && G === 188 && B === 0) {
+			} else if ((R === 231 && G === 192 && B === 0)) {
 				// Yellow
 				R = 196;
 				G = 179;
 				B = 70;
 				A = 255;
-			} else if (R === 253 && G === 139 && B === 0) {
+			} else if ((R === 255 && G === 144 && B === 0)) {
 				// Orange
 				R = 190;
 				G = 72;
 				B = 19;
 				A = 255;
-			} else if (R === 212 && G === 0 && B === 0) {
+			} else if ((R === 214 && G === 0 && B === 0)
+            || (R === 255 && G === 0 && B === 0)) {
 				// Red
 				R = 171;
 				G = 14;
 				B = 14;
 				A = 255;
-			} else if (R === 188 && G === 0 && B === 0) {
+			} else if ((R === 192 && G === 0 && B === 0)
+            || (R === 255 && G === 0 && B === 255)) {
 				// Brown
 				R = 115;
 				G = 31;
@@ -415,15 +368,15 @@ class Radar extends WeatherDisplay {
 				A = 255;
 			}
 
-			// store new values
 			RadarImageData.data[i] = R;
 			RadarImageData.data[i + 1] = G;
 			RadarImageData.data[i + 2] = B;
 			RadarImageData.data[i + 3] = A;
 		}
 
-		// rewrite the image
 		RadarContext.putImageData(RadarImageData, 0, 0);
+
+		// MapContext.drawImage(RadarContext.canvas, 0, 0);
 	}
 
 	static mergeDopplerRadarImage(mapContext, radarContext) {

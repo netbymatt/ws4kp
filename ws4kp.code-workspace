@@ -18,6 +18,7 @@
 			"'storm",
 			"Battaglia",
 			"Noaa",
+			"Pngs",
 			"T",
 			"T'storm",
 			"Visib",
@@ -25,7 +26,8 @@
 			"devbridge",
 			"ltrim",
 			"nosleep",
-			"rtrim"
+			"rtrim",
+			"uscomp"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
