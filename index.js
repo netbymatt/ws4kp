@@ -1,4 +1,5 @@
 // express
+// eslint-disable-next-line import/no-extraneous-dependencies
 const express = require('express');
 
 const app = express();
@@ -9,6 +10,7 @@ const path = require('path');
 app.set('view engine', 'ejs');
 
 // cors pass through
+const fs = require('fs');
 const corsPassThru = require('./cors');
 const radarPassThru = require('./cors/radar');
 const outlookPassThru = require('./cors/outlook');
@@ -19,7 +21,7 @@ app.get('/Conus/*', radarPassThru);
 app.get('/products/*', outlookPassThru);
 
 // version
-const version = require('./version');
+const { version } = JSON.parse(fs.readFileSync('package.json'));
 
 const index = (req, res) => {
 	res.render(path.join(__dirname, 'views/index'), {
@@ -41,7 +43,7 @@ const server = app.listen(port, () => {
 
 // graceful shutdown
 process.on('SIGINT', () => {
-	server.close(()=> {
+	server.close(() => {
 		console.log('Server closed');
 	});
 });

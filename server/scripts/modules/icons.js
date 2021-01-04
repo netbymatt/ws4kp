@@ -10,6 +10,8 @@ const icons = (() => {
 		// grab everything after the last slash ending at any of these: ?&,
 		const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
 		let conditionName = afterLastSlash.match(/(.*?)[,?&.]/)[1];
+		// using probability as a crude heavy/light indication where possible
+		const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
 
 		// if a 'DualImage' is captured, adjust to just the j parameter
 		if (conditionName === 'dualimage') {
@@ -81,7 +83,8 @@ const icons = (() => {
 
 		case 'snow':
 		case 'snow-n':
-			return addPath('Heavy-Snow-1994-2.gif');
+			if (value > 50)	return addPath('Heavy-Snow-1994-2.gif');
+			return addPath('Light-Snow.gif');
 
 		case 'rain_snow':
 			return addPath('Rain-Snow-1992.gif');
@@ -146,6 +149,8 @@ const icons = (() => {
 		// grab everything after the last slash ending at any of these: ?&,
 		const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
 		let conditionName = afterLastSlash.match(/(.*?)[,?&.]/)[1];
+		// using probability as a crude heavy/light indication where possible
+		const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
 
 		// if a 'DualImage' is captured, adjust to just the j parameter
 		if (conditionName === 'dualimage') {
@@ -214,7 +219,8 @@ const icons = (() => {
 
 		case 'snow':
 		case 'snow-n':
-			return addPath('CC_Snow.gif');
+			if (value > 50)	return addPath('CC_Snow.gif');
+			return addPath('CC_SnowShowers.gif');
 
 		case 'rain_snow':
 			return addPath('CC_RainSnow.gif');
