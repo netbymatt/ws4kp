@@ -129,6 +129,7 @@ const icons = (() => {
 			return addPath('Sunny-Wind-1994.gif');
 
 		case 'wind_skc-n':
+		case 'wind_sct-n':
 			return addPath('Clear-Wind-1994.gif');
 
 		case 'blizzard':
@@ -255,9 +256,8 @@ const icons = (() => {
 			return addPath('CC_Windy.gif');
 
 		case 'wind_skc':
-			return addPath('CC_Windy.gif');
-
 		case 'wind_skc-n':
+		case 'wind_sct-n':
 			return addPath('CC_Windy.gif');
 
 		case 'blizzard':
