@@ -73,7 +73,8 @@ const htmlSources = [
 	'views/*.ejs',
 ];
 gulp.task('compress_html', () => {
-	const { version } = JSON.parse(fs.readFileSync('./package.json'));
+	// eslint-disable-next-line global-require
+	const { version } = require('../package.json');
 	return gulp.src(htmlSources)
 		.pipe(ejs({
 			production: version,
