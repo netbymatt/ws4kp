@@ -75,6 +75,7 @@
 
             var eventData = {
                 dir: eventType.replace(/swiped-/, ''),
+                touchType: (changedTouches[0] || {}).touchType || 'direct',
                 xStart: parseInt(xDown, 10),
                 xEnd: parseInt((changedTouches[0] || {}).clientX || -1, 10),
                 yStart: parseInt(yDown, 10),
