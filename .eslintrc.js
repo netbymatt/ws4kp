@@ -22,6 +22,12 @@ module.exports = {
 		'no-tabs': 0,
 		'no-console': 0,
 		'max-len': 0,
+		'no-use-before-define': [
+			'error',
+			{
+				variables: false,
+			},
+		],
 		'no-mixed-operators': [
 			'error',
 			{

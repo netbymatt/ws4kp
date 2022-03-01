@@ -36,9 +36,9 @@ class Radar extends WeatherDisplay {
 		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
 	}
 
-	async getData(weatherParameters) {
-		super.getData(weatherParameters);
-		if (!weatherParameters) weatherParameters = this.weatherParameters;
+	async getData(_weatherParameters) {
+		super.getData(_weatherParameters);
+		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// ALASKA AND HAWAII AREN'T SUPPORTED!
 		if (weatherParameters.state === 'AK' || weatherParameters.state === 'HI') {
@@ -154,7 +154,7 @@ class Radar extends WeatherDisplay {
 					minute,
 				}, {
 					zone: 'UTC',
-				});
+				}).setZone();
 			} else {
 				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone();
 			}

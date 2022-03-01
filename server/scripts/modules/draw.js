@@ -74,7 +74,6 @@ const draw = (() => {
 		context.strokeRect(x, y, width, height);
 	};
 
-	// TODO: implement full themes support
 	const theme = 1;	// classic
 	const topColor1 = 'rgb(192, 91, 2)';
 	const topColor2 = 'rgb(72, 34, 64)';

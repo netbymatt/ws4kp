@@ -247,6 +247,27 @@ class Almanac extends WeatherDisplay {
 		const [FullMoonImage, LastMoonImage, NewMoonImage, FirstMoonImage] = await Promise.all(this.moonImages);
 
 		switch (this.screenIndex) {
+		case 1: {
+			this.context.drawImage(await this.backgroundImage1, 0, 0);
+			draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
+			draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
+			draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
+			draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
+
+			draw.titleText(this.context, 'Almanac', 'Outlook');
+
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 180, '30 Day Outlook', 2, 'center');
+
+			const DateRange = `MID-${info.outlook.thisMonth.toUpperCase()} TO MID-${info.outlook.nextMonth.toUpperCase()}`;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 220, DateRange, 2, 'center');
+
+			const Temperature = info.outlook.temperature;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 300, `Temperatures:  ${Temperature}`, 2);
+
+			const Precipitation = info.outlook.precipitation;
+			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 380, `Precipitation: ${Precipitation}`, 2);
+			break;
+		}
 		case 0:
 		default:
 			// sun and moon data
@@ -292,27 +313,6 @@ class Almanac extends WeatherDisplay {
 				this.context.drawImage(image, 75 + Index * 130, 270);
 			});
 			break;
-
-		case 1: {
-			this.context.drawImage(await this.backgroundImage1, 0, 0);
-			draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-			draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-			draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
-			draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-
-			draw.titleText(this.context, 'Almanac', 'Outlook');
-
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 180, '30 Day Outlook', 2, 'center');
-
-			const DateRange = `MID-${info.outlook.thisMonth.toUpperCase()} TO MID-${info.outlook.nextMonth.toUpperCase()}`;
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 320, 220, DateRange, 2, 'center');
-
-			const Temperature = info.outlook.temperature;
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 300, `Temperatures:  ${Temperature}`, 2);
-
-			const Precipitation = info.outlook.precipitation;
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 380, `Precipitation: ${Precipitation}`, 2);
-		}
 		}
 
 		this.finishDraw();
