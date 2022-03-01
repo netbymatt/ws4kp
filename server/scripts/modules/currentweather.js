@@ -24,6 +24,7 @@ class CurrentWeather extends WeatherDisplay {
 			stationNum += 1;
 			try {
 				// station observations
+				// eslint-disable-next-line no-await-in-loop
 				observations = await utils.fetch.json(`${station.id}/observations`, {
 					cors: true,
 					data: {
@@ -38,8 +39,6 @@ class CurrentWeather extends WeatherDisplay {
 					observations = undefined;
 					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
 				}
-
-			// TODO: add retry for further stations if observations are unavailable
 			} catch (e) {
 				console.error(e);
 			}

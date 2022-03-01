@@ -152,8 +152,9 @@ class Radar extends WeatherDisplay {
 					day,
 					hour,
 					minute,
+				}, {
 					zone: 'UTC',
-				}).setZone();
+				});
 			} else {
 				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone();
 			}

@@ -36,5 +36,11 @@
 			"program": "${workspaceFolder}/index.js",
 			"outputCapture": "std",
 		}
+	],
+	"compounds": [
+		{
+			"name": "Compound",
+			"configurations": ["Frontend", "Server"]
+		}
 	]
 }

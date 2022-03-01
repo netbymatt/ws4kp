@@ -256,8 +256,8 @@ const utils = (() => {
 		let corsUrl = _url;
 		if (params.cors === true) corsUrl = rewriteUrl(_url);
 		const url = new URL(corsUrl);
-		// force url to secure
-		url.protocol = 'https:';
+		// match the security protocol
+		url.protocol = window.location.protocol;
 		// add parameters if necessary
 		if (params.data) {
 			Object.keys(params.data).forEach((key) => {
