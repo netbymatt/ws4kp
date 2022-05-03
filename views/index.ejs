@@ -28,6 +28,7 @@
 		<script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>	
 	<% } else { %>
 		<link rel="stylesheet" type="text/css" href="styles/index.css" />
+		<link rel="stylesheet" type="text/css" href="styles/weatherdisplay.css" />
 		<script type="text/javascript" src="scripts/vendor/auto/jquery.js"></script>
 		<script type="text/javascript" src="scripts/vendor/jquery.autocomplete.min.js"></script>
 		<script type="text/javascript" src="scripts/vendor/auto/nosleep.js"></script>
@@ -89,7 +90,10 @@
                     <div class="instructions">Enter your location above to continue</div>
                 </div>
             </div>
-		</div>
+						<div id="weather-hourly" class="weather-display">
+							<%- include('partials/hourly.ejs') %>
+						</div>
+			</div>
         <div id="divTwcBottom">
             <div id="divTwcBottomLeft">
                 <img id="NavigateMenu" class="navButton" src="images/nav/ic_menu_white_24dp_1x.png" title="Menu" />
