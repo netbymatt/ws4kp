@@ -1,6 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const fs = require('fs');
-
 const gulp = require('gulp');
 const concat = require('gulp-concat');
 const terser = require('gulp-terser');

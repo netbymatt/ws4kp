@@ -28,6 +28,12 @@ module.exports = {
 				variables: false,
 			},
 		],
+		'no-param-reassign': [
+			'error',
+			{
+				props: false,
+			},
+		],
 		'no-mixed-operators': [
 			'error',
 			{
