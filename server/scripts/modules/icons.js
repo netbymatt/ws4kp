@@ -142,6 +142,8 @@ const icons = (() => {
 	};
 
 	const getWeatherIconFromIconLink = (link, _isNightTime) => {
+		if (!link) return;
+
 		// internal function to add path to returned icon
 		const addPath = (icon) => `images/${icon}`;
 		// extract day or night if not provided

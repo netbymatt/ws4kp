@@ -1,0 +1,103 @@
+@use 'colors'as c;
+@use 'utils'as u;
+
+.weather-display {
+	width: 640px;
+	height: 480px;
+	overflow: hidden;
+	position: relative;
+	background-image: url(../images/BackGround1_1.png);
+	display: none;
+
+	&.show {
+		display: block;
+	}
+
+	.template {
+		display: none;
+	}
+
+	.header {
+		width: 640px;
+		height: 60px;
+		padding-top: 30px;
+
+		.title {
+			color: c.$title-color;
+			@include u.text-shadow(3px, 1.5px);
+			font-family: 'Star4000';
+			font-size: 24pt;
+			position: absolute;
+
+			&.single {
+				left: 170px;
+				top: 25px;
+			}
+
+			&.dual {
+				left: 170px;
+
+				&>div {
+					position: absolute;
+				}
+
+				.top {
+					top: -3px;
+				}
+
+				.bottom {
+					top: 26px;
+				}
+			}
+
+		}
+		
+		.logo {
+			top: 30px;
+			left: 50px;
+			position: absolute;
+			z-index: 10;
+		}
+		.noaa-logo {
+			position: absolute;
+			top: 39px;
+			left: 356px;
+		}
+
+		.title.single {
+			top: 40px;
+		}
+
+		.date-time {
+			white-space: pre;
+			color: c.$date-time;
+			font-family: 'Star4000 Small';
+			font-size: 24pt;
+			@include u.text-shadow(3px, 1.5px);
+			left: 415px;
+			width: 170px;
+			text-align: right;
+			position: absolute;
+
+			&.date {
+				padding-top: 22px;
+			}
+		}
+	}
+
+	.main {
+		&.has-scroll {
+			width: 640px;
+			height: 310px;
+			overflow: hidden;
+		}
+	}
+
+
+	.scroll {
+		width: 640px;
+		height: 80px;
+		overflow: hidden;
+		margin-top: 10px;
+	}
+}

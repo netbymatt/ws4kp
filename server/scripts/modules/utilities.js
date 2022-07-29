@@ -286,8 +286,15 @@ const utils = (() => {
 		}
 	};
 
+	const elemForEach = (selector, callback) => {
+		[...document.querySelectorAll(selector)].forEach(callback);
+	};
+
 	// return an orderly object
 	return {
+		elem: {
+			forEach: elemForEach,
+		},
 		image: {
 			load: loadImg,
 			superGifAsync,

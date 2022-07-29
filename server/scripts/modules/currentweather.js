@@ -69,7 +69,7 @@ class CurrentWeather extends WeatherDisplay {
 		data.Temperature = Math.round(observations.temperature.value);
 		data.TemperatureUnit = 'C';
 		data.DewPoint = Math.round(observations.dewpoint.value);
-		data.Ceiling = Math.round(observations.cloudLayers[0].base.value);
+		data.Ceiling = Math.round(observations.cloudLayers[0]?.base?.value ?? 0);
 		data.CeilingUnit = 'm.';
 		data.Visibility = Math.round(observations.visibility.value / 1000);
 		data.VisibilityUnit = ' km.';
@@ -190,15 +190,17 @@ class CurrentWeather extends WeatherDisplay {
 			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 365, data.WindChill + String.fromCharCode(176), 2, 'right');
 		}
 
+		if (data.Icon) {
 		// get main icon
-		this.gifs.push(await utils.image.superGifAsync({
-			src: data.Icon,
-			auto_play: true,
-			canvas: this.canvas,
-			x: 140,
-			y: 175,
-			max_width: 126,
-		}));
+			this.gifs.push(await utils.image.superGifAsync({
+				src: data.Icon,
+				auto_play: true,
+				canvas: this.canvas,
+				x: 140,
+				y: 175,
+				max_width: 126,
+			}));
+		}
 
 		this.finishDraw();
 	}

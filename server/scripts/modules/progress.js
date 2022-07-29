@@ -94,8 +94,10 @@ class Progress extends WeatherDisplay {
 	}
 
 	canvasClick(e) {
-		const x = e.offsetX;
-		const y = e.offsetY;
+		// un-scale
+		const scale = e.target.getBoundingClientRect().width / e.target.width;
+		const x = e.offsetX / scale;
+		const y = e.offsetY / scale;
 		// eliminate off canvas and outside area clicks
 		if (!this.isActive()) return;
 		if (y < 100 || y > 410) return;

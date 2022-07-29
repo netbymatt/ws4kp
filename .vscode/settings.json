@@ -1,5 +1,21 @@
 {
 	"cSpell.enableFiletypes": [
 		"javascript"
-	]
+	],
+	"liveSassCompile.settings.formats": [
+		{
+			"format": "expanded",
+			"extensionName": ".css",
+			"savePath": "/server/styles",
+			"savePathSegmentKeys": null,
+			"savePathReplaceSegmentsWith": null
+		}
+	],
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/bower_components": true,
+		"**/*.code-search": true,
+		"**/compiled.css": true,
+		"**/*.min.js": true,
+	},
 }

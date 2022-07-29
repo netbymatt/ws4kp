@@ -1,6 +1,6 @@
 // base weather display class
 
-/* globals navigation, utils, draw, UNITS, luxon, currentWeatherScroll */
+/* globals navigation, utils, luxon, currentWeatherScroll */
 
 const STATUS = {
 	loading: Symbol('loading'),
@@ -12,7 +12,7 @@ const STATUS = {
 
 // eslint-disable-next-line no-unused-vars
 class WeatherDisplay {
-	constructor(navId, elemId, name, defaultEnabled) {
+	constructor(navId, elemId, name, defaultEnabled, isHtml) {
 		// navId is used in messaging
 		this.navId = navId;
 		this.elemId = undefined;
@@ -21,6 +21,7 @@ class WeatherDisplay {
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
 		this.getDataCallbacks = [];
+		this.isHtml = isHtml;
 
 		// default navigation timing
 		this.timing = {
@@ -41,6 +42,9 @@ class WeatherDisplay {
 			this.setStatus(STATUS.disabled);
 		}
 		this.startNavCount();
+
+		// get any templates
+		this.loadTemplates();
 	}
 
 	addCheckbox(defaultEnabled = true) {
@@ -97,6 +101,9 @@ class WeatherDisplay {
 		if (this.elemId) return;
 		this.elemId = elemId;
 
+		// no additional work if this is HTML
+		if (this.isHtml) return;
+
 		// create a canvas
 		const canvas = document.createElement('template');
 		canvas.innerHTML = `<canvas id='${`${elemId}Canvas`}' width='${width}' height='${height}' style='display: none;' />`;
@@ -136,13 +143,15 @@ class WeatherDisplay {
 	}
 
 	drawCanvas() {
+		if (!this.isHtml) {
 		// stop all gifs
-		this.gifs.forEach((gif) => gif.pause());
-		// delete the gifs
-		this.gifs.length = 0;
-		// refresh the canvas
-		this.canvas = document.getElementById(`${this.elemId}Canvas`);
-		this.context = this.canvas.getContext('2d');
+			this.gifs.forEach((gif) => gif.pause());
+			// delete the gifs
+			this.gifs.length = 0;
+			// refresh the canvas
+			this.canvas = document.getElementById(`${this.elemId}Canvas`);
+			this.context = this.canvas.getContext('2d');
+		}
 
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
@@ -197,64 +206,31 @@ class WeatherDisplay {
 		// if (OkToDrawCustomScrollText) DrawCustomScrollText(WeatherParameters, context);
 	}
 
-	drawCurrentDateTime(bottom) {
+	drawCurrentDateTime() {
 		// only draw if canvas is active to conserve battery
 		if (!this.isActive()) return;
 		const { DateTime } = luxon;
-		const font = 'Star4000 Small';
-		const size = '24pt';
-		const color = '#ffffff';
-		const shadow = 2;
-
-		// on the first pass store the background for the date and time
-		if (!this.dateTimeBackground) {
-			const bg = this.context.getImageData(410, 30, 175, 60);
-			// test background draw complete and skip drawing if there is no background yet
-			if (bg.data[0] === 0) return;
-			// store the background
-			this.dateTimeBackground = bg;
-		}
-
-		// Clear the date and time area.
-		if (bottom) {
-			draw.box(this.context, 'rgb(25, 50, 112)', 0, 389, 640, 16);
-		} else {
-			this.context.putImageData(this.dateTimeBackground, 410, 30);
-		}
-
 		// Get the current date and time.
 		const now = DateTime.local();
 
 		// time = "11:35:08 PM";
 		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11, ' ');
 
-		let x; let y;
-		if (bottom) {
-			x = 400;
-			y = 402;
-		} else {
-			x = 410;
-			y = 65;
+		if (this.lastTime !== time) {
+			utils.elem.forEach('.date-time.time', (elem) => { elem.innerHTML = time.toUpperCase(); });
 		}
-		if (navigation.units() === UNITS.metric) {
-			x += 45;
-		}
-
-		draw.text(this.context, font, size, color, x, y, time.toUpperCase(), shadow); // y += 20;
+		this.lastTime = time;
 
 		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
 
-		if (bottom) {
-			x = 55;
-			y = 402;
-		} else {
-			x = 410;
-			y = 85;
+		if (this.lastDate !== date) {
+			utils.elem.forEach('.date-time.date', (elem) => { elem.innerHTML = date.toUpperCase(); });
 		}
-		draw.text(this.context, font, size, color, x, y, date.toUpperCase(), shadow);
+		this.lastDate = date;
 	}
 
 	async drawNoaaImage() {
+		if (this.isHtml) return;
 		// load the image and store locally
 		if (!this.drawNoaaImage.image) {
 			this.drawNoaaImage.image = utils.image.load('images/noaa5.gif');
@@ -265,6 +241,7 @@ class WeatherDisplay {
 	}
 
 	async drawLogoImage() {
+		if (this.isHtml) return;
 		// load the image and store locally
 		if (!this.drawLogoImage.image) {
 			this.drawLogoImage.image = utils.image.load('images/Logo3.png');
@@ -281,23 +258,33 @@ class WeatherDisplay {
 		if (navCmd === navigation.msg.command.firstFrame) this.navNext(navCmd);
 		if (navCmd === navigation.msg.command.lastFrame) this.navPrev(navCmd);
 
-		// see if the canvas is already showing
-		if (this.canvas.style.display === 'block') return false;
+		this.startNavCount();
 
-		// show the canvas
-		this.canvas.style.display = 'block';
-		return false;
+		if (!this.isHtml) {
+		// see if the canvas is already showing
+			if (this.canvas.style.display === 'block') return;
+
+			// show the canvas
+			this.canvas.style.display = 'block';
+		} else {
+			this.elem.classList.add('show');
+		}
 	}
 
 	hideCanvas() {
 		this.resetNavBaseCount();
 
-		if (!this.canvas) return;
-		this.canvas.style.display = 'none';
+		if (this.canvas) {
+			this.canvas.style.display = 'none';
+		}
+		if (this.isHtml) {
+			this.elem.classList.remove('show');
+		}
 	}
 
 	isActive() {
-		return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
+		if (!this.isHtml)	return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
+		return this.elem.offsetParent !== null;
 	}
 
 	isEnabled() {
@@ -452,7 +439,6 @@ class WeatherDisplay {
 			clearInterval(this.navInterval);
 			this.navInterval = undefined;
 		}
-		this.startNavCount();
 	}
 
 	sendNavDisplayMessage(message) {
@@ -460,5 +446,21 @@ class WeatherDisplay {
 			id: this.navId,
 			type: message,
 		});
+	}
+
+	loadTemplates() {
+		this.templates = {};
+		if (this.elemId !== 'progress') {
+			this.elem = document.getElementById(`${this.elemId}-html`);
+			if (!this.elem) return;
+			const templates = this.elem.querySelectorAll('.template');
+			templates.forEach((template) => {
+				const className = template.classList[0];
+				const node = template.cloneNode(true);
+				node.classList.remove('template');
+				this.templates[className] = node;
+				template.remove();
+			});
+		}
 	}
 }

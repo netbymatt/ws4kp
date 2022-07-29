@@ -1,0 +1,237 @@
+.weather-display {
+  width: 640px;
+  height: 480px;
+  overflow: hidden;
+  position: relative;
+  background-image: url(../images/BackGround1_1.png);
+  display: none;
+}
+.weather-display.show {
+  display: block;
+}
+.weather-display .template {
+  display: none;
+}
+.weather-display .header {
+  width: 640px;
+  height: 60px;
+  padding-top: 30px;
+}
+.weather-display .header .title {
+  color: yellow;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  font-family: "Star4000";
+  font-size: 24pt;
+  position: absolute;
+}
+.weather-display .header .title.single {
+  left: 170px;
+  top: 25px;
+}
+.weather-display .header .title.dual {
+  left: 170px;
+}
+.weather-display .header .title.dual > div {
+  position: absolute;
+}
+.weather-display .header .title.dual .top {
+  top: -3px;
+}
+.weather-display .header .title.dual .bottom {
+  top: 26px;
+}
+.weather-display .header .logo {
+  top: 30px;
+  left: 50px;
+  position: absolute;
+  z-index: 10;
+}
+.weather-display .header .noaa-logo {
+  position: absolute;
+  top: 39px;
+  left: 356px;
+}
+.weather-display .header .title.single {
+  top: 40px;
+}
+.weather-display .header .date-time {
+  white-space: pre;
+  color: white;
+  font-family: "Star4000 Small";
+  font-size: 24pt;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  left: 415px;
+  width: 170px;
+  text-align: right;
+  position: absolute;
+}
+.weather-display .header .date-time.date {
+  padding-top: 22px;
+}
+.weather-display .main.has-scroll {
+  width: 640px;
+  height: 310px;
+  overflow: hidden;
+}
+.weather-display .scroll {
+  width: 640px;
+  height: 80px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+#hourly-html.weather-display .main {
+  overflow-y: hidden;
+}
+#hourly-html.weather-display .main .column-headers {
+  background-color: rgb(32, 0, 87);
+  height: 20px;
+  position: absolute;
+  width: 100%;
+}
+#hourly-html.weather-display .main .column-headers {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  z-index: 5;
+}
+#hourly-html.weather-display .main .column-headers div {
+  display: inline-block;
+  font-family: "Star4000 Small";
+  font-size: 24pt;
+  color: yellow;
+  position: absolute;
+  top: -14px;
+  z-index: 5;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+}
+#hourly-html.weather-display .main .column-headers .temp {
+  left: 370px;
+}
+#hourly-html.weather-display .main .column-headers .like {
+  left: 450px;
+}
+#hourly-html.weather-display .main .column-headers .wind {
+  left: 560px;
+}
+#hourly-html.weather-display .main .hourly-lines {
+  min-height: 338px;
+  padding-top: 10px;
+  background: repeating-linear-gradient(0deg, #001040 0px, #102080 136px, #102080 202px, #001040 338px);
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row {
+  font-family: "Star4000 Large";
+  font-size: 24pt;
+  height: 72px;
+  color: yellow;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  position: relative;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row > div {
+  position: absolute;
+  white-space: pre;
+  top: 8px;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row .hour {
+  left: 50px;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row .icon {
+  left: 280px;
+  width: 70px;
+  text-align: center;
+  top: unset;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row .temp {
+  left: 370px;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row .like {
+  left: 450px;
+}
+#hourly-html.weather-display .main .hourly-lines .hourly-row .wind {
+  left: 530px;
+  width: 100px;
+  text-align: right;
+}
+
+#current-weather-html.weather-display .main .col {
+  height: 50px;
+  width: 255px;
+  display: inline-block;
+  margin-top: 10px;
+  position: absolute;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+}
+#current-weather-html.weather-display .main .col.left {
+  left: 65px;
+  font-family: "Star4000 Extended";
+  font-size: 24pt;
+}
+#current-weather-html.weather-display .main .col.right {
+  right: 65px;
+  font-family: "Star4000 Large";
+  font-size: 20px;
+  font-weight: bold;
+}
+#current-weather-html.weather-display .main .col.right .row {
+  margin-bottom: 8px;
+}
+#current-weather-html.weather-display .main .col.right .row .label,
+#current-weather-html.weather-display .main .col.right .row .value {
+  display: inline-block;
+}
+#current-weather-html.weather-display .main .col.right .row .label {
+  margin-left: 20px;
+}
+#current-weather-html.weather-display .main .col.right .row .value {
+  float: right;
+  margin-right: 10px;
+}
+#current-weather-html.weather-display .main .center {
+  text-align: center;
+}
+#current-weather-html.weather-display .main .temp {
+  font-family: "Star4000 Large";
+  font-size: 24pt;
+}
+#current-weather-html.weather-display .main .icon {
+  height: 100px;
+}
+#current-weather-html.weather-display .main .icon img {
+  max-width: 126px;
+}
+#current-weather-html.weather-display .main .wind-container {
+  margin-bottom: 10px;
+}
+#current-weather-html.weather-display .main .wind-container > div {
+  width: 45%;
+  display: inline-block;
+  margin: 0px;
+}
+#current-weather-html.weather-display .main .wind-container .wind-label {
+  margin-left: 5px;
+}
+#current-weather-html.weather-display .main .wind-container .wind {
+  text-align: right;
+}
+#current-weather-html.weather-display .main .wind-gusts {
+  margin-left: 5px;
+}
+#current-weather-html.weather-display .main .location {
+  color: yellow;
+  margin-bottom: 10px;
+}/*# sourceMappingURL=compiled.css.map */

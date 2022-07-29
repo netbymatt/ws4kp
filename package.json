@@ -1,41 +1,44 @@
 {
-  "name": "ws4kp",
-  "version": "4.1.3",
-  "description": "Welcome to the WeatherStar 4000+ project page!",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/netbymatt/ws4kp.git"
-  },
-  "author": "Matt Walsh",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/netbymatt/ws4kp/issues"
-  },
-  "homepage": "https://github.com/netbymatt/ws4kp#readme",
-  "devDependencies": {
-    "del": "^6.0.0",
-    "ejs": "^3.1.5",
-    "eslint": "^8.10.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.22.1",
-    "express": "^4.17.1",
-    "gulp": "^4.0.2",
-    "gulp-clean-css": "^4.3.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-ejs": "^5.1.0",
-    "gulp-htmlmin": "^5.0.1",
-    "gulp-rename": "^2.0.0",
-    "gulp-s3-upload": "^1.7.3",
-    "gulp-terser": "^2.0.0",
-    "jquery": "^3.6.0",
-    "jquery-touchswipe": "^1.6.19",
-    "luxon": "^2.3.1",
-    "nosleep.js": "^0.12.0",
-    "suncalc": "^1.8.0",
-    "swiped-events": "^1.1.4"
-  }
+	"name": "ws4kp",
+	"version": "4.1.3",
+	"description": "Welcome to the WeatherStar 4000+ project page!",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build:css": "sass ./server/styles/scss/style.scss ./server/styles/compiled.css"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/netbymatt/ws4kp.git"
+	},
+	"author": "Matt Walsh",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/netbymatt/ws4kp/issues"
+	},
+	"homepage": "https://github.com/netbymatt/ws4kp#readme",
+	"devDependencies": {
+		"del": "^6.0.0",
+		"ejs": "^3.1.5",
+		"eslint": "^8.10.0",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-plugin-import": "^2.22.1",
+		"express": "^4.17.1",
+		"gulp": "^4.0.2",
+		"gulp-clean-css": "^4.3.0",
+		"gulp-concat": "^2.6.1",
+		"gulp-ejs": "^5.1.0",
+		"gulp-htmlmin": "^5.0.1",
+		"gulp-rename": "^2.0.0",
+		"gulp-s3-upload": "^1.7.3",
+		"gulp-sass": "^5.1.0",
+		"gulp-terser": "^2.0.0",
+		"jquery": "^3.6.0",
+		"jquery-touchswipe": "^1.6.19",
+		"luxon": "^2.3.1",
+		"nosleep.js": "^0.12.0",
+		"sass": "^1.54.0",
+		"suncalc": "^1.8.0",
+		"swiped-events": "^1.1.4"
+	}
 }
