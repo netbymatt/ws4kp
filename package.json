@@ -35,7 +35,7 @@
 		"gulp-terser": "^2.0.0",
 		"jquery": "^3.6.0",
 		"jquery-touchswipe": "^1.6.19",
-		"luxon": "^2.3.1",
+		"luxon": "^3.0.0",
 		"nosleep.js": "^0.12.0",
 		"sass": "^1.54.0",
 		"suncalc": "^1.8.0",
