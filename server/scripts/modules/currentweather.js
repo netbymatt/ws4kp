@@ -132,7 +132,7 @@ class CurrentWeather extends WeatherDisplay {
 		fill.dewpoint = data.DewPoint + String.fromCharCode(176);
 		fill.ceiling = (data.Ceiling === 0 ? 'Unlimited' : data.Ceiling + data.CeilingUnit);
 		fill.visibility = data.Visibility + data.VisibilityUnit;
-		fill.pressure = data.Pressure;
+		fill.pressure = `${data.Pressure} ${data.PressureDirection}`;
 
 		// switch (data.PressureDirection) {
 		// case 'R':
