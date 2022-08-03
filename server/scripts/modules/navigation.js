@@ -93,7 +93,7 @@ const navigation = (() => {
 
 		// start loading canvases if necessary
 		if (displays.length === 0) {
-			currentWeather = new CurrentWeather(0, 'currentWeather');
+			currentWeather = new CurrentWeather(0, 'current-weather');
 			almanac = new Almanac(7, 'almanac');
 			displays = [
 				currentWeather,

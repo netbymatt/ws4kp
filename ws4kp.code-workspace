@@ -16,18 +16,19 @@
 		"cSpell.enabled": true,
 		"cSpell.words": [
 			"'storm",
+			"arcgis",
 			"Battaglia",
+			"devbridge",
+			"gifs",
+			"ltrim",
 			"Noaa",
+			"nosleep",
 			"Pngs",
+			"rtrim",
 			"T",
 			"T'storm",
-			"Visib",
-			"arcgis",
-			"devbridge",
-			"ltrim",
-			"nosleep",
-			"rtrim",
-			"uscomp"
+			"uscomp",
+			"Visib"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",

@@ -1,10 +1,10 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, draw, navigation */
+/* globals WeatherDisplay, utils, STATUS, icons, UNITS, navigation */
 
 // eslint-disable-next-line no-unused-vars
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Current Conditions');
+		super(navId, elemId, 'Current Conditions', true, true);
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 	}
@@ -111,96 +111,73 @@ class CurrentWeather extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
+		const fill = {};
 		// parse each time to deal with a change in units if necessary
 		const data = this.parseData();
 
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
-		draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-
-		draw.titleText(this.context, 'Current', 'Conditions');
-
-		draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 170, 135, data.Temperature + String.fromCharCode(176), 2);
+		fill.temp = data.Temperature + String.fromCharCode(176);
 
 		let Conditions = data.observations.textDescription;
 		if (Conditions.length > 15) {
 			Conditions = this.shortConditions(Conditions);
 		}
-		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 195, 170, Conditions, 2, 'center');
+		fill.condition = Conditions;
 
-		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 80, 330, 'Wind:', 2);
-		draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 300, 330, `${data.WindDirection} ${data.WindSpeed}`, 2, 'right');
+		fill.wind = data.WindDirection.padEnd(3, '') + data.WindSpeed.toString().padStart(3, ' ');
+		if (data.WindGust) fill['wind-gusts'] = `Gusts to ${data.WindGust}`;
 
-		if (data.WindGust) draw.text(this.context, 'Star4000 Extended', '24pt', '#FFFFFF', 80, 375, `Gusts to ${data.WindGust}`, 2);
+		fill.location = this.data.station.properties.name.substr(0, 20);
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFF00', 315, 120, this.data.station.properties.name.substr(0, 20), 2);
+		fill.humidity = `${data.Humidity}%`;
+		fill.dewpoint = data.DewPoint + String.fromCharCode(176);
+		fill.ceiling = (data.Ceiling === 0 ? 'Unlimited' : data.Ceiling + data.CeilingUnit);
+		fill.visibility = data.Visibility + data.VisibilityUnit;
+		fill.pressure = data.Pressure;
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 165, 'Humidity:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 165, `${data.Humidity}%`, 2, 'right');
+		// switch (data.PressureDirection) {
+		// case 'R':
+		// // Shadow
+		// 	draw.triangle(this.context, '#000000', 552, 302, 542, 312, 562, 312);
+		// 	draw.box(this.context, '#000000', 549, 312, 6, 15);
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 205, 'Dewpoint:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 205, data.DewPoint + String.fromCharCode(176), 2, 'right');
+		// 	// Border
+		// 	draw.triangle(this.context, '#000000', 550, 300, 540, 310, 560, 310);
+		// 	draw.box(this.context, '#000000', 547, 310, 6, 15);
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 245, 'Ceiling:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 245, (data.Ceiling === '' ? 'Unlimited' : data.Ceiling + data.CeilingUnit), 2, 'right');
+		// 	// Fill
+		// 	draw.triangle(this.context, '#FFFF00', 550, 301, 541, 309, 559, 309);
+		// 	draw.box(this.context, '#FFFF00', 548, 309, 4, 15);
+		// 	break;
+		// case 'F':
+		// // Shadow
+		// 	draw.triangle(this.context, '#000000', 552, 327, 542, 317, 562, 317);
+		// 	draw.box(this.context, '#000000', 549, 302, 6, 15);
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 285, 'Visibility:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 285, data.Visibility + data.VisibilityUnit, 2, 'right');
+		// 	// Border
+		// 	draw.triangle(this.context, '#000000', 550, 325, 540, 315, 560, 315);
+		// 	draw.box(this.context, '#000000', 547, 300, 6, 15);
 
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 325, 'Pressure:', 2);
-		draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 535, 325, data.Pressure, 2, 'right');
-
-		switch (data.PressureDirection) {
-		case 'R':
-		// Shadow
-			draw.triangle(this.context, '#000000', 552, 302, 542, 312, 562, 312);
-			draw.box(this.context, '#000000', 549, 312, 6, 15);
-
-			// Border
-			draw.triangle(this.context, '#000000', 550, 300, 540, 310, 560, 310);
-			draw.box(this.context, '#000000', 547, 310, 6, 15);
-
-			// Fill
-			draw.triangle(this.context, '#FFFF00', 550, 301, 541, 309, 559, 309);
-			draw.box(this.context, '#FFFF00', 548, 309, 4, 15);
-			break;
-		case 'F':
-		// Shadow
-			draw.triangle(this.context, '#000000', 552, 327, 542, 317, 562, 317);
-			draw.box(this.context, '#000000', 549, 302, 6, 15);
-
-			// Border
-			draw.triangle(this.context, '#000000', 550, 325, 540, 315, 560, 315);
-			draw.box(this.context, '#000000', 547, 300, 6, 15);
-
-			// Fill
-			draw.triangle(this.context, '#FFFF00', 550, 324, 541, 314, 559, 314);
-			draw.box(this.context, '#FFFF00', 548, 301, 4, 15);
-			break;
-		default:
-		}
+		// 	// Fill
+		// 	draw.triangle(this.context, '#FFFF00', 550, 324, 541, 314, 559, 314);
+		// 	draw.box(this.context, '#FFFF00', 548, 301, 4, 15);
+		// 	break;
+		// default:
+		// }
 
 		if (data.observations.heatIndex.value && data.HeatIndex !== data.Temperature) {
-			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 365, 'Heat Index:', 2);
-			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 365, data.HeatIndex + String.fromCharCode(176), 2, 'right');
+			fill['heat-index-label'] = 'Heat Index:';
+			fill['heat-index'] = data.HeatIndex + String.fromCharCode(176);
 		} else if (data.observations.windChill.value && data.WindChill !== '' && data.WindChill < data.Temperature) {
-			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 340, 365, 'Wind Chill:', 2);
-			draw.text(this.context, 'Star4000 Large', 'bold 16pt', '#FFFFFF', 560, 365, data.WindChill + String.fromCharCode(176), 2, 'right');
+			fill['heat-index-label'] = 'Wind Chill:';
+			fill['heat-index'] = data.WindChill + String.fromCharCode(176);
 		}
 
-		if (data.Icon) {
-		// get main icon
-			this.gifs.push(await utils.image.superGifAsync({
-				src: data.Icon,
-				auto_play: true,
-				canvas: this.canvas,
-				x: 140,
-				y: 175,
-				max_width: 126,
-			}));
-		}
+		fill.icon = { type: 'img', src: data.Icon };
+
+		const area = this.elem.querySelector('.main');
+
+		area.innerHTML = '';
+		area.append(this.fillTemplate('weather', fill));
 
 		this.finishDraw();
 	}

@@ -463,4 +463,30 @@ class WeatherDisplay {
 			});
 		}
 	}
+
+	fillTemplate(name, fillValues) {
+		// get the template
+		const templateNode = this.templates[name];
+		if (!templateNode) return false;
+
+		// clone it
+		const template = templateNode.cloneNode(true);
+
+		Object.entries(fillValues).forEach(([key, value]) => {
+			// get the specified element
+			const elem = template.querySelector(`.${key}`);
+			if (!elem) return;
+
+			// fill based on type provided
+			if (typeof value === 'string' || typeof value === 'number') {
+				// string and number fill the first found selector
+				elem.innerHTML = value;
+			} else if (value?.type === 'img') {
+				// fill the image source
+				elem.querySelector('img').src = value.src;
+			}
+		});
+
+		return template;
+	}
 }

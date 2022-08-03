@@ -188,7 +188,7 @@
   font-weight: bold;
 }
 #current-weather-html.weather-display .main .col.right .row {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 #current-weather-html.weather-display .main .col.right .row .label,
 #current-weather-html.weather-display .main .col.right .row .value {

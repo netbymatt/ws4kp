@@ -116,18 +116,19 @@ class Hourly extends WeatherDisplay {
 		const startingHour = luxon.DateTime.local();
 
 		const lines = this.data.map((data, index) => {
-			const line = this.templates['hourly-row'].cloneNode(true);
+			const fillValues = {};
 			// hour
 			const hour = startingHour.plus({ hours: index });
 			const formattedHour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
-			line.querySelector('.hour').innerHTML = formattedHour;
+			fillValues.hour = formattedHour;
 
 			// temperatures, convert to strings with no decimal
 			const temperature = Math.round(data.temperature).toString().padStart(3);
 			const feelsLike = Math.round(data.apparentTemperature).toString().padStart(3);
-			line.querySelector('.temp').innerHTML = temperature;
+			fillValues.temp = temperature;
 			// only plot apparent temperature if there is a difference
-			if (temperature !== feelsLike) line.querySelector('.like').innerHTML = feelsLike;
+			// if (temperature !== feelsLike) line.querySelector('.like').innerHTML = feelsLike;
+			if (temperature !== feelsLike) fillValues.like = feelsLike;
 
 			// wind
 			let wind = 'Calm';
@@ -135,12 +136,12 @@ class Hourly extends WeatherDisplay {
 				const windSpeed = Math.round(data.windSpeed).toString();
 				wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
 			}
-			line.querySelector('.wind').innerHTML = wind;
+			fillValues.wind = wind;
 
 			// image
-			line.querySelector('.icon img').src = data.icon;
+			fillValues.icon = { type: 'img', src: data.icon };
 
-			return line;
+			return this.fillTemplate('hourly-row', fillValues);
 		});
 
 		list.append(...lines);
