@@ -51,13 +51,14 @@
 			}
 
 		}
-		
+
 		.logo {
 			top: 30px;
 			left: 50px;
 			position: absolute;
 			z-index: 10;
 		}
+
 		.noaa-logo {
 			position: absolute;
 			top: 39px;
@@ -86,10 +87,18 @@
 	}
 
 	.main {
+		position: relative;
+
 		&.has-scroll {
 			width: 640px;
 			height: 310px;
 			overflow: hidden;
+		}
+
+		&.has-box {
+			margin-left: 64px;
+			margin-right: 64px;
+			width: calc(100% - 128px);
 		}
 	}
 

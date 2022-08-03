@@ -74,10 +74,18 @@
 .weather-display .header .date-time.date {
   padding-top: 22px;
 }
+.weather-display .main {
+  position: relative;
+}
 .weather-display .main.has-scroll {
   width: 640px;
   height: 310px;
   overflow: hidden;
+}
+.weather-display .main.has-box {
+  margin-left: 64px;
+  margin-right: 64px;
+  width: calc(100% - 128px);
 }
 .weather-display .scroll {
   width: 640px;
@@ -177,18 +185,17 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
 #current-weather-html.weather-display .main .col.left {
-  left: 65px;
   font-family: "Star4000 Extended";
   font-size: 24pt;
 }
 #current-weather-html.weather-display .main .col.right {
-  right: 65px;
+  right: 0px;
   font-family: "Star4000 Large";
   font-size: 20px;
   font-weight: bold;
 }
 #current-weather-html.weather-display .main .col.right .row {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 #current-weather-html.weather-display .main .col.right .row .label,
 #current-weather-html.weather-display .main .col.right .row .value {

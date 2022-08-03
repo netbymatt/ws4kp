@@ -14,20 +14,19 @@
 			@include u.text-shadow();
 
 			&.left {
-				left: 65px;
 				font-family: 'Star4000 Extended';
 				font-size: 24pt;
 
 			}
 
 			&.right {
-				right: 65px;
+				right: 0px;
 				font-family: 'Star4000 Large';
 				font-size: 20px;
 				font-weight: bold;
 
 				.row {
-					margin-bottom: 16px;
+					margin-bottom: 12px;
 
 					.label,
 					.value {
