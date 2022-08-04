@@ -127,8 +127,10 @@ const index = (() => {
 		const TwcUnits = localStorage.getItem('TwcUnits');
 		if (!TwcUnits || TwcUnits === 'ENGLISH') {
 			document.getElementById('radEnglish').checked = true;
+			navigation.message({ type: 'units', message: 'english' });
 		} else if (TwcUnits === 'METRIC') {
 			document.getElementById('radMetric').checked = true;
+			navigation.message({ type: 'units', message: 'metric' });
 		}
 
 		document.getElementById('radEnglish').addEventListener('change', changeUnits);
