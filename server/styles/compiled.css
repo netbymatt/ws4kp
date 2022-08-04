@@ -124,13 +124,13 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
 .weather-display .main.hourly.main .column-headers .temp {
-  left: 370px;
+  left: 345px;
 }
 .weather-display .main.hourly.main .column-headers .like {
-  left: 450px;
+  left: 425px;
 }
 .weather-display .main.hourly.main .column-headers .wind {
-  left: 560px;
+  left: 535px;
 }
 .weather-display .main.hourly.main .hourly-lines {
   min-height: 338px;
@@ -154,22 +154,22 @@
   top: 8px;
 }
 .weather-display .main.hourly.main .hourly-lines .hourly-row .hour {
-  left: 50px;
+  left: 25px;
 }
 .weather-display .main.hourly.main .hourly-lines .hourly-row .icon {
-  left: 280px;
+  left: 255px;
   width: 70px;
   text-align: center;
   top: unset;
 }
 .weather-display .main.hourly.main .hourly-lines .hourly-row .temp {
-  left: 370px;
+  left: 355px;
 }
 .weather-display .main.hourly.main .hourly-lines .hourly-row .like {
-  left: 450px;
+  left: 425px;
 }
 .weather-display .main.hourly.main .hourly-lines .hourly-row .wind {
-  left: 530px;
+  left: 505px;
   width: 100px;
   text-align: right;
 }
