@@ -1,8 +1,8 @@
 @use 'colors'as c;
 @use 'utils'as u;
 
-.weather-display .current-weather {
-	.main {
+.weather-display .main.current-weather {
+	&.main {
 
 		.col {
 			height: 50px;

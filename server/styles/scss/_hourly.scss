@@ -1,8 +1,8 @@
 @use 'colors'as c;
 @use 'utils'as u;
 
-.weather-display .hourly {
-	.main {
+.weather-display .main.hourly {
+	&.main {
 		overflow-y: hidden;
 
 		.column-headers {

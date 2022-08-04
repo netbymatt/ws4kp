@@ -95,22 +95,22 @@
   margin-top: 10px;
 }
 
-.weather-display .hourly .main {
+.weather-display .main.hourly.main {
   overflow-y: hidden;
 }
-.weather-display .hourly .main .column-headers {
+.weather-display .main.hourly.main .column-headers {
   background-color: rgb(32, 0, 87);
   height: 20px;
   position: absolute;
   width: 100%;
 }
-.weather-display .hourly .main .column-headers {
+.weather-display .main.hourly.main .column-headers {
   position: -webkit-sticky;
   position: sticky;
   top: 0px;
   z-index: 5;
 }
-.weather-display .hourly .main .column-headers div {
+.weather-display .main.hourly.main .column-headers div {
   display: inline-block;
   font-family: "Star4000 Small";
   font-size: 24pt;
@@ -123,21 +123,21 @@
   /* paint-order: stroke fill; */
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
-.weather-display .hourly .main .column-headers .temp {
+.weather-display .main.hourly.main .column-headers .temp {
   left: 370px;
 }
-.weather-display .hourly .main .column-headers .like {
+.weather-display .main.hourly.main .column-headers .like {
   left: 450px;
 }
-.weather-display .hourly .main .column-headers .wind {
+.weather-display .main.hourly.main .column-headers .wind {
   left: 560px;
 }
-.weather-display .hourly .main .hourly-lines {
+.weather-display .main.hourly.main .hourly-lines {
   min-height: 338px;
   padding-top: 10px;
   background: repeating-linear-gradient(0deg, #001040 0px, #102080 136px, #102080 202px, #001040 338px);
 }
-.weather-display .hourly .main .hourly-lines .hourly-row {
+.weather-display .main.hourly.main .hourly-lines .hourly-row {
   font-family: "Star4000 Large";
   font-size: 24pt;
   height: 72px;
@@ -148,33 +148,33 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
   position: relative;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row > div {
+.weather-display .main.hourly.main .hourly-lines .hourly-row > div {
   position: absolute;
   white-space: pre;
   top: 8px;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row .hour {
+.weather-display .main.hourly.main .hourly-lines .hourly-row .hour {
   left: 50px;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row .icon {
+.weather-display .main.hourly.main .hourly-lines .hourly-row .icon {
   left: 280px;
   width: 70px;
   text-align: center;
   top: unset;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row .temp {
+.weather-display .main.hourly.main .hourly-lines .hourly-row .temp {
   left: 370px;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row .like {
+.weather-display .main.hourly.main .hourly-lines .hourly-row .like {
   left: 450px;
 }
-.weather-display .hourly .main .hourly-lines .hourly-row .wind {
+.weather-display .main.hourly.main .hourly-lines .hourly-row .wind {
   left: 530px;
   width: 100px;
   text-align: right;
 }
 
-.weather-display .current-weather .main .col {
+.weather-display .main.current-weather.main .col {
   height: 50px;
   width: 255px;
   display: inline-block;
@@ -185,61 +185,61 @@
   /* paint-order: stroke fill; */
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
-.weather-display .current-weather .main .col.left {
+.weather-display .main.current-weather.main .col.left {
   font-family: "Star4000 Extended";
   font-size: 24pt;
 }
-.weather-display .current-weather .main .col.right {
+.weather-display .main.current-weather.main .col.right {
   right: 0px;
   font-family: "Star4000 Large";
   font-size: 20px;
   font-weight: bold;
 }
-.weather-display .current-weather .main .col.right .row {
+.weather-display .main.current-weather.main .col.right .row {
   margin-bottom: 12px;
 }
-.weather-display .current-weather .main .col.right .row .label,
-.weather-display .current-weather .main .col.right .row .value {
+.weather-display .main.current-weather.main .col.right .row .label,
+.weather-display .main.current-weather.main .col.right .row .value {
   display: inline-block;
 }
-.weather-display .current-weather .main .col.right .row .label {
+.weather-display .main.current-weather.main .col.right .row .label {
   margin-left: 20px;
 }
-.weather-display .current-weather .main .col.right .row .value {
+.weather-display .main.current-weather.main .col.right .row .value {
   float: right;
   margin-right: 10px;
 }
-.weather-display .current-weather .main .center {
+.weather-display .main.current-weather.main .center {
   text-align: center;
 }
-.weather-display .current-weather .main .temp {
+.weather-display .main.current-weather.main .temp {
   font-family: "Star4000 Large";
   font-size: 24pt;
 }
-.weather-display .current-weather .main .icon {
+.weather-display .main.current-weather.main .icon {
   height: 100px;
 }
-.weather-display .current-weather .main .icon img {
+.weather-display .main.current-weather.main .icon img {
   max-width: 126px;
 }
-.weather-display .current-weather .main .wind-container {
+.weather-display .main.current-weather.main .wind-container {
   margin-bottom: 10px;
 }
-.weather-display .current-weather .main .wind-container > div {
+.weather-display .main.current-weather.main .wind-container > div {
   width: 45%;
   display: inline-block;
   margin: 0px;
 }
-.weather-display .current-weather .main .wind-container .wind-label {
+.weather-display .main.current-weather.main .wind-container .wind-label {
   margin-left: 5px;
 }
-.weather-display .current-weather .main .wind-container .wind {
+.weather-display .main.current-weather.main .wind-container .wind {
   text-align: right;
 }
-.weather-display .current-weather .main .wind-gusts {
+.weather-display .main.current-weather.main .wind-gusts {
   margin-left: 5px;
 }
-.weather-display .current-weather .main .location {
+.weather-display .main.current-weather.main .location {
   color: yellow;
   margin-bottom: 10px;
 }
