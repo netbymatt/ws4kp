@@ -4,13 +4,6 @@
 
 <head>
 	<meta charset="utf-8" />
-	<link rel="preload" href="fonts/Star4000.woff" as="font" crossorigin="anonymous" />
-	<link rel="preload" href="fonts/Star 4 Radar.woff" as="font" crossorigin="anonymous" />
-	<link rel="preload" href="fonts/Star4000 Extended.woff" as="font" crossorigin="anonymous" />
-	<link rel="preload" href="fonts/Star4000 Large Compressed.woff" as="font" crossorigin="anonymous" />
-	<link rel="preload" href="fonts/Star4000 Large.woff" as="font" crossorigin="anonymous" />
-	<link rel="preload" href="fonts/Star4000 Small.woff" as="font" crossorigin="anonymous" />
-
 	<title>WeatherStar 4000+</title>
 	<meta name="description"
 		content="Web based WeatherStar 4000 simulator that reports current and forecast weather conditions plus a few extras!" />
@@ -102,6 +95,9 @@
 			</div>
 			<div id="current-weather-html" class="weather-display">
 				<%- include('partials/current-weather.ejs') %>
+			</div>
+			<div id="local-forecast-html" class="weather-display">
+				<%- include('partials/local-forecast.ejs') %>
 			</div>
 		</div>
 		<div id="divTwcBottom">

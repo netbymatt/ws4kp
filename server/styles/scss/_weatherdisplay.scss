@@ -7,10 +7,12 @@
 	overflow: hidden;
 	position: relative;
 	background-image: url(../images/BackGround1_1.png);
-	display: none;
+
+	/* this method is required to hide blocks so they can be measured while off screen */
+	height: 0px;
 
 	&.show {
-		display: block;
+		height: 480px;
 	}
 
 	.template {

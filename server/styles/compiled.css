@@ -4,10 +4,11 @@
   overflow: hidden;
   position: relative;
   background-image: url(../images/BackGround1_1.png);
-  display: none;
+  /* this method is required to hide blocks so they can be measured while off screen */
+  height: 0px;
 }
 .weather-display.show {
-  display: block;
+  height: 480px;
 }
 .weather-display .template {
   display: none;
@@ -94,22 +95,22 @@
   margin-top: 10px;
 }
 
-#hourly-html.weather-display .main {
+.weather-display .hourly .main {
   overflow-y: hidden;
 }
-#hourly-html.weather-display .main .column-headers {
+.weather-display .hourly .main .column-headers {
   background-color: rgb(32, 0, 87);
   height: 20px;
   position: absolute;
   width: 100%;
 }
-#hourly-html.weather-display .main .column-headers {
+.weather-display .hourly .main .column-headers {
   position: -webkit-sticky;
   position: sticky;
   top: 0px;
   z-index: 5;
 }
-#hourly-html.weather-display .main .column-headers div {
+.weather-display .hourly .main .column-headers div {
   display: inline-block;
   font-family: "Star4000 Small";
   font-size: 24pt;
@@ -122,21 +123,21 @@
   /* paint-order: stroke fill; */
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
-#hourly-html.weather-display .main .column-headers .temp {
+.weather-display .hourly .main .column-headers .temp {
   left: 370px;
 }
-#hourly-html.weather-display .main .column-headers .like {
+.weather-display .hourly .main .column-headers .like {
   left: 450px;
 }
-#hourly-html.weather-display .main .column-headers .wind {
+.weather-display .hourly .main .column-headers .wind {
   left: 560px;
 }
-#hourly-html.weather-display .main .hourly-lines {
+.weather-display .hourly .main .hourly-lines {
   min-height: 338px;
   padding-top: 10px;
   background: repeating-linear-gradient(0deg, #001040 0px, #102080 136px, #102080 202px, #001040 338px);
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row {
+.weather-display .hourly .main .hourly-lines .hourly-row {
   font-family: "Star4000 Large";
   font-size: 24pt;
   height: 72px;
@@ -147,33 +148,33 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
   position: relative;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row > div {
+.weather-display .hourly .main .hourly-lines .hourly-row > div {
   position: absolute;
   white-space: pre;
   top: 8px;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row .hour {
+.weather-display .hourly .main .hourly-lines .hourly-row .hour {
   left: 50px;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row .icon {
+.weather-display .hourly .main .hourly-lines .hourly-row .icon {
   left: 280px;
   width: 70px;
   text-align: center;
   top: unset;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row .temp {
+.weather-display .hourly .main .hourly-lines .hourly-row .temp {
   left: 370px;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row .like {
+.weather-display .hourly .main .hourly-lines .hourly-row .like {
   left: 450px;
 }
-#hourly-html.weather-display .main .hourly-lines .hourly-row .wind {
+.weather-display .hourly .main .hourly-lines .hourly-row .wind {
   left: 530px;
   width: 100px;
   text-align: right;
 }
 
-#current-weather-html.weather-display .main .col {
+.weather-display .current-weather .main .col {
   height: 50px;
   width: 255px;
   display: inline-block;
@@ -184,61 +185,84 @@
   /* paint-order: stroke fill; */
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
-#current-weather-html.weather-display .main .col.left {
+.weather-display .current-weather .main .col.left {
   font-family: "Star4000 Extended";
   font-size: 24pt;
 }
-#current-weather-html.weather-display .main .col.right {
+.weather-display .current-weather .main .col.right {
   right: 0px;
   font-family: "Star4000 Large";
   font-size: 20px;
   font-weight: bold;
 }
-#current-weather-html.weather-display .main .col.right .row {
+.weather-display .current-weather .main .col.right .row {
   margin-bottom: 12px;
 }
-#current-weather-html.weather-display .main .col.right .row .label,
-#current-weather-html.weather-display .main .col.right .row .value {
+.weather-display .current-weather .main .col.right .row .label,
+.weather-display .current-weather .main .col.right .row .value {
   display: inline-block;
 }
-#current-weather-html.weather-display .main .col.right .row .label {
+.weather-display .current-weather .main .col.right .row .label {
   margin-left: 20px;
 }
-#current-weather-html.weather-display .main .col.right .row .value {
+.weather-display .current-weather .main .col.right .row .value {
   float: right;
   margin-right: 10px;
 }
-#current-weather-html.weather-display .main .center {
+.weather-display .current-weather .main .center {
   text-align: center;
 }
-#current-weather-html.weather-display .main .temp {
+.weather-display .current-weather .main .temp {
   font-family: "Star4000 Large";
   font-size: 24pt;
 }
-#current-weather-html.weather-display .main .icon {
+.weather-display .current-weather .main .icon {
   height: 100px;
 }
-#current-weather-html.weather-display .main .icon img {
+.weather-display .current-weather .main .icon img {
   max-width: 126px;
 }
-#current-weather-html.weather-display .main .wind-container {
+.weather-display .current-weather .main .wind-container {
   margin-bottom: 10px;
 }
-#current-weather-html.weather-display .main .wind-container > div {
+.weather-display .current-weather .main .wind-container > div {
   width: 45%;
   display: inline-block;
   margin: 0px;
 }
-#current-weather-html.weather-display .main .wind-container .wind-label {
+.weather-display .current-weather .main .wind-container .wind-label {
   margin-left: 5px;
 }
-#current-weather-html.weather-display .main .wind-container .wind {
+.weather-display .current-weather .main .wind-container .wind {
   text-align: right;
 }
-#current-weather-html.weather-display .main .wind-gusts {
+.weather-display .current-weather .main .wind-gusts {
   margin-left: 5px;
 }
-#current-weather-html.weather-display .main .location {
+.weather-display .current-weather .main .location {
   color: yellow;
   margin-bottom: 10px;
+}
+
+.weather-display .local-forecast .container {
+  position: relative;
+  top: 15px;
+  margin: 0px 10px;
+  box-sizing: border-box;
+  height: 280px;
+  overflow: hidden;
+}
+.weather-display .local-forecast .forecasts {
+  position: relative;
+}
+.weather-display .local-forecast .forecast {
+  font-family: "Star4000";
+  font-size: 24pt;
+  text-transform: uppercase;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  min-height: 280px;
+  line-height: 40px;
 }/*# sourceMappingURL=compiled.css.map */

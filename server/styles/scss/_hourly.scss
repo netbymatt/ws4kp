@@ -1,7 +1,7 @@
 @use 'colors'as c;
 @use 'utils'as u;
 
-#hourly-html.weather-display {
+.weather-display .hourly {
 	.main {
 		overflow-y: hidden;
 

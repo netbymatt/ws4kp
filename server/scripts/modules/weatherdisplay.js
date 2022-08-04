@@ -284,7 +284,7 @@ class WeatherDisplay {
 
 	isActive() {
 		if (!this.isHtml)	return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
-		return this.elem.offsetParent !== null;
+		return this.elem.offsetHeight !== 0;
 	}
 
 	isEnabled() {

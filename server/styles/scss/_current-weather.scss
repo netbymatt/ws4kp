@@ -1,7 +1,7 @@
 @use 'colors'as c;
 @use 'utils'as u;
 
-#current-weather-html.weather-display {
+.weather-display .current-weather {
 	.main {
 
 		.col {
