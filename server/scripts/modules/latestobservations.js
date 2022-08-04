@@ -82,6 +82,8 @@ class LatestObservations extends WeatherDisplay {
 				Temperature = utils.units.celsiusToFahrenheit(Temperature);
 				WindSpeed = utils.units.kphToMph(WindSpeed);
 			}
+			WindSpeed = Math.round(WindSpeed);
+			Temperature = Math.round(Temperature);
 
 			const fill = {};
 			fill.location = utils.string.locationCleanup(condition.city).substr(0, 14);
