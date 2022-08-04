@@ -334,4 +334,47 @@
 .weather-display .latest-observations.main .observation-lines .observation-row .wind {
   white-space: pre;
   text-align: right;
+}
+
+#regional-forecast-html.weather-display {
+  background-image: url("../images/BackGround5_1.png");
+}
+
+.weather-display .main.regional-forecast {
+  position: relative;
+}
+.weather-display .main.regional-forecast .map {
+  position: absolute;
+}
+.weather-display .main.regional-forecast .location {
+  position: absolute;
+  width: 140px;
+  margin-left: -40px;
+  margin-top: -30px;
+}
+.weather-display .main.regional-forecast .location > div {
+  position: absolute;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+}
+.weather-display .main.regional-forecast .location .icon {
+  top: 22px;
+  left: 42px;
+}
+.weather-display .main.regional-forecast .location .icon img {
+  max-width: 42px;
+}
+.weather-display .main.regional-forecast .location .temp {
+  font-family: "Star4000 Large Compressed";
+  font-size: 28px;
+  color: yellow;
+  top: 22px;
+  text-align: right;
+  width: 40px;
+}
+.weather-display .main.regional-forecast .location .city {
+  font-family: Star4000;
+  font-size: 20px;
 }/*# sourceMappingURL=compiled.css.map */

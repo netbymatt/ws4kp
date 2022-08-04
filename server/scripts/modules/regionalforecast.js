@@ -359,7 +359,34 @@ class RegionalForecast extends WeatherDisplay {
 		}
 
 		// draw the map
+		const scale = 640 / (offsetXY.x * 2);
+		const map = this.elem.querySelector('.map');
+		map.style.zoom = scale;
+		map.style.top = `-${sourceXY.y}px`;
+		map.style.left = `-${sourceXY.x}px`;
 		this.context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, (offsetXY.x * 2), (offsetXY.y * 2), 0, mapYOff, 640, 312);
+
+		const cities = data.map((city) => {
+			const fill = {};
+			const period = city[this.screenIndex];
+
+			fill.icon = { type: 'img', src: icons.getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
+			fill.city = period.name;
+			let { temperature } = period;
+			if (navigation.units() === UNITS.metric) temperature = Math.round(utils.units.fahrenheitToCelsius(temperature));
+			fill.temp = temperature;
+
+			const elem = this.fillTemplate('location', fill);
+			elem.style.left = `${period.x}px`;
+			elem.style.top = `${period.y}px`;
+
+			return elem;
+		});
+
+		const locationContainer = this.elem.querySelector('.location-container');
+		locationContainer.innerHTML = '';
+		locationContainer.append(...cities);
+
 		await Promise.all(data.map(async (city) => {
 			const period = city[this.screenIndex];
 			// draw the icon if possible
