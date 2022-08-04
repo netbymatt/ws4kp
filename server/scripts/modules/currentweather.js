@@ -126,7 +126,7 @@ class CurrentWeather extends WeatherDisplay {
 		fill.wind = data.WindDirection.padEnd(3, '') + data.WindSpeed.toString().padStart(3, ' ');
 		if (data.WindGust) fill['wind-gusts'] = `Gusts to ${data.WindGust}`;
 
-		fill.location = this.data.station.properties.name.substr(0, 20);
+		fill.location = utils.string.locationCleanup(this.data.station.properties.name).substr(0, 20);
 
 		fill.humidity = `${data.Humidity}%`;
 		fill.dewpoint = data.DewPoint + String.fromCharCode(176);
