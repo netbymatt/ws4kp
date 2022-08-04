@@ -265,4 +265,64 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
   min-height: 280px;
   line-height: 40px;
+}
+
+.weather-display .latest-observations.main {
+  overflow-y: hidden;
+}
+.weather-display .latest-observations.main .column-headers {
+  height: 20px;
+  position: absolute;
+  width: 100%;
+}
+.weather-display .latest-observations.main .column-headers {
+  top: 0px;
+}
+.weather-display .latest-observations.main .column-headers div {
+  display: inline-block;
+  font-family: "Star4000 Small";
+  font-size: 24pt;
+  position: absolute;
+  top: -14px;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+}
+.weather-display .latest-observations.main .column-headers .temp {
+  display: none;
+}
+.weather-display .latest-observations.main .column-headers .temp.show {
+  display: inline-block;
+}
+.weather-display .latest-observations.main .temp {
+  left: 230px;
+}
+.weather-display .latest-observations.main .weather {
+  left: 280px;
+}
+.weather-display .latest-observations.main .wind {
+  left: 430px;
+}
+.weather-display .latest-observations.main .observation-lines {
+  min-height: 338px;
+  padding-top: 10px;
+}
+.weather-display .latest-observations.main .observation-lines .observation-row {
+  font-family: "Star4000";
+  font-size: 24pt;
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  position: relative;
+  height: 40px;
+}
+.weather-display .latest-observations.main .observation-lines .observation-row > div {
+  position: absolute;
+  top: 8px;
+}
+.weather-display .latest-observations.main .observation-lines .observation-row .wind {
+  white-space: pre;
+  text-align: right;
 }/*# sourceMappingURL=compiled.css.map */

@@ -1,12 +1,10 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation, StationInfo */
+/* globals WeatherDisplay, utils, STATUS, UNITS, navigation, StationInfo */
 
 // eslint-disable-next-line no-unused-vars
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Latest Observations');
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
+		super(navId, elemId, 'Latest Observations', true, true);
 
 		// constants
 		this.MaximumRegionalStations = 7;
@@ -67,25 +65,15 @@ class LatestObservations extends WeatherDisplay {
 		// sort array by station name
 		const sortedConditions = conditions.sort((a, b) => ((a.Name < b.Name) ? -1 : 1));
 
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
-		draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-
-		draw.titleText(this.context, 'Latest', 'Observations');
-
 		if (navigation.units() === UNITS.english) {
-			draw.text(this.context, 'Star4000 Small', '24pt', '#FFFFFF', 295, 105, `${String.fromCharCode(176)}F`, 2);
+			this.elem.querySelector('.column-headers .temp.english').classList.add('show');
+			this.elem.querySelector('.column-headers .temp.metric').classList.remove('show');
 		} else {
-			draw.text(this.context, 'Star4000 Small', '24pt', '#FFFFFF', 295, 105, `${String.fromCharCode(176)}C`, 2);
+			this.elem.querySelector('.column-headers .temp.english').classList.remove('show');
+			this.elem.querySelector('.column-headers .temp.metric').classList.add('show');
 		}
-		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFFFF', 345, 105, 'WEATHER', 2);
-		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFFFF', 495, 105, 'WIND', 2);
 
-		let y = 140;
-
-		sortedConditions.forEach((condition) => {
+		const lines = sortedConditions.map((condition) => {
 			let Temperature = condition.temperature.value;
 			let WindSpeed = condition.windSpeed.value;
 			const windDirection = utils.calc.directionToNSEW(condition.windDirection.value);
@@ -95,22 +83,25 @@ class LatestObservations extends WeatherDisplay {
 				WindSpeed = utils.units.kphToMph(WindSpeed);
 			}
 
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 65, y, condition.city.substr(0, 14), 2);
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 345, y, LatestObservations.shortenCurrentConditions(condition.textDescription).substr(0, 9), 2);
-
+			const fill = {};
+			fill.location = utils.string.locationCleanup(condition.city).substr(0, 14);
+			fill.temp = Temperature;
+			fill.weather = LatestObservations.shortenCurrentConditions(condition.textDescription).substr(0, 9);
 			if (WindSpeed > 0) {
-				draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 495, y, windDirection + (Array(6 - windDirection.length - WindSpeed.toString().length).join(' ')) + WindSpeed.toString(), 2);
+				fill.wind = windDirection + (Array(6 - windDirection.length - WindSpeed.toString().length).join(' ')) + WindSpeed.toString();
 			} else if (WindSpeed === 'NA') {
-				draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 495, y, 'NA', 2);
+				fill.wind = 'NA';
 			} else {
-				draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 495, y, 'Calm', 2);
+				fill.wind = 'Calm';
 			}
 
-			const x = (325 - (Temperature.toString().length * 15));
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', x, y, Temperature, 2);
-
-			y += 40;
+			return this.fillTemplate('observation-row', fill);
 		});
+
+		const linesContainer = this.elem.querySelector('.observation-lines');
+		linesContainer.innerHTML = '';
+		linesContainer.append(...lines);
+
 		this.finishDraw();
 	}
 

@@ -97,7 +97,7 @@ const navigation = (() => {
 			almanac = new Almanac(7, 'almanac');
 			displays = [
 				currentWeather,
-				new LatestObservations(1, 'latestObservations'),
+				new LatestObservations(1, 'latest-observations'),
 				new Hourly(2, 'hourly'),
 				new TravelForecast(3, 'travelForecast', false),	// not active by default
 				new RegionalForecast(4, 'regionalForecast'),
