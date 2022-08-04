@@ -107,9 +107,16 @@
 
 
 	.scroll {
+		@include u.text-shadow(3px, 1.5px);
 		width: 640px;
 		height: 80px;
 		overflow: hidden;
 		margin-top: 10px;
+
+		.fixed {
+			font-family: 'Star4000';
+			font-size: 24pt;
+			margin-left: 55px;
+		}
 	}
 }

@@ -1,4 +1,4 @@
-/* globals draw, navigation */
+/* globals draw, navigation, utils */
 
 // eslint-disable-next-line no-unused-vars
 const currentWeatherScroll = (() => {
@@ -14,10 +14,8 @@ const currentWeatherScroll = (() => {
 	// start drawing conditions
 	// reset starts from the first item in the text scroll list
 	const start = (_context) => {
-		// see if there is a context available
-		if (!_context) return;
 		// store see if the context is new
-		if (_context !== context) {
+		if (context && _context !== context) {
 			// clean the outgoing context
 			cleanLastContext();
 			// store the new blank context
@@ -42,6 +40,7 @@ const currentWeatherScroll = (() => {
 	};
 
 	const cleanLastContext = () => {
+		if (!context) return;
 		if (blankDrawArea) context.putImageData(blankDrawArea, 0, 405);
 		blankDrawArea = undefined;
 		context = undefined;
@@ -62,7 +61,7 @@ const currentWeatherScroll = (() => {
 		if (!data) return;
 
 		// clean up any old text
-		context.putImageData(blankDrawArea, 0, 405);
+		if (context) context.putImageData(blankDrawArea, 0, 405);
 
 		drawCondition(screens[screenIndex](data));
 	};
@@ -70,7 +69,7 @@ const currentWeatherScroll = (() => {
 	// the "screens" are stored in an array for easy addition and removal
 	const screens = [
 		// station name
-		(data) => `Conditions at ${data.station.properties.name.substr(0, 20)}`,
+		(data) => `Conditions at ${utils.string.locationCleanup(data.station.properties.name).substr(0, 20)}`,
 
 		// temperature
 		(data) => {
@@ -109,7 +108,14 @@ const currentWeatherScroll = (() => {
 
 	// internal draw function with preset parameters
 	const drawCondition = (text) => {
-		draw.text(context, 'Star4000', '24pt', '#ffffff', 70, 430, text, 2);
+		if (context) {
+			draw.text(context, 'Star4000', '24pt', '#ffffff', 70, 430, text, 2);
+		}
+
+		// update all html scroll elements
+		utils.elem.forEach('.weather-display .scroll .fixed', (elem) => {
+			elem.innerHTML = text;
+		});
 	};
 
 	// return the api

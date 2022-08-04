@@ -89,10 +89,19 @@
   width: calc(100% - 128px);
 }
 .weather-display .scroll {
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
   width: 640px;
   height: 80px;
   overflow: hidden;
   margin-top: 10px;
+}
+.weather-display .scroll .fixed {
+  font-family: "Star4000";
+  font-size: 24pt;
+  margin-left: 55px;
 }
 
 .weather-display .main.hourly.main {
