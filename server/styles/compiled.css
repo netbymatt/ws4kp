@@ -361,11 +361,11 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
 .weather-display .main.regional-forecast .location .icon {
-  top: 22px;
-  left: 42px;
+  top: 26px;
+  left: 44px;
 }
 .weather-display .main.regional-forecast .location .icon img {
-  max-width: 42px;
+  max-height: 32px;
 }
 .weather-display .main.regional-forecast .location .temp {
   font-family: "Star4000 Large Compressed";
