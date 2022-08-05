@@ -19,14 +19,14 @@ class RegionalForecast extends WeatherDisplay {
 		super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
-		// pre-load the base map (returns promise)
-		let src = 'images/Basemap2.png';
+		// pre-load the base map
+		this.baseMap = 'images/Basemap2.png';
 		if (weatherParameters.state === 'HI') {
-			src = 'images/HawaiiRadarMap4.png';
+			this.baseMap = 'images/HawaiiRadarMap4.png';
 		} else if (weatherParameters.state === 'AK') {
-			src = 'images/AlaskaRadarMap6.png';
+			this.baseMap = 'images/AlaskaRadarMap6.png';
 		}
-		this.baseMap = utils.image.load(src);
+		this.elem.querySelector('.map img').src = this.baseMap;
 
 		// map offset
 		const offsetXY = {
@@ -34,10 +34,10 @@ class RegionalForecast extends WeatherDisplay {
 			y: 117,
 		};
 		// get user's location in x/y
-		const sourceXY = this.getXYFromLatitudeLongitude(weatherParameters.latitude, weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
+		const sourceXY = RegionalForecast.getXYFromLatitudeLongitude(weatherParameters.latitude, weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
 
 		// get latitude and longitude limits
-		const minMaxLatLon = this.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, weatherParameters.state);
+		const minMaxLatLon = RegionalForecast.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, weatherParameters.state);
 
 		// get a target distance
 		let targetDistance = 2.5;
@@ -77,7 +77,7 @@ class RegionalForecast extends WeatherDisplay {
 				const forecast = await utils.fetch.json(point.properties.forecast);
 
 				// get XY on map for city
-				const cityXY = this.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
+				const cityXY = RegionalForecast.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
 
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
@@ -165,9 +165,9 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	// utility latitude/pixel conversions
-	getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
-		if (state === 'AK') return this.getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY);
-		if (state === 'HI') return this.getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY);
+	static getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
+		if (state === 'AK') return RegionalForecast.getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY);
+		if (state === 'HI') return RegionalForecast.getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY);
 		let y = 0;
 		let x = 0;
 		const ImgHeight = 1600;
@@ -248,9 +248,9 @@ class RegionalForecast extends WeatherDisplay {
 		return { x, y };
 	}
 
-	getMinMaxLatitudeLongitude(X, Y, OffsetX, OffsetY, state) {
-		if (state === 'AK') return this.getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY);
-		if (state === 'HI') return this.getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY);
+	static getMinMaxLatitudeLongitude(X, Y, OffsetX, OffsetY, state) {
+		if (state === 'AK') return RegionalForecast.getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY);
+		if (state === 'HI') return RegionalForecast.getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY);
 		const maxLat = ((Y / 55.2) - 50.5) * -1;
 		const minLat = (((Y + (OffsetY * 2)) / 55.2) - 50.5) * -1;
 		const minLon = (((X * -1) / 41.775) + 127.5) * -1;
@@ -283,9 +283,9 @@ class RegionalForecast extends WeatherDisplay {
 		};
 	}
 
-	getXYForCity(City, MaxLatitude, MinLongitude, state) {
-		if (state === 'AK') this.getXYForCityAK(City, MaxLatitude, MinLongitude);
-		if (state === 'HI') this.getXYForCityHI(City, MaxLatitude, MinLongitude);
+	static getXYForCity(City, MaxLatitude, MinLongitude, state) {
+		if (state === 'AK') RegionalForecast.getXYForCityAK(City, MaxLatitude, MinLongitude);
+		if (state === 'HI') RegionalForecast.getXYForCityHI(City, MaxLatitude, MinLongitude);
 		let x = (City.lon - MinLongitude) * 57;
 		let y = (MaxLatitude - City.lat) * 70;
 
