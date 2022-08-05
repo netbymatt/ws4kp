@@ -1,12 +1,12 @@
 // regional forecast and observations
 // type 0 = observations, 1 = first forecast, 2 = second forecast
 
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, draw, navigation, luxon, StationInfo, RegionalCities */
+/* globals WeatherDisplay, utils, STATUS, icons, UNITS, navigation, luxon, StationInfo, RegionalCities */
 
 // eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Regional Forecast');
+		super(navId, elemId, 'Regional Forecast', true, true);
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround5_1.png');
@@ -333,14 +333,8 @@ class RegionalForecast extends WeatherDisplay {
 		// break up data into useful values
 		const { regionalData: data, sourceXY, offsetXY } = this.data;
 
-		// fixed offset for all y values when drawing to the map
-		const mapYOff = 90;
-
 		const { DateTime } = luxon;
 		// draw the header graphics
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
 
 		// draw the appropriate title
 		const titleTop = this.elem.querySelector('.title.dual .top');
@@ -348,7 +342,6 @@ class RegionalForecast extends WeatherDisplay {
 		if (this.screenIndex === 0) {
 			titleTop.innerHTML = 'Regional';
 			titleBottom.innerHTML = 'Observations';
-			draw.titleText(this.context, 'Regional', 'Observations');
 		} else {
 			const forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
 
@@ -358,10 +351,8 @@ class RegionalForecast extends WeatherDisplay {
 			// draw the title
 			if (data[0][this.screenIndex].daytime) {
 				titleBottom.innerHTML = dayName;
-				draw.titleText(this.context, 'Forecast for', dayName);
 			} else {
 				titleBottom.innerHTML = `${dayName} Night`;
-				draw.titleText(this.context, 'Forecast for', `${dayName} Night`);
 			}
 		}
 
@@ -371,7 +362,6 @@ class RegionalForecast extends WeatherDisplay {
 		map.style.zoom = scale;
 		map.style.top = `-${sourceXY.y}px`;
 		map.style.left = `-${sourceXY.x}px`;
-		this.context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, (offsetXY.x * 2), (offsetXY.y * 2), 0, mapYOff, 640, 312);
 
 		const cities = data.map((city) => {
 			const fill = {};
@@ -393,30 +383,6 @@ class RegionalForecast extends WeatherDisplay {
 		const locationContainer = this.elem.querySelector('.location-container');
 		locationContainer.innerHTML = '';
 		locationContainer.append(...cities);
-
-		await Promise.all(data.map(async (city) => {
-			const period = city[this.screenIndex];
-			// draw the icon if possible
-			const icon = icons.getWeatherRegionalIconFromIconLink(period.icon, !period.daytime);
-			if (icon) {
-				this.gifs.push(await utils.image.superGifAsync({
-					src: icon,
-					max_width: 42,
-					auto_play: true,
-					canvas: this.canvas,
-					x: period.x,
-					y: period.y - 15 + mapYOff,
-				}));
-			}
-
-			// City Name
-			draw.text(this.context, 'Star4000', '20px', '#ffffff', period.x - 40, period.y - 15 + mapYOff, period.name, 2);
-
-			// Temperature
-			let { temperature } = period;
-			if (navigation.units() === UNITS.metric) temperature = Math.round(utils.units.fahrenheitToCelsius(temperature));
-			draw.text(this.context, 'Star4000 Large Compressed', '28px', '#ffff00', period.x - (temperature.toString().length * 15), period.y + 20 + mapYOff, temperature, 2);
-		}));
 
 		this.finishDraw();
 	}

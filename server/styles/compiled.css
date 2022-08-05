@@ -27,7 +27,7 @@
   font-family: "Star4000";
   font-size: 24pt;
   position: absolute;
-  width: 200px;
+  width: 250px;
 }
 .weather-display .header .title.single {
   left: 170px;
@@ -134,10 +134,10 @@
   text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
 }
 .weather-display .main.hourly.main .column-headers .temp {
-  left: 345px;
+  left: 355px;
 }
 .weather-display .main.hourly.main .column-headers .like {
-  left: 425px;
+  left: 435px;
 }
 .weather-display .main.hourly.main .column-headers .wind {
   left: 535px;
