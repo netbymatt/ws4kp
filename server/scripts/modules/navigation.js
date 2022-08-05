@@ -126,10 +126,15 @@ const navigation = (() => {
 		postMessage('loaded');
 	};
 
-	const countLoadedCanvases = () => displays.reduce((acc, display) => {
-		if (display.status !== STATUS.loading) return acc + 1;
-		return acc;
-	}, 0);
+	const countLoadedCanvases = () => {
+		const result = displays.reduce((acc, display) => {
+			console.log(display.name, display.status);
+			if (display.status !== STATUS.loading) return acc + 1;
+			return acc;
+		}, 0);
+		console.log(result);
+		return result;
+	};
 
 	const hideAllCanvases = () => {
 		displays.forEach((display) => display.hideCanvas());

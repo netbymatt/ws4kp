@@ -22,6 +22,9 @@ class Progress extends WeatherDisplay {
 	async drawCanvas(displays, loadedCount) {
 		super.drawCanvas();
 
+		// get the progress bar cover (makes percentage)
+		if (!this.progressCover) this.progressCover = this.elem.querySelector('.scroll .cover');
+
 		// if no displays provided just draw the backgrounds (above)
 		if (!displays) return;
 		const lines = displays.map((display, index) => {
@@ -73,11 +76,12 @@ class Progress extends WeatherDisplay {
 		const loadedPercent = (loadedCount / displays.length);
 
 		if (loadedPercent < 1.0) {
-			// Draw a box for the progress.
-
+			// show the progress bar and set width
+			this.progressCover.parentNode.classList.add('show');
+			this.progressCover.style.width = `${(1.0 - loadedPercent) * 100}%`;
 		} else {
-			// restore the background
-
+			// hide the progressbar
+			this.progressCover.parentNode.classList.remove('show');
 		}
 	}
 

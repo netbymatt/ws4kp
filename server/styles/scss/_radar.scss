@@ -1,0 +1,21 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#radar-html.weather-display {
+	background-image: url('../images/BackGround4_1.png');
+
+	.header {
+		.title.dual {
+			color: white;
+			font-family: 'Arial', sans-serif;
+			font-weight: bold;
+			font-size: 28pt;
+
+			.bottom {
+				top: 30px;
+			}
+		}
+	}
+}
+
+.weather-display .main.radar {}

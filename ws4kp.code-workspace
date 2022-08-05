@@ -6,12 +6,13 @@
 	],
 	"settings": {
 		"search.exclude": {
-			"**/node_modules": true,
-			"**/bower_components": true,
 			"**/*.code-search": true,
-			"dist/**": true,
+			"**/*.css": true,
 			"**/*.min.js": true,
+			"**/bower_components": true,
+			"**/node_modules": true,
 			"**/vendor": true,
+			"dist/**": true
 		},
 		"cSpell.enabled": true,
 		"cSpell.words": [
