@@ -8,9 +8,6 @@ class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Regional Forecast', true, true);
 
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround5_1.png');
-
 		// timings
 		this.timing.totalScreens = 3;
 	}
@@ -20,13 +17,13 @@ class RegionalForecast extends WeatherDisplay {
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// pre-load the base map
-		this.baseMap = 'images/Basemap2.png';
+		let baseMap = 'images/Basemap2.png';
 		if (weatherParameters.state === 'HI') {
-			this.baseMap = 'images/HawaiiRadarMap4.png';
+			baseMap = 'images/HawaiiRadarMap4.png';
 		} else if (weatherParameters.state === 'AK') {
-			this.baseMap = 'images/AlaskaRadarMap6.png';
+			baseMap = 'images/AlaskaRadarMap6.png';
 		}
-		this.elem.querySelector('.map img').src = this.baseMap;
+		this.elem.querySelector('.map img').src = baseMap;
 
 		// map offset
 		const offsetXY = {
@@ -66,7 +63,7 @@ class RegionalForecast extends WeatherDisplay {
 		});
 
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
-		const regionalForecastPromises = regionalCities.map(async (city) => {
+		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
 			try {
 				// get the point first, then break down into forecast and observations
 				const point = await utils.weather.getPoint(city.lat, city.lon);
@@ -109,10 +106,8 @@ class RegionalForecast extends WeatherDisplay {
 				console.log(e);
 				return false;
 			}
-		});
+		}));
 
-		// wait for the forecasts
-		const regionalDataAll = await Promise.all(regionalForecastPromises);
 		// filter out any false (unavailable data)
 		const regionalData = regionalDataAll.filter((data) => data);
 
@@ -328,7 +323,7 @@ class RegionalForecast extends WeatherDisplay {
 		return city.match(/[^-;/\\,]*/)[0].substr(0, 12);
 	}
 
-	async drawCanvas() {
+	drawCanvas() {
 		super.drawCanvas();
 		// break up data into useful values
 		const { regionalData: data, sourceXY, offsetXY } = this.data;
