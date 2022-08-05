@@ -75,13 +75,13 @@ class Progress extends WeatherDisplay {
 		// calculate loaded percent
 		const loadedPercent = (loadedCount / displays.length);
 
+		this.progressCover.style.width = `${(1.0 - loadedPercent) * 100}%`;
 		if (loadedPercent < 1.0) {
 			// show the progress bar and set width
 			this.progressCover.parentNode.classList.add('show');
-			this.progressCover.style.width = `${(1.0 - loadedPercent) * 100}%`;
 		} else {
-			// hide the progressbar
-			this.progressCover.parentNode.classList.remove('show');
+			// hide the progressbar after 1 second (lines up with with width transition animation)
+			setTimeout(() => this.progressCover.parentNode.classList.remove('show'), 1000);
 		}
 	}
 

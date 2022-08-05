@@ -134,7 +134,7 @@
 			animation-fill-mode: forwards;
 			animation-iteration-count: infinite;
 			animation-name: progress-scroll;
-			animation-timing-function: linear;
+			animation-timing-function: steps(8, end);
 		}
 
 		.cover {
@@ -144,6 +144,7 @@
 			background-color: white;
 			width: 100%;
 			height: 24px;
+			transition: width 1s steps(6);
 		}
 	}
 }
