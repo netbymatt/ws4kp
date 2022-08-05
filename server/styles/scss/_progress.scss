@@ -1,0 +1,85 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .progress {
+	@include u.text-shadow();
+	font-family: 'Star4000 Extended';
+	font-size: 19pt;
+
+	.container {
+		position: relative;
+		top: 15px;
+		margin: 0px 10px;
+		box-sizing: border-box;
+		height: 280px;
+		overflow: hidden;
+
+		.item {
+			position: relative;
+
+			.name {
+				white-space: nowrap;
+
+				&::after {
+					content: '........................................................................';
+				}
+			}
+
+			.links {
+				position: absolute;
+				text-align: right;
+				right: 0px;
+				top: 0px;
+
+				>div {
+					background-color: c.$blue-box;
+					display: none;
+					padding-left: 4px;
+				}
+
+				.loading {
+					color: #ffff00;
+				}
+
+				.press-here {
+					color: #00ff00;
+					cursor: pointer;
+				}
+
+				.failed {
+					color: #ff0000;
+				}
+
+				.no-data {
+					color: #C0C0C0;
+				}
+
+				.disabled {
+					color: #C0C0C0;
+				}
+
+				&.loading .loading {
+					display: block;
+				}
+
+				&.press-here .press-here {
+					display: block;
+				}
+
+				&.failed .failed {
+					display: block;
+				}
+
+				&.no-data .no-data {
+					display: block;
+				}
+
+				&.disabled .disabled {
+					display: block;
+				}
+
+			}
+		}
+	}
+
+}

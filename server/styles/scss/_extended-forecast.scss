@@ -1,5 +1,5 @@
-@use 'colors'as c;
-@use 'utils'as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
 
 #extended-forecast-html.weather-display {
 	background-image: url('../images/BackGround2_1.png');
@@ -49,10 +49,10 @@
 			.temperature-block {
 				display: inline-block;
 				width: 44%;
+				vertical-align: top;
 
 				>div {
 					text-align: center;
-					;
 				}
 
 				.value {

@@ -1,5 +1,5 @@
-@use 'colors'as c;
-@use 'utils'as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
 
 .weather-display {
 	width: 640px;

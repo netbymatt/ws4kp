@@ -42,5 +42,11 @@
 			"**/twc3.js",
 		],
 		"editor.tabSize": 2,
+		"emmet.includeLanguages": {
+			"ejs": "html",
+		},
+		"[html]": {
+			"editor.defaultFormatter": "j69.ejs-beautify"
+		},
 	},
 }

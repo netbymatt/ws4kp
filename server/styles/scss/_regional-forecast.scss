@@ -1,5 +1,5 @@
-@use 'colors'as c;
-@use 'utils'as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
 
 #regional-forecast-html.weather-display {
 	background-image: url('../images/BackGround5_1.png');
@@ -35,10 +35,10 @@
 		}
 
 		.temp {
-			font-family: 'Star4000 Large Compressed';
+			font-family: 'Star4000 Large';
 			font-size: 28px;
 			color: c.$title-color;
-			top: 32px;
+			top: 28px;
 			text-align: right;
 			width: 40px;
 		}
