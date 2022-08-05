@@ -196,7 +196,7 @@ class WeatherDisplay {
 		if (OkToDrawLogoImage) this.drawLogoImage();
 		if (OkToDrawNoaaImage) this.drawNoaaImage();
 		if (OkToDrawCurrentConditions) {
-			currentWeatherScroll.start(this.context);
+			currentWeatherScroll.start();
 		} else {
 			// cause a reset if the progress screen is displayed
 			currentWeatherScroll.stop(this.elemId === 'progress');
