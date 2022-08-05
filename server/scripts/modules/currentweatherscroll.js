@@ -61,7 +61,7 @@ const currentWeatherScroll = (() => {
 		if (!data) return;
 
 		// clean up any old text
-		if (context) context.putImageData(blankDrawArea, 0, 405);
+		if (context && blankDrawArea) context.putImageData(blankDrawArea, 0, 405);
 
 		drawCondition(screens[screenIndex](data));
 	};

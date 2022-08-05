@@ -343,17 +343,24 @@ class RegionalForecast extends WeatherDisplay {
 		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
 
 		// draw the appropriate title
+		const titleTop = this.elem.querySelector('.title.dual .top');
+		const titleBottom = this.elem.querySelector('.title.dual .bottom');
 		if (this.screenIndex === 0) {
+			titleTop.innerHTML = 'Regional';
+			titleBottom.innerHTML = 'Observations';
 			draw.titleText(this.context, 'Regional', 'Observations');
 		} else {
 			const forecastDate = DateTime.fromISO(data[0][this.screenIndex].time);
 
 			// get the name of the day
 			const dayName = forecastDate.toLocaleString({ weekday: 'long' });
+			titleTop.innerHTML = 'Forecast for';
 			// draw the title
 			if (data[0][this.screenIndex].daytime) {
+				titleBottom.innerHTML = dayName;
 				draw.titleText(this.context, 'Forecast for', dayName);
 			} else {
+				titleBottom.innerHTML = `${dayName} Night`;
 				draw.titleText(this.context, 'Forecast for', `${dayName} Night`);
 			}
 		}

@@ -30,6 +30,7 @@ class Hourly extends WeatherDisplay {
 			console.error('Get hourly forecast failed');
 			console.error(e.status, e.responseJSON);
 			this.setStatus(STATUS.failed);
+			return;
 		}
 
 		this.data = await Hourly.parseForecast(forecast.properties);

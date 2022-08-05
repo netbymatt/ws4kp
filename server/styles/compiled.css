@@ -27,6 +27,7 @@
   font-family: "Star4000";
   font-size: 24pt;
   position: absolute;
+  width: 200px;
 }
 .weather-display .header .title.single {
   left: 170px;
@@ -350,7 +351,7 @@
   position: absolute;
   width: 140px;
   margin-left: -40px;
-  margin-top: -30px;
+  margin-top: -35px;
 }
 .weather-display .main.regional-forecast .location > div {
   position: absolute;
@@ -370,7 +371,7 @@
   font-family: "Star4000 Large Compressed";
   font-size: 28px;
   color: yellow;
-  top: 22px;
+  top: 32px;
   text-align: right;
   width: 40px;
 }
