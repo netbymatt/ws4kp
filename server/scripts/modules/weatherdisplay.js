@@ -449,18 +449,16 @@ class WeatherDisplay {
 
 	loadTemplates() {
 		this.templates = {};
-		if (this.elemId !== 'progress') {
-			this.elem = document.getElementById(`${this.elemId}-html`);
-			if (!this.elem) return;
-			const templates = this.elem.querySelectorAll('.template');
-			templates.forEach((template) => {
-				const className = template.classList[0];
-				const node = template.cloneNode(true);
-				node.classList.remove('template');
-				this.templates[className] = node;
-				template.remove();
-			});
-		}
+		this.elem = document.getElementById(`${this.elemId}-html`);
+		if (!this.elem) return;
+		const templates = this.elem.querySelectorAll('.template');
+		templates.forEach((template) => {
+			const className = template.classList[0];
+			const node = template.cloneNode(true);
+			node.classList.remove('template');
+			this.templates[className] = node;
+			template.remove();
+		});
 	}
 
 	fillTemplate(name, fillValues) {
