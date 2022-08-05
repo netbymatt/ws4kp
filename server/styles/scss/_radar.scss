@@ -18,4 +18,15 @@
 	}
 }
 
-.weather-display .main.radar {}
+.weather-display .main.radar {
+	overflow: hidden;
+
+
+	.container {
+		margin-top: 21px;
+
+		.scroll-area {
+			position: relative;
+		}
+	}
+}
