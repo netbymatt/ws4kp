@@ -378,4 +378,64 @@
 .weather-display .main.regional-forecast .location .city {
   font-family: Star4000;
   font-size: 20px;
+}
+
+#extended-forecast-html.weather-display {
+  background-image: url("../images/BackGround2_1.png");
+}
+
+.weather-display .main.extended-forecast .day-container {
+  margin-top: 16px;
+  margin-left: 27px;
+}
+.weather-display .main.extended-forecast .day {
+  /* eventually, when chrome supports paint-order for html elements */
+  /* -webkit-text-stroke: 2px black; */
+  /* paint-order: stroke fill; */
+  text-shadow: 3px 3px 0 black, -1.5px -1.5px 0 black, 0 -1.5px 0 black, 1.5px -1.5px 0 black, 1.5px 0 0 black, 1.5px 1.5px 0 black, 0 1.5px 0 black, -1.5px 1.5px 0 black, -1.5px 0 0 black;
+  padding: 5px;
+  height: 285px;
+  width: 155px;
+  display: inline-block;
+  margin: 0px 15px;
+  font-family: "Star4000";
+  font-size: 24pt;
+}
+.weather-display .main.extended-forecast .day .date {
+  text-transform: uppercase;
+  text-align: center;
+  color: yellow;
+}
+.weather-display .main.extended-forecast .day .condition {
+  text-align: center;
+  height: 74px;
+  margin-top: 10px;
+}
+.weather-display .main.extended-forecast .day .icon {
+  text-align: center;
+  height: 75px;
+}
+.weather-display .main.extended-forecast .day .icon img {
+  max-height: 75px;
+}
+.weather-display .main.extended-forecast .day .temperatures {
+  width: 100%;
+  margin-top: 5px;
+}
+.weather-display .main.extended-forecast .day .temperatures .temperature-block {
+  display: inline-block;
+  width: 44%;
+}
+.weather-display .main.extended-forecast .day .temperatures .temperature-block > div {
+  text-align: center;
+}
+.weather-display .main.extended-forecast .day .temperatures .temperature-block .value {
+  font-family: "Star4000 Large";
+  margin-top: 4px;
+}
+.weather-display .main.extended-forecast .day .temperatures .temperature-block.lo .label {
+  color: #8080FF;
+}
+.weather-display .main.extended-forecast .day .temperatures .temperature-block.hi .label {
+  color: yellow;
 }/*# sourceMappingURL=compiled.css.map */

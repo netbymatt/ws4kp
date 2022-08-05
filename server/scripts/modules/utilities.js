@@ -42,9 +42,8 @@ const utils = (() => {
 	const cachedImages = [];
 	const preload = (src) => {
 		if (cachedImages.includes(src)) return false;
-		const img = new Image();
-		img.scr = src;
-		cachedImages.push(src);
+		blob(src);
+		// cachedImages.push(src);
 		return true;
 	};
 
@@ -177,7 +176,7 @@ const utils = (() => {
 		// build a url, including the rewrite for cors if necessary
 		let corsUrl = _url;
 		if (params.cors === true) corsUrl = rewriteUrl(_url);
-		const url = new URL(corsUrl);
+		const url = new URL(corsUrl, `${window.location.origin}/`);
 		// match the security protocol
 		url.protocol = window.location.protocol;
 		// add parameters if necessary

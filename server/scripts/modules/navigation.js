@@ -102,7 +102,7 @@ const navigation = (() => {
 				new TravelForecast(3, 'travelForecast', false),	// not active by default
 				new RegionalForecast(4, 'regional-forecast'),
 				new LocalForecast(5, 'local-forecast'),
-				new ExtendedForecast(6, 'extendedForecast'),
+				new ExtendedForecast(6, 'extended-forecast'),
 				almanac,
 				new Radar(8, 'radar'),
 			];
