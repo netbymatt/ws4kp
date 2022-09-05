@@ -1,22 +1,20 @@
 // display sun and moon data
 
-/* globals WeatherDisplay, utils, STATUS, draw, SunCalc, luxon */
+/* globals WeatherDisplay, utils, STATUS, SunCalc, luxon */
 
 // eslint-disable-next-line no-unused-vars
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Almanac');
+		super(navId, elemId, 'Almanac', true, true);
 
 		// pre-load background images (returns promises)
 		this.backgroundImage0 = utils.image.load('images/BackGround3_1.png');
 
-		// load all images in parallel (returns promises)
-		this.moonImages = [
-			utils.image.load('images/2/Full-Moon.gif'),
-			utils.image.load('images/2/Last-Quarter.gif'),
-			utils.image.load('images/2/New-Moon.gif'),
-			utils.image.load('images/2/First-Quarter.gif'),
-		];
+		// preload the moon images
+		utils.image.preload('images/2/Full-Moon.gif');
+		utils.image.preload('images/2/Last-Quarter.gif');
+		utils.image.preload('images/2/New-Moon.gif');
+		utils.image.preload('images/2/First-Quarter.gif');
 
 		this.timing.totalScreens = 1;
 	}
@@ -121,53 +119,45 @@ class Almanac extends WeatherDisplay {
 		const Today = DateTime.local();
 		const Tomorrow = Today.plus({ days: 1 });
 
-		// extract moon images
-		const [FullMoonImage, LastMoonImage, NewMoonImage, FirstMoonImage] = await Promise.all(this.moonImages);
-
 		// sun and moon data
-		this.context.drawImage(await this.backgroundImage0, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 640, 190, draw.sideColor1, draw.sideColor2);
+		this.elem.querySelector('.day-1').innerHTML = Today.toLocaleString({ weekday: 'long' });
+		this.elem.querySelector('.day-2').innerHTML = Tomorrow.toLocaleString({ weekday: 'long' });
+		this.elem.querySelector('.rise-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.rise-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.set-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.set-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
 
-		draw.titleText(this.context, 'Almanac', 'Astronomical');
+		const days = info.moon.map((MoonPhase) => {
+			const fill = {};
 
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 320, 120, Today.toLocaleString({ weekday: 'long' }), 2, 'center');
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 500, 120, Tomorrow.toLocaleString({ weekday: 'long' }), 2, 'center');
-
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 150, 'Sunrise:', 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 150, DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 150, DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 70, 180, ' Sunset:', 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 270, 180, DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-		draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 450, 180, DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase(), 2);
-
-		draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 70, 220, 'Moon Data:', 2);
-
-		info.moon.forEach((MoonPhase, Index) => {
 			const date = MoonPhase.date.toLocaleString({ month: 'short', day: 'numeric' });
 
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + Index * 130, 260, MoonPhase.phase, 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + Index * 130, 390, date, 2, 'center');
+			fill.date = date;
+			fill.type = MoonPhase.phase;
+			fill.icon = { type: 'img', src: Almanac.imageName(MoonPhase.Phase) };
 
-			const image = (() => {
-				switch (MoonPhase.phase) {
-				case 'Full':
-					return FullMoonImage;
-				case 'Last':
-					return LastMoonImage;
-				case 'New':
-					return NewMoonImage;
-				case 'First':
-				default:
-					return FirstMoonImage;
-				}
-			})();
-			this.context.drawImage(image, 75 + Index * 130, 270);
+			return this.fillTemplate('day', fill);
 		});
 
+		const daysContainer = this.elem.querySelector('.moon .days');
+		daysContainer.innerHTML = '';
+		daysContainer.append(...days);
+
 		this.finishDraw();
+	}
+
+	static imageName(type) {
+		switch (type) {
+		case 'Full':
+			return 'images/2/Full-Moon.gif';
+		case 'Last':
+			return 'images/2/Last-Quarter.gif';
+		case 'New':
+			return 'images/2/New-Moon.gif';
+		case 'First':
+		default:
+			return 'images/2/First-Quarter.gif';
+		}
 	}
 
 	// make sun and moon data available outside this class
