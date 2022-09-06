@@ -16,6 +16,16 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 	* [Icon](https://twcclassics.com/downloads.html) sets
 	* Countless photos and videos of WeatherStar 4000 forecasts used as references.
 
+## Run Your WeatherStar
+There are a lot of CORS considerations and issues with api.weather.gov that are easiest to deal with by running a local server to see this in action (or use the live link above). You'll need Node.js >12.0 to run the local server.
+
+```
+git clone https://github.com/netbymatt/ws4kp.git
+cd ws4kp
+node index.js
+```
+Open your web browser: http://localhost:8080/ 
+
 ## Why the fork?
 
 The fork is a result of wanting a more manageable, modern code base to work with. Part of it is an exercise in my education in JavaScript. There are several technical changes that were made behind the scenes.
