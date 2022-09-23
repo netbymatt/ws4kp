@@ -99,7 +99,7 @@ const navigation = (() => {
 				currentWeather,
 				new LatestObservations(1, 'latest-observations'),
 				new Hourly(2, 'hourly'),
-				new TravelForecast(3, 'travelForecast', false),	// not active by default
+				new TravelForecast(3, 'travel', false),	// not active by default
 				new RegionalForecast(4, 'regional-forecast'),
 				new LocalForecast(5, 'local-forecast'),
 				new ExtendedForecast(6, 'extended-forecast'),
