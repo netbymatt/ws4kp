@@ -23,7 +23,8 @@ const navigation = (() => {
 	let almanac;
 
 	const init = async () => {
-		// nothing to do
+		// set up resize handler
+		window.addEventListener('resize', resize);
 	};
 
 	const message = (data) => {
@@ -262,6 +263,20 @@ const navigation = (() => {
 		return almanac.getSun();
 	};
 
+	// resize the container on a page resize
+	const resize = () => {
+		const widthZoomPercent = window.innerWidth / 640;
+		const heightZoomPercent = window.innerHeight / 480;
+
+		const scale = Math.min(widthZoomPercent, heightZoomPercent);
+
+		if (scale < 1.0 || document.fullscreenElement) {
+			document.getElementById('container').style.zoom = scale;
+		} else {
+			document.getElementById('container').style.zoom = 1;
+		}
+	};
+
 	return {
 		init,
 		message,
@@ -273,5 +288,6 @@ const navigation = (() => {
 		getDisplay,
 		getCurrentWeather,
 		getSun,
+		resize,
 	};
 })();

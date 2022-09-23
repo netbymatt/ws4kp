@@ -233,7 +233,7 @@ const index = (() => {
 			window.scrollTo(0, 0);
 			FullScreenOverride = true;
 		}
-
+		navigation.resize();
 		UpdateFullScreenNavigate();
 	};
 
@@ -254,6 +254,7 @@ const index = (() => {
 		} else if (document.msExitFullscreen) {
 			document.msExitFullscreen();
 		}
+		navigation.resize();
 	};
 
 	const btnNavigateMenuClick = () => {
