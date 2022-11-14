@@ -177,8 +177,8 @@ const utils = (() => {
 		let corsUrl = _url;
 		if (params.cors === true) corsUrl = rewriteUrl(_url);
 		const url = new URL(corsUrl, `${window.location.origin}/`);
-		// match the security protocol
-		url.protocol = window.location.protocol;
+		// match the security protocol when not on localhost
+		url.protocol = window.location.hostname !== 'localhost' ? window.location.protocol : url.protocol;
 		// add parameters if necessary
 		if (params.data) {
 			Object.keys(params.data).forEach((key) => {
