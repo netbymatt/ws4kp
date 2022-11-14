@@ -178,7 +178,15 @@ const navigation = (() => {
 		progress.hideCanvas();
 		if (!current) {
 			// special case for no active displays (typically on progress screen)
-			displays[0].navNext(msg.command.firstFrame);
+			// find the first ready display
+			let firstDisplay;
+			let displayCount = 0;
+			do {
+				if (displays[displayCount].status === STATUS.loaded) firstDisplay = displays[displayCount];
+				displayCount += 1;
+			} while (!firstDisplay && displayCount < displays.length);
+
+			firstDisplay.navNext(msg.command.firstFrame);
 			return;
 		}
 		if (direction === msg.command.nextFrame) currentDisplay().navNext();
