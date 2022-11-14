@@ -461,7 +461,7 @@ const index = (() => {
 			document.getElementById('spanRefreshCountDown').innerHTML = `${dt.getMinutes() < 10 ? `0${dt.getMinutes()}` : dt.getMinutes()}:${dt.getSeconds() < 10 ? `0${dt.getSeconds()}` : dt.getSeconds()}`;
 
 			// Time has elapsed.
-			if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs) LoadTwcData();
+			if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs && !navigation.isPlaying()) LoadTwcData();
 		};
 		AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, AutoRefreshIntervalMs);
 		AutoRefreshTimer();
@@ -533,8 +533,18 @@ const index = (() => {
 		return noSleep.controller.disable();
 	};
 
+	const refreshCheck = () => {
+		// Time has elapsed.
+		if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs) {
+			LoadTwcData();
+			return true;
+		}
+		return false;
+	};
+
 	return {
 		init,
 		message,
+		refreshCheck,
 	};
 })();
