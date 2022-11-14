@@ -170,7 +170,7 @@ class Radar extends WeatherDisplay {
 			const cropCanvas = document.createElement('canvas');
 			cropCanvas.width = 640;
 			cropCanvas.height = 367;
-			const cropContext = cropCanvas.getContext('2d');
+			const cropContext = cropCanvas.getContext('2d', { willReadFrequently: true });
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
 			// clean the image
