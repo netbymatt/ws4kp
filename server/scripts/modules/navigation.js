@@ -88,7 +88,7 @@ const navigation = (() => {
 		// draw the progress canvas and hide others
 		hideAllCanvases();
 		document.getElementById('loading').style.display = 'none';
-		progress = new Progress(-1, 'progress');
+		if (!progress) progress = new Progress(-1, 'progress');
 		await progress.drawCanvas();
 		progress.showCanvas();
 
@@ -289,6 +289,11 @@ const navigation = (() => {
 		}
 	};
 
+	// reset all statuses to loading on all displays, used to keep the progress bar accurate during refresh
+	const resetStatuses = () => {
+		displays.forEach((display) => { display.status = STATUS.loading; });
+	};
+
 	return {
 		init,
 		message,
@@ -301,5 +306,6 @@ const navigation = (() => {
 		getCurrentWeather,
 		getSun,
 		resize,
+		resetStatuses,
 	};
 })();

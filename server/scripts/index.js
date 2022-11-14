@@ -319,6 +319,7 @@ const index = (() => {
 	};
 
 	const btnNavigateRefreshClick = () => {
+		navigation.resetStatuses();
 		LoadTwcData();
 		UpdateFullScreenNavigate();
 
