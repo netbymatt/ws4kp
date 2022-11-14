@@ -235,6 +235,9 @@ const index = (() => {
 		}
 		navigation.resize();
 		UpdateFullScreenNavigate();
+
+		// change hover text
+		document.getElementById('ToggleFullScreen').title = 'Exit fullscreen';
 	};
 
 	const ExitFullscreen = () => {
@@ -255,6 +258,8 @@ const index = (() => {
 			document.msExitFullscreen();
 		}
 		navigation.resize();
+		// change hover text
+		document.getElementById('ToggleFullScreen').title = 'Enter fullscreen';
 	};
 
 	const btnNavigateMenuClick = () => {
