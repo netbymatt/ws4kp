@@ -29,6 +29,7 @@ const icons = (() => {
 		case 'skc-n':
 		case 'nskc':
 		case 'nskc-n':
+		case 'cold-n':
 			return addPath('Clear-1992.gif');
 
 		case 'bkn':
@@ -135,6 +136,9 @@ const icons = (() => {
 		case 'blizzard':
 			return addPath('Blowing Snow.gif');
 
+		case 'cold':
+			return addPath('cold.gif');
+
 		default:
 			console.log(`Unable to locate regional icon for ${conditionName} ${link} ${isNightTime}`);
 			return false;
@@ -142,7 +146,7 @@ const icons = (() => {
 	};
 
 	const getWeatherIconFromIconLink = (link, _isNightTime) => {
-		if (!link) return;
+		if (!link) return false;
 
 		// internal function to add path to returned icon
 		const addPath = (icon) => `images/${icon}`;
@@ -166,11 +170,13 @@ const icons = (() => {
 		case 'skc':
 		case 'hot':
 		case 'haze':
+		case 'cold':
 			return addPath('CC_Clear1.gif');
 
 		case 'skc-n':
 		case 'nskc':
 		case 'nskc-n':
+		case 'cold-n':
 			return addPath('CC_Clear0.gif');
 
 		case 'sct':
