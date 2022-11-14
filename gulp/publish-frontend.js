@@ -34,7 +34,6 @@ const jsSources = [
 	'server/scripts/vendor/auto/nosleep.js',
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/index.js',
-	'server/scripts/libgif.js',
 	'server/scripts/vendor/auto/luxon.js',
 	'server/scripts/vendor/auto/suncalc.js',
 	'server/scripts/modules/draw.js',
