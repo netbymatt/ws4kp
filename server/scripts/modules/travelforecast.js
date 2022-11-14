@@ -44,7 +44,7 @@ class TravelForecast extends WeatherDisplay {
 			} catch (e) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
 				console.error(e.status, e.responseJSON);
-				return { name: city.Name };
+				return { name: city.Name, error: true };
 			}
 		});
 
@@ -72,6 +72,7 @@ class TravelForecast extends WeatherDisplay {
 		const cities = this.data;
 
 		const lines = cities.map((city) => {
+			if (city.error) return false;
 			const fillValues = {};
 
 			// city name
@@ -100,7 +101,7 @@ class TravelForecast extends WeatherDisplay {
 				fillValues.error = 'NO TRAVEL DATA AVAILABLE';
 			}
 			return this.fillTemplate('travel-row', fillValues);
-		});
+		}).filter((d) => d);
 		list.append(...lines);
 	}
 
