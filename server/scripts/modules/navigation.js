@@ -203,6 +203,10 @@ const navigation = (() => {
 			idx = utils.calc.wrap(curIdx + (i + 1) * direction, totalDisplays);
 			if (displays[idx].status === STATUS.loaded) break;
 		}
+		// if new display index is less than current display a wrap occurred, test for reload timeout
+		if (idx <= curIdx) {
+			if (index.refreshCheck()) return;
+		}
 		const newDisplay = displays[idx];
 		// hide all displays
 		hideAllCanvases();
