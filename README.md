@@ -22,6 +22,7 @@ There are a lot of CORS considerations and issues with api.weather.gov that are 
 ```
 git clone https://github.com/netbymatt/ws4kp.git
 cd ws4kp
+npm i
 node index.js
 ```
 Open your web browser: http://localhost:8080/ 
