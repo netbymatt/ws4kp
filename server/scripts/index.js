@@ -363,6 +363,10 @@ const index = (() => {
 	const documentKeydown = (e) => {
 		const code = (e.keyCode || e.which);
 
+		// 200ms repeat
+		if ((Date.now() - documentKeydown.lastButton ?? 0) < 200) return false;
+		documentKeydown.lastButton = Date.now();
+
 		if (document.fullscreenElement || document.activeElement === document.body) {
 			switch (code) {
 			case 32: // Space
