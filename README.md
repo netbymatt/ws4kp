@@ -27,6 +27,19 @@ node index.js
 ```
 Open your web browser: http://localhost:8080/ 
 
+## Updates in 5.0
+The change to 5.0 changes from drawing the weather graphics on canvas elements and instead uses HTML and CSS to style all of the weather graphics. A lot of other changes and fixes were implemented at the same time.
+
+* Replace all canvas elements with HTML and CSS
+* City and airport names are better parsed to only show the city name.
+* Remove the dependency on libgif-js
+* Use browser for text wrapping where necessary
+* Some new weather icons
+* Refresh only on slideshow repeat
+* Removed Almanac 30-day outlook
+* Fixed startup issue when current conditions are unavailable
+* 
+
 ## Why the fork?
 
 The fork is a result of wanting a more manageable, modern code base to work with. Part of it is an exercise in my education in JavaScript. There are several technical changes that were made behind the scenes.
