@@ -1,19 +1,14 @@
 // navigation handles progress, next/previous and initial load messages from the parent frame
-/* globals index, utils, StationInfo, STATUS */
+/* globals index, utils, StationInfo, STATUS, UNITS */
 /* globals CurrentWeather, LatestObservations, TravelForecast, RegionalForecast, LocalForecast, ExtendedForecast, Almanac, Radar, Progress, Hourly */
 
 document.addEventListener('DOMContentLoaded', () => {
 	navigation.init();
 });
 
-const UNITS = {
-	english: Symbol('english'),
-	metric: Symbol('metric'),
-};
-
 const navigation = (() => {
 	let displays = [];
-	let currentUnits = UNITS.english;
+	let currentUnits;
 	let playing = false;
 	let progress;
 	const weatherParameters = {};
@@ -25,6 +20,7 @@ const navigation = (() => {
 	const init = async () => {
 		// set up resize handler
 		window.addEventListener('resize', resize);
+		currentUnits = UNITS.english;
 	};
 
 	const message = (data) => {
