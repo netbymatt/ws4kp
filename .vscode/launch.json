@@ -26,6 +26,24 @@
 			"type": "pwa-node"
 		},
 		{
+			"name": "Data:regionalcities",
+			"program": "${workspaceFolder}/datagenerators/regionalcities.js",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node"
+		},
+		{
+			"name": "Data:travelcities",
+			"program": "${workspaceFolder}/datagenerators/travelcities.js",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node"
+		},
+		{
 			"type": "node",
 			"request": "launch",
 			"name": "Server",
