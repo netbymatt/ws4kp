@@ -1,10 +1,10 @@
 // current weather conditions display
-/* globals WeatherDisplay */
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { loadImg } from './utils/image.mjs';
 import { text } from './utils/fetch.mjs';
 import { rewriteUrl } from './utils/cors.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -397,4 +397,4 @@ class Radar extends WeatherDisplay {
 	}
 }
 
-window.Radar = Radar;
+export default Radar;

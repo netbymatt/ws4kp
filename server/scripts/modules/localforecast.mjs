@@ -1,9 +1,10 @@
 // display text based local forecast
 
-/* globals WeatherDisplay, navigation */
+/* globals navigation */
 import STATUS from './status.mjs';
 import { UNITS } from './config.mjs';
 import { json } from './utils/fetch.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -96,5 +97,3 @@ class LocalForecast extends WeatherDisplay {
 		}));
 	}
 }
-
-window.LocalForecast = LocalForecast;

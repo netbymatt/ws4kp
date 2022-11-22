@@ -7,8 +7,9 @@ import { directionToNSEW } from './utils/calc.mjs';
 import * as units from './utils/units.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
-/* globals WeatherDisplay, navigation */
+/* globals navigation */
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -191,5 +192,3 @@ class CurrentWeather extends WeatherDisplay {
 }
 
 export default CurrentWeather;
-
-window.CurrentWeather = CurrentWeather;

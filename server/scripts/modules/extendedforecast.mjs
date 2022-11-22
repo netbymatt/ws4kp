@@ -8,8 +8,9 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import { fahrenheitToCelsius } from './utils/units.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
-/* globals WeatherDisplay, navigation */
+/* globals navigation */
 
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -167,5 +168,3 @@ class ExtendedForecast extends WeatherDisplay {
 }
 
 export default ExtendedForecast;
-
-window.ExtendedForecast = ExtendedForecast;

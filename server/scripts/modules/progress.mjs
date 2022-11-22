@@ -1,7 +1,8 @@
 // regional forecast and observations
-/* globals WeatherDisplay, navigation */
+/* globals navigation */
 import { loadImg } from './utils/image.mjs';
 import STATUS from './status.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class Progress extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -101,5 +102,7 @@ class Progress extends WeatherDisplay {
 		}
 	}
 }
+
+export default Progress;
 
 window.Progress = Progress;

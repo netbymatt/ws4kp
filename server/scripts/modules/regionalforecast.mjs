@@ -1,7 +1,7 @@
 // regional forecast and observations
 // type 0 = observations, 1 = first forecast, 2 = second forecast
 
-/* globals WeatherDisplay, navigation, StationInfo, RegionalCities */
+/* globals navigation, StationInfo, RegionalCities */
 import STATUS from './status.mjs';
 import { UNITS } from './config.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
@@ -10,6 +10,7 @@ import * as units from './utils/units.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -389,4 +390,4 @@ class RegionalForecast extends WeatherDisplay {
 	}
 }
 
-window.RegionalForecast = RegionalForecast;
+export default RegionalForecast;

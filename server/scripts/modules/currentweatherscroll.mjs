@@ -98,8 +98,3 @@ export {
 	start,
 	stop,
 };
-
-window.currentWeatherScroll = {
-	start,
-	stop,
-};

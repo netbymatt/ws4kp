@@ -1,8 +1,11 @@
 // base weather display class
 
-/* globals navigation, utils, luxon, currentWeatherScroll, STATUS */
+/* globals navigation */
+import STATUS from './status.mjs';
+import * as currentWeatherScroll from './currentweatherscroll.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
+import { elemForEach } from './utils/elem.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
 		// navId is used in messaging
@@ -166,7 +169,6 @@ class WeatherDisplay {
 	drawCurrentDateTime() {
 		// only draw if canvas is active to conserve battery
 		if (!this.isActive()) return;
-		const { DateTime } = luxon;
 		// Get the current date and time.
 		const now = DateTime.local();
 
@@ -174,14 +176,14 @@ class WeatherDisplay {
 		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11, ' ');
 
 		if (this.lastTime !== time) {
-			utils.elem.forEach('.date-time.time', (elem) => { elem.innerHTML = time.toUpperCase(); });
+			elemForEach('.date-time.time', (elem) => { elem.innerHTML = time.toUpperCase(); });
 		}
 		this.lastTime = time;
 
 		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
 
 		if (this.lastDate !== date) {
-			utils.elem.forEach('.date-time.date', (elem) => { elem.innerHTML = date.toUpperCase(); });
+			elemForEach('.date-time.date', (elem) => { elem.innerHTML = date.toUpperCase(); });
 		}
 		this.lastDate = date;
 	}
@@ -408,3 +410,5 @@ class WeatherDisplay {
 		return template;
 	}
 }
+
+export default WeatherDisplay;

@@ -1,11 +1,12 @@
 // current weather conditions display
-/* globals WeatherDisplay, navigation, StationInfo */
+/* globals navigation, StationInfo */
 import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import { UNITS } from './config.mjs';
 import * as units from './utils/units.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -131,5 +132,3 @@ class LatestObservations extends WeatherDisplay {
 		return condition;
 	}
 }
-
-window.LatestObservations = LatestObservations;

@@ -331,9 +331,3 @@ export {
 	getWeatherRegionalIconFromIconLink,
 	getHourlyIcon,
 };
-
-window.icons = {
-	getWeatherIconFromIconLink,
-	getWeatherRegionalIconFromIconLink,
-	getHourlyIcon,
-};

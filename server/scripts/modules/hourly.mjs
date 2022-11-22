@@ -1,5 +1,5 @@
 // hourly forecast list
-/* globals WeatherDisplay, navigation */
+/* globals navigation */
 
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
@@ -8,6 +8,7 @@ import { UNITS } from './config.mjs';
 import * as units from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -198,5 +199,3 @@ class Hourly extends WeatherDisplay {
 }
 
 export default Hourly;
-
-window.Hourly = Hourly;

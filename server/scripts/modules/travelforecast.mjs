@@ -1,11 +1,12 @@
 // travel forecast display
-/* globals WeatherDisplay, navigation, TravelCities */
+/* globals navigation, TravelCities */
 import STATUS from './status.mjs';
 import { UNITS } from './config.mjs';
 import { json } from './utils/fetch.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { fahrenheitToCelsius } from './utils/units.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
+import WeatherDisplay from './weatherdisplay.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -165,4 +166,4 @@ class TravelForecast extends WeatherDisplay {
 	}
 }
 
-window.TravelForecast = TravelForecast;
+export default TravelForecast;
