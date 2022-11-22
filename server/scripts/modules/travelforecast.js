@@ -29,8 +29,8 @@ class TravelForecast extends WeatherDisplay {
 		const forecastPromises = TravelCities.map(async (city) => {
 			try {
 				// get point then forecast
-				const point = await utils.weather.getPoint(city.Latitude, city.Longitude);
-				const forecast = await utils.fetch.json(point.properties.forecast);
+				if (!city.point) throw new Error('No pre-loaded point');
+				const forecast = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
 				// return a pared-down forecast

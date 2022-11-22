@@ -65,13 +65,12 @@ class RegionalForecast extends WeatherDisplay {
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
 		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
 			try {
-				// get the point first, then break down into forecast and observations
-				const point = await utils.weather.getPoint(city.lat, city.lon);
+				if (!city.point) throw new Error('No pre-loaded point');
 
 				// start off the observation task
-				const observationPromise = RegionalForecast.getRegionalObservation(point, city);
+				const observationPromise = RegionalForecast.getRegionalObservation(city.point, city);
 
-				const forecast = await utils.fetch.json(point.properties.forecast);
+				const forecast = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
 
 				// get XY on map for city
 				const cityXY = RegionalForecast.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
@@ -142,7 +141,7 @@ class RegionalForecast extends WeatherDisplay {
 	static async getRegionalObservation(point, city) {
 		try {
 			// get stations
-			const stations = await utils.fetch.json(point.properties.observationStations);
+			const stations = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/stations`);
 
 			// get the first station
 			const station = stations.features[0].id;
