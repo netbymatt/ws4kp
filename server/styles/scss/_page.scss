@@ -199,10 +199,7 @@ button {
 #display {
 	font-family: "Star4000";
 	margin: 0 0 0 0;
-	/* overflow: hidden; */
 	width: 100%;
-	/* height: 480px; */
-	/* max-width: 640px; */
 }
 
 jsgif {
@@ -246,6 +243,8 @@ jsgif {
 
 #divTwc:fullscreen #container {
 	background-image: none;
+	width: unset;
+	height: unset;
 }
 
 #loading {
@@ -296,9 +295,9 @@ jsgif {
 
 #divTwc:fullscreen {
 	display: flex;
-align-items: center;
-justify-content: center;
-align-content: center;
+	align-items: center;
+	justify-content: center;
+	align-content: center;
 }
 
 #divTwc:fullscreen #display {
