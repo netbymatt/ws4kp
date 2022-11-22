@@ -2,7 +2,6 @@
 const gulp = require('gulp');
 const concat = require('gulp-concat');
 const terser = require('gulp-terser');
-const cleanCSS = require('gulp-clean-css');
 const ejs = require('gulp-ejs');
 const rename = require('gulp-rename');
 const htmlmin = require('gulp-htmlmin');
@@ -59,11 +58,10 @@ gulp.task('compress_js', () => gulp.src(jsSources)
 	.pipe(gulp.dest('./dist/resources')));
 
 const cssSources = [
-	'server/styles/index.css',
+	'server/styles/main.css',
 ];
-gulp.task('compress_css', () => gulp.src(cssSources)
+gulp.task('copy_css', () => gulp.src(cssSources)
 	.pipe(concat('ws.min.css'))
-	.pipe(cleanCSS())
 	.pipe(gulp.dest('./dist/resources')));
 
 const htmlSources = [
@@ -120,4 +118,4 @@ gulp.task('invalidate', async () => cloudfront.createInvalidation({
 	},
 }).promise());
 
-module.exports = gulp.series(clean, gulp.parallel('compress_js', 'compress_js_data', 'compress_css', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');
+module.exports = gulp.series(clean, gulp.parallel('compress_js', 'compress_js_data', 'copy_css', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');
