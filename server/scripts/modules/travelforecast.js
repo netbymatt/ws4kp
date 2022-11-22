@@ -1,16 +1,11 @@
 // travel forecast display
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation, icons, luxon, TravelCities */
+/* globals WeatherDisplay, utils, STATUS, UNITS, navigation, icons, luxon, TravelCities */
 
 // eslint-disable-next-line no-unused-vars
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
 		super(navId, elemId, 'Travel Forecast', defaultActive);
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround6_1.png');
-
-		// height of one city in the travel forecast
-		this.cityHeight = 72;
 
 		// set up the timing
 		this.timing.baseDelay = 20;
@@ -18,7 +13,7 @@ class TravelForecast extends WeatherDisplay {
 		const pagesFloat = TravelCities.length / 4;
 		const pages = Math.floor(pagesFloat) - 2; // first page is already displayed, last page doesn't happen
 		const extra = pages % 1;
-		const timingStep = this.cityHeight * 4;
+		const timingStep = 75 * 4;
 		this.timing.delay = [150 + timingStep];
 		// add additional pages
 		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
@@ -49,7 +44,7 @@ class TravelForecast extends WeatherDisplay {
 			} catch (e) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
 				console.error(e.status, e.responseJSON);
-				return { name: city.Name };
+				return { name: city.Name, error: true };
 			}
 		});
 
@@ -69,47 +64,23 @@ class TravelForecast extends WeatherDisplay {
 	}
 
 	async drawLongCanvas() {
-		// create the "long" canvas if necessary
-		if (!this.longCanvas) {
-			this.longCanvas = document.createElement('canvas');
-			this.longCanvas.width = 640;
-			this.longCanvas.height = 1728;
-			this.longContext = this.longCanvas.getContext('2d');
-			this.longCanvasGifs = [];
-		}
-
-		// stop all gifs
-		this.longCanvasGifs.forEach((gif) => gif.pause());
-		// delete the gifs
-		this.longCanvasGifs.length = 0;
+		// get the element and populate
+		const list = this.elem.querySelector('.travel-lines');
+		list.innerHTML = '';
 
 		// set up variables
 		const cities = this.data;
 
-		// clean up existing gifs
-		this.gifs.forEach((gif) => gif.pause());
-		// delete the gifs
-		this.gifs.length = 0;
-
-		this.longContext.clearRect(0, 0, this.longCanvas.width, this.longCanvas.height);
-
-		// draw the "long" canvas with all cities
-		draw.box(this.longContext, 'rgb(35, 50, 112)', 0, 0, 640, TravelCities.length * this.cityHeight);
-
-		for (let i = 0; i <= 4; i += 1) {
-			const y = i * 346;
-			draw.horizontalGradient(this.longContext, 0, y, 640, y + 346, '#102080', '#001040');
-		}
-
-		await Promise.all(cities.map(async (city, index) => {
-			// calculate base y value
-			const y = 50 + this.cityHeight * index;
+		const lines = cities.map((city) => {
+			if (city.error) return false;
+			const fillValues = {};
 
 			// city name
-			draw.text(this.longContext, 'Star4000 Large Compressed', '24pt', '#FFFF00', 80, y, city.name, 2);
+			fillValues.city = city;
 
 			// check for forecast data
 			if (city.icon) {
+				fillValues.city = city.name;
 				// get temperatures and convert if necessary
 				let { low, high } = city;
 
@@ -122,25 +93,16 @@ class TravelForecast extends WeatherDisplay {
 				const lowString = Math.round(low).toString();
 				const highString = Math.round(high).toString();
 
-				const xLow = (500 - (lowString.length * 20));
-				draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xLow, y, lowString, 2);
+				fillValues.low = lowString;
+				fillValues.high = highString;
 
-				const xHigh = (560 - (highString.length * 20));
-				draw.text(this.longContext, 'Star4000 Large', '24pt', '#FFFF00', xHigh, y, highString, 2);
-
-				this.longCanvasGifs.push(await utils.image.superGifAsync({
-					src: city.icon,
-					auto_play: true,
-					canvas: this.longCanvas,
-					x: 330,
-					y: y - 35,
-					max_width: 47,
-				}));
+				fillValues.icon = { type: 'img', src: city.icon };
 			} else {
-				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y - 18, 'NO TRAVEL', 2);
-				draw.text(this.longContext, 'Star4000 Small', '24pt', '#FFFFFF', 400, y, 'DATA AVAILABLE', 2);
+				fillValues.error = 'NO TRAVEL DATA AVAILABLE';
 			}
-		}));
+			return this.fillTemplate('travel-row', fillValues);
+		}).filter((d) => d);
+		list.append(...lines);
 	}
 
 	async drawCanvas() {
@@ -151,18 +113,7 @@ class TravelForecast extends WeatherDisplay {
 		// set up variables
 		const cities = this.data;
 
-		// draw the standard context
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-
-		draw.titleText(this.context, 'Travel Forecast', `For ${TravelForecast.getTravelCitiesDayName(cities)}`);
-
-		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFF00', 455, 105, 'LOW', 2);
-		draw.text(this.context, 'Star4000 Small', '24pt', '#FFFF00', 510, 105, 'HIGH', 2);
-
-		// copy the scrolled portion of the canvas for the initial run before the scrolling starts
-		this.context.drawImage(this.longCanvas, 0, 0, 640, 289, 0, 110, 640, 289);
+		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${TravelForecast.getTravelCitiesDayName(cities)}`;
 
 		this.finishDraw();
 	}
@@ -180,17 +131,14 @@ class TravelForecast extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
-		// get a fresh canvas
-		const longCanvas = this.getLongCanvas();
-
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(longCanvas.height - 289, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.travel-lines').getBoundingClientRect().height - 289, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
 
 		// copy the scrolled portion of the canvas
-		this.context.drawImage(longCanvas, 0, offsetY, 640, 289, 0, 110, 640, 289);
+		this.elem.querySelector('.main').scrollTo(0, offsetY);
 	}
 
 	static getTravelCitiesDayName(cities) {

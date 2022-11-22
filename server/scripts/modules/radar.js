@@ -1,10 +1,10 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, draw, luxon */
+/* globals WeatherDisplay, utils, STATUS, luxon */
 
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Radar');
+		super(navId, elemId, 'Local Radar', true);
 
 		// set max images
 		this.dopplerRadarImageMax = 6;
@@ -31,9 +31,6 @@ class Radar extends WeatherDisplay {
 			{ time: 1, si: 4 },
 			{ time: 12, si: 5 },
 		];
-
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround4_1.png');
 	}
 
 	async getData(_weatherParameters) {
@@ -163,7 +160,6 @@ class Radar extends WeatherDisplay {
 			const imgBlob = await utils.image.load(blob);
 
 			// draw the entire image
-
 			workingContext.clearRect(0, 0, width, 1600);
 			workingContext.drawImage(imgBlob, 0, 0, width, 1600);
 
@@ -174,7 +170,7 @@ class Radar extends WeatherDisplay {
 			const cropCanvas = document.createElement('canvas');
 			cropCanvas.width = 640;
 			cropCanvas.height = 367;
-			const cropContext = cropCanvas.getContext('2d');
+			const cropContext = cropCanvas.getContext('2d', { willReadFrequently: true });
 			cropContext.imageSmoothingEnabled = false;
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
 			// clean the image
@@ -183,11 +179,20 @@ class Radar extends WeatherDisplay {
 			// merge the radar and map
 			Radar.mergeDopplerRadarImage(context, cropContext);
 
+			const elem = this.fillTemplate('frame', { map: { type: 'img', src: canvas.toDataURL() } });
+
 			return {
 				canvas,
 				time,
+				elem,
 			};
 		}));
+
+		// put the elements in the container
+		const scrollArea = this.elem.querySelector('.scroll-area');
+		scrollArea.innerHTML = '';
+		scrollArea.append(...radarInfo.map((r) => r.elem));
+
 		// set max length
 		this.timing.totalScreens = radarInfo.length;
 		// store the images
@@ -199,31 +204,13 @@ class Radar extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
-		if (this.screenIndex === -1) return;
-		this.context.drawImage(await this.backgroundImage, 0, 0);
 		const { DateTime } = luxon;
-		// Title
-		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 60, 'Local', 2);
-		draw.text(this.context, 'Arial', 'bold 28pt', '#ffffff', 155, 95, 'Radar', 2);
+		const time = this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE);
+		const timePadded = time.length >= 8 ? time : `&nbsp;${time}`;
+		this.elem.querySelector('.header .right .time').innerHTML = timePadded;
 
-		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 438, 49, 'PRECIP', 2, 'center');
-		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 298, 73, 'Light', 2);
-		draw.text(this.context, 'Star4000', 'bold 18pt', '#ffffff', 517, 73, 'Heavy', 2);
-
-		let x = 362;
-		const y = 52;
-		draw.box(this.context, '#000000', x - 2, y - 2, 154, 28);
-		draw.box(this.context, 'rgb(49, 210, 22)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(28, 138, 18)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(20, 90, 15)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(10, 40, 10)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(196, 179, 70)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(190, 72, 19)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(171, 14, 14)', x, y, 17, 24); x += 19;
-		draw.box(this.context, 'rgb(115, 31, 4)', x, y, 17, 24); x += 19;
-
-		this.context.drawImage(this.data[this.screenIndex], 0, 0, 640, 367, 0, 113, 640, 367);
-		draw.text(this.context, 'Star4000 Small', '24pt', '#ffffff', 438, 105, this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE), 2, 'center');
+		// scroll to image
+		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * 371}px`;
 
 		this.finishDraw();
 	}

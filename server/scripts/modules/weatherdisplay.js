@@ -1,6 +1,6 @@
 // base weather display class
 
-/* globals navigation, utils, draw, UNITS, luxon, currentWeatherScroll */
+/* globals navigation, utils, luxon, currentWeatherScroll */
 
 const STATUS = {
 	loading: Symbol('loading'),
@@ -31,8 +31,8 @@ class WeatherDisplay {
 		this.navBaseCount = 0;
 		this.screenIndex = -1;	// special starting condition
 
-		// create the canvas, also stores this.elemId
-		this.createCanvas(elemId);
+		// store elemId once
+		this.storeElemId(elemId);
 
 		if (elemId !== 'progress') this.addCheckbox(defaultEnabled);
 		if (this.enabled) {
@@ -41,6 +41,9 @@ class WeatherDisplay {
 			this.setStatus(STATUS.disabled);
 		}
 		this.startNavCount();
+
+		// get any templates
+		this.loadTemplates();
 	}
 
 	addCheckbox(defaultEnabled = true) {
@@ -92,18 +95,10 @@ class WeatherDisplay {
 		this.loadingStatus = state;
 	}
 
-	createCanvas(elemId, width = 640, height = 480) {
+	storeElemId(elemId) {
 		// only create it once
 		if (this.elemId) return;
 		this.elemId = elemId;
-
-		// create a canvas
-		const canvas = document.createElement('template');
-		canvas.innerHTML = `<canvas id='${`${elemId}Canvas`}' width='${width}' height='${height}' style='display: none;' />`;
-
-		// add to the page
-		const container = document.getElementById('container');
-		container.appendChild(canvas.content.firstChild);
 	}
 
 	// get necessary data for this display
@@ -136,46 +131,27 @@ class WeatherDisplay {
 	}
 
 	drawCanvas() {
-		// stop all gifs
-		this.gifs.forEach((gif) => gif.pause());
-		// delete the gifs
-		this.gifs.length = 0;
-		// refresh the canvas
-		this.canvas = document.getElementById(`${this.elemId}Canvas`);
-		this.context = this.canvas.getContext('2d');
-
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
 	}
 
 	finishDraw() {
 		let OkToDrawCurrentConditions = true;
-		let OkToDrawNoaaImage = true;
 		let OkToDrawCurrentDateTime = true;
-		let OkToDrawLogoImage = true;
 		// let OkToDrawCustomScrollText = false;
 		let bottom;
 
 		// visibility tests
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
-		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
-		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
-		if (this.elemId === 'hourly') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'progress') {
 			OkToDrawCurrentConditions = false;
-			OkToDrawNoaaImage = false;
 		}
 		if (this.elemId === 'radar') {
 			OkToDrawCurrentConditions = false;
 			OkToDrawCurrentDateTime = false;
-			OkToDrawNoaaImage = false;
-			// OkToDrawCustomScrollText = false;
 		}
 		if (this.elemId === 'hazards') {
-			OkToDrawNoaaImage = false;
 			bottom = true;
-			OkToDrawLogoImage = false;
 		}
 		// draw functions
 		if (OkToDrawCurrentDateTime) {
@@ -185,10 +161,8 @@ class WeatherDisplay {
 				setInterval(() => this.drawCurrentDateTime(bottom), 100);
 			}
 		}
-		if (OkToDrawLogoImage) this.drawLogoImage();
-		if (OkToDrawNoaaImage) this.drawNoaaImage();
 		if (OkToDrawCurrentConditions) {
-			currentWeatherScroll.start(this.context);
+			currentWeatherScroll.start();
 		} else {
 			// cause a reset if the progress screen is displayed
 			currentWeatherScroll.stop(this.elemId === 'progress');
@@ -197,81 +171,27 @@ class WeatherDisplay {
 		// if (OkToDrawCustomScrollText) DrawCustomScrollText(WeatherParameters, context);
 	}
 
-	drawCurrentDateTime(bottom) {
+	drawCurrentDateTime() {
 		// only draw if canvas is active to conserve battery
 		if (!this.isActive()) return;
 		const { DateTime } = luxon;
-		const font = 'Star4000 Small';
-		const size = '24pt';
-		const color = '#ffffff';
-		const shadow = 2;
-
-		// on the first pass store the background for the date and time
-		if (!this.dateTimeBackground) {
-			const bg = this.context.getImageData(410, 30, 175, 60);
-			// test background draw complete and skip drawing if there is no background yet
-			if (bg.data[0] === 0) return;
-			// store the background
-			this.dateTimeBackground = bg;
-		}
-
-		// Clear the date and time area.
-		if (bottom) {
-			draw.box(this.context, 'rgb(25, 50, 112)', 0, 389, 640, 16);
-		} else {
-			this.context.putImageData(this.dateTimeBackground, 410, 30);
-		}
-
 		// Get the current date and time.
 		const now = DateTime.local();
 
 		// time = "11:35:08 PM";
 		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11, ' ');
 
-		let x; let y;
-		if (bottom) {
-			x = 400;
-			y = 402;
-		} else {
-			x = 410;
-			y = 65;
+		if (this.lastTime !== time) {
+			utils.elem.forEach('.date-time.time', (elem) => { elem.innerHTML = time.toUpperCase(); });
 		}
-		if (navigation.units() === UNITS.metric) {
-			x += 45;
-		}
-
-		draw.text(this.context, font, size, color, x, y, time.toUpperCase(), shadow); // y += 20;
+		this.lastTime = time;
 
 		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
 
-		if (bottom) {
-			x = 55;
-			y = 402;
-		} else {
-			x = 410;
-			y = 85;
+		if (this.lastDate !== date) {
+			utils.elem.forEach('.date-time.date', (elem) => { elem.innerHTML = date.toUpperCase(); });
 		}
-		draw.text(this.context, font, size, color, x, y, date.toUpperCase(), shadow);
-	}
-
-	async drawNoaaImage() {
-		// load the image and store locally
-		if (!this.drawNoaaImage.image) {
-			this.drawNoaaImage.image = utils.image.load('images/noaa5.gif');
-		}
-		// wait for the image to load completely
-		const img = await this.drawNoaaImage.image;
-		this.context.drawImage(img, 356, 39);
-	}
-
-	async drawLogoImage() {
-		// load the image and store locally
-		if (!this.drawLogoImage.image) {
-			this.drawLogoImage.image = utils.image.load('images/Logo3.png');
-		}
-		// wait for the image load completely
-		const img = await this.drawLogoImage.image;
-		this.context.drawImage(img, 50, 30, 85, 67);
+		this.lastDate = date;
 	}
 
 	// show/hide the canvas and start/stop the navigation timer
@@ -281,23 +201,18 @@ class WeatherDisplay {
 		if (navCmd === navigation.msg.command.firstFrame) this.navNext(navCmd);
 		if (navCmd === navigation.msg.command.lastFrame) this.navPrev(navCmd);
 
-		// see if the canvas is already showing
-		if (this.canvas.style.display === 'block') return false;
+		this.startNavCount();
 
-		// show the canvas
-		this.canvas.style.display = 'block';
-		return false;
+		this.elem.classList.add('show');
 	}
 
 	hideCanvas() {
 		this.resetNavBaseCount();
-
-		if (!this.canvas) return;
-		this.canvas.style.display = 'none';
+		this.elem.classList.remove('show');
 	}
 
 	isActive() {
-		return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
+		return this.elem.offsetHeight !== 0;
 	}
 
 	isEnabled() {
@@ -452,7 +367,6 @@ class WeatherDisplay {
 			clearInterval(this.navInterval);
 			this.navInterval = undefined;
 		}
-		this.startNavCount();
 	}
 
 	sendNavDisplayMessage(message) {
@@ -460,5 +374,45 @@ class WeatherDisplay {
 			id: this.navId,
 			type: message,
 		});
+	}
+
+	loadTemplates() {
+		this.templates = {};
+		this.elem = document.getElementById(`${this.elemId}-html`);
+		if (!this.elem) return;
+		const templates = this.elem.querySelectorAll('.template');
+		templates.forEach((template) => {
+			const className = template.classList[0];
+			const node = template.cloneNode(true);
+			node.classList.remove('template');
+			this.templates[className] = node;
+			template.remove();
+		});
+	}
+
+	fillTemplate(name, fillValues) {
+		// get the template
+		const templateNode = this.templates[name];
+		if (!templateNode) return false;
+
+		// clone it
+		const template = templateNode.cloneNode(true);
+
+		Object.entries(fillValues).forEach(([key, value]) => {
+			// get the specified element
+			const elem = template.querySelector(`.${key}`);
+			if (!elem) return;
+
+			// fill based on type provided
+			if (typeof value === 'string' || typeof value === 'number') {
+				// string and number fill the first found selector
+				elem.innerHTML = value;
+			} else if (value?.type === 'img') {
+				// fill the image source
+				elem.querySelector('img').src = value.src;
+			}
+		});
+
+		return template;
 	}
 }

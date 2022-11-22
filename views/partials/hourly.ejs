@@ -1,0 +1,18 @@
+<%- include('header.ejs', {title: 'Hourly Forecast' , hasTime: true }) %>
+	<div class="main has-scroll hourly">
+		<div class="column-headers">
+			<div class="temp">TEMP</div>
+			<div class="like">LIKE</div>
+			<div class="wind">WIND</div>
+		</div>
+		<div class="hourly-lines">
+			<div class="hourly-row template">
+				<div class="hour"></div>
+				<div class="icon"><img /></div>
+				<div class="temp"></div>
+				<div class="like"></div>
+				<div class="wind"></div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

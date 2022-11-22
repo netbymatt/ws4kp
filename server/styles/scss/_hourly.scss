@@ -1,0 +1,95 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.hourly {
+	&.main {
+		overflow-y: hidden;
+
+		.column-headers {
+			background-color: c.$column-header;
+			height: 20px;
+			position: absolute;
+			width: 100%;
+		}
+
+		.column-headers {
+			position: sticky;
+			top: 0px;
+			z-index: 5;
+
+			div {
+				display: inline-block;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				position: absolute;
+				top: -14px;
+				z-index: 5;
+				@include u.text-shadow();
+			}
+
+			.temp {
+				left: 355px;
+			}
+
+			.like {
+				left: 435px;
+			}
+
+			.wind {
+				left: 535px;
+			}
+		}
+
+		.hourly-lines {
+			min-height: 338px;
+			padding-top: 10px;
+
+			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
+					c.$gradient-main-background-1 136px,
+					c.$gradient-main-background-1 202px,
+					c.$gradient-main-background-2 338px,
+				);
+
+			.hourly-row {
+				font-family: 'Star4000 Large';
+				font-size: 24pt;
+				height: 72px;
+				color: c.$title-color;
+				@include u.text-shadow();
+				position: relative;
+
+				>div {
+					position: absolute;
+					white-space: pre;
+					top: 8px;
+				}
+
+				.hour {
+					left: 25px;
+				}
+
+				.icon {
+					left: 255px;
+					width: 70px;
+					text-align: center;
+					top: unset;
+				}
+
+				.temp {
+					left: 355px;
+				}
+
+				.like {
+					left: 425px;
+				}
+
+				.wind {
+					left: 505px;
+					width: 100px;
+					text-align: right;
+				}
+			}
+		}
+	}
+}

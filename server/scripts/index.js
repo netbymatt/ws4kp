@@ -4,9 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const index = (() => {
-	const overrides = {
-		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
-	};
+	const overrides = {};
 	const AutoRefreshIntervalMs = 500;
 	const AutoRefreshTotalIntervalMs = 600000; // 10 min.
 
@@ -127,8 +125,10 @@ const index = (() => {
 		const TwcUnits = localStorage.getItem('TwcUnits');
 		if (!TwcUnits || TwcUnits === 'ENGLISH') {
 			document.getElementById('radEnglish').checked = true;
+			navigation.message({ type: 'units', message: 'english' });
 		} else if (TwcUnits === 'METRIC') {
 			document.getElementById('radMetric').checked = true;
+			navigation.message({ type: 'units', message: 'metric' });
 		}
 
 		document.getElementById('radEnglish').addEventListener('change', changeUnits);
@@ -231,8 +231,11 @@ const index = (() => {
 			window.scrollTo(0, 0);
 			FullScreenOverride = true;
 		}
-
+		navigation.resize();
 		UpdateFullScreenNavigate();
+
+		// change hover text
+		document.getElementById('ToggleFullScreen').title = 'Exit fullscreen';
 	};
 
 	const ExitFullscreen = () => {
@@ -252,6 +255,9 @@ const index = (() => {
 		} else if (document.msExitFullscreen) {
 			document.msExitFullscreen();
 		}
+		navigation.resize();
+		// change hover text
+		document.getElementById('ToggleFullScreen').title = 'Enter fullscreen';
 	};
 
 	const btnNavigateMenuClick = () => {
@@ -311,6 +317,7 @@ const index = (() => {
 	};
 
 	const btnNavigateRefreshClick = () => {
+		navigation.resetStatuses();
 		LoadTwcData();
 		UpdateFullScreenNavigate();
 

@@ -1,0 +1,14 @@
+<%- include('header.ejs', {titleDual:{ top: 'Regional' , bottom: 'Observations' }, hasTime: true }) %>
+	<div class="main has-scroll regional-forecast">
+		<div class="map"><img src="images/Basemap2.png" /></div>
+		<div class="location-container">
+			<div class="location template">
+				<div class="icon">
+					<img src="" />
+				</div>
+				<div class="city"></div>
+				<div class="temp"></div>
+			</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

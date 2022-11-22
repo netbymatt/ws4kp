@@ -1,0 +1,23 @@
+<%- include('header.ejs', {titleDual:{ top: 'Extended' , bottom: 'Forecast' }, hasTime: true }) %>
+<div class="main has-scroll extended-forecast">
+  <div class="day-container">
+    <div class="day template">
+      <div class="date"></div>
+      <div class="icon">
+        <img src="" />
+      </div>
+      <div class="condition"></div>
+      <div class="temperatures">
+        <div class="temperature-block lo">
+          <div class="label">Lo</div>
+          <div class="value value-lo"></div>
+        </div>
+        <div class="temperature-block hi">
+          <div class="label">Hi</div>
+          <div class="value value-hi"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('scroll.ejs') %>

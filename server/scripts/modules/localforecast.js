@@ -1,17 +1,14 @@
 // display text based local forecast
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, navigation */
+/* globals WeatherDisplay, utils, STATUS, UNITS, navigation */
 
 // eslint-disable-next-line no-unused-vars
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Forecast');
+		super(navId, elemId, 'Local Forecast', true);
 
 		// set timings
 		this.timing.baseDelay = 5000;
-
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 	}
 
 	async getData(_weatherParameters) {
@@ -28,14 +25,8 @@ class LocalForecast extends WeatherDisplay {
 		// parse raw data
 		const conditions = LocalForecast.parse(rawData);
 
-		// split this forecast into the correct number of screens
-		const maxRows = 7;
-		const maxCols = 32;
-
-		this.screenTexts = [];
-
 		// read each text
-		conditions.forEach((condition) => {
+		this.screenTexts = conditions.map((condition) => {
 			// process the text
 			let text = `${condition.DayName.toUpperCase()}...`;
 			let conditionText = condition.Text;
@@ -44,44 +35,23 @@ class LocalForecast extends WeatherDisplay {
 			}
 			text += conditionText.toUpperCase().replace('...', ' ');
 
-			text = utils.string.wordWrap(text, maxCols, '\n');
-			const lines = text.split('\n');
-			const lineCount = lines.length;
-			let ScreenText = '';
-			const maxRowCount = maxRows;
-			let rowCount = 0;
-
-			// if (PrependAlert) {
-			// 	ScreenText = LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1];
-			// 	rowCount = ScreenText.split('\n').length - 1;
-			// }
-
-			for (let i = 0; i <= lineCount - 1; i += 1) {
-				if (lines[i] !== '') {
-					if (rowCount > maxRowCount - 1) {
-					// if (PrependAlert) {
-					// 	LocalForecastScreenTexts[LocalForecastScreenTexts.length - 1] = ScreenText;
-					// 	PrependAlert = false;
-					// } else {
-						this.screenTexts.push(ScreenText);
-						// }
-						ScreenText = '';
-						rowCount = 0;
-					}
-
-					ScreenText += `${lines[i]}\n`;
-					rowCount += 1;
-				}
-			}
-			// if (PrependAlert) {
-			// 	this.screenTexts[this.screenTexts.length - 1] = ScreenText;
-			// 	PrependAlert = false;
-			// } else {
-			this.screenTexts.push(ScreenText);
-			// }
+			return text;
 		});
 
-		this.timing.totalScreens = this.screenTexts.length;
+		// fill the forecast texts
+		const templates = this.screenTexts.map((text) => this.fillTemplate('forecast', { text }));
+		const forecastsElem = this.elem.querySelector('.forecasts');
+		forecastsElem.innerHTML = '';
+		forecastsElem.append(...templates);
+
+		// increase each forecast height to a multiple of container height
+		this.pageHeight = forecastsElem.parentNode.getBoundingClientRect().height;
+		templates.forEach((forecast) => {
+			const newHeight = Math.ceil(forecast.scrollHeight / this.pageHeight) * this.pageHeight;
+			forecast.style.height = `${newHeight}px`;
+		});
+
+		this.timing.totalScreens = forecastsElem.scrollHeight / this.pageHeight;
 		this.calcNavTiming();
 		this.setStatus(STATUS.loaded);
 	}
@@ -105,25 +75,12 @@ class LocalForecast extends WeatherDisplay {
 		}
 	}
 
-	// TODO: alerts needs a cleanup
-	// TODO: second page of screenTexts when needed
 	async drawCanvas() {
 		super.drawCanvas();
 
-		this.context.drawImage(await this.backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 52, 399, draw.sideColor1, draw.sideColor2);
-		draw.horizontalGradientSingle(this.context, 584, 90, 640, 399, draw.sideColor1, draw.sideColor2);
+		const top = -this.screenIndex * this.pageHeight;
+		this.elem.querySelector('.forecasts').style.top = `${top}px`;
 
-		draw.titleText(this.context, 'Local ', 'Forecast');
-
-		// clear existing text
-		draw.box(this.context, 'rgb(33, 40, 90)', 65, 105, 505, 280);
-		// Draw the text.
-		this.screenTexts[this.screenIndex].split('\n').forEach((text, index) => {
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 75, 140 + 40 * index, text, 2);
-		});
 		this.finishDraw();
 	}
 

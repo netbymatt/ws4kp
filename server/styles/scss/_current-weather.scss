@@ -1,0 +1,96 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.current-weather {
+	&.main {
+
+		.col {
+			height: 50px;
+			width: 255px;
+			display: inline-block;
+			margin-top: 10px;
+			position: absolute;
+
+			@include u.text-shadow();
+
+			&.left {
+				font-family: 'Star4000 Extended';
+				font-size: 24pt;
+
+			}
+
+			&.right {
+				right: 0px;
+				font-family: 'Star4000 Large';
+				font-size: 16pt;
+				font-weight: bold;
+
+				.row {
+					margin-bottom: 12px;
+
+					.label,
+					.value {
+						display: inline-block;
+					}
+
+					.label {
+						margin-left: 20px;
+					}
+
+					.value {
+						float: right;
+						margin-right: 10px;
+					}
+
+				}
+
+			}
+		}
+
+		.center {
+			text-align: center;
+		}
+
+		.temp {
+			font-family: 'Star4000 Large';
+			font-size: 24pt;
+		}
+
+		.condition {}
+
+		.icon {
+			height: 100px;
+
+			img {
+				max-width: 126px;
+			}
+		}
+
+		.wind-container {
+			margin-bottom: 10px;
+
+			&>div {
+				width: 45%;
+				display: inline-block;
+				margin: 0px;
+			}
+
+			.wind-label {
+				margin-left: 5px;
+			}
+
+			.wind {
+				text-align: right;
+			}
+		}
+
+		.wind-gusts {
+			margin-left: 5px;
+		}
+
+		.location {
+			color: c.$title-color;
+			margin-bottom: 10px;
+		}
+	}
+}

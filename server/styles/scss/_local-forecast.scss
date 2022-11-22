@@ -1,0 +1,26 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .local-forecast {
+	.container {
+		position: relative;
+		top: 15px;
+		margin: 0px 10px;
+		box-sizing: border-box;
+		height: 280px;
+		overflow: hidden;
+	}
+
+	.forecasts {
+		position: relative;
+	}
+
+	.forecast {
+		font-family: 'Star4000';
+		font-size: 24pt;
+		text-transform: uppercase;
+		@include u.text-shadow();
+		min-height: 280px;
+		line-height: 40px;
+	}
+}

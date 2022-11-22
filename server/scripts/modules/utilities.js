@@ -1,6 +1,5 @@
 // radar utilities
 
-/* globals SuperGif */
 // eslint-disable-next-line no-unused-vars
 const utils = (() => {
 	// ****************************** weather data ********************************
@@ -30,38 +29,15 @@ const utils = (() => {
 		}
 	});
 
-	// async version of SuperGif
-	const superGifAsync = (e) => new Promise((resolve) => {
-		const gif = new SuperGif(e);
-		gif.load(() => resolve(gif));
-	});
-
 	// preload an image
 	// the goal is to get it in the browser's cache so it is available more quickly when the browser needs it
 	// a list of cached icons is used to avoid hitting the cache multiple times
 	const cachedImages = [];
 	const preload = (src) => {
 		if (cachedImages.includes(src)) return false;
-		const img = new Image();
-		img.scr = src;
-		cachedImages.push(src);
+		blob(src);
+		// cachedImages.push(src);
 		return true;
-	};
-
-	// draw an image on a local canvas and return the context
-	const drawLocalCanvas = (img) => {
-		// create a canvas
-		const canvas = document.createElement('canvas');
-		canvas.width = img.width;
-		canvas.height = img.height;
-
-		// get the context
-		const context = canvas.getContext('2d');
-		context.imageSmoothingEnabled = false;
-
-		// draw the image
-		context.drawImage(img, 0, 0);
-		return context;
 	};
 
 	// *********************************** unit conversions ***********************
@@ -136,99 +112,21 @@ const utils = (() => {
 	const wrap = (x, m) => ((x % m) + m) % m;
 
 	// ********************************* strings *********************************************
-	const wordWrap = (_str, ...rest) => {
-		//  discuss at: https://locutus.io/php/wordwrap/
-		// original by: Jonas Raoni Soares Silva (https://www.jsfromhell.com)
-		// improved by: Nick Callen
-		// improved by: Kevin van Zonneveld (https://kvz.io)
-		// improved by: Sakimori
-		//  revised by: Jonas Raoni Soares Silva (https://www.jsfromhell.com)
-		// bugfixed by: Michael Grier
-		// bugfixed by: Feras ALHAEK
-		// improved by: Rafał Kukawski (https://kukawski.net)
-		//   example 1: wordwrap('Kevin van Zonneveld', 6, '|', true)
-		//   returns 1: 'Kevin|van|Zonnev|eld'
-		//   example 2: wordwrap('The quick brown fox jumped over the lazy dog.', 20, '<br />\n')
-		//   returns 2: 'The quick brown fox<br />\njumped over the lazy<br />\ndog.'
-		//   example 3: wordwrap('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.')
-		//   returns 3: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\ntempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim\nveniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea\ncommodo consequat.'
-		const intWidth = rest[0] ?? 75;
-		const strBreak = rest[1] ?? '\n';
-		const cut = rest[2] ?? false;
+	const locationCleanup = (input) => {
+		// regexes to run
+		const regexes = [
+			// "Chicago / West Chicago", removes before slash
+			/^[A-Za-z ]+ \/ /,
+			// "Chicago/Waukegan" removes before slash
+			/^[A-Za-z ]+\//,
+			// "Chicago, Chicago O'hare" removes before comma
+			/^[A-Za-z ]+, /,
+		];
 
-		let i;
-		let j;
-		let line;
-
-		let str = _str;
-		str += '';
-
-		if (intWidth < 1) {
-			return str;
-		}
-
-		const reLineBreaks = /\r\n|\n|\r/;
-		const reBeginningUntilFirstWhitespace = /^\S*/;
-		const reLastCharsWithOptionalTrailingWhitespace = /\S*(\s)?$/;
-
-		const lines = str.split(reLineBreaks);
-		const l = lines.length;
-		let match;
-
-		// for each line of text
-		// eslint-disable-next-line no-plusplus
-		for (i = 0; i < l; lines[i++] += line) {
-			line = lines[i];
-			lines[i] = '';
-
-			while (line.length > intWidth) {
-				// get slice of length one char above limit
-				const slice = line.slice(0, intWidth + 1);
-
-				// remove leading whitespace from rest of line to parse
-				let ltrim = 0;
-				// remove trailing whitespace from new line content
-				let rtrim = 0;
-
-				match = slice.match(reLastCharsWithOptionalTrailingWhitespace);
-
-				// if the slice ends with whitespace
-				if (match[1]) {
-					// then perfect moment to cut the line
-					j = intWidth;
-					ltrim = 1;
-				} else {
-					// otherwise cut at previous whitespace
-					j = slice.length - match[0].length;
-
-					if (j) {
-						rtrim = 1;
-					}
-
-					// but if there is no previous whitespace
-					// and cut is forced
-					// cut just at the defined limit
-					if (!j && cut && intWidth) {
-						j = intWidth;
-					}
-
-					// if cut wasn't forced
-					// cut at next possible whitespace after the limit
-					if (!j) {
-						const charsUntilNextWhitespace = (line.slice(intWidth).match(reBeginningUntilFirstWhitespace) || [''])[0];
-
-						j = slice.length + charsUntilNextWhitespace.length;
-					}
-				}
-
-				lines[i] += line.slice(0, j - rtrim);
-				line = line.slice(j + ltrim);
-				lines[i] += line.length ? strBreak : '';
-			}
-		}
-
-		return lines.join('\n');
+		// run all regexes
+		return regexes.reduce((value, regex) => value.replace(regex, ''), input);
 	};
+
 	// ********************************* cors ********************************************
 	// rewrite some urls for local server
 	const rewriteUrl = (_url) => {
@@ -255,9 +153,9 @@ const utils = (() => {
 		// build a url, including the rewrite for cors if necessary
 		let corsUrl = _url;
 		if (params.cors === true) corsUrl = rewriteUrl(_url);
-		const url = new URL(corsUrl);
-		// match the security protocol
-		url.protocol = window.location.protocol;
+		const url = new URL(corsUrl, `${window.location.origin}/`);
+		// match the security protocol when not on localhost
+		url.protocol = window.location.hostname !== 'localhost' ? window.location.protocol : url.protocol;
 		// add parameters if necessary
 		if (params.data) {
 			Object.keys(params.data).forEach((key) => {
@@ -286,13 +184,18 @@ const utils = (() => {
 		}
 	};
 
+	const elemForEach = (selector, callback) => {
+		[...document.querySelectorAll(selector)].forEach(callback);
+	};
+
 	// return an orderly object
 	return {
+		elem: {
+			forEach: elemForEach,
+		},
 		image: {
 			load: loadImg,
-			superGifAsync,
 			preload,
-			drawLocalCanvas,
 		},
 		weather: {
 			getPoint,
@@ -318,7 +221,7 @@ const utils = (() => {
 			wrap,
 		},
 		string: {
-			wordWrap,
+			locationCleanup,
 		},
 		cors: {
 			rewriteUrl,

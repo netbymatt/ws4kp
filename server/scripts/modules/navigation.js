@@ -23,7 +23,8 @@ const navigation = (() => {
 	let almanac;
 
 	const init = async () => {
-		// nothing to do
+		// set up resize handler
+		window.addEventListener('resize', resize);
 	};
 
 	const message = (data) => {
@@ -87,22 +88,22 @@ const navigation = (() => {
 		// draw the progress canvas and hide others
 		hideAllCanvases();
 		document.getElementById('loading').style.display = 'none';
-		progress = new Progress(-1, 'progress');
+		if (!progress) progress = new Progress(-1, 'progress');
 		await progress.drawCanvas();
 		progress.showCanvas();
 
 		// start loading canvases if necessary
 		if (displays.length === 0) {
-			currentWeather = new CurrentWeather(0, 'currentWeather');
+			currentWeather = new CurrentWeather(0, 'current-weather');
 			almanac = new Almanac(7, 'almanac');
 			displays = [
 				currentWeather,
-				new LatestObservations(1, 'latestObservations'),
+				new LatestObservations(1, 'latest-observations'),
 				new Hourly(2, 'hourly'),
-				new TravelForecast(3, 'travelForecast', false),	// not active by default
-				new RegionalForecast(4, 'regionalForecast'),
-				new LocalForecast(5, 'localForecast'),
-				new ExtendedForecast(6, 'extendedForecast'),
+				new TravelForecast(3, 'travel', false),	// not active by default
+				new RegionalForecast(4, 'regional-forecast'),
+				new LocalForecast(5, 'local-forecast'),
+				new ExtendedForecast(6, 'extended-forecast'),
 				almanac,
 				new Radar(8, 'radar'),
 			];
@@ -177,7 +178,15 @@ const navigation = (() => {
 		progress.hideCanvas();
 		if (!current) {
 			// special case for no active displays (typically on progress screen)
-			displays[0].navNext(msg.command.firstFrame);
+			// find the first ready display
+			let firstDisplay;
+			let displayCount = 0;
+			do {
+				if (displays[displayCount].status === STATUS.loaded) firstDisplay = displays[displayCount];
+				displayCount += 1;
+			} while (!firstDisplay && displayCount < displays.length);
+
+			firstDisplay.navNext(msg.command.firstFrame);
 			return;
 		}
 		if (direction === msg.command.nextFrame) currentDisplay().navNext();
@@ -266,6 +275,25 @@ const navigation = (() => {
 		return almanac.getSun();
 	};
 
+	// resize the container on a page resize
+	const resize = () => {
+		const widthZoomPercent = window.innerWidth / 640;
+		const heightZoomPercent = window.innerHeight / 480;
+
+		const scale = Math.min(widthZoomPercent, heightZoomPercent);
+
+		if (scale < 1.0 || document.fullscreenElement) {
+			document.getElementById('container').style.zoom = scale;
+		} else {
+			document.getElementById('container').style.zoom = 1;
+		}
+	};
+
+	// reset all statuses to loading on all displays, used to keep the progress bar accurate during refresh
+	const resetStatuses = () => {
+		displays.forEach((display) => { display.status = STATUS.loading; });
+	};
+
 	return {
 		init,
 		message,
@@ -277,5 +305,7 @@ const navigation = (() => {
 		getDisplay,
 		getCurrentWeather,
 		getSun,
+		resize,
+		resetStatuses,
 	};
 })();

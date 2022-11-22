@@ -1,0 +1,85 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#almanac-html.weather-display {
+	background-image: url('../images/BackGround3_1.png');
+}
+
+.weather-display .main.almanac {
+	font-family: 'Star4000';
+	font-size: 24pt;
+	@include u.text-shadow();
+
+	.sun {
+		display: table;
+		margin-left: 50px;
+		height: 100px;
+
+
+		&>div {
+			display: table-row;
+			position: relative;
+
+			&>div {
+				display: table-cell;
+			}
+		}
+
+		.days {
+			color: c.$column-header-text;
+			text-align: right;
+			top: -5px;
+
+			.day {
+				padding-right: 10px;
+			}
+
+		}
+
+		.times {
+			text-align: right;
+
+			.sun-time {
+				width: 200px;
+			}
+
+			&.times-1 {
+				top: -10px;
+			}
+
+			&.times-2 {
+				top: -15px;
+			}
+		}
+	}
+
+	.moon {
+		position: relative;
+		top: -10px;
+
+		padding: 0px 60px;
+
+		.title {
+			color: c.$column-header-text;
+		}
+
+		.day {
+			display: inline-block;
+			text-align: center;
+			width: 130px;
+
+			.icon {
+				// shadow in image make it look off center
+				padding-left: 10px;
+			}
+
+			.date {
+				position: relative;
+				top: -10px;
+			}
+		}
+	}
+
+
+
+}

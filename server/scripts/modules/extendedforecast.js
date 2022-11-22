@@ -1,18 +1,15 @@
 // display extended forecast graphically
 // technically uses the same data as the local forecast, we'll let the browser do the caching of that
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, draw, icons, navigation, luxon */
+/* globals WeatherDisplay, utils, STATUS, UNITS, icons, navigation, luxon */
 
 // eslint-disable-next-line no-unused-vars
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Extended Forecast');
+		super(navId, elemId, 'Extended Forecast', true);
 
 		// set timings
 		this.timing.totalScreens = 2;
-
-		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround2_1.png');
 	}
 
 	async getData(_weatherParameters) {
@@ -85,14 +82,18 @@ class ExtendedForecast extends WeatherDisplay {
 	}
 
 	static shortenExtendedForecastText(long) {
-		let short = long;
-		short = short.replace(/ and /g, ' ');
-		short = short.replace(/Slight /g, '');
-		short = short.replace(/Chance /g, '');
-		short = short.replace(/Very /g, '');
-		short = short.replace(/Patchy /g, '');
-		short = short.replace(/Areas /g, '');
-		short = short.replace(/Dense /g, '');
+		const regexList = [
+			[/ and /ig, ' '],
+			[/Slight /ig, ''],
+			[/Chance /ig, ''],
+			[/Very /ig, ''],
+			[/Patchy /ig, ''],
+			[/Areas /ig, ''],
+			[/Dense /ig, ''],
+			[/Thunderstorm/g, 'T\'Storm'],
+		];
+		// run all regexes
+		const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
 
 		let conditions = short.split(' ');
 		if (short.indexOf('then') !== -1) {
@@ -113,12 +114,12 @@ class ExtendedForecast extends WeatherDisplay {
 				short2 = '';
 			}
 		}
-		short = short1;
+		let result = short1;
 		if (short2 !== '') {
-			short += ` ${short2}`;
+			result += ` ${short2}`;
 		}
 
-		return [short, short1, short2];
+		return result;
 	}
 
 	async drawCanvas() {
@@ -128,45 +129,32 @@ class ExtendedForecast extends WeatherDisplay {
 		// grab the first three or second set of three array elements
 		const forecast = this.data.slice(0 + 3 * this.screenIndex, 3 + this.screenIndex * 3);
 
-		const backgroundImage = await this.backgroundImage;
+		// create each day template
+		const days = forecast.map((Day) => {
+			const fill = {};
+			fill.date = Day.dayName;
 
-		this.context.drawImage(backgroundImage, 0, 0);
-		draw.horizontalGradientSingle(this.context, 0, 30, 500, 90, draw.topColor1, draw.topColor2);
-		draw.triangle(this.context, 'rgb(28, 10, 87)', 500, 30, 450, 90, 500, 90);
-		draw.horizontalGradientSingle(this.context, 0, 90, 640, 399, draw.sideColor1, draw.sideColor2);
-		this.context.drawImage(backgroundImage, 38, 100, 174, 297, 38, 100, 174, 297);
-		this.context.drawImage(backgroundImage, 232, 100, 174, 297, 232, 100, 174, 297);
-		this.context.drawImage(backgroundImage, 426, 100, 174, 297, 426, 100, 174, 297);
-
-		draw.titleText(this.context, 'Extended', 'Forecast');
-
-		await Promise.all(forecast.map(async (Day, Index) => {
-			const offset = Index * 195;
-			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 100 + offset, 135, Day.dayName.toUpperCase(), 2);
-			draw.text(this.context, 'Star4000', '24pt', '#8080FF', 85 + offset, 345, 'Lo', 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFF00', 165 + offset, 345, 'Hi', 2, 'center');
 			let { low } = Day;
 			if (low !== undefined) {
 				if (navigation.units() === UNITS.metric) low = utils.units.fahrenheitToCelsius(low);
-				draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 85 + offset, 385, low, 2, 'center');
+				fill['value-lo'] = Math.round(low);
 			}
 			let { high } = Day;
 			if (navigation.units() === UNITS.metric) high = utils.units.fahrenheitToCelsius(high);
-			draw.text(this.context, 'Star4000 Large', '24pt', '#FFFFFF', 165 + offset, 385, high, 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + offset, 270, Day.text[1], 2, 'center');
-			draw.text(this.context, 'Star4000', '24pt', '#FFFFFF', 120 + offset, 310, Day.text[2], 2, 'center');
+			fill['value-hi'] = Math.round(high);
+			fill.condition = Day.text;
 
 			// draw the icon
-			this.gifs.push(await utils.image.superGifAsync({
-				src: Day.icon,
-				auto_play: true,
-				canvas: this.canvas,
-				x: 70 + Index * 195,
-				y: 150,
-				max_height: 75,
-			}));
-		}));
+			fill.icon = { type: 'img', src: Day.icon };
 
+			// return the filled template
+			return this.fillTemplate('day', fill);
+		});
+
+		// empty and update the container
+		const dayContainer = this.elem.querySelector('.day-container');
+		dayContainer.innerHTML = '';
+		dayContainer.append(...days);
 		this.finishDraw();
 	}
 }

@@ -1,4 +1,4 @@
-/* globals draw, navigation */
+/* globals navigation, utils */
 
 // eslint-disable-next-line no-unused-vars
 const currentWeatherScroll = (() => {
@@ -6,25 +6,13 @@ const currentWeatherScroll = (() => {
 	const degree = String.fromCharCode(176);
 
 	// local variables
-	let context;	// currently active context
-	let blankDrawArea;	// original state of context
 	let interval;
 	let screenIndex = 0;
 
 	// start drawing conditions
 	// reset starts from the first item in the text scroll list
-	const start = (_context) => {
-		// see if there is a context available
-		if (!_context) return;
+	const start = () => {
 		// store see if the context is new
-		if (_context !== context) {
-			// clean the outgoing context
-			cleanLastContext();
-			// store the new blank context
-			blankDrawArea = _context.getImageData(0, 405, 640, 75);
-		}
-		// store the context locally
-		context = _context;
 
 		// set up the interval if needed
 		if (!interval) {
@@ -36,15 +24,8 @@ const currentWeatherScroll = (() => {
 	};
 
 	const stop = (reset) => {
-		cleanLastContext();
 		if (interval) interval = clearInterval(interval);
 		if (reset) screenIndex = 0;
-	};
-
-	const cleanLastContext = () => {
-		if (blankDrawArea) context.putImageData(blankDrawArea, 0, 405);
-		blankDrawArea = undefined;
-		context = undefined;
 	};
 
 	// increment interval, roll over
@@ -61,16 +42,13 @@ const currentWeatherScroll = (() => {
 		// nothing to do if there's no data yet
 		if (!data) return;
 
-		// clean up any old text
-		context.putImageData(blankDrawArea, 0, 405);
-
 		drawCondition(screens[screenIndex](data));
 	};
 
 	// the "screens" are stored in an array for easy addition and removal
 	const screens = [
 		// station name
-		(data) => `Conditions at ${data.station.properties.name.substr(0, 20)}`,
+		(data) => `Conditions at ${utils.string.locationCleanup(data.station.properties.name).substr(0, 20)}`,
 
 		// temperature
 		(data) => {
@@ -109,7 +87,10 @@ const currentWeatherScroll = (() => {
 
 	// internal draw function with preset parameters
 	const drawCondition = (text) => {
-		draw.text(context, 'Star4000', '24pt', '#ffffff', 70, 430, text, 2);
+		// update all html scroll elements
+		utils.elem.forEach('.weather-display .scroll .fixed', (elem) => {
+			elem.innerHTML = text;
+		});
 	};
 
 	// return the api
