@@ -1,6 +1,5 @@
 // radar utilities
 
-/* globals SuperGif */
 // eslint-disable-next-line no-unused-vars
 const utils = (() => {
 	// ****************************** weather data ********************************
@@ -30,12 +29,6 @@ const utils = (() => {
 		}
 	});
 
-	// async version of SuperGif
-	const superGifAsync = (e) => new Promise((resolve) => {
-		const gif = new SuperGif(e);
-		gif.load(() => resolve(gif));
-	});
-
 	// preload an image
 	// the goal is to get it in the browser's cache so it is available more quickly when the browser needs it
 	// a list of cached icons is used to avoid hitting the cache multiple times
@@ -45,22 +38,6 @@ const utils = (() => {
 		blob(src);
 		// cachedImages.push(src);
 		return true;
-	};
-
-	// draw an image on a local canvas and return the context
-	const drawLocalCanvas = (img) => {
-		// create a canvas
-		const canvas = document.createElement('canvas');
-		canvas.width = img.width;
-		canvas.height = img.height;
-
-		// get the context
-		const context = canvas.getContext('2d');
-		context.imageSmoothingEnabled = false;
-
-		// draw the image
-		context.drawImage(img, 0, 0);
-		return context;
 	};
 
 	// *********************************** unit conversions ***********************
@@ -218,9 +195,7 @@ const utils = (() => {
 		},
 		image: {
 			load: loadImg,
-			superGifAsync,
 			preload,
-			drawLocalCanvas,
 		},
 		weather: {
 			getPoint,

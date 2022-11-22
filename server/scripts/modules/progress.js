@@ -5,7 +5,7 @@
 // eslint-disable-next-line no-unused-vars
 class Progress extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, '', false, true);
+		super(navId, elemId, '', false);
 
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
@@ -97,12 +97,7 @@ class Progress extends WeatherDisplay {
 		const display = navigation.getDisplay(index);
 		if (display && display.status === STATUS.loaded) {
 			display.showCanvas(navigation.msg.command.firstFrame);
-			if (this.canvas) {
-				this.canvas.style.display = 'none';
-			}
-			if (this.isHtml) {
-				this.elem.classList.remove('show');
-			}
+			this.elem.classList.remove('show');
 		}
 	}
 }

@@ -5,7 +5,7 @@
 // eslint-disable-next-line no-unused-vars
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Almanac', true, true);
+		super(navId, elemId, 'Almanac', true);
 
 		// pre-load background images (returns promises)
 		this.backgroundImage0 = utils.image.load('images/BackGround3_1.png');

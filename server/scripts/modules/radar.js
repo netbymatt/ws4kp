@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Radar', true, true);
+		super(navId, elemId, 'Local Radar', true);
 
 		// set max images
 		this.dopplerRadarImageMax = 6;

@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-unused-vars
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Current Conditions', true, true);
+		super(navId, elemId, 'Current Conditions', true);
 		// pre-load background image (returns promise)
 		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
 	}
@@ -133,36 +133,6 @@ class CurrentWeather extends WeatherDisplay {
 		fill.ceiling = (data.Ceiling === 0 ? 'Unlimited' : data.Ceiling + data.CeilingUnit);
 		fill.visibility = data.Visibility + data.VisibilityUnit;
 		fill.pressure = `${data.Pressure} ${data.PressureDirection}`;
-
-		// switch (data.PressureDirection) {
-		// case 'R':
-		// // Shadow
-		// 	draw.triangle(this.context, '#000000', 552, 302, 542, 312, 562, 312);
-		// 	draw.box(this.context, '#000000', 549, 312, 6, 15);
-
-		// 	// Border
-		// 	draw.triangle(this.context, '#000000', 550, 300, 540, 310, 560, 310);
-		// 	draw.box(this.context, '#000000', 547, 310, 6, 15);
-
-		// 	// Fill
-		// 	draw.triangle(this.context, '#FFFF00', 550, 301, 541, 309, 559, 309);
-		// 	draw.box(this.context, '#FFFF00', 548, 309, 4, 15);
-		// 	break;
-		// case 'F':
-		// // Shadow
-		// 	draw.triangle(this.context, '#000000', 552, 327, 542, 317, 562, 317);
-		// 	draw.box(this.context, '#000000', 549, 302, 6, 15);
-
-		// 	// Border
-		// 	draw.triangle(this.context, '#000000', 550, 325, 540, 315, 560, 315);
-		// 	draw.box(this.context, '#000000', 547, 300, 6, 15);
-
-		// 	// Fill
-		// 	draw.triangle(this.context, '#FFFF00', 550, 324, 541, 314, 559, 314);
-		// 	draw.box(this.context, '#FFFF00', 548, 301, 4, 15);
-		// 	break;
-		// default:
-		// }
 
 		if (data.observations.heatIndex.value && data.HeatIndex !== data.Temperature) {
 			fill['heat-index-label'] = 'Heat Index:';

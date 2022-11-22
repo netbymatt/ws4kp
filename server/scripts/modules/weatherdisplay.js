@@ -12,7 +12,7 @@ const STATUS = {
 
 // eslint-disable-next-line no-unused-vars
 class WeatherDisplay {
-	constructor(navId, elemId, name, defaultEnabled, isHtml) {
+	constructor(navId, elemId, name, defaultEnabled) {
 		// navId is used in messaging
 		this.navId = navId;
 		this.elemId = undefined;
@@ -21,7 +21,6 @@ class WeatherDisplay {
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
 		this.getDataCallbacks = [];
-		this.isHtml = isHtml;
 
 		// default navigation timing
 		this.timing = {
@@ -32,8 +31,8 @@ class WeatherDisplay {
 		this.navBaseCount = 0;
 		this.screenIndex = -1;	// special starting condition
 
-		// create the canvas, also stores this.elemId
-		this.createCanvas(elemId);
+		// store elemId once
+		this.storeElemId(elemId);
 
 		if (elemId !== 'progress') this.addCheckbox(defaultEnabled);
 		if (this.enabled) {
@@ -96,21 +95,10 @@ class WeatherDisplay {
 		this.loadingStatus = state;
 	}
 
-	createCanvas(elemId, width = 640, height = 480) {
+	storeElemId(elemId) {
 		// only create it once
 		if (this.elemId) return;
 		this.elemId = elemId;
-
-		// no additional work if this is HTML
-		if (this.isHtml) return;
-
-		// create a canvas
-		const canvas = document.createElement('template');
-		canvas.innerHTML = `<canvas id='${`${elemId}Canvas`}' width='${width}' height='${height}' style='display: none;' />`;
-
-		// add to the page
-		const container = document.getElementById('container');
-		container.appendChild(canvas.content.firstChild);
 	}
 
 	// get necessary data for this display
@@ -143,47 +131,27 @@ class WeatherDisplay {
 	}
 
 	drawCanvas() {
-		if (!this.isHtml) {
-		// stop all gifs
-			this.gifs.forEach((gif) => gif.pause());
-			// delete the gifs
-			this.gifs.length = 0;
-			// refresh the canvas
-			this.canvas = document.getElementById(`${this.elemId}Canvas`);
-			this.context = this.canvas.getContext('2d');
-		}
-
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
 	}
 
 	finishDraw() {
 		let OkToDrawCurrentConditions = true;
-		let OkToDrawNoaaImage = true;
 		let OkToDrawCurrentDateTime = true;
-		let OkToDrawLogoImage = true;
 		// let OkToDrawCustomScrollText = false;
 		let bottom;
 
 		// visibility tests
 		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
-		if (this.elemId === 'almanac') OkToDrawNoaaImage = false;
-		if (this.elemId === 'travelForecast') OkToDrawNoaaImage = false;
-		if (this.elemId === 'regionalForecast') OkToDrawNoaaImage = false;
 		if (this.elemId === 'progress') {
 			OkToDrawCurrentConditions = false;
-			OkToDrawNoaaImage = false;
 		}
 		if (this.elemId === 'radar') {
 			OkToDrawCurrentConditions = false;
 			OkToDrawCurrentDateTime = false;
-			OkToDrawNoaaImage = false;
-			// OkToDrawCustomScrollText = false;
 		}
 		if (this.elemId === 'hazards') {
-			OkToDrawNoaaImage = false;
 			bottom = true;
-			OkToDrawLogoImage = false;
 		}
 		// draw functions
 		if (OkToDrawCurrentDateTime) {
@@ -193,8 +161,6 @@ class WeatherDisplay {
 				setInterval(() => this.drawCurrentDateTime(bottom), 100);
 			}
 		}
-		if (OkToDrawLogoImage) this.drawLogoImage();
-		if (OkToDrawNoaaImage) this.drawNoaaImage();
 		if (OkToDrawCurrentConditions) {
 			currentWeatherScroll.start();
 		} else {
@@ -228,28 +194,6 @@ class WeatherDisplay {
 		this.lastDate = date;
 	}
 
-	async drawNoaaImage() {
-		if (this.isHtml) return;
-		// load the image and store locally
-		if (!this.drawNoaaImage.image) {
-			this.drawNoaaImage.image = utils.image.load('images/noaa5.gif');
-		}
-		// wait for the image to load completely
-		const img = await this.drawNoaaImage.image;
-		this.context.drawImage(img, 356, 39);
-	}
-
-	async drawLogoImage() {
-		if (this.isHtml) return;
-		// load the image and store locally
-		if (!this.drawLogoImage.image) {
-			this.drawLogoImage.image = utils.image.load('images/Logo3.png');
-		}
-		// wait for the image load completely
-		const img = await this.drawLogoImage.image;
-		this.context.drawImage(img, 50, 30, 85, 67);
-	}
-
 	// show/hide the canvas and start/stop the navigation timer
 	showCanvas(navCmd) {
 		// reset timing if enabled
@@ -259,30 +203,15 @@ class WeatherDisplay {
 
 		this.startNavCount();
 
-		if (!this.isHtml) {
-		// see if the canvas is already showing
-			if (this.canvas.style.display === 'block') return;
-
-			// show the canvas
-			this.canvas.style.display = 'block';
-		} else {
-			this.elem.classList.add('show');
-		}
+		this.elem.classList.add('show');
 	}
 
 	hideCanvas() {
 		this.resetNavBaseCount();
-
-		if (this.canvas) {
-			this.canvas.style.display = 'none';
-		}
-		if (this.isHtml) {
-			this.elem.classList.remove('show');
-		}
+		this.elem.classList.remove('show');
 	}
 
 	isActive() {
-		if (!this.isHtml)	return document.getElementById(`${this.elemId}Canvas`).offsetParent !== null;
 		return this.elem.offsetHeight !== 0;
 	}
 

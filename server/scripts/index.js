@@ -4,9 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const index = (() => {
-	const overrides = {
-		// '32899, Orlando, Florida, USA': { x: -80.6774, y: 28.6143 },
-	};
+	const overrides = {};
 	const AutoRefreshIntervalMs = 500;
 	const AutoRefreshTotalIntervalMs = 600000; // 10 min.
 

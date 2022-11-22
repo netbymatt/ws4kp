@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-unused-vars
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Latest Observations', true, true);
+		super(navId, elemId, 'Latest Observations', true);
 
 		// constants
 		this.MaximumRegionalStations = 7;

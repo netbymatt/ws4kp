@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build:css": "sass ./server/styles/scss/style.scss ./server/styles/compiled.css"
+		"build:css": "sass ./server/styles/scss/style.scss ./server/styles/compiled.css",
+		"lint": "eslint ./server/scripts/**",
+		"lint:fix": "eslint --fix ./server/scripts/**"
 	},
 	"repository": {
 		"type": "git",

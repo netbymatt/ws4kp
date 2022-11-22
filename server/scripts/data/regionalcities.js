@@ -581,4 +581,3 @@ const RegionalCities = [
 		lon: -110.9698,
 	},
 ];
-

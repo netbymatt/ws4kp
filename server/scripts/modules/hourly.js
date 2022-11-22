@@ -5,7 +5,7 @@
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Hourly Forecast', defaultActive, true);
+		super(navId, elemId, 'Hourly Forecast', defaultActive);
 
 		// set up the timing
 		this.timing.baseDelay = 20;

@@ -5,7 +5,7 @@
 // eslint-disable-next-line no-unused-vars
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Forecast', true, true);
+		super(navId, elemId, 'Local Forecast', true);
 
 		// set timings
 		this.timing.baseDelay = 5000;

@@ -6,7 +6,7 @@
 // eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Regional Forecast', true, true);
+		super(navId, elemId, 'Regional Forecast', true);
 
 		// timings
 		this.timing.totalScreens = 3;
@@ -102,7 +102,7 @@ class RegionalForecast extends WeatherDisplay {
 					RegionalForecast.buildForecast(forecast.properties.periods[2], city, cityXY),
 				];
 			} catch (e) {
-				console.log(`No regional forecast data for '${city.name}'`);
+				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
 				console.log(e);
 				return false;
 			}
@@ -149,11 +149,12 @@ class RegionalForecast extends WeatherDisplay {
 			// get the observation data
 			const observation = await utils.fetch.json(`${station}/observations/latest`);
 			// preload the image
+			if (!observation.properties.icon) return false;
 			utils.image.preload(icons.getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
 			// return the observation
 			return observation.properties;
 		} catch (e) {
-			console.log(`Unable to get regional observations for ${city.Name}`);
+			console.log(`Unable to get regional observations for ${city.Name ?? city.city}`);
 			console.error(e.status, e.responseJSON);
 			return false;
 		}

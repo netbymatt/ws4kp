@@ -5,7 +5,7 @@
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Travel Forecast', defaultActive, true);
+		super(navId, elemId, 'Travel Forecast', defaultActive);
 
 		// set up the timing
 		this.timing.baseDelay = 20;
