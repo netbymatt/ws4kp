@@ -1,7 +1,14 @@
 // hourly forecast list
-/* globals WeatherDisplay, utils, STATUS, UNITS, navigation, icons, luxon */
+/* globals WeatherDisplay, navigation */
 
-// eslint-disable-next-line no-unused-vars
+import STATUS from './status.mjs';
+import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
+import { json } from './utils/fetch.mjs';
+import { UNITS } from './config.mjs';
+import * as units from './utils/units.mjs';
+import { getHourlyIcon } from './icons.mjs';
+import { directionToNSEW } from './utils/calc.mjs';
+
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
@@ -25,7 +32,7 @@ class Hourly extends WeatherDisplay {
 		let forecast;
 		try {
 			// get the forecast
-			forecast = await utils.fetch.json(weatherParameters.forecastGridData);
+			forecast = await json(weatherParameters.forecastGridData);
 		} catch (e) {
 			console.error('Get hourly forecast failed');
 			console.error(e.status, e.responseJSON);
@@ -59,16 +66,16 @@ class Hourly extends WeatherDisplay {
 					temperature: temperature[idx],
 					apparentTemperature: apparentTemperature[idx],
 					windSpeed: windSpeed[idx],
-					windDirection: utils.calc.directionToNSEW(windDirection[idx]),
+					windDirection: directionToNSEW(windDirection[idx]),
 					icon: icons[idx],
 				};
 			}
 
 			return {
-				temperature: utils.units.celsiusToFahrenheit(temperature[idx]),
-				apparentTemperature: utils.units.celsiusToFahrenheit(apparentTemperature[idx]),
-				windSpeed: utils.units.kilometersToMiles(windSpeed[idx]),
-				windDirection: utils.calc.directionToNSEW(windDirection[idx]),
+				temperature: units.celsiusToFahrenheit(temperature[idx]),
+				apparentTemperature: units.celsiusToFahrenheit(apparentTemperature[idx]),
+				windSpeed: units.kilometersToMiles(windSpeed[idx]),
+				windDirection: directionToNSEW(windDirection[idx]),
 				icon: icons[idx],
 			};
 		});
@@ -76,24 +83,24 @@ class Hourly extends WeatherDisplay {
 
 	// given forecast paramaters determine a suitable icon
 	static async determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) {
-		const startOfHour = luxon.DateTime.local().startOf('hour');
+		const startOfHour = DateTime.local().startOf('hour');
 		const sunTimes = (await navigation.getSun()).sun;
-		const overnight = luxon.Interval.fromDateTimes(luxon.DateTime.fromJSDate(sunTimes[0].sunset), luxon.DateTime.fromJSDate(sunTimes[1].sunrise));
-		const tomorrowOvernight = luxon.DateTime.fromJSDate(sunTimes[1].sunset);
+		const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
+		const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
 		return skyCover.map((val, idx) => {
 			const hour = startOfHour.plus({ hours: idx });
 			const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-			return icons.getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
+			return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
 		});
 	}
 
 	// expand a set of values with durations to an hour-by-hour array
 	static expand(data) {
-		const startOfHour = luxon.DateTime.utc().startOf('hour').toMillis();
+		const startOfHour = DateTime.utc().startOf('hour').toMillis();
 		const result = []; // resulting expanded values
 		data.forEach((item) => {
 			let startTime = Date.parse(item.validTime.substr(0, item.validTime.indexOf('/')));
-			const duration = luxon.Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
+			const duration = Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
 			const endTime = startTime + duration;
 			// loop through duration at one hour intervals
 			do {
@@ -114,7 +121,7 @@ class Hourly extends WeatherDisplay {
 		const list = this.elem.querySelector('.hourly-lines');
 		list.innerHTML = '';
 
-		const startingHour = luxon.DateTime.local();
+		const startingHour = DateTime.local();
 
 		const lines = this.data.map((data, index) => {
 			const fillValues = {};
@@ -177,7 +184,6 @@ class Hourly extends WeatherDisplay {
 	}
 
 	static getTravelCitiesDayName(cities) {
-		const { DateTime } = luxon;
 		// effectively returns early on the first found date
 		return cities.reduce((dayName, city) => {
 			if (city && dayName === '') {
@@ -190,3 +196,7 @@ class Hourly extends WeatherDisplay {
 		}, '');
 	}
 }
+
+export default Hourly;
+
+window.Hourly = Hourly;

@@ -1,7 +1,12 @@
 // travel forecast display
-/* globals WeatherDisplay, utils, STATUS, UNITS, navigation, icons, luxon, TravelCities */
+/* globals WeatherDisplay, navigation, TravelCities */
+import STATUS from './status.mjs';
+import { UNITS } from './config.mjs';
+import { json } from './utils/fetch.mjs';
+import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
+import { fahrenheitToCelsius } from './utils/units.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
@@ -30,7 +35,7 @@ class TravelForecast extends WeatherDisplay {
 			try {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');
-				const forecast = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
+				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
 				// return a pared-down forecast
@@ -39,7 +44,7 @@ class TravelForecast extends WeatherDisplay {
 					high: forecast.properties.periods[todayShift].temperature,
 					low: forecast.properties.periods[todayShift + 1].temperature,
 					name: city.Name,
-					icon: icons.getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
+					icon: getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
 				};
 			} catch (e) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
@@ -85,8 +90,8 @@ class TravelForecast extends WeatherDisplay {
 				let { low, high } = city;
 
 				if (navigation.units() === UNITS.metric) {
-					low = utils.units.fahrenheitToCelsius(low);
-					high = utils.units.fahrenheitToCelsius(high);
+					low = fahrenheitToCelsius(low);
+					high = fahrenheitToCelsius(high);
 				}
 
 				// convert to strings with no decimal
@@ -142,7 +147,6 @@ class TravelForecast extends WeatherDisplay {
 	}
 
 	static getTravelCitiesDayName(cities) {
-		const { DateTime } = luxon;
 		// effectively returns early on the first found date
 		return cities.reduce((dayName, city) => {
 			if (city && dayName === '') {
@@ -160,3 +164,5 @@ class TravelForecast extends WeatherDisplay {
 		return this.longCanvas;
 	}
 }
+
+window.TravelForecast = TravelForecast;

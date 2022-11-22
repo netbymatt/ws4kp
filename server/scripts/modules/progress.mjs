@@ -1,14 +1,14 @@
 // regional forecast and observations
+/* globals WeatherDisplay, navigation */
+import { loadImg } from './utils/image.mjs';
+import STATUS from './status.mjs';
 
-/* globals WeatherDisplay, utils, STATUS, navigation */
-
-// eslint-disable-next-line no-unused-vars
 class Progress extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, '', false);
 
 		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
+		this.backgroundImage = loadImg('images/BackGround1_1.png');
 
 		// disable any navigation timing
 		this.timing = false;
@@ -101,3 +101,5 @@ class Progress extends WeatherDisplay {
 		}
 	}
 }
+
+window.Progress = Progress;

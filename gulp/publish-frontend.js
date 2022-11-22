@@ -35,7 +35,6 @@ const jsSources = [
 	'server/scripts/index.js',
 	'server/scripts/vendor/auto/luxon.js',
 	'server/scripts/vendor/auto/suncalc.js',
-	'server/scripts/modules/draw.js',
 	'server/scripts/modules/weatherdisplay.js',
 	'server/scripts/modules/icons.js',
 	'server/scripts/modules/utilities.js',

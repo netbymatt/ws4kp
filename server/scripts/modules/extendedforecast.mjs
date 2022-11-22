@@ -1,9 +1,16 @@
 // display extended forecast graphically
 // technically uses the same data as the local forecast, we'll let the browser do the caching of that
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, icons, navigation, luxon */
+import STATUS from './status.mjs';
+import { UNITS } from './config.mjs';
+import { json } from './utils/fetch.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
+import { fahrenheitToCelsius } from './utils/units.mjs';
+import { getWeatherIconFromIconLink } from './icons.mjs';
+import { preloadImg } from './utils/image.mjs';
 
-// eslint-disable-next-line no-unused-vars
+/* globals WeatherDisplay, navigation */
+
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Extended Forecast', true);
@@ -21,7 +28,7 @@ class ExtendedForecast extends WeatherDisplay {
 		if (navigation.units() === UNITS.metric) units = 'si';
 		let forecast;
 		try {
-			forecast = await utils.fetch.json(weatherParameters.forecast, {
+			forecast = await json(weatherParameters.forecast, {
 				data: {
 					units,
 				},
@@ -44,7 +51,7 @@ class ExtendedForecast extends WeatherDisplay {
 		const Days = [0, 1, 2, 3, 4, 5, 6];
 
 		const dates = Days.map((shift) => {
-			const date = luxon.DateTime.local().startOf('day').plus({ days: shift });
+			const date = DateTime.local().startOf('day').plus({ days: shift });
 			return date.toLocaleString({ weekday: 'short' });
 		});
 
@@ -61,12 +68,12 @@ class ExtendedForecast extends WeatherDisplay {
 			// get the object to modify/populate
 			const fDay = forecast[destIndex];
 			// high temperature will always be last in the source array so it will overwrite the low values assigned below
-			fDay.icon = icons.getWeatherIconFromIconLink(period.icon);
+			fDay.icon = getWeatherIconFromIconLink(period.icon);
 			fDay.text = ExtendedForecast.shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = dates[destIndex];
 
 			// preload the icon
-			utils.image.preload(fDay.icon);
+			preloadImg(fDay.icon);
 
 			if (period.isDaytime) {
 			// day time is the high temperature
@@ -136,11 +143,11 @@ class ExtendedForecast extends WeatherDisplay {
 
 			let { low } = Day;
 			if (low !== undefined) {
-				if (navigation.units() === UNITS.metric) low = utils.units.fahrenheitToCelsius(low);
+				if (navigation.units() === UNITS.metric) low = fahrenheitToCelsius(low);
 				fill['value-lo'] = Math.round(low);
 			}
 			let { high } = Day;
-			if (navigation.units() === UNITS.metric) high = utils.units.fahrenheitToCelsius(high);
+			if (navigation.units() === UNITS.metric) high = fahrenheitToCelsius(high);
 			fill['value-hi'] = Math.round(high);
 			fill.condition = Day.text;
 
@@ -158,3 +165,7 @@ class ExtendedForecast extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+export default ExtendedForecast;
+
+window.ExtendedForecast = ExtendedForecast;

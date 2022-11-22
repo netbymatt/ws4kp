@@ -1,7 +1,11 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, luxon */
+/* globals WeatherDisplay */
+import STATUS from './status.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
+import { loadImg } from './utils/image.mjs';
+import { text } from './utils/fetch.mjs';
+import { rewriteUrl } from './utils/cors.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Radar', true);
@@ -43,13 +47,10 @@ class Radar extends WeatherDisplay {
 			return;
 		}
 
-		// date and time parsing
-		const { DateTime } = luxon;
-
 		// get the base map
 		let src = 'images/4000RadarMap2.jpg';
 		if (weatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';
-		this.baseMap = await utils.image.load(src);
+		this.baseMap = await loadImg(src);
 
 		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
 		const baseUrlEnd = '/GIS/uscomp/';
@@ -65,7 +66,7 @@ class Radar extends WeatherDisplay {
 		const lists = (await Promise.all(baseUrls.map(async (url) => {
 			try {
 			// get a list of available radars
-				const radarHtml = await utils.fetch.text(url, { cors: true });
+				const radarHtml = await text(url, { cors: true });
 				return radarHtml;
 			} catch (e) {
 				console.log('Unable to get list of radars');
@@ -130,7 +131,7 @@ class Radar extends WeatherDisplay {
 			context.imageSmoothingEnabled = false;
 
 			// get the image
-			const response = await fetch(utils.cors.rewriteUrl(url));
+			const response = await fetch(rewriteUrl(url));
 
 			// test response
 			if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
@@ -157,7 +158,7 @@ class Radar extends WeatherDisplay {
 			}
 
 			// assign to an html image element
-			const imgBlob = await utils.image.load(blob);
+			const imgBlob = await loadImg(blob);
 
 			// draw the entire image
 			workingContext.clearRect(0, 0, width, 1600);
@@ -204,7 +205,6 @@ class Radar extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
-		const { DateTime } = luxon;
 		const time = this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE);
 		const timePadded = time.length >= 8 ? time : `&nbsp;${time}`;
 		this.elem.querySelector('.header .right .time').innerHTML = timePadded;
@@ -396,3 +396,5 @@ class Radar extends WeatherDisplay {
 		mapContext.drawImage(radarContext.canvas, 0, 0);
 	}
 }
+
+window.Radar = Radar;

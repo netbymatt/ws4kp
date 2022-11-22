@@ -1,14 +1,6 @@
 // base weather display class
 
-/* globals navigation, utils, luxon, currentWeatherScroll */
-
-const STATUS = {
-	loading: Symbol('loading'),
-	loaded: Symbol('loaded'),
-	failed: Symbol('failed'),
-	noData: Symbol('noData'),
-	disabled: Symbol('disabled'),
-};
+/* globals navigation, utils, luxon, currentWeatherScroll, STATUS */
 
 // eslint-disable-next-line no-unused-vars
 class WeatherDisplay {

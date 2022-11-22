@@ -1,20 +1,22 @@
 // display sun and moon data
+import { loadImg, preloadImg } from './utils/image.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
+import STATUS from './status.mjs';
 
-/* globals WeatherDisplay, utils, STATUS, SunCalc, luxon */
+/* globals WeatherDisplay, SunCalc */
 
-// eslint-disable-next-line no-unused-vars
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Almanac', true);
 
 		// pre-load background images (returns promises)
-		this.backgroundImage0 = utils.image.load('images/BackGround3_1.png');
+		this.backgroundImage0 = loadImg('images/BackGround3_1.png');
 
 		// preload the moon images
-		utils.image.preload('images/2/Full-Moon.gif');
-		utils.image.preload('images/2/Last-Quarter.gif');
-		utils.image.preload('images/2/New-Moon.gif');
-		utils.image.preload('images/2/First-Quarter.gif');
+		preloadImg('images/2/Full-Moon.gif');
+		preloadImg('images/2/Last-Quarter.gif');
+		preloadImg('images/2/New-Moon.gif');
+		preloadImg('images/2/First-Quarter.gif');
 
 		this.timing.totalScreens = 1;
 	}
@@ -39,8 +41,6 @@ class Almanac extends WeatherDisplay {
 	}
 
 	calcSunMoonData(weatherParameters) {
-		const { DateTime } = luxon;
-
 		const sun = [
 			SunCalc.getTimes(new Date(), weatherParameters.latitude, weatherParameters.longitude),
 			SunCalc.getTimes(DateTime.local().plus({ days: 1 }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude),
@@ -115,7 +115,6 @@ class Almanac extends WeatherDisplay {
 	async drawCanvas() {
 		super.drawCanvas();
 		const info = this.data;
-		const { DateTime } = luxon;
 		const Today = DateTime.local();
 		const Tomorrow = Today.plus({ days: 1 });
 
@@ -170,3 +169,7 @@ class Almanac extends WeatherDisplay {
 		});
 	}
 }
+
+export default Almanac;
+
+window.Almanac = Almanac;

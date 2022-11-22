@@ -4,8 +4,8 @@ const UNITS = {
 };
 
 export {
+	// eslint-disable-next-line import/prefer-default-export
 	UNITS,
 };
 
 window.UNITS = UNITS;
-console.log('config');

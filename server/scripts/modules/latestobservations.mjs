@@ -1,7 +1,12 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, UNITS, navigation, StationInfo */
+/* globals WeatherDisplay, navigation, StationInfo */
+import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
+import { json } from './utils/fetch.mjs';
+import STATUS from './status.mjs';
+import { locationCleanup } from './utils/string.mjs';
+import { UNITS } from './config.mjs';
+import * as units from './utils/units.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Latest Observations', true);
@@ -17,7 +22,7 @@ class LatestObservations extends WeatherDisplay {
 		// calculate distance to each station
 		const stationsByDistance = Object.keys(StationInfo).map((key) => {
 			const station = StationInfo[key];
-			const distance = utils.calc.distance(station.lat, station.lon, weatherParameters.latitude, weatherParameters.longitude);
+			const distance = calcDistance(station.lat, station.lon, weatherParameters.latitude, weatherParameters.longitude);
 			return { ...station, distance };
 		});
 
@@ -29,7 +34,7 @@ class LatestObservations extends WeatherDisplay {
 		// get data for regional stations
 		const allConditions = await Promise.all(regionalStations.map(async (station) => {
 			try {
-				const data = await utils.fetch.json(`https://api.weather.gov/stations/${station.id}/observations/latest`);
+				const data = await json(`https://api.weather.gov/stations/${station.id}/observations/latest`);
 				// test for temperature, weather and wind values present
 				if (data.properties.temperature.value === null
 					|| data.properties.textDescription === ''
@@ -76,17 +81,17 @@ class LatestObservations extends WeatherDisplay {
 		const lines = sortedConditions.map((condition) => {
 			let Temperature = condition.temperature.value;
 			let WindSpeed = condition.windSpeed.value;
-			const windDirection = utils.calc.directionToNSEW(condition.windDirection.value);
+			const windDirection = directionToNSEW(condition.windDirection.value);
 
 			if (navigation.units() === UNITS.english) {
-				Temperature = utils.units.celsiusToFahrenheit(Temperature);
-				WindSpeed = utils.units.kphToMph(WindSpeed);
+				Temperature = units.celsiusToFahrenheit(Temperature);
+				WindSpeed = units.kphToMph(WindSpeed);
 			}
 			WindSpeed = Math.round(WindSpeed);
 			Temperature = Math.round(Temperature);
 
 			const fill = {};
-			fill.location = utils.string.locationCleanup(condition.city).substr(0, 14);
+			fill.location = locationCleanup(condition.city).substr(0, 14);
 			fill.temp = Temperature;
 			fill.weather = LatestObservations.shortenCurrentConditions(condition.textDescription).substr(0, 9);
 			if (WindSpeed > 0) {
@@ -126,3 +131,5 @@ class LatestObservations extends WeatherDisplay {
 		return condition;
 	}
 }
+
+window.LatestObservations = LatestObservations;

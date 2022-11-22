@@ -1,9 +1,16 @@
 // regional forecast and observations
 // type 0 = observations, 1 = first forecast, 2 = second forecast
 
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, navigation, luxon, StationInfo, RegionalCities */
+/* globals WeatherDisplay, navigation, StationInfo, RegionalCities */
+import STATUS from './status.mjs';
+import { UNITS } from './config.mjs';
+import { distance as calcDistance } from './utils/calc.mjs';
+import { json } from './utils/fetch.mjs';
+import * as units from './utils/units.mjs';
+import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
+import { preloadImg } from './utils/image.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Regional Forecast', true);
@@ -55,7 +62,7 @@ class RegionalForecast extends WeatherDisplay {
 				const targetDist = city.targetDistance || 1;
 				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
 				const okToAddCity = regionalCities.reduce((acc, testCity) => {
-					const distance = utils.calc.distance(city.lon, city.lat, testCity.lon, testCity.lat);
+					const distance = calcDistance(city.lon, city.lat, testCity.lon, testCity.lat);
 					return acc && distance >= targetDist;
 				}, true);
 				if (okToAddCity) regionalCities.push(city);
@@ -70,7 +77,7 @@ class RegionalForecast extends WeatherDisplay {
 				// start off the observation task
 				const observationPromise = RegionalForecast.getRegionalObservation(city.point, city);
 
-				const forecast = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
+				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
 
 				// get XY on map for city
 				const cityXY = RegionalForecast.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
@@ -80,7 +87,7 @@ class RegionalForecast extends WeatherDisplay {
 				// format the observation the same as the forecast
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),
-					temperature: utils.units.celsiusToFahrenheit(observation.temperature.value),
+					temperature: units.celsiusToFahrenheit(observation.temperature.value),
 					name: RegionalForecast.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,
@@ -88,7 +95,7 @@ class RegionalForecast extends WeatherDisplay {
 				};
 
 				// preload the icon
-				utils.image.preload(icons.getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime));
+				preloadImg(getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime));
 
 				// return a pared-down forecast
 				// 0th object is the current conditions
@@ -141,15 +148,15 @@ class RegionalForecast extends WeatherDisplay {
 	static async getRegionalObservation(point, city) {
 		try {
 			// get stations
-			const stations = await utils.fetch.json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/stations`);
+			const stations = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/stations`);
 
 			// get the first station
 			const station = stations.features[0].id;
 			// get the observation data
-			const observation = await utils.fetch.json(`${station}/observations/latest`);
+			const observation = await json(`${station}/observations/latest`);
 			// preload the image
 			if (!observation.properties.icon) return false;
-			utils.image.preload(icons.getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
+			preloadImg(getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
 			// return the observation
 			return observation.properties;
 		} catch (e) {
@@ -328,7 +335,6 @@ class RegionalForecast extends WeatherDisplay {
 		// break up data into useful values
 		const { regionalData: data, sourceXY, offsetXY } = this.data;
 
-		const { DateTime } = luxon;
 		// draw the header graphics
 
 		// draw the appropriate title
@@ -362,10 +368,10 @@ class RegionalForecast extends WeatherDisplay {
 			const fill = {};
 			const period = city[this.screenIndex];
 
-			fill.icon = { type: 'img', src: icons.getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
+			fill.icon = { type: 'img', src: getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
 			fill.city = period.name;
 			let { temperature } = period;
-			if (navigation.units() === UNITS.metric) temperature = Math.round(utils.units.fahrenheitToCelsius(temperature));
+			if (navigation.units() === UNITS.metric) temperature = Math.round(units.fahrenheitToCelsius(temperature));
 			fill.temp = temperature;
 
 			const elem = this.fillTemplate('location', fill);
@@ -382,3 +388,5 @@ class RegionalForecast extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+window.RegionalForecast = RegionalForecast;

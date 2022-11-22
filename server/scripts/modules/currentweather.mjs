@@ -1,12 +1,20 @@
 // current weather conditions display
-/* globals WeatherDisplay, utils, STATUS, icons, UNITS, navigation */
+import STATUS from './status.mjs';
+import { UNITS } from './config.mjs';
+import { loadImg, preloadImg } from './utils/image.mjs';
+import { json } from './utils/fetch.mjs';
+import { directionToNSEW } from './utils/calc.mjs';
+import * as units from './utils/units.mjs';
+import { locationCleanup } from './utils/string.mjs';
+import { getWeatherIconFromIconLink } from './icons.mjs';
 
-// eslint-disable-next-line no-unused-vars
+/* globals WeatherDisplay, navigation */
+
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
 		// pre-load background image (returns promise)
-		this.backgroundImage = utils.image.load('images/BackGround1_1.png');
+		this.backgroundImage = loadImg('images/BackGround1_1.png');
 	}
 
 	async getData(_weatherParameters) {
@@ -25,7 +33,7 @@ class CurrentWeather extends WeatherDisplay {
 			try {
 				// station observations
 				// eslint-disable-next-line no-await-in-loop
-				observations = await utils.fetch.json(`${station.id}/observations`, {
+				observations = await json(`${station.id}/observations`, {
 					cors: true,
 					data: {
 						limit: 2,
@@ -50,7 +58,7 @@ class CurrentWeather extends WeatherDisplay {
 			return;
 		}
 		// preload the icon
-		utils.image.preload(icons.getWeatherIconFromIconLink(observations.features[0].properties.icon));
+		preloadImg(getWeatherIconFromIconLink(observations.features[0].properties.icon));
 
 		// we only get here if there was no error above
 		this.data = { ...observations, station };
@@ -74,14 +82,14 @@ class CurrentWeather extends WeatherDisplay {
 		data.Visibility = Math.round(observations.visibility.value / 1000);
 		data.VisibilityUnit = ' km.';
 		data.WindSpeed = Math.round(observations.windSpeed.value);
-		data.WindDirection = utils.calc.directionToNSEW(observations.windDirection.value);
+		data.WindDirection = directionToNSEW(observations.windDirection.value);
 		data.Pressure = Math.round(observations.barometricPressure.value);
 		data.HeatIndex = Math.round(observations.heatIndex.value);
 		data.WindChill = Math.round(observations.windChill.value);
 		data.WindGust = Math.round(observations.windGust.value);
 		data.WindUnit = 'KPH';
 		data.Humidity = Math.round(observations.relativeHumidity.value);
-		data.Icon = icons.getWeatherIconFromIconLink(observations.icon);
+		data.Icon = getWeatherIconFromIconLink(observations.icon);
 		data.PressureDirection = '';
 		data.TextConditions = observations.textDescription;
 		data.station = this.data.station;
@@ -92,19 +100,19 @@ class CurrentWeather extends WeatherDisplay {
 		if (pressureDiff < -150) data.PressureDirection = 'F';
 
 		if (navigation.units() === UNITS.english) {
-			data.Temperature = utils.units.celsiusToFahrenheit(data.Temperature);
+			data.Temperature = units.celsiusToFahrenheit(data.Temperature);
 			data.TemperatureUnit = 'F';
-			data.DewPoint = utils.units.celsiusToFahrenheit(data.DewPoint);
-			data.Ceiling = Math.round(utils.units.metersToFeet(data.Ceiling) / 100) * 100;
+			data.DewPoint = units.celsiusToFahrenheit(data.DewPoint);
+			data.Ceiling = Math.round(units.metersToFeet(data.Ceiling) / 100) * 100;
 			data.CeilingUnit = 'ft.';
-			data.Visibility = utils.units.kilometersToMiles(observations.visibility.value / 1000);
+			data.Visibility = units.kilometersToMiles(observations.visibility.value / 1000);
 			data.VisibilityUnit = ' mi.';
-			data.WindSpeed = utils.units.kphToMph(data.WindSpeed);
+			data.WindSpeed = units.kphToMph(data.WindSpeed);
 			data.WindUnit = 'MPH';
-			data.Pressure = utils.units.pascalToInHg(data.Pressure).toFixed(2);
-			data.HeatIndex = utils.units.celsiusToFahrenheit(data.HeatIndex);
-			data.WindChill = utils.units.celsiusToFahrenheit(data.WindChill);
-			data.WindGust = utils.units.kphToMph(data.WindGust);
+			data.Pressure = units.pascalToInHg(data.Pressure).toFixed(2);
+			data.HeatIndex = units.celsiusToFahrenheit(data.HeatIndex);
+			data.WindChill = units.celsiusToFahrenheit(data.WindChill);
+			data.WindGust = units.kphToMph(data.WindGust);
 		}
 		return data;
 	}
@@ -126,7 +134,7 @@ class CurrentWeather extends WeatherDisplay {
 		fill.wind = data.WindDirection.padEnd(3, '') + data.WindSpeed.toString().padStart(3, ' ');
 		if (data.WindGust) fill['wind-gusts'] = `Gusts to ${data.WindGust}`;
 
-		fill.location = utils.string.locationCleanup(this.data.station.properties.name).substr(0, 20);
+		fill.location = locationCleanup(this.data.station.properties.name).substr(0, 20);
 
 		fill.humidity = `${data.Humidity}%`;
 		fill.dewpoint = data.DewPoint + String.fromCharCode(176);
@@ -181,3 +189,7 @@ class CurrentWeather extends WeatherDisplay {
 		return condition;
 	}
 }
+
+export default CurrentWeather;
+
+window.CurrentWeather = CurrentWeather;

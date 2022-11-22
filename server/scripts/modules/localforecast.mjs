@@ -1,8 +1,10 @@
 // display text based local forecast
 
-/* globals WeatherDisplay, utils, STATUS, UNITS, navigation */
+/* globals WeatherDisplay, navigation */
+import STATUS from './status.mjs';
+import { UNITS } from './config.mjs';
+import { json } from './utils/fetch.mjs';
 
-// eslint-disable-next-line no-unused-vars
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Forecast', true);
@@ -62,7 +64,7 @@ class LocalForecast extends WeatherDisplay {
 		let units = 'us';
 		if (navigation.units() === UNITS.metric) units = 'si';
 		try {
-			return await utils.fetch.json(weatherParameters.forecast, {
+			return await json(weatherParameters.forecast, {
 				data: {
 					units,
 				},
@@ -94,3 +96,5 @@ class LocalForecast extends WeatherDisplay {
 		}));
 	}
 }
+
+window.LocalForecast = LocalForecast;

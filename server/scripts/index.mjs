@@ -1,6 +1,7 @@
 import { UNITS } from './modules/config.mjs';
+import { json } from './modules/utils/fetch.mjs';
 
-/* globals NoSleep, states, navigation, utils */
+/* globals NoSleep, states, navigation */
 document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
@@ -175,7 +176,7 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 	if (overrides[suggestion.value]) {
 		doRedirectToGeometry(overrides[suggestion.value]);
 	} else {
-		const data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
+		const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 			data: {
 				text: suggestion.value,
 				magicKey: suggestion.data,
@@ -492,7 +493,7 @@ const btnGetGpsClick = async () => {
 
 	let data;
 	try {
-		data = await utils.fetch.json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
+		data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
 			data: {
 				location: `${longitude},${latitude}`,
 				distance: 1000, // Find location up to 1 KM.

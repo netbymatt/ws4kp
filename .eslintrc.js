@@ -12,7 +12,7 @@ module.exports = {
 		SharedArrayBuffer: 'readonly',
 	},
 	parserOptions: {
-		ecmaVersion: 2020,
+		ecmaVersion: 2021,
 	},
 	rules: {
 		indent: [
@@ -44,6 +44,13 @@ module.exports = {
 					['in', 'instanceof'],
 				],
 				allowSamePrecedence: true,
+			},
+		],
+		'import/extensions': [
+			'error',
+			{
+				mjs: 'always',
+				json: 'always',
 			},
 		],
 	},

@@ -9,8 +9,8 @@ const clean = (cb) => {
 };
 
 const vendorFiles = [
-	'./node_modules/luxon/build/global/luxon.js',
-	'./node_modules/luxon/build/global/luxon.js.map',
+	'./node_modules/luxon/build/es6/luxon.js',
+	'./node_modules/luxon/build/es6/luxon.js.map',
 	'./node_modules/nosleep.js/dist/NoSleep.js',
 	'./node_modules/jquery/dist/jquery.js',
 	'./node_modules/suncalc/suncalc.js',
@@ -22,6 +22,7 @@ const copy = () => gulp.src(vendorFiles)
 		path.dirname = path.dirname.toLowerCase();
 		path.basename = path.basename.toLowerCase();
 		path.extname = path.extname.toLowerCase();
+		if (path.basename === 'luxon') path.extname = '.mjs';
 	}))
 	.pipe(gulp.dest('./server/scripts/vendor/auto'));
 
