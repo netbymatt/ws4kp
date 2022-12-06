@@ -3,7 +3,7 @@
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { json } from './utils/fetch.mjs';
-import { convert, UNITS, getUnits } from './utils/units.mjs';
+import { celsiusToFahrenheit, kilometersToMiles } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -61,25 +61,13 @@ class Hourly extends WeatherDisplay {
 
 		const icons = await Hourly.determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
-		return temperature.map((val, idx) => {
-			if (getUnits() === UNITS.metric) {
-				return {
-					temperature: temperature[idx],
-					apparentTemperature: apparentTemperature[idx],
-					windSpeed: windSpeed[idx],
-					windDirection: directionToNSEW(windDirection[idx]),
-					icon: icons[idx],
-				};
-			}
-
-			return {
-				temperature: convert.celsiusToFahrenheit(temperature[idx]),
-				apparentTemperature: convert.celsiusToFahrenheit(apparentTemperature[idx]),
-				windSpeed: convert.kilometersToMiles(windSpeed[idx]),
-				windDirection: directionToNSEW(windDirection[idx]),
-				icon: icons[idx],
-			};
-		});
+		return temperature.map((val, idx) => ({
+			temperature: celsiusToFahrenheit(temperature[idx]),
+			apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
+			windSpeed: kilometersToMiles(windSpeed[idx]),
+			windDirection: directionToNSEW(windDirection[idx]),
+			icon: icons[idx],
+		}));
 	}
 
 	// given forecast paramaters determine a suitable icon

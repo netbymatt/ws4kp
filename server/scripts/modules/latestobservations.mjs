@@ -3,7 +3,7 @@ import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
 import { locationCleanup } from './utils/string.mjs';
-import { convert, UNITS, getUnits } from './utils/units.mjs';
+import { celsiusToFahrenheit, kphToMph } from './utils/units.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 
@@ -70,25 +70,14 @@ class LatestObservations extends WeatherDisplay {
 		// sort array by station name
 		const sortedConditions = conditions.sort((a, b) => ((a.Name < b.Name) ? -1 : 1));
 
-		if (getUnits() === UNITS.english) {
-			this.elem.querySelector('.column-headers .temp.english').classList.add('show');
-			this.elem.querySelector('.column-headers .temp.metric').classList.remove('show');
-		} else {
-			this.elem.querySelector('.column-headers .temp.english').classList.remove('show');
-			this.elem.querySelector('.column-headers .temp.metric').classList.add('show');
-		}
+		this.elem.querySelector('.column-headers .temp.english').classList.add('show');
+		this.elem.querySelector('.column-headers .temp.metric').classList.remove('show');
 
 		const lines = sortedConditions.map((condition) => {
-			let Temperature = condition.temperature.value;
-			let WindSpeed = condition.windSpeed.value;
 			const windDirection = directionToNSEW(condition.windDirection.value);
 
-			if (getUnits() === UNITS.english) {
-				Temperature = convert.celsiusToFahrenheit(Temperature);
-				WindSpeed = convert.kphToMph(WindSpeed);
-			}
-			WindSpeed = Math.round(WindSpeed);
-			Temperature = Math.round(Temperature);
+			const	Temperature = Math.round(celsiusToFahrenheit(condition.temperature.value));
+			const WindSpeed = Math.round(kphToMph(condition.windSpeed.value));
 
 			const fill = {};
 			fill.location = locationCleanup(condition.city).substr(0, 14);

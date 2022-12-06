@@ -1,4 +1,3 @@
-import { setUnits } from './modules/utils/units.mjs';
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
@@ -114,7 +113,6 @@ const init = () => {
 		localStorage.removeItem('TwcAutoRefresh');
 
 		document.getElementById('radEnglish').checked = true;
-		localStorage.removeItem('TwcUnits');
 
 		localStorage.removeItem('TwcPlay');
 		postMessage('navButton', 'play');
@@ -122,27 +120,9 @@ const init = () => {
 		localStorage.removeItem('TwcQuery');
 	});
 
-	const TwcUnits = localStorage.getItem('TwcUnits');
-	if (!TwcUnits || TwcUnits === 'ENGLISH') {
-		document.getElementById('radEnglish').checked = true;
-		setUnits('english');
-	} else if (TwcUnits === 'METRIC') {
-		document.getElementById('radMetric').checked = true;
-		setUnits('metric');
-	}
-
-	document.getElementById('radEnglish').addEventListener('change', changeUnits);
-	document.getElementById('radMetric').addEventListener('change', changeUnits);
-
 	// swipe functionality
 	document.getElementById('container').addEventListener('swiped-left', () => swipeCallBack('left'));
 	document.getElementById('container').addEventListener('swiped-right', () => swipeCallBack('right'));
-};
-
-const changeUnits = (e) => {
-	const Units = e.target.value;
-	localStorage.setItem('TwcUnits', Units);
-	postMessage('units', Units);
 };
 
 const autocompleteOnSelect = async (suggestion, elem) => {

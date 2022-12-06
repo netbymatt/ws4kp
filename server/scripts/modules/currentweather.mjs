@@ -7,7 +7,9 @@ import { locationCleanup } from './utils/string.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import { getUnits, UNITS, convert } from './utils/units.mjs';
+import {
+	celsiusToFahrenheit, kphToMph, pascalToInHg, metersToFeet, kilometersToMiles,
+} from './utils/units.mjs';
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -98,21 +100,19 @@ class CurrentWeather extends WeatherDisplay {
 		if (pressureDiff > 150) data.PressureDirection = 'R';
 		if (pressureDiff < -150) data.PressureDirection = 'F';
 
-		if (getUnits() === UNITS.english) {
-			data.Temperature = convert.celsiusToFahrenheit(data.Temperature);
-			data.TemperatureUnit = 'F';
-			data.DewPoint = convert.celsiusToFahrenheit(data.DewPoint);
-			data.Ceiling = Math.round(convert.metersToFeet(data.Ceiling) / 100) * 100;
-			data.CeilingUnit = 'ft.';
-			data.Visibility = convert.kilometersToMiles(observations.visibility.value / 1000);
-			data.VisibilityUnit = ' mi.';
-			data.WindSpeed = convert.kphToMph(data.WindSpeed);
-			data.WindUnit = 'MPH';
-			data.Pressure = convert.pascalToInHg(data.Pressure).toFixed(2);
-			data.HeatIndex = convert.celsiusToFahrenheit(data.HeatIndex);
-			data.WindChill = convert.celsiusToFahrenheit(data.WindChill);
-			data.WindGust = convert.kphToMph(data.WindGust);
-		}
+		data.Temperature = celsiusToFahrenheit(data.Temperature);
+		data.TemperatureUnit = 'F';
+		data.DewPoint = celsiusToFahrenheit(data.DewPoint);
+		data.Ceiling = Math.round(metersToFeet(data.Ceiling) / 100) * 100;
+		data.CeilingUnit = 'ft.';
+		data.Visibility = kilometersToMiles(observations.visibility.value / 1000);
+		data.VisibilityUnit = ' mi.';
+		data.WindSpeed = kphToMph(data.WindSpeed);
+		data.WindUnit = 'MPH';
+		data.Pressure = pascalToInHg(data.Pressure).toFixed(2);
+		data.HeatIndex = celsiusToFahrenheit(data.HeatIndex);
+		data.WindChill = celsiusToFahrenheit(data.WindChill);
+		data.WindGust = kphToMph(data.WindGust);
 		return data;
 	}
 

@@ -4,7 +4,6 @@
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { UNITS, getUnits, convert } from './utils/units.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -23,13 +22,11 @@ class ExtendedForecast extends WeatherDisplay {
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// request us or si units
-		let units = 'us';
-		if (getUnits() === UNITS.metric) units = 'si';
 		let forecast;
 		try {
 			forecast = await json(weatherParameters.forecast, {
 				data: {
-					units,
+					units: 'us',
 				},
 			});
 		} catch (e) {
@@ -140,13 +137,11 @@ class ExtendedForecast extends WeatherDisplay {
 			const fill = {};
 			fill.date = Day.dayName;
 
-			let { low } = Day;
+			const { low } = Day;
 			if (low !== undefined) {
-				if (getUnits() === UNITS.metric) low = convert.fahrenheitToCelsius(low);
 				fill['value-lo'] = Math.round(low);
 			}
-			let { high } = Day;
-			if (getUnits() === UNITS.metric) high = convert.fahrenheitToCelsius(high);
+			const { high } = Day;
 			fill['value-hi'] = Math.round(high);
 			fill.condition = Day.text;
 

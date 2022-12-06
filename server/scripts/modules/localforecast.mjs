@@ -1,7 +1,6 @@
 // display text based local forecast
 
 import STATUS from './status.mjs';
-import { UNITS, getUnits } from './utils/units.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -32,10 +31,7 @@ class LocalForecast extends WeatherDisplay {
 		this.screenTexts = conditions.map((condition) => {
 			// process the text
 			let text = `${condition.DayName.toUpperCase()}...`;
-			let conditionText = condition.Text;
-			if (getUnits() === UNITS.metric) {
-				conditionText = condition.TextC;
-			}
+			const conditionText = condition.Text;
 			text += conditionText.toUpperCase().replace('...', ' ');
 
 			return text;
@@ -62,12 +58,10 @@ class LocalForecast extends WeatherDisplay {
 	// get the unformatted data (also used by extended forecast)
 	async getRawData(weatherParameters) {
 		// request us or si units
-		let units = 'us';
-		if (getUnits() === UNITS.metric) units = 'si';
 		try {
 			return await json(weatherParameters.forecast, {
 				data: {
-					units,
+					units: 'us',
 				},
 			});
 		} catch (e) {

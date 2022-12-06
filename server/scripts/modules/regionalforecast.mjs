@@ -4,7 +4,7 @@
 import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
-import { convert, UNITS, getUnits } from './utils/units.mjs';
+import { celsiusToFahrenheit } from './utils/units.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
@@ -87,7 +87,7 @@ class RegionalForecast extends WeatherDisplay {
 				// format the observation the same as the forecast
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),
-					temperature: convert.celsiusToFahrenheit(observation.temperature.value),
+					temperature: celsiusToFahrenheit(observation.temperature.value),
 					name: RegionalForecast.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,
@@ -370,8 +370,7 @@ class RegionalForecast extends WeatherDisplay {
 
 			fill.icon = { type: 'img', src: getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
 			fill.city = period.name;
-			let { temperature } = period;
-			if (getUnits() === UNITS.metric) temperature = Math.round(convert.fahrenheitToCelsius(temperature));
+			const { temperature } = period;
 			fill.temp = temperature;
 
 			const elem = this.fillTemplate('location', fill);

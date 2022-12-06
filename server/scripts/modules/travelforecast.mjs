@@ -2,7 +2,6 @@
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
-import { convert, UNITS, getUnits } from './utils/units.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -87,12 +86,7 @@ class TravelForecast extends WeatherDisplay {
 			if (city.icon) {
 				fillValues.city = city.name;
 				// get temperatures and convert if necessary
-				let { low, high } = city;
-
-				if (getUnits() === UNITS.metric) {
-					low = convert.fahrenheitToCelsius(low);
-					high = convert.fahrenheitToCelsius(high);
-				}
+				const { low, high } = city;
 
 				// convert to strings with no decimal
 				const lowString = Math.round(low).toString();
