@@ -38,7 +38,6 @@ The change to 5.0 changes from drawing the weather graphics on canvas elements a
 * Refresh only on slideshow repeat
 * Removed Almanac 30-day outlook
 * Fixed startup issue when current conditions are unavailable
-* 
 
 ## Why the fork?
 
@@ -63,7 +62,7 @@ The fork is a result of wanting a more manageable, modern code base to work with
 I've made several changes to this Weather Star 4000 simulation compared to the original hardware unit and the code that this was forked from.
 
 * Narration was removed. In the original code narration made use of the computer's local text-to-speech engine which didn't sound great.
-* Music was removed. I don't want to deal with copyright issues and hosting MP3s. If you're looking for the music that played during forecasts please visit [TWCClassics](https://twcclassics.com/audio/).
+* Music was removed. I don't want to deal with copyright issues and hosting MP3s. If you're looking for the music that played during forecasts please visit [TWCClassics Audio](https://twcclassics.com/audio/).
 * Marine forecast (tides) is not available as it is not part of the new API.
 * The nearby cities displayed on screens such as "Latest Observations" and "Regional Forecast" are likely not the same as they were in the 90's. The weather monitoring equipment at these stations move over time for one reason or another, and coming up with a simple formulaic way of finding nearby stations is sufficient to give the same look-and-feel as the original.
 * The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
@@ -80,6 +79,11 @@ As time allows I will be working on the following enhancements.
 And the following technical fixes.
 
 * Caching of the animated gifs, specifically after they are decompressed
+
+# Donation
+If you find this repo or https://weatherstar.netbymatt.com useful I would appreciate a little support to help pay for the cost of hosting the site.
+
+<a href="https://www.buymeacoffee.com/temp.exp" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me An Umbrella" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
 ## Issue reporting and feature requests
 
