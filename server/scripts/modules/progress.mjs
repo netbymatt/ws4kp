@@ -1,8 +1,10 @@
 // regional forecast and observations
-/* globals navigation */
 import { loadImg } from './utils/image.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
+import {
+	registerProgress, message, getDisplay, msg,
+} from './navigation.mjs';
 
 class Progress extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -18,6 +20,8 @@ class Progress extends WeatherDisplay {
 
 		// setup event listener
 		this.elem.querySelector('.container').addEventListener('click', this.lineClick.bind(this));
+
+		this.okToDrawCurrentConditions = false;
 	}
 
 	async drawCanvas(displays, loadedCount) {
@@ -93,16 +97,16 @@ class Progress extends WeatherDisplay {
 		const index = +indexRaw;
 
 		// stop playing
-		navigation.message('navButton');
+		message('navButton');
 		// use the y value to determine an index
-		const display = navigation.getDisplay(index);
+		const display = getDisplay(index);
 		if (display && display.status === STATUS.loaded) {
-			display.showCanvas(navigation.msg.command.firstFrame);
+			display.showCanvas(msg.command.firstFrame);
 			this.elem.classList.remove('show');
 		}
 	}
 }
 
-export default Progress;
-
-window.Progress = Progress;
+// register our own display
+const progress = new Progress(-1, 'progress');
+registerProgress(progress);

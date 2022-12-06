@@ -1,14 +1,14 @@
 // hourly forecast list
-/* globals navigation */
 
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { json } from './utils/fetch.mjs';
-import { UNITS } from './config.mjs';
-import * as units from './utils/units.mjs';
+import { convert, UNITS, getUnits } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
+import { registerDisplay } from './navigation.mjs';
+import getSun from './almanac.mjs';
 
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -62,7 +62,7 @@ class Hourly extends WeatherDisplay {
 		const icons = await Hourly.determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
 		return temperature.map((val, idx) => {
-			if (navigation.units === UNITS.metric) {
+			if (getUnits() === UNITS.metric) {
 				return {
 					temperature: temperature[idx],
 					apparentTemperature: apparentTemperature[idx],
@@ -73,9 +73,9 @@ class Hourly extends WeatherDisplay {
 			}
 
 			return {
-				temperature: units.celsiusToFahrenheit(temperature[idx]),
-				apparentTemperature: units.celsiusToFahrenheit(apparentTemperature[idx]),
-				windSpeed: units.kilometersToMiles(windSpeed[idx]),
+				temperature: convert.celsiusToFahrenheit(temperature[idx]),
+				apparentTemperature: convert.celsiusToFahrenheit(apparentTemperature[idx]),
+				windSpeed: convert.kilometersToMiles(windSpeed[idx]),
 				windDirection: directionToNSEW(windDirection[idx]),
 				icon: icons[idx],
 			};
@@ -85,7 +85,7 @@ class Hourly extends WeatherDisplay {
 	// given forecast paramaters determine a suitable icon
 	static async determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) {
 		const startOfHour = DateTime.local().startOf('hour');
-		const sunTimes = (await navigation.getSun()).sun;
+		const sunTimes = (await getSun()).sun;
 		const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
 		const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
 		return skyCover.map((val, idx) => {
@@ -198,4 +198,5 @@ class Hourly extends WeatherDisplay {
 	}
 }
 
-export default Hourly;
+// register display
+registerDisplay(new Hourly(2, 'hourly'));

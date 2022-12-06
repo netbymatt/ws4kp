@@ -1,6 +1,7 @@
-/* globals navigation  */
 import { locationCleanup } from './utils/string.mjs';
 import { elemForEach } from './utils/elem.mjs';
+import getCurrentWeather from './currentweather.mjs';
+import { currentDisplay } from './navigation.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
@@ -24,12 +25,17 @@ const start = () => {
 };
 
 const stop = (reset) => {
-	if (interval) interval = clearInterval(interval);
 	if (reset) screenIndex = 0;
 };
 
 // increment interval, roll over
 const incrementInterval = () => {
+	// test current screen
+	const display = currentDisplay();
+	if (!display?.okToDrawCurrentConditions) {
+		stop(display?.elemId === 'progress');
+		return;
+	}
 	screenIndex = (screenIndex + 1) % (screens.length);
 	// draw new text
 	drawScreen();
@@ -37,7 +43,7 @@ const incrementInterval = () => {
 
 const drawScreen = async () => {
 	// get the conditions
-	const data = await navigation.getCurrentWeather();
+	const data = await getCurrentWeather();
 
 	// nothing to do if there's no data yet
 	if (!data) return;
@@ -93,8 +99,4 @@ const drawCondition = (text) => {
 	});
 };
 
-// return the api
-export {
-	start,
-	stop,
-};
+start();

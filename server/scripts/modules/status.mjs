@@ -7,4 +7,3 @@ const STATUS = {
 };
 
 export default STATUS;
-window.STATUS = STATUS;

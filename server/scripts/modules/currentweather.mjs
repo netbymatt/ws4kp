@@ -1,15 +1,13 @@
 // current weather conditions display
 import STATUS from './status.mjs';
-import { UNITS } from './config.mjs';
 import { loadImg, preloadImg } from './utils/image.mjs';
 import { json } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
-import * as units from './utils/units.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-
-/* globals navigation */
+import { registerDisplay } from './navigation.mjs';
+import { getUnits, UNITS, convert } from './utils/units.mjs';
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -100,20 +98,20 @@ class CurrentWeather extends WeatherDisplay {
 		if (pressureDiff > 150) data.PressureDirection = 'R';
 		if (pressureDiff < -150) data.PressureDirection = 'F';
 
-		if (navigation.units() === UNITS.english) {
-			data.Temperature = units.celsiusToFahrenheit(data.Temperature);
+		if (getUnits() === UNITS.english) {
+			data.Temperature = convert.celsiusToFahrenheit(data.Temperature);
 			data.TemperatureUnit = 'F';
-			data.DewPoint = units.celsiusToFahrenheit(data.DewPoint);
-			data.Ceiling = Math.round(units.metersToFeet(data.Ceiling) / 100) * 100;
+			data.DewPoint = convert.celsiusToFahrenheit(data.DewPoint);
+			data.Ceiling = Math.round(convert.metersToFeet(data.Ceiling) / 100) * 100;
 			data.CeilingUnit = 'ft.';
-			data.Visibility = units.kilometersToMiles(observations.visibility.value / 1000);
+			data.Visibility = convert.kilometersToMiles(observations.visibility.value / 1000);
 			data.VisibilityUnit = ' mi.';
-			data.WindSpeed = units.kphToMph(data.WindSpeed);
+			data.WindSpeed = convert.kphToMph(data.WindSpeed);
 			data.WindUnit = 'MPH';
-			data.Pressure = units.pascalToInHg(data.Pressure).toFixed(2);
-			data.HeatIndex = units.celsiusToFahrenheit(data.HeatIndex);
-			data.WindChill = units.celsiusToFahrenheit(data.WindChill);
-			data.WindGust = units.kphToMph(data.WindGust);
+			data.Pressure = convert.pascalToInHg(data.Pressure).toFixed(2);
+			data.HeatIndex = convert.celsiusToFahrenheit(data.HeatIndex);
+			data.WindChill = convert.celsiusToFahrenheit(data.WindChill);
+			data.WindGust = convert.kphToMph(data.WindGust);
 		}
 		return data;
 	}
@@ -191,4 +189,7 @@ class CurrentWeather extends WeatherDisplay {
 	}
 }
 
-export default CurrentWeather;
+const display = new CurrentWeather(0, 'current-weather');
+registerDisplay(display);
+
+export default display.getCurrentWeather.bind(display);

@@ -1,14 +1,15 @@
 // base weather display class
 
-/* globals navigation */
 import STATUS from './status.mjs';
-import * as currentWeatherScroll from './currentweatherscroll.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { elemForEach } from './utils/elem.mjs';
+import {
+	msg, displayNavMessage, isPlaying, updateStatus,
+} from './navigation.mjs';
 
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
-		// navId is used in messaging
+		// navId is used in messaging and sort order
 		this.navId = navId;
 		this.elemId = undefined;
 		this.gifs = [];
@@ -16,6 +17,9 @@ class WeatherDisplay {
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
 		this.getDataCallbacks = [];
+		this.defaultEnabled = defaultEnabled;
+		this.okToDrawCurrentConditions = true;
+		this.okToDrawCurrentDateTime = true;
 
 		// default navigation timing
 		this.timing = {
@@ -29,7 +33,6 @@ class WeatherDisplay {
 		// store elemId once
 		this.storeElemId(elemId);
 
-		if (elemId !== 'progress') this.addCheckbox(defaultEnabled);
 		if (this.enabled) {
 			this.setStatus(STATUS.loading);
 		} else {
@@ -41,7 +44,10 @@ class WeatherDisplay {
 		this.loadTemplates();
 	}
 
-	addCheckbox(defaultEnabled = true) {
+	generateCheckbox(defaultEnabled = true) {
+		// no checkbox if progress
+		if (this.elemId === 'progress') return false;
+
 		// get the saved status of the checkbox
 		let savedStatus = window.localStorage.getItem(`${this.elemId}Enabled`);
 		if (savedStatus === null) savedStatus = defaultEnabled;
@@ -60,8 +66,8 @@ class WeatherDisplay {
 							<input type="checkbox" value="true" id="${this.elemId}Enabled" name="${this.elemId}Enabled"${this.enabled ? ' checked' : ''}/>
 						  ${this.name}</label>`;
 		checkbox.content.firstChild.addEventListener('change', (e) => this.checkboxChange(e));
-		const availableDisplays = document.getElementById('enabledDisplays');
-		availableDisplays.appendChild(checkbox.content.firstChild);
+
+		return checkbox.content.firstChild;
 	}
 
 	checkboxChange(e) {
@@ -76,7 +82,7 @@ class WeatherDisplay {
 	// set data status and send update to navigation module
 	setStatus(value) {
 		this.status = value;
-		navigation.updateStatus({
+		updateStatus({
 			id: this.navId,
 			status: this.status,
 		});
@@ -131,39 +137,14 @@ class WeatherDisplay {
 	}
 
 	finishDraw() {
-		let OkToDrawCurrentConditions = true;
-		let OkToDrawCurrentDateTime = true;
-		// let OkToDrawCustomScrollText = false;
-		let bottom;
-
-		// visibility tests
-		// if (_ScrollText !== '') OkToDrawCustomScrollText = true;
-		if (this.elemId === 'progress') {
-			OkToDrawCurrentConditions = false;
-		}
-		if (this.elemId === 'radar') {
-			OkToDrawCurrentConditions = false;
-			OkToDrawCurrentDateTime = false;
-		}
-		if (this.elemId === 'hazards') {
-			bottom = true;
-		}
-		// draw functions
-		if (OkToDrawCurrentDateTime) {
-			this.drawCurrentDateTime(bottom);
+		// draw date and time
+		if (this.okToDrawCurrentDateTime) {
+			this.drawCurrentDateTime();
 			// auto clock refresh
 			if (!this.dateTimeInterval) {
-				setInterval(() => this.drawCurrentDateTime(bottom), 100);
+				setInterval(() => this.drawCurrentDateTime(), 100);
 			}
 		}
-		if (OkToDrawCurrentConditions) {
-			currentWeatherScroll.start();
-		} else {
-			// cause a reset if the progress screen is displayed
-			currentWeatherScroll.stop(this.elemId === 'progress');
-		}
-		// TODO: add custom scroll text
-		// if (OkToDrawCustomScrollText) DrawCustomScrollText(WeatherParameters, context);
 	}
 
 	drawCurrentDateTime() {
@@ -192,8 +173,8 @@ class WeatherDisplay {
 	showCanvas(navCmd) {
 		// reset timing if enabled
 		// if a nav command is present call it to set the screen index
-		if (navCmd === navigation.msg.command.firstFrame) this.navNext(navCmd);
-		if (navCmd === navigation.msg.command.lastFrame) this.navPrev(navCmd);
+		if (navCmd === msg.command.firstFrame) this.navNext(navCmd);
+		if (navCmd === msg.command.lastFrame) this.navPrev(navCmd);
 
 		this.startNavCount();
 
@@ -223,7 +204,7 @@ class WeatherDisplay {
 	//	if the array forms are used totalScreens is overwritten by the size of the array
 	navBaseTime() {
 		// see if play is active and screen is active
-		if (!navigation.isPlaying() || !this.isActive()) return;
+		if (!isPlaying() || !this.isActive()) return;
 		// increment the base count
 		this.navBaseCount += 1;
 
@@ -241,7 +222,7 @@ class WeatherDisplay {
 		// special cases for first and last frame
 		// must compare with false as nextScreenIndex could be 0 which is valid
 		if (nextScreenIndex === false) {
-			this.sendNavDisplayMessage(navigation.msg.response.next);
+			this.sendNavDisplayMessage(msg.response.next);
 			return;
 		}
 
@@ -306,7 +287,7 @@ class WeatherDisplay {
 	// navigate to next screen
 	navNext(command) {
 		// check for special 'first frame' command
-		if (command === navigation.msg.command.firstFrame) {
+		if (command === msg.command.firstFrame) {
 			this.resetNavBaseCount();
 		} else {
 			// set the base count to the next available frame
@@ -319,7 +300,7 @@ class WeatherDisplay {
 	// navigate to previous screen
 	navPrev(command) {
 		// check for special 'last frame' command
-		if (command === navigation.msg.command.lastFrame) {
+		if (command === msg.command.lastFrame) {
 			this.navBaseCount = this.timing.fullDelay[this.timing.totalScreens - 1] - 1;
 		} else {
 			// find the highest fullDelay that is less than the current base count
@@ -329,7 +310,7 @@ class WeatherDisplay {
 			}, 0);
 			// if the new base count is zero then we're already at the first screen
 			if (newBaseCount === 0 && this.navBaseCount === 0) {
-				this.sendNavDisplayMessage(navigation.msg.response.previous);
+				this.sendNavDisplayMessage(msg.response.previous);
 				return;
 			}
 			this.navBaseCount = newBaseCount;
@@ -364,7 +345,7 @@ class WeatherDisplay {
 	}
 
 	sendNavDisplayMessage(message) {
-		navigation.displayNavMessage({
+		displayNavMessage({
 			id: this.navId,
 			type: message,
 		});

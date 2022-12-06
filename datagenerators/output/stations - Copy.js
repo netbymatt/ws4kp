@@ -6796,13 +6796,6 @@ const StationInfo = {
 		lat: 39.4429,
 		lon: -87.32207,
 	},
-	KEYE: {
-		id: 'KEYE',
-		city: 'Indianapolis, Eagle Creek Airpark',
-		state: 'IN',
-		lat: 39.825,
-		lon: -86.29583,
-	},
 	KGSH: {
 		id: 'KGSH',
 		city: 'Goshen, Goshen Municipal Airport',

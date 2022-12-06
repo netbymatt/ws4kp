@@ -1,12 +1,11 @@
 // travel forecast display
-/* globals navigation, TravelCities */
 import STATUS from './status.mjs';
-import { UNITS } from './config.mjs';
 import { json } from './utils/fetch.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
-import { fahrenheitToCelsius } from './utils/units.mjs';
+import { convert, UNITS, getUnits } from './utils/units.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
+import { registerDisplay } from './navigation.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -90,9 +89,9 @@ class TravelForecast extends WeatherDisplay {
 				// get temperatures and convert if necessary
 				let { low, high } = city;
 
-				if (navigation.units() === UNITS.metric) {
-					low = fahrenheitToCelsius(low);
-					high = fahrenheitToCelsius(high);
+				if (getUnits() === UNITS.metric) {
+					low = convert.fahrenheitToCelsius(low);
+					high = convert.fahrenheitToCelsius(high);
 				}
 
 				// convert to strings with no decimal
@@ -166,4 +165,5 @@ class TravelForecast extends WeatherDisplay {
 	}
 }
 
-export default TravelForecast;
+// register display, not active by default
+registerDisplay(new TravelForecast(3, 'travel', false));

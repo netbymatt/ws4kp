@@ -5,10 +5,14 @@ import { loadImg } from './utils/image.mjs';
 import { text } from './utils/fetch.mjs';
 import { rewriteUrl } from './utils/cors.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
+import { registerDisplay } from './navigation.mjs';
 
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Radar', true);
+
+		this.okToDrawCurrentConditions = false;
+		this.okToDrawCurrentDateTime = false;
 
 		// set max images
 		this.dopplerRadarImageMax = 6;
@@ -397,4 +401,5 @@ class Radar extends WeatherDisplay {
 	}
 }
 
-export default Radar;
+// register display
+registerDisplay(new Radar(8, 'radar'));

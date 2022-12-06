@@ -10,6 +10,13 @@ module.exports = {
 	globals: {
 		Atomics: 'readonly',
 		SharedArrayBuffer: 'readonly',
+		StationInfo: 'readonly',
+		RegionalCities: 'readonly',
+		TravelCities: 'readonly',
+		NoSleep: 'readonly',
+		states: 'readonly',
+		SunCalc: 'readonly',
+
 	},
 	parserOptions: {
 		ecmaVersion: 2021,

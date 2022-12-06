@@ -2,15 +2,13 @@
 // technically uses the same data as the local forecast, we'll let the browser do the caching of that
 
 import STATUS from './status.mjs';
-import { UNITS } from './config.mjs';
 import { json } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { fahrenheitToCelsius } from './utils/units.mjs';
+import { UNITS, getUnits, convert } from './utils/units.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-
-/* globals navigation */
+import { registerDisplay } from './navigation.mjs';
 
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -26,7 +24,7 @@ class ExtendedForecast extends WeatherDisplay {
 
 		// request us or si units
 		let units = 'us';
-		if (navigation.units() === UNITS.metric) units = 'si';
+		if (getUnits() === UNITS.metric) units = 'si';
 		let forecast;
 		try {
 			forecast = await json(weatherParameters.forecast, {
@@ -144,11 +142,11 @@ class ExtendedForecast extends WeatherDisplay {
 
 			let { low } = Day;
 			if (low !== undefined) {
-				if (navigation.units() === UNITS.metric) low = fahrenheitToCelsius(low);
+				if (getUnits() === UNITS.metric) low = convert.fahrenheitToCelsius(low);
 				fill['value-lo'] = Math.round(low);
 			}
 			let { high } = Day;
-			if (navigation.units() === UNITS.metric) high = fahrenheitToCelsius(high);
+			if (getUnits() === UNITS.metric) high = convert.fahrenheitToCelsius(high);
 			fill['value-hi'] = Math.round(high);
 			fill.condition = Day.text;
 
@@ -167,4 +165,5 @@ class ExtendedForecast extends WeatherDisplay {
 	}
 }
 
-export default ExtendedForecast;
+// register display
+registerDisplay(new ExtendedForecast(6, 'extended-forecast'));

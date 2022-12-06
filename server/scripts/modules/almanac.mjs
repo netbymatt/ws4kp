@@ -3,8 +3,7 @@ import { loadImg, preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-
-/* globals SunCalc */
+import { registerDisplay } from './navigation.mjs';
 
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -171,4 +170,8 @@ class Almanac extends WeatherDisplay {
 	}
 }
 
-export default Almanac;
+// register display
+const display = new Almanac(7, 'almanac');
+registerDisplay(display);
+
+export default display.getSun.bind(display);

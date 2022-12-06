@@ -1,21 +1,17 @@
-import { UNITS } from './modules/config.mjs';
+import { setUnits } from './modules/utils/units.mjs';
 import { json } from './modules/utils/fetch.mjs';
+import noSleep from './modules/utils/nosleep.mjs';
+import {
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
+} from './modules/navigation.mjs';
 
-/* globals NoSleep, states, navigation */
 document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
 
 const overrides = {};
-const AutoRefreshIntervalMs = 500;
-const AutoRefreshTotalIntervalMs = 600000; // 10 min.
 
 let AutoSelectQuery = false;
-
-let LastUpdate = null;
-let AutoRefreshIntervalId = null;
-let AutoRefreshCountMs = 0;
-
 let FullScreenOverride = false;
 
 const categories = [
@@ -34,6 +30,8 @@ const init = () => {
 	document.getElementById('txtAddress').addEventListener('focus', (e) => {
 		e.target.select();
 	});
+
+	registerRefreshData(LoadTwcData);
 
 	document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenuClick);
 	document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
@@ -127,35 +125,14 @@ const init = () => {
 	const TwcUnits = localStorage.getItem('TwcUnits');
 	if (!TwcUnits || TwcUnits === 'ENGLISH') {
 		document.getElementById('radEnglish').checked = true;
-		navigation.message({ type: 'units', message: 'english' });
+		setUnits('english');
 	} else if (TwcUnits === 'METRIC') {
 		document.getElementById('radMetric').checked = true;
-		navigation.message({ type: 'units', message: 'metric' });
+		setUnits('metric');
 	}
 
 	document.getElementById('radEnglish').addEventListener('change', changeUnits);
 	document.getElementById('radMetric').addEventListener('change', changeUnits);
-
-	document.getElementById('chkAutoRefresh').addEventListener('change', (e) => {
-		const Checked = e.target.checked;
-
-		if (LastUpdate) {
-			if (Checked) {
-				StartAutoRefreshTimer();
-			} else {
-				StopAutoRefreshTimer();
-			}
-		}
-
-		localStorage.setItem('TwcAutoRefresh', Checked);
-	});
-
-	const TwcAutoRefresh = localStorage.getItem('TwcAutoRefresh');
-	if (!TwcAutoRefresh || TwcAutoRefresh === 'true') {
-		document.getElementById('chkAutoRefresh').checked = true;
-	} else {
-		document.getElementById('chkAutoRefresh').checked = false;
-	}
 
 	// swipe functionality
 	document.getElementById('container').addEventListener('swiped-left', () => swipeCallBack('left'));
@@ -165,7 +142,6 @@ const init = () => {
 const changeUnits = (e) => {
 	const Units = e.target.value;
 	localStorage.setItem('TwcUnits', Units);
-	AssignLastUpdate();
 	postMessage('units', Units);
 };
 
@@ -207,7 +183,7 @@ const btnFullScreenClick = () => {
 		ExitFullscreen();
 	}
 
-	if (navigation.isPlaying()) {
+	if (isPlaying()) {
 		noSleep(true);
 	} else {
 		noSleep(false);
@@ -233,7 +209,7 @@ const EnterFullScreen = () => {
 		window.scrollTo(0, 0);
 		FullScreenOverride = true;
 	}
-	navigation.resize();
+	resize();
 	UpdateFullScreenNavigate();
 
 	// change hover text
@@ -257,7 +233,7 @@ const ExitFullscreen = () => {
 	} else if (document.msExitFullscreen) {
 		document.msExitFullscreen();
 	}
-	navigation.resize();
+	resize();
 	// change hover text
 	document.getElementById('ToggleFullScreen').title = 'Enter fullscreen';
 };
@@ -277,11 +253,8 @@ const LoadTwcData = (_latLon) => {
 	if (!latLon) return;
 
 	document.getElementById('txtAddress').blur();
-	StopAutoRefreshTimer();
-	LastUpdate = null;
-	AssignLastUpdate();
-
-	postMessage('latLon', latLon);
+	stopAutoRefreshTimer();
+	latLonReceived(latLon);
 };
 
 const swipeCallBack = (direction) => {
@@ -297,29 +270,8 @@ const swipeCallBack = (direction) => {
 	}
 };
 
-const AssignLastUpdate = () => {
-	if (LastUpdate) {
-		switch (navigation.units()) {
-		case UNITS.english:
-			LastUpdate = LastUpdate.toLocaleString('en-US', {
-				weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
-			});
-			break;
-		default:
-			LastUpdate = LastUpdate.toLocaleString('en-GB', {
-				weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
-			});
-			break;
-		}
-	}
-
-	document.getElementById('spanLastRefresh').innerHTML = LastUpdate;
-
-	if (LastUpdate && document.getElementById('chkAutoRefresh').checked) StartAutoRefreshTimer();
-};
-
 const btnNavigateRefreshClick = () => {
-	navigation.resetStatuses();
+	resetStatuses();
 	LoadTwcData();
 	UpdateFullScreenNavigate();
 
@@ -410,77 +362,9 @@ const btnNavigatePlayClick = () => {
 	return false;
 };
 
-// read and dispatch an event from the iframe
-const message = (data) => {
-	const playButton = document.getElementById('NavigatePlay');
-	// dispatch event
-	if (!data.type) return;
-	switch (data.type) {
-	case 'loaded':
-		LastUpdate = new Date();
-		AssignLastUpdate();
-		break;
-
-	case 'weatherParameters':
-		populateWeatherParameters(data.message);
-		break;
-
-	case 'isPlaying':
-		localStorage.setItem('TwcPlay', navigation.isPlaying());
-
-		if (navigation.isPlaying()) {
-			noSleep(true);
-			playButton.title = 'Pause';
-			playButton.src = 'images/nav/ic_pause_white_24dp_1x.png';
-		} else {
-			noSleep(false);
-			playButton.title = 'Play';
-			playButton.src = 'images/nav/ic_play_arrow_white_24dp_1x.png';
-		}
-		break;
-
-	default:
-		console.error(`Unknown event '${data.eventType}`);
-	}
-};
-
 // post a message to the iframe
 const postMessage = (type, myMessage = {}) => {
-	navigation.message({ type, message: myMessage });
-};
-
-const StartAutoRefreshTimer = () => {
-	// Ensure that any previous timer has already stopped.
-	// check if timer is running
-	if (AutoRefreshIntervalId) return;
-
-	// Reset the time elapsed.
-	AutoRefreshCountMs = 0;
-
-	const AutoRefreshTimer = () => {
-		// Increment the total time elapsed.
-		AutoRefreshCountMs += AutoRefreshIntervalMs;
-
-		// Display the count down.
-		let RemainingMs = (AutoRefreshTotalIntervalMs - AutoRefreshCountMs);
-		if (RemainingMs < 0) {
-			RemainingMs = 0;
-		}
-		const dt = new Date(RemainingMs);
-		document.getElementById('spanRefreshCountDown').innerHTML = `${dt.getMinutes() < 10 ? `0${dt.getMinutes()}` : dt.getMinutes()}:${dt.getSeconds() < 10 ? `0${dt.getSeconds()}` : dt.getSeconds()}`;
-
-		// Time has elapsed.
-		if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs && !navigation.isPlaying()) LoadTwcData();
-	};
-	AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, AutoRefreshIntervalMs);
-	AutoRefreshTimer();
-};
-const StopAutoRefreshTimer = () => {
-	if (AutoRefreshIntervalId) {
-		window.clearInterval(AutoRefreshIntervalId);
-		document.getElementById('spanRefreshCountDown').innerHTML = '--:--';
-		AutoRefreshIntervalId = null;
-	}
+	navMessage({ type, message: myMessage });
 };
 
 const btnGetGpsClick = async () => {
@@ -517,48 +401,4 @@ const btnGetGpsClick = async () => {
 
 	// Save the query
 	localStorage.setItem('TwcQuery', TwcQuery);
-};
-
-const populateWeatherParameters = (weatherParameters) => {
-	document.getElementById('spanCity').innerHTML = `${weatherParameters.city}, `;
-	document.getElementById('spanState').innerHTML = weatherParameters.state;
-	document.getElementById('spanStationId').innerHTML = weatherParameters.stationId;
-	document.getElementById('spanRadarId').innerHTML = weatherParameters.radarId;
-	document.getElementById('spanZoneId').innerHTML = weatherParameters.zoneId;
-};
-
-// track state of nosleep locally to avoid a null case error
-// when nosleep.disable is called without first calling .enable
-let wakeLock = false;
-const noSleep = (enable = false) => {
-	// get a nosleep controller
-	if (!noSleep.controller) noSleep.controller = new NoSleep();
-	// don't call anything if the states match
-	if (wakeLock === enable) return false;
-	// store the value
-	wakeLock = enable;
-	// call the function
-	if (enable) return noSleep.controller.enable();
-	return noSleep.controller.disable();
-};
-
-const refreshCheck = () => {
-	// Time has elapsed.
-	if (AutoRefreshCountMs >= AutoRefreshTotalIntervalMs) {
-		LoadTwcData();
-		return true;
-	}
-	return false;
-};
-
-export {
-	init,
-	message,
-	refreshCheck,
-};
-
-window.index = {
-	init,
-	message,
-	refreshCheck,
 };
