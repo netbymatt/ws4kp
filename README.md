@@ -31,7 +31,7 @@ Open your web browser: http://localhost:8080/
 The change to 5.0 changes from drawing the weather graphics on canvas elements and instead uses HTML and CSS to style all of the weather graphics. A lot of other changes and fixes were implemented at the same time.
 
 * Replace all canvas elements with HTML and CSS
-* City and airport names are better parsed to better show location in the available space
+* City and airport names are better parsed to fit the available space
 * Remove the dependency on libgif-js
 * Use browser for text wrapping where necessary
 * Some new weather icons
@@ -61,14 +61,15 @@ The fork is a result of wanting a more manageable, modern code base to work with
 
 I've made several changes to this Weather Star 4000 simulation compared to the original hardware unit and the code that this was forked from.
 
+* Radar displays the timestamp of the image.
+* A new hour-by-hour graph of the temperature, cloud cover and precipitation chances for the next 24 hours.
+* A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast. (off by default because it duplicates the hourly graph)
+* The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
 * Narration was removed. In the original code narration made use of the computer's local text-to-speech engine which didn't sound great.
 * Music was removed. I don't want to deal with copyright issues and hosting MP3s. If you're looking for the music that played during forecasts please visit [TWCClassics](https://twcclassics.com/audio/).
 * Marine forecast (tides) is not available as it is not part of the new API.
 * The nearby cities displayed on screens such as "Latest Observations" and "Regional Forecast" are likely not the same as they were in the 90's. The weather monitoring equipment at these stations move over time for one reason or another, and coming up with a simple formulaic way of finding nearby stations is sufficient to give the same look-and-feel as the original.
-* The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
 * "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and a checkboxes can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
-* Radar displays the timestamp of the image.
-* A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast.
 
 ## Wish list
 
