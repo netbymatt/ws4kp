@@ -20,7 +20,7 @@ class RegionalForecast extends WeatherDisplay {
 	}
 
 	async getData(_weatherParameters) {
-		super.getData(_weatherParameters);
+		if (!super.getData(_weatherParameters)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// pre-load the base map
