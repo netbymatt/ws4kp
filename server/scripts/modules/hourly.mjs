@@ -29,7 +29,7 @@ class Hourly extends WeatherDisplay {
 
 	async getData(weatherParameters) {
 		// super checks for enabled
-		if (!super.getData(weatherParameters)) return;
+		const superResponse = super.getData(weatherParameters);
 		let forecast;
 		try {
 			// get the forecast
@@ -42,6 +42,9 @@ class Hourly extends WeatherDisplay {
 		}
 
 		this.data = await Hourly.parseForecast(forecast.properties);
+
+		this.getDataCallback();
+		if (!superResponse) return;
 
 		this.setStatus(STATUS.loaded);
 		this.drawLongCanvas();
@@ -66,6 +69,8 @@ class Hourly extends WeatherDisplay {
 			apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
 			windSpeed: kilometersToMiles(windSpeed[idx]),
 			windDirection: directionToNSEW(windDirection[idx]),
+			probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
+			skyCover: skyCover[idx],
 			icon: icons[idx],
 		}));
 	}
@@ -184,7 +189,20 @@ class Hourly extends WeatherDisplay {
 			return dayName;
 		}, '');
 	}
+
+	// make data available outside this class
+	// promise allows for data to be requested before it is available
+	async getCurrentData() {
+		return new Promise((resolve) => {
+			if (this.data) resolve(this.data);
+			// data not available, put it into the data callback queue
+			this.getDataCallbacks.push(() => resolve(this.data));
+		});
+	}
 }
 
 // register display
-registerDisplay(new Hourly(2, 'hourly'));
+const display = new Hourly(2, 'hourly', false);
+registerDisplay(display);
+
+export default display.getCurrentData.bind(display);

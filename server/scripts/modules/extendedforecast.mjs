@@ -161,4 +161,4 @@ class ExtendedForecast extends WeatherDisplay {
 }
 
 // register display
-registerDisplay(new ExtendedForecast(6, 'extended-forecast'));
+registerDisplay(new ExtendedForecast(7, 'extended-forecast'));

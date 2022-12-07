@@ -171,7 +171,7 @@ class Almanac extends WeatherDisplay {
 }
 
 // register display
-const display = new Almanac(7, 'almanac');
+const display = new Almanac(8, 'almanac');
 registerDisplay(display);
 
 export default display.getSun.bind(display);

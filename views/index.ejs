@@ -34,6 +34,7 @@
   <script type="module" src="scripts/modules/almanac.mjs"></script>
   <script type="module" src="scripts/modules/icons.mjs"></script>
   <script type="module" src="scripts/modules/extendedforecast.mjs"></script>
+  <script type="module" src="scripts/modules/hourly-graph.mjs"></script>
   <script type="module" src="scripts/modules/hourly.mjs"></script>
   <script type="module" src="scripts/modules/latestobservations.mjs"></script>
   <script type="module" src="scripts/modules/localforecast.mjs"></script>
@@ -90,6 +91,9 @@
       <div id="hourly-html" class="weather-display">
         <%- include('partials/hourly.ejs') %>
       </div>
+      <div id="hourly-graph-html" class="weather-display">
+        <%- include('partials/hourly-graph.ejs') %>
+      </div>
       <div id="travel-html" class="weather-display">
         <%- include('partials/travel.ejs') %>
       </div>
@@ -126,7 +130,7 @@
         <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_1x.png" title="Refresh" />
       </div>
       <div id="divTwcBottomRight">
-        <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_exit_white_24dp_1x.png" title="Enter Fullscreen" />
+        <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_1x.png" title="Enter Fullscreen" />
       </div>
     </div>
   </div>

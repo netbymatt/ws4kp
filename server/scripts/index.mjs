@@ -192,8 +192,10 @@ const EnterFullScreen = () => {
 	resize();
 	UpdateFullScreenNavigate();
 
-	// change hover text
-	document.getElementById('ToggleFullScreen').title = 'Exit fullscreen';
+	// change hover text and image
+	const img = document.getElementById('ToggleFullScreen');
+	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_1x.png';
+	img.title = 'Exit fullscreen';
 };
 
 const ExitFullscreen = () => {
@@ -214,8 +216,10 @@ const ExitFullscreen = () => {
 		document.msExitFullscreen();
 	}
 	resize();
-	// change hover text
-	document.getElementById('ToggleFullScreen').title = 'Enter fullscreen';
+	// change hover text and image
+	const img = document.getElementById('ToggleFullScreen');
+	img.src = 'images/nav/ic_fullscreen_white_24dp_1x.png';
+	img.title = 'Enter fullscreen';
 };
 
 const btnNavigateMenuClick = () => {

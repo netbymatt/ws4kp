@@ -160,4 +160,4 @@ class TravelForecast extends WeatherDisplay {
 }
 
 // register display, not active by default
-registerDisplay(new TravelForecast(3, 'travel', false));
+registerDisplay(new TravelForecast(4, 'travel', false));

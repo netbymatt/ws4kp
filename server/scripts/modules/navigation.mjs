@@ -281,7 +281,7 @@ const generateCheckboxes = () => {
 
 	if (!availableDisplays) return;
 	// generate checkboxes
-	const checkboxes = displays.map((d) => d.generateCheckbox()).filter((d) => d);
+	const checkboxes = displays.map((d) => d.generateCheckbox(d.defaultEnabled)).filter((d) => d);
 
 	// write to page
 	availableDisplays.innerHTML = '';

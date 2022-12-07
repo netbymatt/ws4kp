@@ -17,6 +17,8 @@
 				<% if (locals?.hasTime) { %>
 					<div class="date-time date"></div>
 					<div class="date-time time"></div>
+					<% } else if (!locals?.noaaLogo) { %>
+						<div class="right"></div>
 					<% } %>
 						<% if (locals?.noaaLogo) { %>
 							<div class="noaa-logo">
