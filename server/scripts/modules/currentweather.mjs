@@ -188,7 +188,6 @@ class CurrentWeather extends WeatherDisplay {
 		return condition;
 	}
 }
-
 const display = new CurrentWeather(0, 'current-weather');
 registerDisplay(display);
 

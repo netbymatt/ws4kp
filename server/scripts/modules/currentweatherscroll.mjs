@@ -98,5 +98,6 @@ const drawCondition = (text) => {
 		elem.innerHTML = text;
 	});
 };
-
-start();
+document.addEventListener('DOMContentLoaded', () => {
+	start();
+});

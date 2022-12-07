@@ -16,10 +16,11 @@ class Progress extends WeatherDisplay {
 		// disable any navigation timing
 		this.timing = false;
 
-		this.version = document.getElementById('version').innerHTML;
-
-		// setup event listener
-		this.elem.querySelector('.container').addEventListener('click', this.lineClick.bind(this));
+		// setup event listener for dom-required initialization
+		document.addEventListener('DOMContentLoaded', () => {
+			this.version = document.getElementById('version').innerHTML;
+			this.elem.querySelector('.container').addEventListener('click', this.lineClick.bind(this));
+		});
 
 		this.okToDrawCurrentConditions = false;
 	}

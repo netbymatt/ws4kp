@@ -7,6 +7,9 @@ const rename = require('gulp-rename');
 const htmlmin = require('gulp-htmlmin');
 const del = require('del');
 const s3Upload = require('gulp-s3-upload');
+const webpack = require('webpack-stream');
+const TerserPlugin = require('terser-webpack-plugin');
+const path = require('path');
 
 const clean = () => del(['./dist**']);
 
@@ -22,39 +25,70 @@ const jsSourcesData = [
 	'server/scripts/data/stations.js',
 	'server/scripts/data/states.js',
 ];
+
+const webpackOptions = {
+	mode: 'production',
+	// mode: 'development',
+	// devtool: 'source-map',
+	output: {
+		filename: 'ws.min.js',
+	},
+	resolve: {
+		roots: [path.resolve(__dirname, './')],
+	},
+	optimization: {
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				extractComments: false,
+				terserOptions: {
+					// sourceMap: true,
+					format: {
+						comments: false,
+					},
+				},
+			}),
+		],
+	},
+};
+
 gulp.task('compress_js_data', () => gulp.src(jsSourcesData)
 	.pipe(concat('data.min.js'))
 	.pipe(terser())
 	.pipe(gulp.dest('./dist/resources')));
 
-const jsSources = [
+const jsVendorSources = [
 	'server/scripts/vendor/auto/jquery.js',
 	'server/scripts/vendor/jquery.autocomplete.min.js',
 	'server/scripts/vendor/auto/nosleep.js',
 	'server/scripts/vendor/auto/swiped-events.js',
-	'server/scripts/index.js',
-	'server/scripts/vendor/auto/luxon.js',
 	'server/scripts/vendor/auto/suncalc.js',
-	'server/scripts/modules/weatherdisplay.js',
-	'server/scripts/modules/icons.js',
-	'server/scripts/modules/utilities.js',
-	'server/scripts/modules/currentweather.js',
-	'server/scripts/modules/currentweatherscroll.js',
-	'server/scripts/modules/latestobservations.js',
-	'server/scripts/modules/travelforecast.js',
-	'server/scripts/modules/regionalforecast.js',
-	'server/scripts/modules/localforecast.js',
-	'server/scripts/modules/extendedforecast.js',
-	'server/scripts/modules/almanac.js',
-	'server/scripts/modules/radar.js',
-	'server/scripts/modules/hourly.js',
-	'server/scripts/modules/progress.js',
-	'server/scripts/modules/navigation.js',
 ];
-gulp.task('compress_js', () => gulp.src(jsSources)
-	.pipe(concat('ws.min.js'))
+
+gulp.task('compress_js_vendor', () => gulp.src(jsVendorSources)
+	.pipe(concat('vendor.min.js'))
 	.pipe(terser())
 	.pipe(gulp.dest('./dist/resources')));
+
+const mjsSources = [
+	'server/scripts/modules/currentweatherscroll.mjs',
+	'server/scripts/modules/currentweather.mjs',
+	'server/scripts/modules/almanac.mjs',
+	'server/scripts/modules/icons.mjs',
+	'server/scripts/modules/extendedforecast.mjs',
+	'server/scripts/modules/hourly.mjs',
+	'server/scripts/modules/latestobservations.mjs',
+	'server/scripts/modules/localforecast.mjs',
+	'server/scripts/modules/radar.mjs',
+	'server/scripts/modules/regionalforecast.mjs',
+	'server/scripts/modules/travelforecast.mjs',
+	'server/scripts/modules/progress.mjs',
+	'server/scripts/index.mjs',
+];
+
+gulp.task('build_js', () => gulp.src(mjsSources)
+	.pipe(webpack(webpackOptions))
+	.pipe(gulp.dest('dist/resources')));
 
 const cssSources = [
 	'server/styles/main.css',
@@ -93,6 +127,7 @@ const s3 = s3Upload({
 });
 const uploadSources = [
 	'dist/**',
+	'!dist/**/*.map',
 ];
 gulp.task('upload', () => gulp.src(uploadSources, { base: './dist' })
 	.pipe(s3({
@@ -117,4 +152,4 @@ gulp.task('invalidate', async () => cloudfront.createInvalidation({
 	},
 }).promise());
 
-module.exports = gulp.series(clean, gulp.parallel('compress_js', 'compress_js_data', 'copy_css', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');
+module.exports = gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files'));// , 'upload', 'invalidate');

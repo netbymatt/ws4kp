@@ -32,6 +32,7 @@ const init = async () => {
 		document.getElementById('chkAutoRefresh').checked = false;
 	}
 	document.getElementById('chkAutoRefresh').addEventListener('change', autoRefreshChange);
+	generateCheckboxes();
 };
 
 const message = (data) => {
@@ -272,10 +273,17 @@ const registerDisplay = (display) => {
 	displays[display.navId] = display;
 
 	// generate checkboxes
+	generateCheckboxes();
+};
+
+const generateCheckboxes = () => {
+	const availableDisplays = document.getElementById('enabledDisplays');
+
+	if (!availableDisplays) return;
+	// generate checkboxes
 	const checkboxes = displays.map((d) => d.generateCheckbox()).filter((d) => d);
 
 	// write to page
-	const availableDisplays = document.getElementById('enabledDisplays');
 	availableDisplays.innerHTML = '';
 	availableDisplays.append(...checkboxes);
 };

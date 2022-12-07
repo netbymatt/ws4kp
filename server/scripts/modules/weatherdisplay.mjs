@@ -41,7 +41,9 @@ class WeatherDisplay {
 		this.startNavCount();
 
 		// get any templates
-		this.loadTemplates();
+		document.addEventListener('DOMContentLoaded', () => {
+			this.loadTemplates();
+		});
 	}
 
 	generateCheckbox(defaultEnabled = true) {

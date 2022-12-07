@@ -23,7 +23,7 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			"type": "pwa-node"
+			"type": "node"
 		},
 		{
 			"name": "Data:regionalcities",
@@ -32,7 +32,7 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			"type": "pwa-node"
+			"type": "node"
 		},
 		{
 			"name": "Data:travelcities",
@@ -41,7 +41,7 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			"type": "pwa-node"
+			"type": "node"
 		},
 		{
 			"type": "node",
@@ -51,7 +51,18 @@
 				"<node_internals>/**",
 			],
 			"program": "${workspaceFolder}/index.js",
-			"outputCapture": "std",
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Server-dist",
+			"skipFiles": [
+				"<node_internals>/**",
+			],
+			"program": "${workspaceFolder}/index.js",
+			"env": {
+				"DIST": "1"
+			}
 		}
 	],
 	"compounds": [

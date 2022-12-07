@@ -30,12 +30,19 @@ const index = (req, res) => {
 	});
 };
 
-// main page
-app.get('/index.html', index);
-app.get('/', index);
-
-// fallback
-app.get('*', express.static(path.join(__dirname, './server')));
+// debugging
+if (process.env?.DIST !== '1') {
+	// debugging
+	app.get('/index.html', index);
+	app.get('/', index);
+	app.get('*', express.static(path.join(__dirname, './server')));
+} else {
+	// distribution
+	app.use('/images', express.static(path.join(__dirname, './server/images')));
+	app.use('/fonts', express.static(path.join(__dirname, './server/fonts')));
+	app.use('/scripts', express.static(path.join(__dirname, './server/scripts')));
+	app.use('/', express.static(path.join(__dirname, './dist')));
+}
 
 const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);

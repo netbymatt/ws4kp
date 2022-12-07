@@ -38,7 +38,9 @@
 		"nosleep.js": "^0.12.0",
 		"sass": "^1.54.0",
 		"suncalc": "^1.8.0",
-		"swiped-events": "^1.1.4"
+		"swiped-events": "^1.1.4",
+		"terser-webpack-plugin": "^5.3.6",
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"eslint": "^8.21.0",

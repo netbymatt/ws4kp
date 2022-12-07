@@ -19,6 +19,7 @@
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
   <script type="text/javascript" src="resources/data.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
   <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>
   <script type="text/javascript" src="scripts/custom.js?_=<%=production%>"></script>
   <% } else { %>
@@ -27,25 +28,20 @@
   <script type="text/javascript" src="scripts/vendor/jquery.autocomplete.min.js"></script>
   <script type="text/javascript" src="scripts/vendor/auto/nosleep.js"></script>
   <script type="text/javascript" src="scripts/vendor/auto/swiped-events.js"></script>
-  <script type="module" src="scripts/modules/navigation.mjs"></script>
+  <script type="text/javascript" src="scripts/vendor/auto/suncalc.js"></script>
   <script type="module" src="scripts/modules/currentweatherscroll.mjs"></script>
-
-  <!-- to be removed-->
-  <script type="module" src="scripts/modules/status.mjs"></script>
   <script type="module" src="scripts/modules/currentweather.mjs"></script>
   <script type="module" src="scripts/modules/almanac.mjs"></script>
   <script type="module" src="scripts/modules/icons.mjs"></script>
   <script type="module" src="scripts/modules/extendedforecast.mjs"></script>
   <script type="module" src="scripts/modules/hourly.mjs"></script>
-  <script type="module" src="scripts/modules/progress.mjs"></script>
   <script type="module" src="scripts/modules/latestobservations.mjs"></script>
   <script type="module" src="scripts/modules/localforecast.mjs"></script>
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/regionalforecast.mjs"></script>
   <script type="module" src="scripts/modules/travelforecast.mjs"></script>
-  <script type="module" src="scripts/modules/weatherdisplay.mjs"></script>
-
-  <script type="module" src="scripts/index.mjs"></script>
+  <script type="module" src="scripts/modules/progress.mjs"></script>
+	<script type="module" src="scripts/index.mjs"></script>
 
   <!-- data -->
   <script type="text/javascript" src="scripts/data/states.js"></script>
@@ -53,8 +49,7 @@
   <script type="text/javascript" src="scripts/data/regionalcities.js"></script>
   <script type="text/javascript" src="scripts/data/stations.js"></script>
 
-  <script type="text/javascript" src="scripts/vendor/auto/suncalc.js"></script>
-  <script type="text/javascript" src="scripts/custom.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="scripts/custom.js"></script>
 
   <% } %>
 
