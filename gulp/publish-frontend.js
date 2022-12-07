@@ -152,4 +152,4 @@ gulp.task('invalidate', async () => cloudfront.createInvalidation({
 	},
 }).promise());
 
-module.exports = gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files'));// , 'upload', 'invalidate');
+module.exports = gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files'), 'upload', 'invalidate');
