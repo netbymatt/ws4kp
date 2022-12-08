@@ -5,6 +5,17 @@
 
 body {
 	font-family: "Star4000";
+
+	@media (prefers-color-scheme: dark) {
+		background-color: #000000;
+		color: white;
+	}
+
+	a {
+		@media (prefers-color-scheme: dark) {
+			color: lightblue;
+		}
+	}
 }
 
 input,
@@ -20,12 +31,42 @@ button {
 #txtAddress {
 	width: 490px;
 	font-size: 16pt;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: #000000;
+		color: white;
+		border: 1px solid darkgray;
+	}
 }
 
 #btnGetGps,
 #btnGetLatLng,
 #btnClearQuery {
 	font-size: 16pt;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: #000000;
+		color: white;
+	}
+
+	border: 1px solid darkgray;
+}
+
+#btnGetGps img {
+
+	&.dark {
+		display: none;
+
+		@media (prefers-color-scheme: dark) {
+			display: inline-block;
+		}
+	}
+
+	&.light {
+		@media (prefers-color-scheme: dark) {
+			display: none;
+		}
+	}
 }
 
 .autocomplete-suggestions {
@@ -90,6 +131,11 @@ button {
 	display: flex;
 	flex-direction: row;
 	background-color: #000000;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: rgb(48, 48, 48);
+	}
+
 	color: #ffffff;
 	width: 100%;
 }
