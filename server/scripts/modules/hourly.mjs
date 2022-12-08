@@ -37,12 +37,13 @@ class Hourly extends WeatherDisplay {
 		} catch (e) {
 			console.error('Get hourly forecast failed');
 			console.error(e.status, e.responseJSON);
-			this.setStatus(STATUS.failed);
+			if (this.enabled) this.setStatus(STATUS.failed);
+			// return undefined to other subscribers
+			this.getDataCallback(undefined);
 			return;
 		}
 
 		this.data = await Hourly.parseForecast(forecast.properties);
-
 		this.getDataCallback();
 		if (!superResponse) return;
 

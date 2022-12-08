@@ -28,6 +28,10 @@ class HourlyGraph extends WeatherDisplay {
 		if (!super.getData()) return;
 
 		const data = await getHourlyData();
+		if (data === undefined) {
+			this.setStatus(STATUS.failed);
+			return;
+		}
 
 		// get interesting data
 		const temperature = data.map((d) => d.temperature);

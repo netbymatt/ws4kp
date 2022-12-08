@@ -55,7 +55,9 @@ class CurrentWeather extends WeatherDisplay {
 		// test for data received
 		if (!observations) {
 			console.error('All current weather stations exhausted');
-			this.setStatus(STATUS.failed);
+			if (this.enabled) this.setStatus(STATUS.failed);
+			// send failed to subscribers
+			this.getDataCallback(undefined);
 			return;
 		}
 		// preload the icon
