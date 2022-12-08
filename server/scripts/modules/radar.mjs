@@ -367,8 +367,6 @@ class Radar extends WeatherDisplay {
 		}
 
 		RadarContext.putImageData(RadarImageData, 0, 0);
-
-		// MapContext.drawImage(RadarContext.canvas, 0, 0);
 	}
 
 	static mergeDopplerRadarImage(mapContext, radarContext) {

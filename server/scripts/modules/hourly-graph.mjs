@@ -42,18 +42,20 @@ class HourlyGraph extends WeatherDisplay {
 	}
 
 	drawCanvas() {
-		if (!this.canvas) this.canvas = this.elem.querySelector('.chart canvas');
+		if (!this.image) this.image = this.elem.querySelector('.chart img');
 
 		// get available space
-		const boundingRect = this.canvas.getBoundingClientRect();
-		const availableWidth = boundingRect.width;
-		const availableHeight = boundingRect.height;
+		const availableWidth = 532;
+		const availableHeight = 285;
 
-		this.canvas.width = availableWidth;
-		this.canvas.height = availableHeight;
+		this.image.width = availableWidth;
+		this.image.height = availableHeight;
 
 		// get context
-		const ctx = this.canvas.getContext('2d');
+		const canvas = document.createElement('canvas');
+		canvas.width = availableWidth;
+		canvas.height = availableHeight;
+		const ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 
 		// calculate time scale
@@ -96,6 +98,9 @@ class HourlyGraph extends WeatherDisplay {
 		this.elem.querySelector('.y-axis .l-1').innerHTML = maxTemp;
 		this.elem.querySelector('.y-axis .l-2').innerHTML = midTemp;
 		this.elem.querySelector('.y-axis .l-3').innerHTML = minTemp;
+
+		// set the image source
+		this.image.src = canvas.toDataURL();
 
 		super.drawCanvas();
 		this.finishDraw();
