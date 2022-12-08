@@ -99,9 +99,11 @@ class HourlyGraph extends WeatherDisplay {
 		});
 
 		// temperature axis labels
-		this.elem.querySelector('.y-axis .l-1').innerHTML = maxTemp;
-		this.elem.querySelector('.y-axis .l-2').innerHTML = midTemp;
-		this.elem.querySelector('.y-axis .l-3').innerHTML = minTemp;
+		// limited to 3 characters, sacraficing degree character
+		const degree = String.fromCharCode(176);
+		this.elem.querySelector('.y-axis .l-1').innerHTML = (maxTemp + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-2').innerHTML = (midTemp + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-3').innerHTML = (minTemp + degree).substring(0, 3);
 
 		// set the image source
 		this.image.src = canvas.toDataURL();

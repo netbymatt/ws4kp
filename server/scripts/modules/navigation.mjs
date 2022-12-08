@@ -23,6 +23,7 @@ let AutoRefreshCountMs = 0;
 const init = async () => {
 	// set up resize handler
 	window.addEventListener('resize', resize);
+	resize();
 
 	// auto refresh
 	const TwcAutoRefresh = localStorage.getItem('TwcAutoRefresh');

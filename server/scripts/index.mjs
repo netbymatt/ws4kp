@@ -23,7 +23,7 @@ const categories = [
 	'Airport', 'Ferry', 'Marina', 'Pier', 'Port', 'Resort', // POI/Travel
 	'Postal', 'Populated Place',
 ];
-const cats = categories.join(',');
+const category = categories.join(',');
 
 const init = () => {
 	document.getElementById('txtAddress').addEventListener('focus', (e) => {
@@ -54,7 +54,7 @@ const init = () => {
 		params: {
 			f: 'json',
 			countryCode: 'USA', // 'USA,PRI,VIR,GUM,ASM',
-			category: cats,
+			category,
 			maxSuggestions: 10,
 		},
 		dataType: 'json',
