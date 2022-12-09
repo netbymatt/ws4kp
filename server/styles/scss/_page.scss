@@ -31,6 +31,7 @@ button {
 #txtAddress {
 	width: 490px;
 	font-size: 16pt;
+	max-width: calc(100% - 8px);
 
 	@media (prefers-color-scheme: dark) {
 		background-color: #000000;
