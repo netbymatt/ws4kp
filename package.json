@@ -1,6 +1,6 @@
 {
 	"name": "ws4kp",
-	"version": "5.4.1",
+	"version": "5.4.2",
 	"description": "Welcome to the WeatherStar 4000+ project page!",
 	"main": "index.js",
 	"scripts": {
@@ -40,10 +40,9 @@
 		"suncalc": "^1.8.0",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
-		"webpack-stream": "^7.0.0"
-	},
-	"dependencies": {
+		"webpack-stream": "^7.0.0",
 		"eslint": "^8.21.0",
 		"eslint-plugin-import": "^2.26.0"
-	}
+	},
+	"dependencies": {}
 }
