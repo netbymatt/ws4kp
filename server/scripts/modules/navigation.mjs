@@ -252,11 +252,11 @@ const getDisplay = (index) => displays[index];
 
 // resize the container on a page resize
 const resize = () => {
-	const widthZoomPercent = document.body.clientWidth / 640;
-	const heightZoomPercent = document.body.clientHeight / 480;
+	const marginOffset = (document.fullscreenElement) ? 0 : 16;
+	const widthZoomPercent = (window.innerWidth - marginOffset) / 640;
+	const heightZoomPercent = (window.innerHeight - marginOffset) / 480;
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
-	console.log(scale, document.body.clientWidth);
 	if (scale < 1.0 || document.fullscreenElement) {
 		document.getElementById('container').style.zoom = scale;
 	} else {

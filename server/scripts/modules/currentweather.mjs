@@ -128,7 +128,7 @@ class CurrentWeather extends WeatherDisplay {
 
 		let Conditions = data.observations.textDescription;
 		if (Conditions.length > 15) {
-			Conditions = this.shortConditions(Conditions);
+			Conditions = CurrentWeather.shortConditions(Conditions);
 		}
 		fill.condition = Conditions;
 
