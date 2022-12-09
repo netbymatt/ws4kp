@@ -112,7 +112,7 @@ class TravelForecast extends WeatherDisplay {
 		// set up variables
 		const cities = this.data;
 
-		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${TravelForecast.getTravelCitiesDayName(cities)}`;
+		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${getTravelCitiesDayName(cities)}`;
 
 		this.finishDraw();
 	}
@@ -140,24 +140,23 @@ class TravelForecast extends WeatherDisplay {
 		this.elem.querySelector('.main').scrollTo(0, offsetY);
 	}
 
-	static getTravelCitiesDayName(cities) {
-		// effectively returns early on the first found date
-		return cities.reduce((dayName, city) => {
-			if (city && dayName === '') {
-				// today or tomorrow
-				const day = DateTime.local().plus({ days: (city.today) ? 0 : 1 });
-				// return the day
-				return day.toLocaleString({ weekday: 'long' });
-			}
-			return dayName;
-		}, '');
-	}
-
 	// necessary to get the lastest long canvas when scrolling
 	getLongCanvas() {
 		return this.longCanvas;
 	}
 }
+
+// effectively returns early on the first found date
+const getTravelCitiesDayName = (cities) => cities.reduce((dayName, city) => {
+	if (city && dayName === '') {
+		// today or tomorrow
+		const day = DateTime.local().plus({ days: (city.today) ? 0 : 1 });
+		// return the day
+		return day.toLocaleString({ weekday: 'long' });
+	}
+	return dayName;
+}, '')
+;
 
 // register display, not active by default
 registerDisplay(new TravelForecast(4, 'travel', false));

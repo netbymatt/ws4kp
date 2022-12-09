@@ -82,7 +82,7 @@ class LatestObservations extends WeatherDisplay {
 			const fill = {};
 			fill.location = locationCleanup(condition.city).substr(0, 14);
 			fill.temp = Temperature;
-			fill.weather = LatestObservations.shortenCurrentConditions(condition.textDescription).substr(0, 9);
+			fill.weather = shortenCurrentConditions(condition.textDescription).substr(0, 9);
 			if (WindSpeed > 0) {
 				fill.wind = windDirection + (Array(6 - windDirection.length - WindSpeed.toString().length).join(' ')) + WindSpeed.toString();
 			} else if (WindSpeed === 'NA') {
@@ -100,25 +100,24 @@ class LatestObservations extends WeatherDisplay {
 
 		this.finishDraw();
 	}
-
-	static shortenCurrentConditions(_condition) {
-		let condition = _condition;
-		condition = condition.replace(/Light/, 'L');
-		condition = condition.replace(/Heavy/, 'H');
-		condition = condition.replace(/Partly/, 'P');
-		condition = condition.replace(/Mostly/, 'M');
-		condition = condition.replace(/Few/, 'F');
-		condition = condition.replace(/Thunderstorm/, 'T\'storm');
-		condition = condition.replace(/ in /, '');
-		condition = condition.replace(/Vicinity/, '');
-		condition = condition.replace(/ and /, ' ');
-		condition = condition.replace(/Freezing Rain/, 'Frz Rn');
-		condition = condition.replace(/Freezing/, 'Frz');
-		condition = condition.replace(/Unknown Precip/, '');
-		condition = condition.replace(/L Snow Fog/, 'L Snw/Fog');
-		condition = condition.replace(/ with /, '/');
-		return condition;
-	}
 }
+const shortenCurrentConditions = (_condition) => {
+	let condition = _condition;
+	condition = condition.replace(/Light/, 'L');
+	condition = condition.replace(/Heavy/, 'H');
+	condition = condition.replace(/Partly/, 'P');
+	condition = condition.replace(/Mostly/, 'M');
+	condition = condition.replace(/Few/, 'F');
+	condition = condition.replace(/Thunderstorm/, 'T\'storm');
+	condition = condition.replace(/ in /, '');
+	condition = condition.replace(/Vicinity/, '');
+	condition = condition.replace(/ and /, ' ');
+	condition = condition.replace(/Freezing Rain/, 'Frz Rn');
+	condition = condition.replace(/Freezing/, 'Frz');
+	condition = condition.replace(/Unknown Precip/, '');
+	condition = condition.replace(/L Snow Fog/, 'L Snw/Fog');
+	condition = condition.replace(/ with /, '/');
+	return condition;
+};
 // register display
 registerDisplay(new LatestObservations(1, 'latest-observations'));

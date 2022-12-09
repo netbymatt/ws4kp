@@ -25,7 +25,7 @@ class LocalForecast extends WeatherDisplay {
 			return;
 		}
 		// parse raw data
-		const conditions = LocalForecast.parse(rawData);
+		const conditions = parse(rawData);
 
 		// read each text
 		this.screenTexts = conditions.map((condition) => {
@@ -80,17 +80,14 @@ class LocalForecast extends WeatherDisplay {
 
 		this.finishDraw();
 	}
-
-	// format the forecast
-	static parse(forecast) {
-		// only use the first 6 lines
-		return forecast.properties.periods.slice(0, 6).map((text) => ({
-			// format day and text
-			DayName: text.name.toUpperCase(),
-			Text: text.detailedForecast,
-		}));
-	}
 }
 
+// format the forecast
+// only use the first 6 lines
+const parse = (forecast) => forecast.properties.periods.slice(0, 6).map((text) => ({
+	// format day and text
+	DayName: text.name.toUpperCase(),
+	Text: text.detailedForecast,
+}));
 // register display
 registerDisplay(new LocalForecast(6, 'local-forecast'));

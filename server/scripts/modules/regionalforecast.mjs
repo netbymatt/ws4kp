@@ -10,6 +10,7 @@ import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import * as utils from './regionalforecast-utils.mjs';
 
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -38,10 +39,10 @@ class RegionalForecast extends WeatherDisplay {
 			y: 117,
 		};
 		// get user's location in x/y
-		const sourceXY = RegionalForecast.getXYFromLatitudeLongitude(weatherParameters.latitude, weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
+		const sourceXY = utils.getXYFromLatitudeLongitude(weatherParameters.latitude, weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
 
 		// get latitude and longitude limits
-		const minMaxLatLon = RegionalForecast.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, weatherParameters.state);
+		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, weatherParameters.state);
 
 		// get a target distance
 		let targetDistance = 2.5;
@@ -75,12 +76,12 @@ class RegionalForecast extends WeatherDisplay {
 				if (!city.point) throw new Error('No pre-loaded point');
 
 				// start off the observation task
-				const observationPromise = RegionalForecast.getRegionalObservation(city.point, city);
+				const observationPromise = utils.getRegionalObservation(city.point, city);
 
 				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
 
 				// get XY on map for city
-				const cityXY = RegionalForecast.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
+				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
 
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
@@ -88,7 +89,7 @@ class RegionalForecast extends WeatherDisplay {
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),
 					temperature: celsiusToFahrenheit(observation.temperature.value),
-					name: RegionalForecast.formatCity(city.city),
+					name: utils.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,
 					y: cityXY.y,
@@ -104,8 +105,8 @@ class RegionalForecast extends WeatherDisplay {
 				// always skip the first forecast index because it's what's going on right now
 				return [
 					regionalObservation,
-					RegionalForecast.buildForecast(forecast.properties.periods[1], city, cityXY),
-					RegionalForecast.buildForecast(forecast.properties.periods[2], city, cityXY),
+					utils.buildForecast(forecast.properties.periods[1], city, cityXY),
+					utils.buildForecast(forecast.properties.periods[2], city, cityXY),
 				];
 			} catch (e) {
 				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
@@ -131,203 +132,6 @@ class RegionalForecast extends WeatherDisplay {
 		};
 
 		this.setStatus(STATUS.loaded);
-	}
-
-	static buildForecast(forecast, city, cityXY) {
-		return {
-			daytime: forecast.isDaytime,
-			temperature: forecast.temperature || 0,
-			name: RegionalForecast.formatCity(city.city),
-			icon: forecast.icon,
-			x: cityXY.x,
-			y: cityXY.y,
-			time: forecast.startTime,
-		};
-	}
-
-	static async getRegionalObservation(point, city) {
-		try {
-			// get stations
-			const stations = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/stations`);
-
-			// get the first station
-			const station = stations.features[0].id;
-			// get the observation data
-			const observation = await json(`${station}/observations/latest`);
-			// preload the image
-			if (!observation.properties.icon) return false;
-			preloadImg(getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
-			// return the observation
-			return observation.properties;
-		} catch (e) {
-			console.log(`Unable to get regional observations for ${city.Name ?? city.city}`);
-			console.error(e.status, e.responseJSON);
-			return false;
-		}
-	}
-
-	// utility latitude/pixel conversions
-	static getXYFromLatitudeLongitude(Latitude, Longitude, OffsetX, OffsetY, state) {
-		if (state === 'AK') return RegionalForecast.getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY);
-		if (state === 'HI') return RegionalForecast.getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY);
-		let y = 0;
-		let x = 0;
-		const ImgHeight = 1600;
-		const ImgWidth = 2550;
-
-		y = (50.5 - Latitude) * 55.2;
-		y -= OffsetY; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
-		} else if (y < 0) {
-			y = 0;
-		}
-
-		x = ((-127.5 - Longitude) * 41.775) * -1;
-		x -= OffsetX; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
-		} else if (x < 0) {
-			x = 0;
-		}
-
-		return { x, y };
-	}
-
-	static getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY) {
-		let y = 0;
-		let x = 0;
-		const ImgHeight = 1142;
-		const ImgWidth = 1200;
-
-		y = (73.0 - Latitude) * 56;
-		y -= OffsetY; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
-		} else if (y < 0) {
-			y = 0;
-		}
-
-		x = ((-175.0 - Longitude) * 25.0) * -1;
-		x -= OffsetX; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
-		} else if (x < 0) {
-			x = 0;
-		}
-
-		return { x, y };
-	}
-
-	static getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY) {
-		let y = 0;
-		let x = 0;
-		const ImgHeight = 571;
-		const ImgWidth = 600;
-
-		y = (25 - Latitude) * 55.2;
-		y -= OffsetY; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (y > (ImgHeight - (OffsetY * 2))) {
-			y = ImgHeight - (OffsetY * 2);
-		} else if (y < 0) {
-			y = 0;
-		}
-
-		x = ((-164.5 - Longitude) * 41.775) * -1;
-		x -= OffsetX; // Centers map.
-		// Do not allow the map to exceed the max/min coordinates.
-		if (x > (ImgWidth - (OffsetX * 2))) {
-			x = ImgWidth - (OffsetX * 2);
-		} else if (x < 0) {
-			x = 0;
-		}
-
-		return { x, y };
-	}
-
-	static getMinMaxLatitudeLongitude(X, Y, OffsetX, OffsetY, state) {
-		if (state === 'AK') return RegionalForecast.getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY);
-		if (state === 'HI') return RegionalForecast.getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY);
-		const maxLat = ((Y / 55.2) - 50.5) * -1;
-		const minLat = (((Y + (OffsetY * 2)) / 55.2) - 50.5) * -1;
-		const minLon = (((X * -1) / 41.775) + 127.5) * -1;
-		const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 127.5) * -1;
-
-		return {
-			minLat, maxLat, minLon, maxLon,
-		};
-	}
-
-	static getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY) {
-		const maxLat = ((Y / 56) - 73.0) * -1;
-		const minLat = (((Y + (OffsetY * 2)) / 56) - 73.0) * -1;
-		const minLon = (((X * -1) / 25) + 175.0) * -1;
-		const maxLon = ((((X + (OffsetX * 2)) * -1) / 25) + 175.0) * -1;
-
-		return {
-			minLat, maxLat, minLon, maxLon,
-		};
-	}
-
-	static getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY) {
-		const maxLat = ((Y / 55.2) - 25) * -1;
-		const minLat = (((Y + (OffsetY * 2)) / 55.2) - 25) * -1;
-		const minLon = (((X * -1) / 41.775) + 164.5) * -1;
-		const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 164.5) * -1;
-
-		return {
-			minLat, maxLat, minLon, maxLon,
-		};
-	}
-
-	static getXYForCity(City, MaxLatitude, MinLongitude, state) {
-		if (state === 'AK') RegionalForecast.getXYForCityAK(City, MaxLatitude, MinLongitude);
-		if (state === 'HI') RegionalForecast.getXYForCityHI(City, MaxLatitude, MinLongitude);
-		let x = (City.lon - MinLongitude) * 57;
-		let y = (MaxLatitude - City.lat) * 70;
-
-		if (y < 30) y = 30;
-		if (y > 282) y = 282;
-
-		if (x < 40) x = 40;
-		if (x > 580) x = 580;
-
-		return { x, y };
-	}
-
-	static getXYForCityAK(City, MaxLatitude, MinLongitude) {
-		let x = (City.lon - MinLongitude) * 37;
-		let y = (MaxLatitude - City.lat) * 70;
-
-		if (y < 30) y = 30;
-		if (y > 282) y = 282;
-
-		if (x < 40) x = 40;
-		if (x > 580) x = 580;
-		return { x, y };
-	}
-
-	static getXYForCityHI(City, MaxLatitude, MinLongitude) {
-		let x = (City.lon - MinLongitude) * 57;
-		let y = (MaxLatitude - City.lat) * 70;
-
-		if (y < 30) y = 30;
-		if (y > 282) y = 282;
-
-		if (x < 40) x = 40;
-		if (x > 580) x = 580;
-
-		return { x, y };
-	}
-
-	// to fit on the map, remove anything after punctuation and then limit to 15 characters
-	static formatCity(city) {
-		return city.match(/[^-;/\\,]*/)[0].substr(0, 12);
 	}
 
 	drawCanvas() {

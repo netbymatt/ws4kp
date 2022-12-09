@@ -36,93 +36,9 @@ class ExtendedForecast extends WeatherDisplay {
 			return;
 		}
 		// we only get here if there was no error above
-		this.data = ExtendedForecast.parse(forecast.properties.periods);
+		this.data = parse(forecast.properties.periods);
 		this.screenIndex = 0;
 		this.setStatus(STATUS.loaded);
-	}
-
-	// the api provides the forecast in 12 hour increments, flatten to day increments with high and low temperatures
-	static parse(fullForecast) {
-	// create a list of days starting with today
-		const Days = [0, 1, 2, 3, 4, 5, 6];
-
-		const dates = Days.map((shift) => {
-			const date = DateTime.local().startOf('day').plus({ days: shift });
-			return date.toLocaleString({ weekday: 'short' });
-		});
-
-		// track the destination forecast index
-		let destIndex = 0;
-		const forecast = [];
-		fullForecast.forEach((period) => {
-		// create the destination object if necessary
-			if (!forecast[destIndex]) {
-				forecast.push({
-					dayName: '', low: undefined, high: undefined, text: undefined, icon: undefined,
-				});
-			}
-			// get the object to modify/populate
-			const fDay = forecast[destIndex];
-			// high temperature will always be last in the source array so it will overwrite the low values assigned below
-			fDay.icon = getWeatherIconFromIconLink(period.icon);
-			fDay.text = ExtendedForecast.shortenExtendedForecastText(period.shortForecast);
-			fDay.dayName = dates[destIndex];
-
-			// preload the icon
-			preloadImg(fDay.icon);
-
-			if (period.isDaytime) {
-			// day time is the high temperature
-				fDay.high = period.temperature;
-				destIndex += 1;
-			} else {
-			// low temperature
-				fDay.low = period.temperature;
-			}
-		});
-
-		return forecast;
-	}
-
-	static shortenExtendedForecastText(long) {
-		const regexList = [
-			[/ and /ig, ' '],
-			[/Slight /ig, ''],
-			[/Chance /ig, ''],
-			[/Very /ig, ''],
-			[/Patchy /ig, ''],
-			[/Areas /ig, ''],
-			[/Dense /ig, ''],
-			[/Thunderstorm/g, 'T\'Storm'],
-		];
-		// run all regexes
-		const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
-
-		let conditions = short.split(' ');
-		if (short.indexOf('then') !== -1) {
-			conditions = short.split(' then ');
-			conditions = conditions[1].split(' ');
-		}
-
-		let short1 = conditions[0].substr(0, 10);
-		let short2 = '';
-		if (conditions[1]) {
-			if (!short1.endsWith('.')) {
-				short2 = conditions[1].substr(0, 10);
-			} else {
-				short1 = short1.replace(/\./, '');
-			}
-
-			if (short2 === 'Blowing') {
-				short2 = '';
-			}
-		}
-		let result = short1;
-		if (short2 !== '') {
-			result += ` ${short2}`;
-		}
-
-		return result;
 	}
 
 	async drawCanvas() {
@@ -159,6 +75,90 @@ class ExtendedForecast extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+// the api provides the forecast in 12 hour increments, flatten to day increments with high and low temperatures
+const parse = (fullForecast) => {
+	// create a list of days starting with today
+	const Days = [0, 1, 2, 3, 4, 5, 6];
+
+	const dates = Days.map((shift) => {
+		const date = DateTime.local().startOf('day').plus({ days: shift });
+		return date.toLocaleString({ weekday: 'short' });
+	});
+
+	// track the destination forecast index
+	let destIndex = 0;
+	const forecast = [];
+	fullForecast.forEach((period) => {
+		// create the destination object if necessary
+		if (!forecast[destIndex]) {
+			forecast.push({
+				dayName: '', low: undefined, high: undefined, text: undefined, icon: undefined,
+			});
+		}
+		// get the object to modify/populate
+		const fDay = forecast[destIndex];
+		// high temperature will always be last in the source array so it will overwrite the low values assigned below
+		fDay.icon = getWeatherIconFromIconLink(period.icon);
+		fDay.text = shortenExtendedForecastText(period.shortForecast);
+		fDay.dayName = dates[destIndex];
+
+		// preload the icon
+		preloadImg(fDay.icon);
+
+		if (period.isDaytime) {
+			// day time is the high temperature
+			fDay.high = period.temperature;
+			destIndex += 1;
+		} else {
+			// low temperature
+			fDay.low = period.temperature;
+		}
+	});
+
+	return forecast;
+};
+
+const shortenExtendedForecastText = (long) => {
+	const regexList = [
+		[/ and /ig, ' '],
+		[/Slight /ig, ''],
+		[/Chance /ig, ''],
+		[/Very /ig, ''],
+		[/Patchy /ig, ''],
+		[/Areas /ig, ''],
+		[/Dense /ig, ''],
+		[/Thunderstorm/g, 'T\'Storm'],
+	];
+		// run all regexes
+	const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
+
+	let conditions = short.split(' ');
+	if (short.indexOf('then') !== -1) {
+		conditions = short.split(' then ');
+		conditions = conditions[1].split(' ');
+	}
+
+	let short1 = conditions[0].substr(0, 10);
+	let short2 = '';
+	if (conditions[1]) {
+		if (!short1.endsWith('.')) {
+			short2 = conditions[1].substr(0, 10);
+		} else {
+			short1 = short1.replace(/\./, '');
+		}
+
+		if (short2 === 'Blowing') {
+			short2 = '';
+		}
+	}
+	let result = short1;
+	if (short2 !== '') {
+		result += ` ${short2}`;
+	}
+
+	return result;
+};
 
 // register display
 registerDisplay(new ExtendedForecast(7, 'extended-forecast'));

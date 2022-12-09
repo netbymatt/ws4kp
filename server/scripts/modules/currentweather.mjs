@@ -128,7 +128,7 @@ class CurrentWeather extends WeatherDisplay {
 
 		let Conditions = data.observations.textDescription;
 		if (Conditions.length > 15) {
-			Conditions = CurrentWeather.shortConditions(Conditions);
+			Conditions = shortConditions(Conditions);
 		}
 		fill.condition = Conditions;
 
@@ -170,26 +170,27 @@ class CurrentWeather extends WeatherDisplay {
 			this.getDataCallbacks.push(() => resolve(this.parseData()));
 		});
 	}
-
-	static shortConditions(_condition) {
-		let condition = _condition;
-		condition = condition.replace(/Light/g, 'L');
-		condition = condition.replace(/Heavy/g, 'H');
-		condition = condition.replace(/Partly/g, 'P');
-		condition = condition.replace(/Mostly/g, 'M');
-		condition = condition.replace(/Few/g, 'F');
-		condition = condition.replace(/Thunderstorm/g, 'T\'storm');
-		condition = condition.replace(/ in /g, '');
-		condition = condition.replace(/Vicinity/g, '');
-		condition = condition.replace(/ and /g, ' ');
-		condition = condition.replace(/Freezing Rain/g, 'Frz Rn');
-		condition = condition.replace(/Freezing/g, 'Frz');
-		condition = condition.replace(/Unknown Precip/g, '');
-		condition = condition.replace(/L Snow Fog/g, 'L Snw/Fog');
-		condition = condition.replace(/ with /g, '/');
-		return condition;
-	}
 }
+
+const shortConditions = (_condition) => {
+	let condition = _condition;
+	condition = condition.replace(/Light/g, 'L');
+	condition = condition.replace(/Heavy/g, 'H');
+	condition = condition.replace(/Partly/g, 'P');
+	condition = condition.replace(/Mostly/g, 'M');
+	condition = condition.replace(/Few/g, 'F');
+	condition = condition.replace(/Thunderstorm/g, 'T\'storm');
+	condition = condition.replace(/ in /g, '');
+	condition = condition.replace(/Vicinity/g, '');
+	condition = condition.replace(/ and /g, ' ');
+	condition = condition.replace(/Freezing Rain/g, 'Frz Rn');
+	condition = condition.replace(/Freezing/g, 'Frz');
+	condition = condition.replace(/Unknown Precip/g, '');
+	condition = condition.replace(/L Snow Fog/g, 'L Snw/Fog');
+	condition = condition.replace(/ with /g, '/');
+	return condition;
+};
+
 const display = new CurrentWeather(0, 'current-weather');
 registerDisplay(display);
 
