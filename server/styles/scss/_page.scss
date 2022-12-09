@@ -73,7 +73,10 @@ button {
 .autocomplete-suggestions {
 	background-color: #ffffff;
 	border: 1px solid #000000;
-	/*overflow: auto;*/
+
+	@media (prefers-color-scheme: dark) {
+		background-color: #000000;
+	}
 }
 
 .autocomplete-suggestion {

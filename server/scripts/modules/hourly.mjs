@@ -43,72 +43,12 @@ class Hourly extends WeatherDisplay {
 			return;
 		}
 
-		this.data = await Hourly.parseForecast(forecast.properties);
+		this.data = await parseForecast(forecast.properties);
 		this.getDataCallback();
 		if (!superResponse) return;
 
 		this.setStatus(STATUS.loaded);
 		this.drawLongCanvas();
-	}
-
-	// extract specific values from forecast and format as an array
-	static async parseForecast(data) {
-		const temperature = Hourly.expand(data.temperature.values);
-		const apparentTemperature = Hourly.expand(data.apparentTemperature.values);
-		const windSpeed = Hourly.expand(data.windSpeed.values);
-		const windDirection = Hourly.expand(data.windDirection.values);
-		const skyCover = Hourly.expand(data.skyCover.values);	// cloud icon
-		const weather = Hourly.expand(data.weather.values);	// fog icon
-		const iceAccumulation = Hourly.expand(data.iceAccumulation.values); 	// ice icon
-		const probabilityOfPrecipitation = Hourly.expand(data.probabilityOfPrecipitation.values);	// rain icon
-		const snowfallAmount = Hourly.expand(data.snowfallAmount.values);	// snow icon
-
-		const icons = await Hourly.determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
-
-		return temperature.map((val, idx) => ({
-			temperature: celsiusToFahrenheit(temperature[idx]),
-			apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
-			windSpeed: kilometersToMiles(windSpeed[idx]),
-			windDirection: directionToNSEW(windDirection[idx]),
-			probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
-			skyCover: skyCover[idx],
-			icon: icons[idx],
-		}));
-	}
-
-	// given forecast paramaters determine a suitable icon
-	static async determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) {
-		const startOfHour = DateTime.local().startOf('hour');
-		const sunTimes = (await getSun()).sun;
-		const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
-		const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
-		return skyCover.map((val, idx) => {
-			const hour = startOfHour.plus({ hours: idx });
-			const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-			return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
-		});
-	}
-
-	// expand a set of values with durations to an hour-by-hour array
-	static expand(data) {
-		const startOfHour = DateTime.utc().startOf('hour').toMillis();
-		const result = []; // resulting expanded values
-		data.forEach((item) => {
-			let startTime = Date.parse(item.validTime.substr(0, item.validTime.indexOf('/')));
-			const duration = Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
-			const endTime = startTime + duration;
-			// loop through duration at one hour intervals
-			do {
-				// test for timestamp greater than now
-				if (startTime >= startOfHour && result.length < 24) {
-					result.push(item.value); // push data array
-				} // timestamp is after now
-				// increment start time by 1 hour
-				startTime += 3600000;
-			} while (startTime < endTime && result.length < 24);
-		}); // for each value
-
-		return result;
 	}
 
 	async drawLongCanvas() {
@@ -178,19 +118,6 @@ class Hourly extends WeatherDisplay {
 		this.elem.querySelector('.main').scrollTo(0, offsetY);
 	}
 
-	static getTravelCitiesDayName(cities) {
-		// effectively returns early on the first found date
-		return cities.reduce((dayName, city) => {
-			if (city && dayName === '') {
-				// today or tomorrow
-				const day = DateTime.local().plus({ days: (city.today) ? 0 : 1 });
-				// return the day
-				return day.toLocaleString({ weekday: 'long' });
-			}
-			return dayName;
-		}, '');
-	}
-
 	// make data available outside this class
 	// promise allows for data to be requested before it is available
 	async getCurrentData() {
@@ -201,6 +128,66 @@ class Hourly extends WeatherDisplay {
 		});
 	}
 }
+
+// extract specific values from forecast and format as an array
+const parseForecast = async (data) => {
+	const temperature = expand(data.temperature.values);
+	const apparentTemperature = expand(data.apparentTemperature.values);
+	const windSpeed = expand(data.windSpeed.values);
+	const windDirection = expand(data.windDirection.values);
+	const skyCover = expand(data.skyCover.values);	// cloud icon
+	const weather = expand(data.weather.values);	// fog icon
+	const iceAccumulation = expand(data.iceAccumulation.values); 	// ice icon
+	const probabilityOfPrecipitation = expand(data.probabilityOfPrecipitation.values);	// rain icon
+	const snowfallAmount = expand(data.snowfallAmount.values);	// snow icon
+
+	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
+
+	return temperature.map((val, idx) => ({
+		temperature: celsiusToFahrenheit(temperature[idx]),
+		apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
+		windSpeed: kilometersToMiles(windSpeed[idx]),
+		windDirection: directionToNSEW(windDirection[idx]),
+		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
+		skyCover: skyCover[idx],
+		icon: icons[idx],
+	}));
+};
+
+// given forecast paramaters determine a suitable icon
+const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) => {
+	const startOfHour = DateTime.local().startOf('hour');
+	const sunTimes = (await getSun()).sun;
+	const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
+	const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
+	return skyCover.map((val, idx) => {
+		const hour = startOfHour.plus({ hours: idx });
+		const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
+		return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
+	});
+};
+
+// expand a set of values with durations to an hour-by-hour array
+const expand = (data) => {
+	const startOfHour = DateTime.utc().startOf('hour').toMillis();
+	const result = []; // resulting expanded values
+	data.forEach((item) => {
+		let startTime = Date.parse(item.validTime.substr(0, item.validTime.indexOf('/')));
+		const duration = Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
+		const endTime = startTime + duration;
+		// loop through duration at one hour intervals
+		do {
+			// test for timestamp greater than now
+			if (startTime >= startOfHour && result.length < 24) {
+				result.push(item.value); // push data array
+			} // timestamp is after now
+			// increment start time by 1 hour
+			startTime += 3600000;
+		} while (startTime < endTime && result.length < 24);
+	}); // for each value
+
+	return result;
+};
 
 // register display
 const display = new Hourly(2, 'hourly', false);

@@ -133,7 +133,7 @@ class Almanac extends WeatherDisplay {
 
 			fill.date = date;
 			fill.type = MoonPhase.phase;
-			fill.icon = { type: 'img', src: Almanac.imageName(MoonPhase.Phase) };
+			fill.icon = { type: 'img', src: imageName(MoonPhase.Phase) };
 
 			return this.fillTemplate('day', fill);
 		});
@@ -143,20 +143,6 @@ class Almanac extends WeatherDisplay {
 		daysContainer.append(...days);
 
 		this.finishDraw();
-	}
-
-	static imageName(type) {
-		switch (type) {
-		case 'Full':
-			return 'images/2/Full-Moon.gif';
-		case 'Last':
-			return 'images/2/Last-Quarter.gif';
-		case 'New':
-			return 'images/2/New-Moon.gif';
-		case 'First':
-		default:
-			return 'images/2/First-Quarter.gif';
-		}
 	}
 
 	// make sun and moon data available outside this class
@@ -169,6 +155,20 @@ class Almanac extends WeatherDisplay {
 		});
 	}
 }
+
+const imageName = (type) => {
+	switch (type) {
+	case 'Full':
+		return 'images/2/Full-Moon.gif';
+	case 'Last':
+		return 'images/2/Last-Quarter.gif';
+	case 'New':
+		return 'images/2/New-Moon.gif';
+	case 'First':
+	default:
+		return 'images/2/First-Quarter.gif';
+	}
+};
 
 // register display
 const display = new Almanac(8, 'almanac');
