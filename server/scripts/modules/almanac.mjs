@@ -133,7 +133,7 @@ class Almanac extends WeatherDisplay {
 
 			fill.date = date;
 			fill.type = MoonPhase.phase;
-			fill.icon = { type: 'img', src: imageName(MoonPhase.Phase) };
+			fill.icon = { type: 'img', src: imageName(MoonPhase.phase) };
 
 			return this.fillTemplate('day', fill);
 		});
