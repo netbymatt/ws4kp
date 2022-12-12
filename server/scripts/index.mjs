@@ -8,9 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
 
-const overrides = {};
-
-let AutoSelectQuery = false;
 let FullScreenOverride = false;
 
 const categories = [
@@ -58,21 +55,12 @@ const init = () => {
 			maxSuggestions: 10,
 		},
 		dataType: 'json',
-		transformResult: (response) => {
-			if (AutoSelectQuery) {
-				AutoSelectQuery = false;
-				window.setTimeout(() => {
-					$(ac.suggestionsContainer.children[0]).click();
-				}, 1);
-			}
-
-			return {
-				suggestions: $.map(response.suggestions, (i) => ({
-					value: i.text,
-					data: i.magicKey,
-				})),
-			};
-		},
+		transformResult: (response) => ({
+			suggestions: $.map(response.suggestions, (i) => ({
+				value: i.text,
+				data: i.magicKey,
+			})),
+		}),
 		minChars: 3,
 		showNoSuggestionNotice: true,
 		noSuggestionNotice: 'No results found. Please try a different search string.',
@@ -88,12 +76,11 @@ const init = () => {
 
 	// Auto load the previous query
 	const TwcQuery = localStorage.getItem('TwcQuery');
-	if (TwcQuery) {
-		AutoSelectQuery = true;
+	const TwcLatLong = localStorage.getItem('TwcLatLon');
+	if (TwcQuery && TwcLatLong) {
 		const txtAddress = document.getElementById('txtAddress');
 		txtAddress.value = TwcQuery;
-		txtAddress.blur();
-		txtAddress.focus();
+		LoadTwcData(JSON.parse(TwcLatLong));
 	}
 
 	const TwcPlay = localStorage.getItem('TwcPlay');
@@ -118,6 +105,7 @@ const init = () => {
 		postMessage('navButton', 'play');
 
 		localStorage.removeItem('TwcQuery');
+		localStorage.removeItem('TwcLatLon');
 	});
 
 	// swipe functionality
@@ -129,31 +117,30 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 	// Do not auto get the same city twice.
 	if (elem.previousSuggestionValue === suggestion.value) return;
 
-	if (overrides[suggestion.value]) {
-		doRedirectToGeometry(overrides[suggestion.value]);
-	} else {
-		const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
-			data: {
-				text: suggestion.value,
-				magicKey: suggestion.data,
-				f: 'json',
-			},
-		});
+	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
+		data: {
+			text: suggestion.value,
+			magicKey: suggestion.data,
+			f: 'json',
+		},
+	});
 
-		const loc = data.locations[0];
-		if (loc) {
-			doRedirectToGeometry(loc.feature.geometry);
-		} else {
-			console.error('An unexpected error occurred. Please try a different search string.');
-		}
+	const loc = data.locations[0];
+	if (loc) {
+		doRedirectToGeometry(loc.feature.geometry);
+	} else {
+		console.error('An unexpected error occurred. Please try a different search string.');
 	}
 };
 
 const doRedirectToGeometry = (geom) => {
 	const latLon = { lat: Math.round2(geom.y, 4), lon: Math.round2(geom.x, 4) };
-	LoadTwcData(latLon);
 	// Save the query
 	localStorage.setItem('TwcQuery', document.getElementById('txtAddress').value);
+	localStorage.setItem('TwcLatLon', JSON.stringify(latLon));
+
+	// get the data
+	LoadTwcData(latLon);
 };
 
 const btnFullScreenClick = () => {
