@@ -100,8 +100,11 @@ const updateStatus = (value) => {
 	if (!progress) return;
 	progress.drawCanvas(displays, countLoadedDisplays());
 
+	// calculate first enabled display
+	const firstDisplayIndex = displays.findIndex((display) => display.enabled);
+
 	// if this is the first display and we're playing, load it up so it starts playing
-	if (isPlaying() && value.id === 0 && value.status === STATUS.loaded) {
+	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
 	}
 
