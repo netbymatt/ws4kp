@@ -11,6 +11,7 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
+import { getPoint } from './utils/weather.mjs';
 
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -73,12 +74,13 @@ class RegionalForecast extends WeatherDisplay {
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
 		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
 			try {
-				if (!city.point) throw new Error('No pre-loaded point');
+				const point = city?.point ?? (await getAndFormatPoint(city.lat, city.lon));
+				if (!point) throw new Error('No pre-loaded point');
 
 				// start off the observation task
-				const observationPromise = utils.getRegionalObservation(city.point, city);
+				const observationPromise = utils.getRegionalObservation(point, city);
 
-				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
+				const forecast = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
 
 				// get XY on map for city
 				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, weatherParameters.state);
@@ -191,6 +193,15 @@ class RegionalForecast extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+const getAndFormatPoint = async (lat, lon) => {
+	const point = await getPoint(lat, lon);
+	return {
+		x: point.properties.gridX,
+		y: point.properties.gridY,
+		wfo: point.properties.gridId,
+	};
+};
 
 // register display
 registerDisplay(new RegionalForecast(5, 'regional-forecast'));

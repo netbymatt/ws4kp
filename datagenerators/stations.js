@@ -4,43 +4,61 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('./https');
+const states = require('./stations-states');
+const chunk = require('./chunk');
 
 // immediately invoked function so we can access async/await
 const start = async () => {
-	// load the list of states
-	const states = ['AK', 'NC', 'VA', 'TX', 'GA', 'PR'];
-	// const states = require('./stations-states.js');
+	// chunk the list of states
+	const chunkStates = chunk(states, 5);
 
+	// store output
 	const output = {};
-	// loop through states
-	await Promise.all(states.map(async (state) => {
-		try {
-			// get list and parse the JSON
-			const stationsRaw = await https(`https://api.weather.gov/stations?state=${state}`);
-			const stationsAll = JSON.parse(stationsRaw).features;
-			// filter stations for 4 letter identifiers
-			const stations = stationsAll.filter((station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/));
-			// add each resulting station to the output
-			stations.forEach((station) => {
-				const id = station.properties.stationIdentifier;
-				if (output[id]) {
-					console.log(`Duplicate station: ${state}-${id}`);
-					return;
+
+	// process all chunks
+	for (let i = 0; i < chunkStates.length; i += 1) {
+		const stateChunk = chunkStates[i];
+		// loop through states
+
+		stateChunk.forEach(async (state) => {
+			try {
+				let stations;
+				let next = `https://api.weather.gov/stations?state=${state}`;
+				do {
+				// get list and parse the JSON
+					// eslint-disable-next-line no-await-in-loop
+					const stationsRaw = await https(next);
+					stations = JSON.parse(stationsRaw);
+					// filter stations for 4 letter identifiers
+					const stationsFiltered = stations.features.filter((station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/));
+					// add each resulting station to the output
+					stationsFiltered.forEach((station) => {
+						const id = station.properties.stationIdentifier;
+						if (output[id]) {
+							console.log(`Duplicate station: ${state}-${id}`);
+							return;
+						}
+						output[id] = {
+							id,
+							city: station.properties.name,
+							state,
+							lat: station.geometry.coordinates[1],
+							lon: station.geometry.coordinates[0],
+						};
+					});
+					next = stations?.pagination?.next;
+					// write the output
+					fs.writeFileSync(path.join(__dirname, 'output/stations.json'), JSON.stringify(output, null, 2));
 				}
-				output[id] = {
-					id,
-					city: station.properties.name,
-					state,
-					lat: station.geometry.coordinates[1],
-					lon: station.geometry.coordinates[0],
-				};
-			});
-			console.log(`Complete: ${state}`);
-		} catch (e) {
-			console.error(`Unable to get state: ${state}`);
-			return false;
-		}
-	}));
+				while (next && stations.features.length > 0);
+				console.log(`Complete: ${state}`);
+				return true;
+			} catch (e) {
+				console.error(`Unable to get state: ${state}`);
+				return false;
+			}
+		});
+	}
 
 	// write the output
 	fs.writeFileSync(path.join(__dirname, 'output/stations.js'), JSON.stringify(output, null, 2));
