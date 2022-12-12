@@ -3,12 +3,13 @@ import noSleep from './modules/utils/nosleep.mjs';
 import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
 } from './modules/navigation.mjs';
+import { round2 } from './modules/utils/units.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
 
-let FullScreenOverride = false;
+let fullScreenOverride = false;
 
 const categories = [
 	'Land Features',
@@ -27,7 +28,7 @@ const init = () => {
 		e.target.select();
 	});
 
-	registerRefreshData(LoadTwcData);
+	registerRefreshData(loadData);
 
 	document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenuClick);
 	document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
@@ -38,11 +39,11 @@ const init = () => {
 	document.getElementById('btnGetGps').addEventListener('click', btnGetGpsClick);
 
 	document.getElementById('divTwc').addEventListener('click', () => {
-		if (document.fullscreenElement) UpdateFullScreenNavigate();
+		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
 
 	document.addEventListener('keydown', documentKeydown);
-	document.addEventListener('touchmove', (e) => { if (FullScreenOverride) e.preventDefault(); });
+	document.addEventListener('touchmove', (e) => { if (fullScreenOverride) e.preventDefault(); });
 
 	$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -56,7 +57,7 @@ const init = () => {
 		},
 		dataType: 'json',
 		transformResult: (response) => ({
-			suggestions: $.map(response.suggestions, (i) => ({
+			suggestions: response.suggestions.map((i) => ({
 				value: i.text,
 				data: i.magicKey,
 			})),
@@ -68,23 +69,23 @@ const init = () => {
 		width: 490,
 	});
 
-	const ac = $('#frmGetLatLng #txtAddress').devbridgeAutocomplete();
 	$('#frmGetLatLng').on('submit', () => {
-		if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).click();
+		const ac = $('#frmGetLatLng #txtAddress').devbridgeAutocomplete();
+		if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).trigger('click');
 		return false;
 	});
 
 	// Auto load the previous query
-	const TwcQuery = localStorage.getItem('TwcQuery');
-	const TwcLatLong = localStorage.getItem('TwcLatLon');
-	if (TwcQuery && TwcLatLong) {
+	const query = localStorage.getItem('latLonQuery');
+	const latLon = localStorage.getItem('latLonLon');
+	if (query && latLon) {
 		const txtAddress = document.getElementById('txtAddress');
-		txtAddress.value = TwcQuery;
-		LoadTwcData(JSON.parse(TwcLatLong));
+		txtAddress.value = query;
+		loadData(JSON.parse(latLon));
 	}
 
-	const TwcPlay = localStorage.getItem('TwcPlay');
-	if (TwcPlay === null || TwcPlay === 'true') postMessage('navButton', 'play');
+	const twcPlay = localStorage.getItem('play');
+	if (twcPlay === null || twcPlay === 'true') postMessage('navButton', 'play');
 
 	document.getElementById('btnClearQuery').addEventListener('click', () => {
 		document.getElementById('spanCity').innerHTML = '';
@@ -93,19 +94,14 @@ const init = () => {
 		document.getElementById('spanRadarId').innerHTML = '';
 		document.getElementById('spanZoneId').innerHTML = '';
 
-		localStorage.removeItem('TwcScrollText');
-		localStorage.removeItem('TwcScrollTextChecked');
-
 		document.getElementById('chkAutoRefresh').checked = true;
-		localStorage.removeItem('TwcAutoRefresh');
+		localStorage.removeItem('autoRefresh');
 
-		document.getElementById('radEnglish').checked = true;
-
-		localStorage.removeItem('TwcPlay');
+		localStorage.removeItem('play');
 		postMessage('navButton', 'play');
 
-		localStorage.removeItem('TwcQuery');
-		localStorage.removeItem('TwcLatLon');
+		localStorage.removeItem('latLonQuery');
+		localStorage.removeItem('latLonLon');
 	});
 
 	// swipe functionality
@@ -134,20 +130,20 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 };
 
 const doRedirectToGeometry = (geom) => {
-	const latLon = { lat: Math.round2(geom.y, 4), lon: Math.round2(geom.x, 4) };
+	const latLon = { lat: round2(geom.y, 4), lon: round2(geom.x, 4) };
 	// Save the query
-	localStorage.setItem('TwcQuery', document.getElementById('txtAddress').value);
-	localStorage.setItem('TwcLatLon', JSON.stringify(latLon));
+	localStorage.setItem('latLonQuery', document.getElementById('txtAddress').value);
+	localStorage.setItem('latLonLon', JSON.stringify(latLon));
 
 	// get the data
-	LoadTwcData(latLon);
+	loadData(latLon);
 };
 
 const btnFullScreenClick = () => {
 	if (!document.fullscreenElement) {
-		EnterFullScreen();
+		enterFullScreen();
 	} else {
-		ExitFullscreen();
+		exitFullscreen();
 	}
 
 	if (isPlaying()) {
@@ -156,12 +152,12 @@ const btnFullScreenClick = () => {
 		noSleep(false);
 	}
 
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 
 	return false;
 };
 
-const EnterFullScreen = () => {
+const enterFullScreen = () => {
 	const element = document.getElementById('divTwc');
 
 	// Supports most browsers and their versions.
@@ -174,10 +170,10 @@ const EnterFullScreen = () => {
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
-		FullScreenOverride = true;
+		fullScreenOverride = true;
 	}
 	resize();
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 
 	// change hover text and image
 	const img = document.getElementById('ToggleFullScreen');
@@ -185,11 +181,11 @@ const EnterFullScreen = () => {
 	img.title = 'Exit fullscreen';
 };
 
-const ExitFullscreen = () => {
+const exitFullscreen = () => {
 	// exit full-screen
 
-	if (FullScreenOverride) {
-		FullScreenOverride = false;
+	if (fullScreenOverride) {
+		fullScreenOverride = false;
 	}
 
 	if (document.exitFullscreen) {
@@ -211,15 +207,15 @@ const ExitFullscreen = () => {
 
 const btnNavigateMenuClick = () => {
 	postMessage('navButton', 'menu');
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 	return false;
 };
 
-const LoadTwcData = (_latLon) => {
+const loadData = (_latLon) => {
 	// if latlon is provided store it locally
-	if (_latLon) LoadTwcData.latLon = _latLon;
+	if (_latLon) loadData.latLon = _latLon;
 	// get the data
-	const { latLon } = LoadTwcData;
+	const { latLon } = loadData;
 	// if there's no data stop
 	if (!latLon) return;
 
@@ -243,39 +239,39 @@ const swipeCallBack = (direction) => {
 
 const btnNavigateRefreshClick = () => {
 	resetStatuses();
-	LoadTwcData();
-	UpdateFullScreenNavigate();
+	loadData();
+	updateFullScreenNavigate();
 
 	return false;
 };
 
 const btnNavigateNextClick = () => {
 	postMessage('navButton', 'next');
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 
 	return false;
 };
 
 const btnNavigatePreviousClick = () => {
 	postMessage('navButton', 'previous');
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 
 	return false;
 };
 
-let NavigateFadeIntervalId = null;
+let navigateFadeIntervalId = null;
 
-const UpdateFullScreenNavigate = () => {
+const updateFullScreenNavigate = () => {
 	document.activeElement.blur();
 	document.getElementById('divTwcBottom').classList.remove('hidden');
 	document.getElementById('divTwcBottom').classList.add('visible');
 
-	if (NavigateFadeIntervalId) {
-		clearTimeout(NavigateFadeIntervalId);
-		NavigateFadeIntervalId = null;
+	if (navigateFadeIntervalId) {
+		clearTimeout(navigateFadeIntervalId);
+		navigateFadeIntervalId = null;
 	}
 
-	NavigateFadeIntervalId = setTimeout(() => {
+	navigateFadeIntervalId = setTimeout(() => {
 		if (document.fullscreenElement) {
 			document.getElementById('divTwcBottom').classList.remove('visible');
 			document.getElementById('divTwcBottom').classList.add('hidden');
@@ -324,11 +320,9 @@ const documentKeydown = (e) => {
 	return false;
 };
 
-Math.round2 = (value, decimals) => Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
-
 const btnNavigatePlayClick = () => {
 	postMessage('navButton', 'playToggle');
-	UpdateFullScreenNavigate();
+	updateFullScreenNavigate();
 
 	return false;
 };
@@ -363,13 +357,13 @@ const btnGetGpsClick = async () => {
 	const { City } = data.address;
 	const State = states.getTwoDigitCode(data.address.Region);
 	const Country = data.address.CountryCode;
-	const TwcQuery = `${ZipCode}, ${City}, ${State}, ${Country}`;
+	const query = `${ZipCode}, ${City}, ${State}, ${Country}`;
 
 	const txtAddress = document.getElementById('txtAddress');
-	txtAddress.value = TwcQuery;
+	txtAddress.value = query;
 	txtAddress.blur();
 	txtAddress.focus();
 
 	// Save the query
-	localStorage.setItem('TwcQuery', TwcQuery);
+	localStorage.setItem('latLonQuery', query);
 };

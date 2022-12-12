@@ -1,6 +1,6 @@
 // *********************************** unit conversions ***********************
 
-const round2 = (value, decimals) => Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
+const round2 = (value, decimals) => Math.trunc(value * 10 ** decimals) / 10 ** decimals;
 
 const kphToMph = (Kph) => Math.round(Kph / 1.60934);
 const celsiusToFahrenheit = (Celsius) => Math.round((Celsius * 9) / 5 + 32);
@@ -14,4 +14,5 @@ export {
 	kilometersToMiles,
 	metersToFeet,
 	pascalToInHg,
+	round2,
 };
