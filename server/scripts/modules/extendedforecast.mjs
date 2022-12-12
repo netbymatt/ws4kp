@@ -28,6 +28,8 @@ class ExtendedForecast extends WeatherDisplay {
 				data: {
 					units: 'us',
 				},
+				retryCount: 3,
+				stillWaiting: () => this.stillWaiting(),
 			});
 		} catch (e) {
 			console.error('Unable to get extended forecast');

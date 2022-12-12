@@ -37,7 +37,8 @@
 					padding-left: 4px;
 				}
 
-				.loading {
+				.loading,
+				.retrying {
 					color: #ffff00;
 				}
 
@@ -58,23 +59,12 @@
 					color: #C0C0C0;
 				}
 
-				&.loading .loading {
-					display: block;
-				}
-
-				&.press-here .press-here {
-					display: block;
-				}
-
-				&.failed .failed {
-					display: block;
-				}
-
-				&.no-data .no-data {
-					display: block;
-				}
-
-				&.disabled .disabled {
+				&.loading .loading,
+				&.press-here .press-here,
+				&.failed .failed,
+				&.no-data .no-data,
+				&.disabled .disabled,
+				&.retrying .retrying {
 					display: block;
 				}
 

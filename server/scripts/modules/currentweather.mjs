@@ -19,7 +19,8 @@ class CurrentWeather extends WeatherDisplay {
 	}
 
 	async getData(_weatherParameters) {
-		if (!super.getData(_weatherParameters)) return;
+		// always load the data for use in the lower scroll
+		const superResult = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// Load the observations
@@ -39,6 +40,8 @@ class CurrentWeather extends WeatherDisplay {
 					data: {
 						limit: 2,
 					},
+					retryCount: 3,
+					stillWaiting: () => this.stillWaiting(),
 				});
 
 				// test data quality
@@ -60,14 +63,17 @@ class CurrentWeather extends WeatherDisplay {
 			this.getDataCallback(undefined);
 			return;
 		}
-		// preload the icon
-		preloadImg(getWeatherIconFromIconLink(observations.features[0].properties.icon));
 
 		// we only get here if there was no error above
 		this.data = { ...observations, station };
-		this.setStatus(STATUS.loaded);
-
 		this.getDataCallback();
+
+		// stop here if we're disabled
+		if (!superResult) return;
+
+		// preload the icon
+		preloadImg(getWeatherIconFromIconLink(observations.features[0].properties.icon));
+		this.setStatus(STATUS.loaded);
 	}
 
 	// format the data for use outside this function
@@ -163,7 +169,8 @@ class CurrentWeather extends WeatherDisplay {
 
 	// make data available outside this class
 	// promise allows for data to be requested before it is available
-	async getCurrentWeather() {
+	async getCurrentWeather(stillWaiting) {
+		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
 		return new Promise((resolve) => {
 			if (this.data) resolve(this.parseData());
 			// data not available, put it into the data callback queue

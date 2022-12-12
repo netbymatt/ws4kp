@@ -17,6 +17,7 @@ class WeatherDisplay {
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
 		this.getDataCallbacks = [];
+		this.stillWaitingCallbacks = [];
 		this.defaultEnabled = defaultEnabled;
 		this.okToDrawCurrentConditions = true;
 		this.okToDrawCurrentDateTime = true;
@@ -391,6 +392,14 @@ class WeatherDisplay {
 		});
 
 		return template;
+	}
+
+	// still waiting for data (retries triggered)
+	stillWaiting() {
+		if (this.enabled) this.setStatus(STATUS.retrying);
+		// handle still waiting callbacks
+		this.stillWaitingCallbacks.forEach((callback) => callback());
+		this.stillWaitingCallbacks = [];
 	}
 }
 

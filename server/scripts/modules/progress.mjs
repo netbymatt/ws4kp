@@ -55,6 +55,9 @@ class Progress extends WeatherDisplay {
 			case STATUS.disabled:
 				statusClass = 'disabled';
 				break;
+			case STATUS.retrying:
+				statusClass = 'retrying';
+				break;
 			default:
 			}
 

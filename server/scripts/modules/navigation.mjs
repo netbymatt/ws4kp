@@ -98,7 +98,7 @@ const getWeather = async (latLon) => {
 const updateStatus = (value) => {
 	if (value.id < 0) return;
 	if (!progress) return;
-	progress.drawCanvas(displays, countLoadedCanvases());
+	progress.drawCanvas(displays, countLoadedDisplays());
 
 	// if this is the first display and we're playing, load it up so it starts playing
 	if (isPlaying() && value.id === 0 && value.status === STATUS.loaded) {
@@ -106,13 +106,16 @@ const updateStatus = (value) => {
 	}
 
 	// send loaded messaged to parent
-	if (countLoadedCanvases() < displays.length) return;
+	if (countLoadedDisplays() < displays.length) return;
 
 	// everything loaded, set timestamps
 	AssignLastUpdate(new Date());
 };
 
-const countLoadedCanvases = () => displays.reduce((acc, display) => {
+// note: a display that is "still waiting"/"retrying" is considered loaded intentionally
+// the weather.gov api has long load times for some products when you are the first
+// requester for the product after the cache expires
+const countLoadedDisplays = () => displays.reduce((acc, display) => {
 	if (display.status !== STATUS.loading) return acc + 1;
 	return acc;
 }, 0);

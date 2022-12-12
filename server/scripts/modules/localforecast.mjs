@@ -63,6 +63,8 @@ class LocalForecast extends WeatherDisplay {
 				data: {
 					units: 'us',
 				},
+				retryCount: 3,
+				stillWaiting: () => this.stillWaiting(),
 			});
 		} catch (e) {
 			console.error(`GetWeatherForecast failed: ${weatherParameters.forecast}`);

@@ -33,7 +33,7 @@ class Hourly extends WeatherDisplay {
 		let forecast;
 		try {
 			// get the forecast
-			forecast = await json(weatherParameters.forecastGridData);
+			forecast = await json(weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
 		} catch (e) {
 			console.error('Get hourly forecast failed');
 			console.error(e.status, e.responseJSON);
@@ -120,7 +120,8 @@ class Hourly extends WeatherDisplay {
 
 	// make data available outside this class
 	// promise allows for data to be requested before it is available
-	async getCurrentData() {
+	async getCurrentData(stillWaiting) {
+		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
 		return new Promise((resolve) => {
 			if (this.data) resolve(this.data);
 			// data not available, put it into the data callback queue
