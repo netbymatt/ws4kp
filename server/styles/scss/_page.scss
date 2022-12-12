@@ -306,17 +306,21 @@ jsgif {
 	align-items: center;
 	text-align: center;
 	justify-content: center;
-}
 
-#loading .title {
-	font-family: Star4000 Large;
-	font-size: 36px;
-	color: yellow;
-	margin-bottom: 40px;
-}
+	.title {
+		font-family: Star4000 Large;
+		font-size: 36px;
+		color: yellow;
+		margin-bottom: 0px;
+	}
 
-#loading .instructions {
-	font-size: 18pt;
+	.version {
+		margin-bottom: 35px;
+	}
+
+	.instructions {
+		font-size: 18pt;
+	}
 }
 
 .heading {
