@@ -377,3 +377,11 @@ jsgif {
 	opacity: 0;
 	transition: visibility 0s 1s, opacity 1s linear
 }
+
+.github-links {
+	width: 610px;
+	max-width: calc(100vw - 30px);
+	display: flex;
+	justify-content: space-evenly;
+	flex-wrap: wrap;
+}
