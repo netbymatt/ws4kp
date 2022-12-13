@@ -36,7 +36,9 @@ const init = () => {
 	document.getElementById('NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
 	document.getElementById('NavigatePlay').addEventListener('click', btnNavigatePlayClick);
 	document.getElementById('ToggleFullScreen').addEventListener('click', btnFullScreenClick);
-	document.getElementById('btnGetGps').addEventListener('click', btnGetGpsClick);
+	const btnGetGps = document.getElementById('btnGetGps');
+	btnGetGps.addEventListener('click', btnGetGpsClick);
+	if (!navigator.geolocation) btnGetGps.style.display = 'none';
 
 	document.getElementById('divTwc').addEventListener('click', () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
@@ -77,11 +79,15 @@ const init = () => {
 
 	// Auto load the previous query
 	const query = localStorage.getItem('latLonQuery');
-	const latLon = localStorage.getItem('latLonLon');
-	if (query && latLon) {
+	const latLon = localStorage.getItem('latLon');
+	const fromGPS = localStorage.getItem('latLonFromGPS');
+	if (query && latLon && !fromGPS) {
 		const txtAddress = document.getElementById('txtAddress');
 		txtAddress.value = query;
 		loadData(JSON.parse(latLon));
+	}
+	if (fromGPS) {
+		btnGetGpsClick();
 	}
 
 	const twcPlay = localStorage.getItem('play');
@@ -101,7 +107,9 @@ const init = () => {
 		postMessage('navButton', 'play');
 
 		localStorage.removeItem('latLonQuery');
-		localStorage.removeItem('latLonLon');
+		localStorage.removeItem('latLon');
+		localStorage.removeItem('latLonFromGPS');
+		document.getElementById('btnGetGps').classList.remove('active');
 	});
 
 	// swipe functionality
@@ -129,14 +137,14 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 	}
 };
 
-const doRedirectToGeometry = (geom) => {
+const doRedirectToGeometry = (geom, haveDataCallback) => {
 	const latLon = { lat: round2(geom.y, 4), lon: round2(geom.x, 4) };
 	// Save the query
 	localStorage.setItem('latLonQuery', document.getElementById('txtAddress').value);
-	localStorage.setItem('latLonLon', JSON.stringify(latLon));
+	localStorage.setItem('latLon', JSON.stringify(latLon));
 
 	// get the data
-	loadData(latLon);
+	loadData(latLon, haveDataCallback);
 };
 
 const btnFullScreenClick = () => {
@@ -211,7 +219,7 @@ const btnNavigateMenuClick = () => {
 	return false;
 };
 
-const loadData = (_latLon) => {
+const loadData = (_latLon, haveDataCallback) => {
 	// if latlon is provided store it locally
 	if (_latLon) loadData.latLon = _latLon;
 	// get the data
@@ -221,7 +229,7 @@ const loadData = (_latLon) => {
 
 	document.getElementById('txtAddress').blur();
 	stopAutoRefreshTimer();
-	latLonReceived(latLon);
+	latLonReceived(latLon, haveDataCallback);
 };
 
 const swipeCallBack = (direction) => {
@@ -332,38 +340,39 @@ const postMessage = (type, myMessage = {}) => {
 	navMessage({ type, message: myMessage });
 };
 
+const getPosition = async () => new Promise((resolve) => {
+	navigator.geolocation.getCurrentPosition(resolve);
+});
+
 const btnGetGpsClick = async () => {
 	if (!navigator.geolocation) return;
+	const btn = document.getElementById('btnGetGps');
 
-	const position = await (() => new Promise((resolve) => {
-		navigator.geolocation.getCurrentPosition(resolve);
-	}))();
+	// toggle first
+	if (btn.classList.contains('active')) {
+		btn.classList.remove('active');
+		localStorage.removeItem('latLonFromGPS');
+		return;
+	}
+
+	// set gps active
+	btn.classList.add('active');
+
+	// get position
+	const position = await getPosition();
 	const { latitude, longitude } = position.coords;
 
-	let data;
-	try {
-		data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode', {
-			data: {
-				location: `${longitude},${latitude}`,
-				distance: 1000, // Find location up to 1 KM.
-				f: 'json',
-			},
-		});
-	} catch (e) {
-		console.error('Unable to fetch reverse geocode');
-		console.error(e.status, e.responseJSONe);
-	}
-	const ZipCode = data.address.Postal;
-	const { City } = data.address;
-	const State = states.getTwoDigitCode(data.address.Region);
-	const Country = data.address.CountryCode;
-	const query = `${ZipCode}, ${City}, ${State}, ${Country}`;
-
 	const txtAddress = document.getElementById('txtAddress');
-	txtAddress.value = query;
-	txtAddress.blur();
-	txtAddress.focus();
+	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
-	// Save the query
-	localStorage.setItem('latLonQuery', query);
+	doRedirectToGeometry({ y: latitude, x: longitude }, (point) => {
+		console.log(point);
+		const location = point.properties.relativeLocation.properties;
+		// Save the query
+		const query = `${location.city}, ${location.state}`;
+		localStorage.setItem('latLon', JSON.stringify({ lat: latitude, lon: longitude }));
+		localStorage.setItem('latLonQuery', query);
+		localStorage.setItem('latLonFromGPS', true);
+		txtAddress.value = `${location.city}, ${location.state}`;
+	});
 };

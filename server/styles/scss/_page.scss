@@ -53,19 +53,33 @@ button {
 	border: 1px solid darkgray;
 }
 
-#btnGetGps img {
+#btnGetGps {
+	img {
 
-	&.dark {
-		display: none;
+		&.dark {
+			display: none;
 
-		@media (prefers-color-scheme: dark) {
-			display: inline-block;
+			@media (prefers-color-scheme: dark) {
+				display: inline-block;
+			}
+		}
+
+		&.light {
+			@media (prefers-color-scheme: dark) {
+				display: none;
+			}
 		}
 	}
 
-	&.light {
+	&.active {
+		background-color: black;
+
 		@media (prefers-color-scheme: dark) {
-			display: none;
+			background-color: white;
+		}
+
+		img {
+			filter: invert(1);
 		}
 	}
 }

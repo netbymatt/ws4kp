@@ -49,9 +49,11 @@ const message = (data) => {
 	}
 };
 
-const getWeather = async (latLon) => {
+const getWeather = async (latLon, haveDataCallback) => {
 	// get initial weather data
 	const point = await getPoint(latLon.lat, latLon.lon);
+
+	if (typeof haveDataCallback === 'function') haveDataCallback(point);
 
 	// get stations
 	const stations = await json(point.properties.observationStations);
@@ -331,8 +333,8 @@ const AssignLastUpdate = (date) => {
 	}
 };
 
-const latLonReceived = (data) => {
-	getWeather(data);
+const latLonReceived = (data, haveDataCallback) => {
+	getWeather(data, haveDataCallback);
 	AssignLastUpdate(null);
 };
 
