@@ -131,6 +131,8 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 
 	const loc = data.locations[0];
 	if (loc) {
+		localStorage.removeItem('latLonFromGPS');
+		document.getElementById('btnGetGps').classList.remove('active');
 		doRedirectToGeometry(loc.feature.geometry);
 	} else {
 		console.error('An unexpected error occurred. Please try a different search string.');

@@ -7,6 +7,9 @@ const https = require('./https');
 const states = require('./stations-states');
 const chunk = require('./chunk');
 
+// skip stations starting with these letters
+const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
+
 // immediately invoked function so we can access async/await
 const start = async () => {
 	// chunk the list of states
@@ -30,7 +33,9 @@ const start = async () => {
 					const stationsRaw = await https(next);
 					stations = JSON.parse(stationsRaw);
 					// filter stations for 4 letter identifiers
-					const stationsFiltered = stations.features.filter((station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/));
+					const stationsFiltered4 = stations.features.filter((station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/));
+					// filter against starting letter
+					const stationsFiltered = stationsFiltered4.filter((station) => !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
 					// add each resulting station to the output
 					stationsFiltered.forEach((station) => {
 						const id = station.properties.stationIdentifier;
@@ -48,6 +53,7 @@ const start = async () => {
 					});
 					next = stations?.pagination?.next;
 					// write the output
+					// write the output
 					fs.writeFileSync(path.join(__dirname, 'output/stations.json'), JSON.stringify(output, null, 2));
 				}
 				while (next && stations.features.length > 0);
@@ -59,9 +65,6 @@ const start = async () => {
 			}
 		});
 	}
-
-	// write the output
-	fs.writeFileSync(path.join(__dirname, 'output/stations.js'), JSON.stringify(output, null, 2));
 };
 
 // immediately invoked function allows access to async

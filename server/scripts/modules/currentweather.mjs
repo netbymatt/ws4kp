@@ -11,6 +11,9 @@ import {
 	celsiusToFahrenheit, kphToMph, pascalToInHg, metersToFeet, kilometersToMiles,
 } from './utils/units.mjs';
 
+// some stations prefixed do not provide all the necessary data
+const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
+
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
@@ -23,14 +26,17 @@ class CurrentWeather extends WeatherDisplay {
 		const superResult = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
+		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
+		const filteredStations = weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
+
 		// Load the observations
 		let observations; let
 			station;
 		// station number counter
 		let stationNum = 0;
-		while (!observations && stationNum < weatherParameters.stations.length) {
+		while (!observations && stationNum < filteredStations.length) {
 			// get the station
-			station = weatherParameters.stations[stationNum];
+			station = filteredStations[stationNum];
 			stationNum += 1;
 			try {
 				// station observations
