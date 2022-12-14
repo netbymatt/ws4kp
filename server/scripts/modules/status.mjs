@@ -7,4 +7,29 @@ const STATUS = {
 	retrying: Symbol('retyring'),
 };
 
+const calcStatusClass = (statusCode) => {
+	switch (statusCode) {
+	case STATUS.loading:
+		return 'loading';
+	case STATUS.loaded:
+		return 'press-here';
+	case STATUS.failed:
+		return 'failed';
+	case STATUS.noData:
+		return 'no-data';
+	case STATUS.disabled:
+		return 'disabled';
+	case STATUS.retrying:
+		return 'retrying';
+	default:
+		return '';
+	}
+};
+
+const statusClasses = ['loading', 'press-here', 'failed', 'no-data', 'disabled', 'retrying'];
+
 export default STATUS;
+export {
+	calcStatusClass,
+	statusClasses,
+};

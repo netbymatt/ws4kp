@@ -37,27 +37,7 @@
 					padding-left: 4px;
 				}
 
-				.loading,
-				.retrying {
-					color: #ffff00;
-				}
-
-				.press-here {
-					color: #00ff00;
-					cursor: pointer;
-				}
-
-				.failed {
-					color: #ff0000;
-				}
-
-				.no-data {
-					color: #C0C0C0;
-				}
-
-				.disabled {
-					color: #C0C0C0;
-				}
+				@include u.status-colors();
 
 				&.loading .loading,
 				&.press-here .press-here,

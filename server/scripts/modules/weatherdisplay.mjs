@@ -1,6 +1,6 @@
 // base weather display class
 
-import STATUS from './status.mjs';
+import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { elemForEach } from './utils/elem.mjs';
 import {
@@ -64,13 +64,24 @@ class WeatherDisplay {
 		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.enabled);
 
 		// create a checkbox in the selected displays area
-		const checkbox = document.createElement('template');
-		checkbox.innerHTML = `<label for="${this.elemId}Enabled">
-							<input type="checkbox" value="true" id="${this.elemId}Enabled" name="${this.elemId}Enabled"${this.enabled ? ' checked' : ''}/>
-						  ${this.name}</label>`;
-		checkbox.content.firstChild.addEventListener('change', (e) => this.checkboxChange(e));
+		const label = document.createElement('label');
+		label.for = `${this.elemId}-checkbox`;
+		label.id = `${this.elemId}-label`;
+		const checkbox = document.createElement('input');
+		checkbox.type = 'checkbox';
+		checkbox.value = true;
+		checkbox.id = `${this.elemId}-checkbox`;
+		checkbox.name = `${this.elemId}-checkbox`;
+		checkbox.checked = this.enabled;
+		checkbox.addEventListener('change', (e) => this.checkboxChange(e));
+		const span = document.createElement('span');
+		span.innerHTML = this.name;
 
-		return checkbox.content.firstChild;
+		label.append(checkbox, span);
+
+		this.checkbox = label;
+
+		return label;
 	}
 
 	checkboxChange(e) {
@@ -89,6 +100,11 @@ class WeatherDisplay {
 			id: this.navId,
 			status: this.status,
 		});
+
+		// update coloring of checkbox at bottom of page
+		if (!this.checkbox) return;
+		this.checkbox.classList.remove(...statusClasses);
+		this.checkbox.classList.add(calcStatusClass(value));
 	}
 
 	get status() {

@@ -15,3 +15,28 @@
 		(-$outline) $outline 0 c.$text-shadow,
 		(-$outline) 0 0 c.$text-shadow;
 }
+
+@mixin status-colors() {
+
+	.loading,
+	.retrying {
+		color: #ffff00;
+	}
+
+	.press-here {
+		color: #00ff00;
+		cursor: pointer;
+	}
+
+	.failed {
+		color: #ff0000;
+	}
+
+	.no-data {
+		color: #C0C0C0;
+	}
+
+	.disabled {
+		color: #C0C0C0;
+	}
+}

@@ -1,6 +1,6 @@
 // regional forecast and observations
 import { loadImg } from './utils/image.mjs';
-import STATUS from './status.mjs';
+import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import {
 	registerProgress, message, getDisplay, msg,
@@ -38,28 +38,7 @@ class Progress extends WeatherDisplay {
 
 			fill.name = display.name;
 
-			let statusClass;
-			switch (display.status) {
-			case STATUS.loading:
-				statusClass = 'loading';
-				break;
-			case STATUS.loaded:
-				statusClass = 'press-here';
-				break;
-			case STATUS.failed:
-				statusClass = 'failed';
-				break;
-			case STATUS.noData:
-				statusClass = 'no-data';
-				break;
-			case STATUS.disabled:
-				statusClass = 'disabled';
-				break;
-			case STATUS.retrying:
-				statusClass = 'retrying';
-				break;
-			default:
-			}
+			const statusClass = calcStatusClass(display.status);
 
 			// make the line
 			const line = this.fillTemplate('item', fill);
@@ -68,7 +47,7 @@ class Progress extends WeatherDisplay {
 
 			// update the status
 			const links = line.querySelector('.links');
-			links.classList.remove('loading');
+			links.classList.remove(...statusClasses);
 			links.classList.add(statusClass);
 			links.dataset.index = index;
 			return line;

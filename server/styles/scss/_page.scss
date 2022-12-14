@@ -1,3 +1,5 @@
+@use 'shared/_utils'as u;
+
 @font-face {
 	font-family: "Star4000";
 	src: url('../fonts/Star4000.woff') format('woff');
@@ -312,11 +314,17 @@ button {
 
 #enabledDisplays {
 	margin-bottom: 15px;
-}
+	@include u.status-colors();
 
-#enabledDisplays label {
-	display: block;
-	max-width: 300px;
+	.press-here {
+		color: white;
+	}
+
+	label {
+		display: block;
+		max-width: 300px;
+
+	}
 }
 
 #divTwcBottom img {
