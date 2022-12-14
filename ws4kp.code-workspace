@@ -50,10 +50,6 @@
 		"[html]": {
 			"editor.defaultFormatter": "j69.ejs-beautify"
 		},
-		"files.exclude": {
-			"**/node_modules": true,
-			"**/debug.log": true,
-			"server/scripts/custom.js": true
-		},
+		"files.exclude": {},
 	},
 }

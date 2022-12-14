@@ -58,17 +58,17 @@ const screens = [
 
 	// temperature
 	(data) => {
-		let text = `Temp: ${data.Temperature}${degree} ${data.TemperatureUnit}`;
+		let text = `Temp: ${data.Temperature}${degree}${data.TemperatureUnit}`;
 		if (data.observations.heatIndex.value) {
-			text += `    Heat Index: ${data.HeatIndex}${degree} ${data.TemperatureUnit}`;
+			text += `    Heat Index: ${data.HeatIndex}${degree}${data.TemperatureUnit}`;
 		} else if (data.observations.windChill.value) {
-			text += `    Wind Chill: ${data.WindChill}${degree} ${data.TemperatureUnit}`;
+			text += `    Wind Chill: ${data.WindChill}${degree}${data.TemperatureUnit}`;
 		}
 		return text;
 	},
 
 	// humidity
-	(data) => `Humidity: ${data.Humidity}${degree} ${data.TemperatureUnit}  Dewpoint: ${data.DewPoint}${degree} ${data.TemperatureUnit}`,
+	(data) => `Humidity: ${data.Humidity}%   Dewpoint: ${data.DewPoint}${degree}${data.TemperatureUnit}`,
 
 	// barometric pressure
 	(data) => `Barometric Pressure: ${data.Pressure} ${data.PressureDirection}`,
