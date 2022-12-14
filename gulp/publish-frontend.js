@@ -71,6 +71,7 @@ gulp.task('compress_js_vendor', () => gulp.src(jsVendorSources)
 
 const mjsSources = [
 	'server/scripts/modules/currentweatherscroll.mjs',
+	'server/scripts/modules/hazards.mjs',
 	'server/scripts/modules/currentweather.mjs',
 	'server/scripts/modules/almanac.mjs',
 	'server/scripts/modules/icons.mjs',
