@@ -12,7 +12,6 @@ class WeatherDisplay {
 		// navId is used in messaging and sort order
 		this.navId = navId;
 		this.elemId = undefined;
-		this.gifs = [];
 		this.data = undefined;
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
@@ -34,7 +33,7 @@ class WeatherDisplay {
 		// store elemId once
 		this.storeElemId(elemId);
 
-		if (this.enabled) {
+		if (this.isEnabled) {
 			this.setStatus(STATUS.loading);
 		} else {
 			this.setStatus(STATUS.disabled);
@@ -55,13 +54,13 @@ class WeatherDisplay {
 		let savedStatus = window.localStorage.getItem(`display-enabled: ${this.elemId}`);
 		if (savedStatus === null) savedStatus = defaultEnabled;
 		if (savedStatus === 'true' || savedStatus === true) {
-			this.enabled = true;
+			this.isEnabled = true;
 		} else {
-			this.enabled = false;
+			this.isEnabled = false;
 		}
 
 		// refresh (or initially store the state of the checkbox)
-		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.enabled);
+		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.isEnabled);
 
 		// create a checkbox in the selected displays area
 		const label = document.createElement('label');
@@ -72,7 +71,7 @@ class WeatherDisplay {
 		checkbox.value = true;
 		checkbox.id = `${this.elemId}-checkbox`;
 		checkbox.name = `${this.elemId}-checkbox`;
-		checkbox.checked = this.enabled;
+		checkbox.checked = this.isEnabled;
 		checkbox.addEventListener('change', (e) => this.checkboxChange(e));
 		const span = document.createElement('span');
 		span.innerHTML = this.name;
@@ -86,9 +85,9 @@ class WeatherDisplay {
 
 	checkboxChange(e) {
 		// update the state
-		this.enabled = e.target.checked;
+		this.isEnabled = e.target.checked;
 		// store the value for the next load
-		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.enabled);
+		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.isEnabled);
 		// calling get data will update the status and actually get the data if we're set to enabled
 		this.getData();
 	}
@@ -130,7 +129,7 @@ class WeatherDisplay {
 		if (weatherParameters) this.weatherParameters = weatherParameters;
 
 		// set status
-		if (this.enabled) {
+		if (this.isEnabled) {
 			this.setStatus(STATUS.loading);
 		} else {
 			this.setStatus(STATUS.disabled);
@@ -168,7 +167,7 @@ class WeatherDisplay {
 
 	drawCurrentDateTime() {
 		// only draw if canvas is active to conserve battery
-		if (!this.isActive()) return;
+		if (!this.active) return;
 		// Get the current date and time.
 		const now = DateTime.local();
 
@@ -205,12 +204,12 @@ class WeatherDisplay {
 		this.elem.classList.remove('show');
 	}
 
-	isActive() {
+	get active() {
 		return this.elem.offsetHeight !== 0;
 	}
 
-	isEnabled() {
-		return this.enabled;
+	get enabled() {
+		return this.isEnabled;
 	}
 
 	// navigation timings
@@ -223,7 +222,7 @@ class WeatherDisplay {
 	//	if the array forms are used totalScreens is overwritten by the size of the array
 	navBaseTime() {
 		// see if play is active and screen is active
-		if (!isPlaying() || !this.isActive()) return;
+		if (!isPlaying() || !this.active) return;
 		// increment the base count
 		this.navBaseCount += 1;
 
@@ -412,7 +411,7 @@ class WeatherDisplay {
 
 	// still waiting for data (retries triggered)
 	stillWaiting() {
-		if (this.enabled) this.setStatus(STATUS.retrying);
+		if (this.isEnabled) this.setStatus(STATUS.retrying);
 		// handle still waiting callbacks
 		this.stillWaitingCallbacks.forEach((callback) => callback());
 		this.stillWaitingCallbacks = [];

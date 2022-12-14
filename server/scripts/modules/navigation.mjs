@@ -65,6 +65,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 	if (StationId in StationInfo) {
 		city = StationInfo[StationId].city;
 		[city] = city.split('/');
+		city = city.replace(/\s+$/, '');
 	}
 
 	// populate the weather parameters
@@ -201,7 +202,7 @@ const loadDisplay = (direction) => {
 
 // get the current display index or value
 const currentDisplayIndex = () => {
-	const index = displays.findIndex((display) => display.isActive());
+	const index = displays.findIndex((display) => display.active);
 	return index;
 };
 const currentDisplay = () => displays[currentDisplayIndex()];
