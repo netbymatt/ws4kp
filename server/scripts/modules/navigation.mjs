@@ -261,9 +261,8 @@ const getDisplay = (index) => displays[index];
 
 // resize the container on a page resize
 const resize = () => {
-	const marginOffset = (document.fullscreenElement) ? 0 : 16;
-	const widthZoomPercent = (window.innerWidth - marginOffset) / 640;
-	const heightZoomPercent = (window.innerHeight - marginOffset) / 480;
+	const widthZoomPercent = (document.getElementById('divTwcBottom').getBoundingClientRect().width) / 640;
+	const heightZoomPercent = (window.innerHeight) / 480;
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
 	if (scale < 1.0 || document.fullscreenElement) {

@@ -270,9 +270,11 @@ button {
 
 #container {
 	position: relative;
-	width: 100%;
-	height: 100%;
+	width: 640px;
+	height: 480px;
+	overflow: hidden;
 	background-image: url(../images/BackGround1_1.png);
+
 }
 
 #divTwc:fullscreen #container {
