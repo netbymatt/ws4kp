@@ -23,7 +23,6 @@ const jsSourcesData = [
 	'server/scripts/data/travelcities.js',
 	'server/scripts/data/regionalcities.js',
 	'server/scripts/data/stations.js',
-	'server/scripts/data/states.js',
 ];
 
 const webpackOptions = {

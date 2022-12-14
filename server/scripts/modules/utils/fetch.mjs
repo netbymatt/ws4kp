@@ -2,7 +2,6 @@ import { rewriteUrl } from './cors.mjs';
 
 const json = (url, params) => fetchAsync(url, 'json', params);
 const text = (url, params) => fetchAsync(url, 'text', params);
-const raw = (url, params) => fetchAsync(url, '', params);
 const blob = (url, params) => fetchAsync(url, 'blob', params);
 
 const fetchAsync = async (_url, responseType, _params = {}) => {
@@ -96,6 +95,5 @@ const retryDelay = (retryNumber) => {
 export {
 	json,
 	text,
-	raw,
 	blob,
 };

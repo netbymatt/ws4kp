@@ -24,7 +24,7 @@ const cachedImages = [];
 const preloadImg = (src) => {
 	if (cachedImages.includes(src)) return false;
 	blob(src);
-	// cachedImages.push(src);
+	cachedImages.push(src);
 	return true;
 };
 
