@@ -204,7 +204,7 @@ const shortConditions = (_condition) => {
 	return condition;
 };
 
-const display = new CurrentWeather(0, 'current-weather');
+const display = new CurrentWeather(1, 'current-weather');
 registerDisplay(display);
 
 export default display.getCurrentWeather.bind(display);

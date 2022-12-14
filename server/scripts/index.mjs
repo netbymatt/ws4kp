@@ -90,8 +90,8 @@ const init = () => {
 		btnGetGpsClick();
 	}
 
-	const twcPlay = localStorage.getItem('play');
-	if (twcPlay === null || twcPlay === 'true') postMessage('navButton', 'play');
+	const play = localStorage.getItem('play');
+	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.getElementById('btnClearQuery').addEventListener('click', () => {
 		document.getElementById('spanCity').innerHTML = '';

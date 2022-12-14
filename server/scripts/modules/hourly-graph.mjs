@@ -146,4 +146,4 @@ const drawPath = (path, ctx, options) => {
 const formatTime = (time) => time.toFormat('ha').slice(0, -1);
 
 // register display
-registerDisplay(new HourlyGraph(3, 'hourly-graph'));
+registerDisplay(new HourlyGraph(4, 'hourly-graph'));

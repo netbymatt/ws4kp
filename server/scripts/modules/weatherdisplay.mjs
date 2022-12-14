@@ -20,6 +20,7 @@ class WeatherDisplay {
 		this.defaultEnabled = defaultEnabled;
 		this.okToDrawCurrentConditions = true;
 		this.okToDrawCurrentDateTime = true;
+		this.showOnProgress = true;
 
 		// default navigation timing
 		this.timing = {
@@ -75,8 +76,11 @@ class WeatherDisplay {
 		checkbox.addEventListener('change', (e) => this.checkboxChange(e));
 		const span = document.createElement('span');
 		span.innerHTML = this.name;
+		const alert = document.createElement('span');
+		alert.innerHTML = '!!!';
+		alert.classList.add('alert');
 
-		label.append(checkbox, span);
+		label.append(checkbox, span, alert);
 
 		this.checkbox = label;
 
@@ -257,10 +261,10 @@ class WeatherDisplay {
 		// call the appropriate screen index change method
 		if (!this.screenIndexChange) {
 			await this.drawCanvas();
-			this.showCanvas();
 		} else {
 			this.screenIndexChange(this.screenIndex);
 		}
+		this.showCanvas();
 	}
 
 	// take the three timing formats shown above and break them into arrays for consistent usage in navigation functions
@@ -340,6 +344,7 @@ class WeatherDisplay {
 	screenIndexFromBaseCount() {
 		// test for timing enabled
 		if (!this.timing) return 0;
+		if (this.timing.totalScreens === 0) return false;
 		// find the first timing in the timing array that is greater than the base count
 		if (this.timing && !this.timing.fullDelay) this.calcNavTiming();
 		const timingIndex = this.timing.fullDelay.findIndex((delay) => delay > this.navBaseCount);

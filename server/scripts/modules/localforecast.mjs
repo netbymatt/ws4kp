@@ -92,4 +92,4 @@ const parse = (forecast) => forecast.properties.periods.slice(0, 6).map((text) =
 	Text: text.detailedForecast,
 }));
 // register display
-registerDisplay(new LocalForecast(6, 'local-forecast'));
+registerDisplay(new LocalForecast(7, 'local-forecast'));

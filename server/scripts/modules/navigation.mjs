@@ -26,8 +26,8 @@ const init = async () => {
 	resize();
 
 	// auto refresh
-	const TwcAutoRefresh = localStorage.getItem('TwcAutoRefresh');
-	if (!TwcAutoRefresh || TwcAutoRefresh === 'true') {
+	const autoRefresh = localStorage.getItem('autoRefresh');
+	if (!autoRefresh || autoRefresh === 'true') {
 		document.getElementById('chkAutoRefresh').checked = true;
 	} else {
 		document.getElementById('chkAutoRefresh').checked = false;
@@ -103,8 +103,11 @@ const updateStatus = (value) => {
 	if (!progress) return;
 	progress.drawCanvas(displays, countLoadedDisplays());
 
+	// first display is hazards and it must load before evaluating the first display
+	if (displays[0].status === STATUS.loading) return;
+
 	// calculate first enabled display
-	const firstDisplayIndex = displays.findIndex((display) => display.enabled);
+	const firstDisplayIndex = displays.findIndex((display) => display.enabled && display.timing.totalScreens > 0);
 
 	// if this is the first display and we're playing, load it up so it starts playing
 	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
@@ -165,7 +168,7 @@ const navTo = (direction) => {
 		let firstDisplay;
 		let displayCount = 0;
 		do {
-			if (displays[displayCount].status === STATUS.loaded) firstDisplay = displays[displayCount];
+			if (displays[displayCount].status === STATUS.loaded && displays[displayCount].timing.totalScreens > 0) firstDisplay = displays[displayCount];
 			displayCount += 1;
 		} while (!firstDisplay && displayCount < displays.length);
 
@@ -186,7 +189,7 @@ const loadDisplay = (direction) => {
 	for (let i = 0; i < totalDisplays; i += 1) {
 		// convert form simple 0-10 to start at current display index +/-1 and wrap
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
-		if (displays[idx].status === STATUS.loaded) break;
+		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
 	}
 	// if new display index is less than current display a wrap occurred, test for reload timeout
 	if (idx <= curIdx) {
@@ -210,7 +213,7 @@ const currentDisplay = () => displays[currentDisplayIndex()];
 const setPlaying = (newValue) => {
 	playing = newValue;
 	const playButton = document.getElementById('NavigatePlay');
-	localStorage.setItem('TwcPlay', playing);
+	localStorage.setItem('play', playing);
 
 	if (playing) {
 		noSleep(true);
@@ -319,7 +322,7 @@ const autoRefreshChange = (e) => {
 		stopAutoRefreshTimer();
 	}
 
-	localStorage.setItem('TwcAutoRefresh', checked);
+	localStorage.setItem('autoRefresh', checked);
 };
 
 const AssignLastUpdate = (date) => {

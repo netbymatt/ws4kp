@@ -191,7 +191,7 @@ const expand = (data) => {
 };
 
 // register display
-const display = new Hourly(2, 'hourly', false);
+const display = new Hourly(3, 'hourly', false);
 registerDisplay(display);
 
 export default display.getCurrentData.bind(display);

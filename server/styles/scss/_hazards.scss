@@ -1,0 +1,27 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .main.hazards {
+	&.main {
+		overflow-y: hidden;
+
+		.hazard-lines {
+			min-height: 400px;
+			padding-top: 10px;
+
+			background-color: rgb(112, 35, 35);
+
+			.hazard {
+				font-family: 'Star4000';
+				font-size: 24pt;
+				color: white;
+				@include u.text-shadow(0px);
+				position: relative;
+				text-transform: uppercase;
+				margin-top: 110px;
+				margin-left: 80px;
+				margin-right: 80px;
+			}
+		}
+	}
+}

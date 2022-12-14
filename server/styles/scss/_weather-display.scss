@@ -96,6 +96,10 @@
 			width: 640px;
 			height: 310px;
 			overflow: hidden;
+
+			&.no-header {
+				height: 400px;
+			}
 		}
 
 		&.has-box {

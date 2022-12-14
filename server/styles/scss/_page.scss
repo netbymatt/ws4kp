@@ -326,6 +326,14 @@ button {
 		display: block;
 		max-width: 300px;
 
+		.alert {
+			display: none;
+
+			&.show {
+				display: inline;
+				color: red;
+			}
+		}
 	}
 }
 

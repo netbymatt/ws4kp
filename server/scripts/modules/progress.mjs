@@ -26,6 +26,7 @@ class Progress extends WeatherDisplay {
 	}
 
 	async drawCanvas(displays, loadedCount) {
+		if (!this.elem) return;
 		super.drawCanvas();
 
 		// get the progress bar cover (makes percentage)
@@ -34,6 +35,7 @@ class Progress extends WeatherDisplay {
 		// if no displays provided just draw the backgrounds (above)
 		if (!displays) return;
 		const lines = displays.map((display, index) => {
+			if (display.showOnProgress === false) return false;
 			const fill = {};
 
 			fill.name = display.name;
