@@ -35,7 +35,8 @@ class Hazards extends WeatherDisplay {
 			const alerts = await json(url, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
 			const unsortedAlerts = alerts.features ?? [];
 			const sortedAlerts = unsortedAlerts.sort((a, b) => (hazardLevels[b.properties.severity] ?? 0) - (hazardLevels[a.properties.severity] ?? 0));
-			this.data = sortedAlerts;
+			const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown');
+			this.data = filteredAlerts;
 
 			// show alert indicator
 			if (this.data.length > 0) alert.classList.add('show');
@@ -72,6 +73,7 @@ class Hazards extends WeatherDisplay {
 		// no alerts, skip this display by setting timing to zero
 		if (lines.length === 0) {
 			this.timing.totalScreens = 0;
+			this.setStatus(STATUS.loaded);
 			return;
 		}
 

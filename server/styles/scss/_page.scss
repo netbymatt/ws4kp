@@ -318,8 +318,33 @@ button {
 	margin-bottom: 15px;
 	@include u.status-colors();
 
+	@media (prefers-color-scheme: light) {
+
+		.loading,
+		.retrying {
+			color: hsl(60, 100%, 30%);
+		}
+
+		.press-here {
+			color: hsl(120, 100%, 30%);
+			cursor: pointer;
+		}
+
+		.failed {
+			color: hsl(0, 100%, 30%);
+		}
+
+		.no-data {
+			color: hsl(0, 0%, 30%);
+		}
+
+		.disabled {
+			color: hsl(0, 0%, 30%);
+		}
+	}
+
 	.press-here {
-		color: white;
+		color: black;
 	}
 
 	label {
