@@ -133,6 +133,7 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 		return addPath('Clear-Wind-1994.gif');
 
 	case 'blizzard':
+	case 'blizzard-n':
 		return addPath('Blowing Snow.gif');
 
 	case 'cold':
