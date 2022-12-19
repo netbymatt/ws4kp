@@ -368,7 +368,6 @@ const btnGetGpsClick = async () => {
 	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
 	doRedirectToGeometry({ y: latitude, x: longitude }, (point) => {
-		console.log(point);
 		const location = point.properties.relativeLocation.properties;
 		// Save the query
 		const query = `${location.city}, ${location.state}`;

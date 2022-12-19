@@ -22,7 +22,7 @@ class Almanac extends WeatherDisplay {
 	}
 
 	async getData(_weatherParameters) {
-		if (!super.getData(_weatherParameters)) return;
+		const superResponse = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// get sun/moon data
@@ -33,11 +33,13 @@ class Almanac extends WeatherDisplay {
 			sun,
 			moon,
 		};
-		// update status
-		this.setStatus(STATUS.loaded);
-
 		// share data
 		this.getDataCallback();
+
+		if (!superResponse) return;
+
+		// update status
+		this.setStatus(STATUS.loaded);
 	}
 
 	calcSunMoonData(weatherParameters) {
