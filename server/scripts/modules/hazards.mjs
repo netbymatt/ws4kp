@@ -50,7 +50,10 @@ class Hazards extends WeatherDisplay {
 
 		this.getDataCallback();
 
-		if (!superResult) return;
+		if (!superResult) {
+			this.setStatus(STATUS.loaded);
+			return;
+		}
 		this.drawLongCanvas();
 	}
 
@@ -71,6 +74,7 @@ class Hazards extends WeatherDisplay {
 
 		// no alerts, skip this display by setting timing to zero
 		if (lines.length === 0) {
+			this.setStatus(STATUS.loaded);
 			this.timing.totalScreens = 0;
 			return;
 		}
@@ -86,8 +90,8 @@ class Hazards extends WeatherDisplay {
 		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
 		// add the final 3 second delay
 		this.timing.delay.push(150);
-		this.calcNavTiming();
 		this.setStatus(STATUS.loaded);
+		this.calcNavTiming();
 	}
 
 	drawCanvas() {

@@ -268,6 +268,7 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 		return addPath('CC_Windy.gif');
 
 	case 'blizzard':
+	case 'blizzard-n':
 		return addPath('Blowing-Snow.gif');
 
 	default:
