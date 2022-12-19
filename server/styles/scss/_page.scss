@@ -318,6 +318,10 @@ button {
 	margin-bottom: 15px;
 	@include u.status-colors();
 
+	.press-here {
+		color: white;
+	}
+
 	@media (prefers-color-scheme: light) {
 
 		.loading,
@@ -326,7 +330,7 @@ button {
 		}
 
 		.press-here {
-			color: hsl(120, 100%, 30%);
+			color: black;
 			cursor: pointer;
 		}
 
@@ -341,10 +345,6 @@ button {
 		.disabled {
 			color: hsl(0, 0%, 30%);
 		}
-	}
-
-	.press-here {
-		color: black;
 	}
 
 	label {
