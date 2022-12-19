@@ -16,7 +16,7 @@ const weatherParameters = {};
 
 // auto refresh
 const AUTO_REFRESH_INTERVAL_MS = 500;
-const AUTO_REFRESH_TIME_MS = 600000; // 10 min.
+const AUTO_REFRESH_TIME_MS = 6000; // 10 min.
 let AutoRefreshIntervalId = null;
 let AutoRefreshCountMs = 0;
 
@@ -175,6 +175,7 @@ const navTo = (direction) => {
 		if (!firstDisplay) return;
 
 		firstDisplay.navNext(msg.command.firstFrame);
+		firstDisplay.showCanvas();
 		return;
 	}
 	if (direction === msg.command.nextFrame) currentDisplay().navNext();
@@ -377,7 +378,7 @@ const stopAutoRefreshTimer = () => {
 
 const refreshCheck = () => {
 	// Time has elapsed.
-	if (AutoRefreshCountMs >= AUTO_REFRESH_TIME_MS) {
+	if (AutoRefreshCountMs >= AUTO_REFRESH_TIME_MS && isPlaying()) {
 		loadTwcData();
 		return true;
 	}
