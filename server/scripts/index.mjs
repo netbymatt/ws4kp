@@ -290,37 +290,41 @@ const updateFullScreenNavigate = () => {
 };
 
 const documentKeydown = (e) => {
-	const code = (e.keyCode || e.which);
-
-	// 200ms repeat
-	if ((Date.now() - documentKeydown.lastButton ?? 0) < 200) return false;
-	documentKeydown.lastButton = Date.now();
+	const { key } = e;
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
-		switch (code) {
-		case 32: // Space
+		switch (key) {
+		case ' ': // Space
+			// don't scroll
+			e.preventDefault();
 			btnNavigatePlayClick();
 			return false;
 
-		case 39: // Right Arrow
-		case 34: // Page Down
+		case 'ArrowRight':
+		case 'PageDown':
+			// don't scroll
+			e.preventDefault();
 			btnNavigateNextClick();
 			return false;
 
-		case 37: // Left Arrow
-		case 33: // Page Up
+		case 'ArrowLeft':
+		case 'PageUp':
+			// don't scroll
+			e.preventDefault();
 			btnNavigatePreviousClick();
 			return false;
 
-		case 36: // Home
+		case 'ArrowUp': // Home
+			e.preventDefault();
 			btnNavigateMenuClick();
 			return false;
 
-		case 48: // Restart
+		case '0': // "O" Restart
 			btnNavigateRefreshClick();
 			return false;
 
-		case 70: // F
+		case 'F':
+		case 'f':
 			btnFullScreenClick();
 			return false;
 
