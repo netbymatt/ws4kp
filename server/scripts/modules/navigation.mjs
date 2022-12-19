@@ -219,11 +219,11 @@ const setPlaying = (newValue) => {
 	if (playing) {
 		noSleep(true);
 		playButton.title = 'Pause';
-		playButton.src = 'images/nav/ic_pause_white_24dp_1x.png';
+		playButton.src = 'images/nav/ic_pause_white_24dp_2x.png';
 	} else {
 		noSleep(false);
 		playButton.title = 'Play';
-		playButton.src = 'images/nav/ic_play_arrow_white_24dp_1x.png';
+		playButton.src = 'images/nav/ic_play_arrow_white_24dp_2x.png';
 	}
 	// if we're playing and on the progress screen jump to the next screen
 	if (!progress) return;

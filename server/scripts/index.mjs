@@ -187,7 +187,7 @@ const enterFullScreen = () => {
 
 	// change hover text and image
 	const img = document.getElementById('ToggleFullScreen');
-	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_1x.png';
+	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
 	img.title = 'Exit fullscreen';
 };
 
@@ -211,7 +211,7 @@ const exitFullscreen = () => {
 	resize();
 	// change hover text and image
 	const img = document.getElementById('ToggleFullScreen');
-	img.src = 'images/nav/ic_fullscreen_white_24dp_1x.png';
+	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
 	img.title = 'Enter fullscreen';
 };
 
