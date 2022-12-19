@@ -1,0 +1,98 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#marine-forecast-html.weather-display {
+	background-image: url('../images/BackGround8_1.png');
+}
+
+.weather-display .main.marine-forecast {
+	font-family: 'Star4000';
+	font-size: 24pt;
+	@include u.text-shadow();
+
+	.advisory {
+		width: 100%;
+		height: 90px;
+		overflow: hidden;
+
+		.advisory-text {
+			border: 4px solid black;
+			width: 75%;
+			margin-left: auto;
+			margin-right: auto;
+			text-align: center;
+			margin-top: 40px;
+			;
+		}
+	}
+
+	.headers {
+		display: inline-block;
+		vertical-align: top;
+
+		.winds {
+			text-align: right;
+			width: 150px;
+			margin-top: 42px;
+			margin-bottom: 60px;
+		}
+	}
+
+	.day-container {
+		display: inline-block;
+	}
+
+	.day {
+		padding: 5px;
+		width: 165px;
+		display: inline-block;
+		margin: 0px 15px;
+		text-align: center;
+
+		.date {
+			color: c.$title-color;
+		}
+
+		.wave {
+			border: 4px solid #b09ffb;
+
+			.wave-icon {
+				height: 20px;
+
+				img {
+					display: block;
+					margin-left: auto;
+					margin-right: auto;
+				}
+			}
+		}
+
+		.temperatures {
+			width: 100%;
+			margin-top: 5px;
+
+			.temperature-block {
+				display: inline-block;
+				width: 44%;
+				vertical-align: top;
+
+				>div {
+					text-align: center;
+				}
+
+				.value {
+					font-family: 'Star4000 Large';
+					margin-top: 4px;
+				}
+
+				&.lo .label {
+					color: c.$extended-low;
+				}
+
+				&.hi .label {
+					color: c.$title-color;
+				}
+			}
+		}
+	}
+}

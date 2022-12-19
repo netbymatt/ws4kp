@@ -141,6 +141,7 @@ const parseForecast = async (data) => {
 	const iceAccumulation = expand(data.iceAccumulation.values); 	// ice icon
 	const probabilityOfPrecipitation = expand(data.probabilityOfPrecipitation.values);	// rain icon
 	const snowfallAmount = expand(data.snowfallAmount.values);	// snow icon
+	const waveHeight = expand(data.waveHeight.values);
 
 	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
@@ -152,6 +153,7 @@ const parseForecast = async (data) => {
 		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
 		skyCover: skyCover[idx],
 		icon: icons[idx],
+		waveHeight: waveHeight[idx],
 	}));
 };
 
