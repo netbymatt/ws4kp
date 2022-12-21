@@ -77,7 +77,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 	weatherParameters.weatherOffice = point.properties.cwa;
 	weatherParameters.city = city;
 	weatherParameters.state = point.properties.relativeLocation.properties.state;
-	weatherParameters.timeZone = point.properties.relativeLocation.properties.timeZone;
+	weatherParameters.timeZone = point.properties.timeZone;
 	weatherParameters.forecast = point.properties.forecast;
 	weatherParameters.forecastGridData = point.properties.forecastGridData;
 	weatherParameters.stations = stations.features;
@@ -400,6 +400,8 @@ const registerRefreshData = (callback) => {
 	loadTwcData.callback = callback;
 };
 
+const timeZone = () => weatherParameters.timeZone;
+
 export {
 	updateStatus,
 	displayNavMessage,
@@ -415,4 +417,5 @@ export {
 	latLonReceived,
 	stopAutoRefreshTimer,
 	registerRefreshData,
+	timeZone,
 };

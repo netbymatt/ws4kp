@@ -43,7 +43,7 @@ const incrementInterval = () => {
 
 const drawScreen = async () => {
 	// get the conditions
-	const data = await getCurrentWeather(() => this.stillWaiting());
+	const data = await getCurrentWeather();
 
 	// nothing to do if there's no data yet
 	if (!data) return;

@@ -2,9 +2,8 @@
 
 import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { elemForEach } from './utils/elem.mjs';
 import {
-	msg, displayNavMessage, isPlaying, updateStatus,
+	msg, displayNavMessage, isPlaying, updateStatus, timeZone,
 } from './navigation.mjs';
 
 class WeatherDisplay {
@@ -173,20 +172,22 @@ class WeatherDisplay {
 		// only draw if canvas is active to conserve battery
 		if (!this.active) return;
 		// Get the current date and time.
-		const now = DateTime.local();
+		const now = DateTime.local().setZone(timeZone());
 
 		// time = "11:35:08 PM";
 		const time = now.toLocaleString(DateTime.TIME_WITH_SECONDS).padStart(11, ' ');
+		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
 
-		if (this.lastTime !== time) {
-			elemForEach('.date-time.time', (elem) => { elem.innerHTML = time.toUpperCase(); });
+		const dateElem = this.elem.querySelector('.date-time.date');
+		const timeElem = this.elem.querySelector('.date-time.time');
+
+		if (timeElem && this.lastTime !== time) {
+			timeElem.innerHTML = time.toUpperCase();
 		}
 		this.lastTime = time;
 
-		const date = now.toFormat(' ccc LLL ') + now.day.toString().padStart(2, ' ');
-
-		if (this.lastDate !== date) {
-			elemForEach('.date-time.date', (elem) => { elem.innerHTML = date.toUpperCase(); });
+		if (dateElem && this.lastDate !== date) {
+			dateElem.innerHTML = date.toUpperCase();
 		}
 		this.lastDate = date;
 	}

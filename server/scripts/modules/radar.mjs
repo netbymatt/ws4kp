@@ -5,7 +5,7 @@ import { loadImg } from './utils/image.mjs';
 import { text } from './utils/fetch.mjs';
 import { rewriteUrl } from './utils/cors.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 
 class Radar extends WeatherDisplay {
@@ -159,7 +159,7 @@ class Radar extends WeatherDisplay {
 					zone: 'UTC',
 				}).setZone();
 			} else {
-				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone();
+				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone(timeZone());
 			}
 
 			// assign to an html image element
