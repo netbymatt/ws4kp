@@ -44,10 +44,13 @@ const init = () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
 
+	document.getElementById('txtAddress').addEventListener('keydown', (key) => { if (key.code === 'Enter') formSubmit(); });
+	document.getElementById('btnGetLatLng').addEventListener('click', () => formSubmit());
+
 	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (fullScreenOverride) e.preventDefault(); });
 
-	$('#frmGetLatLng #txtAddress').devbridgeAutocomplete({
+	$('#txtAddress').devbridgeAutocomplete({
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 		deferRequestBy: 300,
 		paramName: 'text',
@@ -71,11 +74,11 @@ const init = () => {
 		width: 490,
 	});
 
-	$('#frmGetLatLng').on('submit', () => {
-		const ac = $('#frmGetLatLng #txtAddress').devbridgeAutocomplete();
+	const formSubmit = () => {
+		const ac = $('#txtAddress').devbridgeAutocomplete();
 		if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).trigger('click');
 		return false;
-	});
+	};
 
 	// Auto load the previous query
 	const query = localStorage.getItem('latLonQuery');

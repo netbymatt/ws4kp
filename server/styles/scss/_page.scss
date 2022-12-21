@@ -20,72 +20,83 @@ body {
 	}
 }
 
-input,
-button {
-	font-family: "Star4000";
-}
+#divQuery {
+	max-width: 640px;
 
-#imgGetGps {
-	height: 13px;
-	vertical-align: middle;
-}
+	.buttons {
+		display: inline-block;
+		width: 150px;
+		text-align: right;
 
-#txtAddress {
-	width: 490px;
-	font-size: 16pt;
-	max-width: calc(100% - 8px);
-
-	@media (prefers-color-scheme: dark) {
-		background-color: #000000;
-		color: white;
-		border: 1px solid darkgray;
-	}
-}
-
-#btnGetGps,
-#btnGetLatLng,
-#btnClearQuery {
-	font-size: 16pt;
-
-	@media (prefers-color-scheme: dark) {
-		background-color: #000000;
-		color: white;
-	}
-
-	border: 1px solid darkgray;
-}
-
-#btnGetGps {
-	img {
-
-		&.dark {
-			display: none;
-
-			@media (prefers-color-scheme: dark) {
-				display: inline-block;
-			}
+		#imgGetGps {
+			height: 13px;
+			vertical-align: middle;
 		}
 
-		&.light {
+		button {
+			font-size: 16pt;
+
 			@media (prefers-color-scheme: dark) {
-				display: none;
+				background-color: #000000;
+				color: white;
+			}
+
+			border: 1px solid darkgray;
+		}
+
+		#btnGetGps {
+			img {
+
+				&.dark {
+					display: none;
+
+					@media (prefers-color-scheme: dark) {
+						display: inline-block;
+					}
+				}
+
+				&.light {
+					@media (prefers-color-scheme: dark) {
+						display: none;
+					}
+				}
+			}
+
+			&.active {
+				background-color: black;
+
+				@media (prefers-color-scheme: dark) {
+					background-color: white;
+				}
+
+				img {
+					filter: invert(1);
+				}
 			}
 		}
 	}
 
-	&.active {
-		background-color: black;
+	input,
+	button {
+		font-family: "Star4000";
+	}
+
+	#txtAddress {
+		width: calc(100% - 170px);
+		max-width: 490px;
+		font-size: 16pt;
+		min-width: 200px;
+		display: inline-block;
 
 		@media (prefers-color-scheme: dark) {
-			background-color: white;
-		}
-
-		img {
-			filter: invert(1);
+			background-color: #000000;
+			color: white;
+			border: 1px solid darkgray;
 		}
 	}
-}
 
+	
+}
 .autocomplete-suggestions {
 	background-color: #ffffff;
 	border: 1px solid #000000;
@@ -93,19 +104,19 @@ button {
 	@media (prefers-color-scheme: dark) {
 		background-color: #000000;
 	}
-}
 
-.autocomplete-suggestion {
-	/*padding: 2px 5px;*/
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-size: 16pt;
-}
+	.autocomplete-suggestion {
+		/*padding: 2px 5px;*/
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-size: 16pt;
+	}
 
-.autocomplete-selected {
-	background-color: #0000ff;
-	color: #ffffff;
+	.autocomplete-selected {
+		background-color: #0000ff;
+		color: #ffffff;
+	}
 }
 
 #divTwc {

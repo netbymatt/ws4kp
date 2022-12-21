@@ -60,13 +60,14 @@
 
 
   <div id="divQuery">
-    <form id="frmGetLatLng">
-      <input id="txtAddress" type="text" value="" placeholder="Zip or City, State" /><button id="btnGetGps" type="button" title="Get GPS Location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light"/><img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark"/></button>
-      <input id="btnGetLatLng" type="submit" value="GO" />
-      <input id="btnClearQuery" type="reset" value="Reset" />
-    </form>
-    <div id="divLat"></div>
-    <div id="divLng"></div>
+		<input id="txtAddress" type="text" value="" placeholder="Zip or City, State" />
+		<div class="buttons">
+			<button id="btnGetGps" type="button" title="Get GPS Location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light"/>
+				<img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark"/>
+			</button>
+			<button id="btnGetLatLng" type="submit">GO</button>
+			<button id="btnClearQuery" type="reset">Reset</button>
+		</div>
   </div>
   <div id="version" style="display:none">
     <%- version %>
