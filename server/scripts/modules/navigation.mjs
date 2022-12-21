@@ -109,6 +109,13 @@ const updateStatus = (value) => {
 	// calculate first enabled display
 	const firstDisplayIndex = displays.findIndex((display) => display.enabled && display.timing.totalScreens > 0);
 
+	// value.id = 0 is hazards, if they fail to load hot-wire a new value.id to the current display to see if it needs to be loaded
+	// typically this plays out as current conditions loads, then hazards fails.
+	if (value.id === 0 && (value.status === STATUS.failed || value.status === STATUS.retrying)) {
+		value.id = firstDisplayIndex;
+		value.status = displays[firstDisplayIndex].status;
+	}
+
 	// if this is the first display and we're playing, load it up so it starts playing
 	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
