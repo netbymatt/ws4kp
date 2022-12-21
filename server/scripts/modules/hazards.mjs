@@ -92,8 +92,8 @@ class Hazards extends WeatherDisplay {
 		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
 		// add the final 3 second delay
 		this.timing.delay.push(150);
-		this.setStatus(STATUS.loaded);
 		this.calcNavTiming();
+		this.setStatus(STATUS.loaded);
 	}
 
 	drawCanvas() {
