@@ -85,13 +85,13 @@ class Hazards extends WeatherDisplay {
 		// set up the timing
 		this.timing.baseDelay = 20;
 		// 24 hours = 6 pages
-		const pages = Math.ceil(list.scrollHeight / 390); // first page is already displayed, last page doesn't happen
-		const timingStep = 75 * 4;
+		const pages = Math.max(Math.ceil(list.scrollHeight / 400) - 3, 1);
+		const timingStep = 400;
 		this.timing.delay = [150 + timingStep];
 		// add additional pages
 		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
 		// add the final 3 second delay
-		this.timing.delay.push(150);
+		this.timing.delay.push(250);
 		this.calcNavTiming();
 		this.setStatus(STATUS.loaded);
 	}
