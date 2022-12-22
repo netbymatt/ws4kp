@@ -32,26 +32,20 @@ class LatestObservations extends WeatherDisplay {
 		const regionalStations = sortedStations.slice(0, 30);
 
 		// get data for regional stations
-		const allConditions = await Promise.all(regionalStations.map(async (station) => {
-			try {
-				const data = await json(`https://api.weather.gov/stations/${station.id}/observations/latest`, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
-				// test for temperature, weather and wind values present
-				if (data.properties.temperature.value === null
-					|| data.properties.textDescription === ''
-					|| data.properties.windSpeed.value === null) return false;
-				// format the return values
-				return {
-					...data.properties,
-					StationId: station.id,
-					city: station.city,
-				};
-			} catch (e) {
-				console.log(`Unable to get latest observations for ${station.id}`);
-				return false;
-			}
-		}));
-		// remove and stations that did not return data
-		const actualConditions = allConditions.filter((condition) => condition);
+		// get first 7 stations
+		const actualConditions = [];
+		let lastStation = Math.min(regionalStations.length, 7);
+		let firstStation = 0;
+		while (actualConditions.length < 7 && (lastStation) <= regionalStations.length) {
+			// eslint-disable-next-line no-await-in-loop
+			const someStations = await getStations(regionalStations.slice(firstStation, lastStation));
+
+			actualConditions.push(...someStations);
+			// update counters
+			firstStation += lastStation;
+			lastStation = Math.min(regionalStations.length + 1, firstStation + 7 - actualConditions.length);
+		}
+
 		// cut down to the maximum of 7
 		this.data = actualConditions.slice(0, this.MaximumRegionalStations);
 
@@ -118,6 +112,29 @@ const shortenCurrentConditions = (_condition) => {
 	condition = condition.replace(/L Snow Fog/, 'L Snw/Fog');
 	condition = condition.replace(/ with /, '/');
 	return condition;
+};
+
+const getStations = async (stations) => {
+	const stationData = await Promise.all(stations.map(async (station) => {
+		try {
+			const data = await json(`https://api.weather.gov/stations/${station.id}/observations/latest`, { retryCount: 1, stillWaiting: () => this.stillWaiting() });
+			// test for temperature, weather and wind values present
+			if (data.properties.temperature.value === null
+			|| data.properties.textDescription === ''
+			|| data.properties.windSpeed.value === null) return false;
+			// format the return values
+			return {
+				...data.properties,
+				StationId: station.id,
+				city: station.city,
+			};
+		} catch (e) {
+			console.log(`Unable to get latest observations for ${station.id}`);
+			return false;
+		}
+	}));
+	// filter false (no data or other error)
+	return stationData.filter((d) => d);
 };
 // register display
 registerDisplay(new LatestObservations(2, 'latest-observations'));

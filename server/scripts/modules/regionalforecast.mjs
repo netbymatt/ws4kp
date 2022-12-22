@@ -87,6 +87,9 @@ class RegionalForecast extends WeatherDisplay {
 
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
+
+				if (!observation) return false;
+
 				// format the observation the same as the forecast
 				const regionalObservation = {
 					daytime: !!observation.icon.match(/\/day\//),

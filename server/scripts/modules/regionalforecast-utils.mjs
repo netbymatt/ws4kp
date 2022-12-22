@@ -23,7 +23,9 @@ const getRegionalObservation = async (point, city) => {
 		const observation = await json(`${station}/observations/latest`);
 		// preload the image
 		if (!observation.properties.icon) return false;
-		preloadImg(getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime));
+		const icon = getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime);
+		if (!icon) return false;
+		preloadImg(icon);
 		// return the observation
 		return observation.properties;
 	} catch (e) {
