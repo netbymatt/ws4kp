@@ -53,7 +53,9 @@ class CurrentWeather extends WeatherDisplay {
 				// test data quality
 				if (observations.features[0].properties.temperature.value === null
 					|| observations.features[0].properties.windSpeed.value === null
-					|| observations.features[0].properties.textDescription === null) {
+					|| observations.features[0].properties.textDescription === null
+					|| observations.features[0].properties.textDescription === ''
+					|| observations.features[0].properties.icon === null) {
 					observations = undefined;
 					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
 				}
