@@ -57,7 +57,7 @@ class TravelForecast extends WeatherDisplay {
 		this.data = forecasts;
 
 		// test for some data available in at least one forecast
-		const hasData = this.data.reduce((acc, forecast) => acc || forecast.high, false);
+		const hasData = this.data.some((forecast) => forecast.high);
 		if (!hasData) {
 			this.setStatus(STATUS.noData);
 			return;
