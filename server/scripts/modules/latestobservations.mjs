@@ -50,7 +50,7 @@ class LatestObservations extends WeatherDisplay {
 		this.data = actualConditions.slice(0, this.MaximumRegionalStations);
 
 		// test for at least one station
-		if (this.data.length < 1) {
+		if (this.data.length === 0) {
 			this.setStatus(STATUS.noData);
 			return;
 		}
@@ -73,10 +73,12 @@ class LatestObservations extends WeatherDisplay {
 			const	Temperature = Math.round(celsiusToFahrenheit(condition.temperature.value));
 			const WindSpeed = Math.round(kphToMph(condition.windSpeed.value));
 
-			const fill = {};
-			fill.location = locationCleanup(condition.city).substr(0, 14);
-			fill.temp = Temperature;
-			fill.weather = shortenCurrentConditions(condition.textDescription).substr(0, 9);
+			const fill = {
+				location: locationCleanup(condition.city).substr(0, 14),
+				temp: Temperature,
+				weather: shortenCurrentConditions(condition.textDescription).substr(0, 9),
+			};
+
 			if (WindSpeed > 0) {
 				fill.wind = windDirection + (Array(6 - windDirection.length - WindSpeed.toString().length).join(' ')) + WindSpeed.toString();
 			} else if (WindSpeed === 'NA') {
@@ -128,7 +130,7 @@ const getStations = async (stations) => {
 				StationId: station.id,
 				city: station.city,
 			};
-		} catch (e) {
+		} catch (error) {
 			console.log(`Unable to get latest observations for ${station.id}`);
 			return false;
 		}

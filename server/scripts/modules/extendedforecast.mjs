@@ -31,9 +31,9 @@ class ExtendedForecast extends WeatherDisplay {
 				retryCount: 3,
 				stillWaiting: () => this.stillWaiting(),
 			});
-		} catch (e) {
+		} catch (error) {
 			console.error('Unable to get extended forecast');
-			console.error(e.status, e.responseJSON);
+			console.error(error.status, error.responseJSON);
 			this.setStatus(STATUS.failed);
 			return;
 		}
@@ -52,7 +52,10 @@ class ExtendedForecast extends WeatherDisplay {
 
 		// create each day template
 		const days = forecast.map((Day) => {
-			const fill = {};
+			const fill = {
+				icon: { type: 'img', src: Day.icon },
+				condition: Day.text,
+			};
 			fill.date = Day.dayName;
 
 			const { low } = Day;
@@ -61,10 +64,6 @@ class ExtendedForecast extends WeatherDisplay {
 			}
 			const { high } = Day;
 			fill['value-hi'] = Math.round(high);
-			fill.condition = Day.text;
-
-			// draw the icon
-			fill.icon = { type: 'img', src: Day.icon };
 
 			// return the filled template
 			return this.fillTemplate('day', fill);
@@ -123,13 +122,13 @@ const parse = (fullForecast) => {
 
 const shortenExtendedForecastText = (long) => {
 	const regexList = [
-		[/ and /ig, ' '],
-		[/Slight /ig, ''],
-		[/Chance /ig, ''],
-		[/Very /ig, ''],
-		[/Patchy /ig, ''],
-		[/Areas /ig, ''],
-		[/Dense /ig, ''],
+		[/ and /gi, ' '],
+		[/slight /gi, ''],
+		[/chance /gi, ''],
+		[/very /gi, ''],
+		[/patchy /gi, ''],
+		[/areas /gi, ''],
+		[/dense /gi, ''],
 		[/Thunderstorm/g, 'T\'Storm'],
 	];
 		// run all regexes
@@ -144,10 +143,10 @@ const shortenExtendedForecastText = (long) => {
 	let short1 = conditions[0].substr(0, 10);
 	let short2 = '';
 	if (conditions[1]) {
-		if (!short1.endsWith('.')) {
-			short2 = conditions[1].substr(0, 10);
-		} else {
+		if (short1.endsWith('.')) {
 			short1 = short1.replace(/\./, '');
+		} else {
+			short2 = conditions[1].substr(0, 10);
 		}
 
 		if (short2 === 'Blowing') {

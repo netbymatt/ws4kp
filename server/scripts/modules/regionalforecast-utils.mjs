@@ -28,9 +28,9 @@ const getRegionalObservation = async (point, city) => {
 		preloadImg(icon);
 		// return the observation
 		return observation.properties;
-	} catch (e) {
+	} catch (error) {
 		console.log(`Unable to get regional observations for ${city.Name ?? city.city}`);
-		console.error(e.status, e.responseJSON);
+		console.error(error.status, error.responseJSON);
 		return false;
 	}
 };
@@ -195,7 +195,7 @@ const getXYForCityHI = (City, MaxLatitude, MinLongitude) => {
 };
 
 // to fit on the map, remove anything after punctuation and then limit to 15 characters
-const formatCity = (city) => city.match(/[^-;/\\,]*/)[0].substr(0, 12);
+const formatCity = (city) => city.match(/[^,/;\\-]*/)[0].substr(0, 12);
 
 export {
 	buildForecast,

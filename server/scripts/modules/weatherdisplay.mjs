@@ -53,11 +53,7 @@ class WeatherDisplay {
 		// get the saved status of the checkbox
 		let savedStatus = window.localStorage.getItem(`display-enabled: ${this.elemId}`);
 		if (savedStatus === null) savedStatus = defaultEnabled;
-		if (savedStatus === 'true' || savedStatus === true) {
-			this.isEnabled = true;
-		} else {
-			this.isEnabled = false;
-		}
+		this.isEnabled = !!((savedStatus === 'true' || savedStatus === true));
 
 		// refresh (or initially store the state of the checkbox)
 		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.isEnabled);
@@ -253,17 +249,13 @@ class WeatherDisplay {
 		if (nextScreenIndex === this.screenIndex) return;
 
 		// test for -1 (no screen displayed yet)
-		if (nextScreenIndex === -1) {
-			this.screenIndex = 0;
-		} else {
-			this.screenIndex = nextScreenIndex;
-		}
+		this.screenIndex = nextScreenIndex === -1 ? 0 : nextScreenIndex;
 
 		// call the appropriate screen index change method
-		if (!this.screenIndexChange) {
-			await this.drawCanvas();
-		} else {
+		if (this.screenIndexChange) {
 			this.screenIndexChange(this.screenIndex);
+		} else {
+			await this.drawCanvas();
 		}
 		this.showCanvas();
 	}
@@ -377,7 +369,7 @@ class WeatherDisplay {
 
 	loadTemplates() {
 		this.templates = {};
-		this.elem = document.getElementById(`${this.elemId}-html`);
+		this.elem = document.querySelector(`#${this.elemId}-html`);
 		if (!this.elem) return;
 		const templates = this.elem.querySelectorAll('.template');
 		templates.forEach((template) => {

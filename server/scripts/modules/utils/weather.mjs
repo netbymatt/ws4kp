@@ -3,9 +3,9 @@ import { json } from './fetch.mjs';
 const getPoint = async (lat, lon) => {
 	try {
 		return await json(`https://api.weather.gov/points/${lat},${lon}`);
-	} catch (e) {
+	} catch (error) {
 		console.log(`Unable to get point ${lat}, ${lon}`);
-		console.error(e);
+		console.error(error);
 		return false;
 	}
 };

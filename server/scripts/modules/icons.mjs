@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-function-scoping */
 /* spell-checker: disable */
 
 const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
@@ -8,7 +9,7 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 
 	// grab everything after the last slash ending at any of these: ?&,
 	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
-	let conditionName = afterLastSlash.match(/(.*?)[,?&.]/)[1];
+	let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
 	// using probability as a crude heavy/light indication where possible
 	const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
 
@@ -156,7 +157,7 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 
 	// grab everything after the last slash ending at any of these: ?&,
 	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
-	let conditionName = afterLastSlash.match(/(.*?)[,?&.]/)[1];
+	let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
 	// using probability as a crude heavy/light indication where possible
 	const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
 

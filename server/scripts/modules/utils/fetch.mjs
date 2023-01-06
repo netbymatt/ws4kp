@@ -21,7 +21,7 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	if (params.cors === true) corsUrl = rewriteUrl(_url);
 	const url = new URL(corsUrl, `${window.location.origin}/`);
 	// match the security protocol when not on localhost
-	url.protocol = window.location.hostname !== 'localhost' ? window.location.protocol : url.protocol;
+	url.protocol = window.location.hostname === 'localhost' ? url.protocol : window.location.protocol;
 	// add parameters if necessary
 	if (params.data) {
 		Object.keys(params.data).forEach((key) => {
@@ -73,7 +73,7 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 		// out of retries
 		return resolve(response);
 	})
-		.catch((e) => reject(e));
+		.catch((error) => reject(error));
 });
 
 const delay = (time, func, ...args) => new Promise((resolve) => {
@@ -87,8 +87,8 @@ const retryDelay = (retryNumber) => {
 	case 1: return 1000;
 	case 2: return 2000;
 	case 3: return 5000;
-	case 4: return 10000;
-	default: return 30000;
+	case 4: return 10_000;
+	default: return 30_000;
 	}
 };
 

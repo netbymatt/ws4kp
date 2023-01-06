@@ -40,9 +40,9 @@ class Hazards extends WeatherDisplay {
 
 			// show alert indicator
 			if (this.data.length > 0) alert.classList.add('show');
-		} catch (e) {
+		} catch (error) {
 			console.error('Get hourly forecast failed');
-			console.error(e.status, e.responseJSON);
+			console.error(error.status, error.responseJSON);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
 			// return undefined to other subscribers
 			this.getDataCallback(undefined);

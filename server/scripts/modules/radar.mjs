@@ -71,25 +71,24 @@ class Radar extends WeatherDisplay {
 		const lists = (await Promise.all(baseUrls.map(async (url) => {
 			try {
 			// get a list of available radars
-				const radarHtml = await text(url, { cors: true });
-				return radarHtml;
-			} catch (e) {
+				return text(url, { cors: true });
+			} catch (error) {
 				console.log('Unable to get list of radars');
-				console.error(e);
+				console.error(error);
 				this.setStatus(STATUS.failed);
 				return false;
 			}
 		}))).filter((d) => d);
 
 		// convert to an array of gif urls
-		const pngs = lists.map((html, htmlIdx) => {
+		const pngs = lists.flatMap((html, htmlIdx) => {
 			const parser = new DOMParser();
 			const xmlDoc = parser.parseFromString(html, 'text/html');
 			// add the base url
 			const base = xmlDoc.createElement('base');
 			base.href = baseUrls[htmlIdx];
 			xmlDoc.head.append(base);
-			const anchors = xmlDoc.getElementsByTagName('a');
+			const anchors = xmlDoc.querySelectorAll('a');
 			const urls = [];
 			Array.from(anchors).forEach((elem) => {
 				if (elem.innerHTML?.includes('.png') && elem.innerHTML?.includes('n0r_'))	{
@@ -97,7 +96,7 @@ class Radar extends WeatherDisplay {
 				}
 			});
 			return urls;
-		}).flat();
+		});
 
 		// get the last few images
 		const sortedPngs = pngs.sort((a, b) => (Date(a) < Date(b) ? -1 : 1));

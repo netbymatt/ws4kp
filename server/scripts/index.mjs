@@ -22,35 +22,38 @@ const categories = [
 	'Postal', 'Populated Place',
 ];
 const category = categories.join(',');
+const TXT_ADDRESS_SELECTOR = '#txtAddress';
+const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
+const BNT_GET_GPS_SELECTOR = '#btnGetGps';
 
 const init = () => {
-	document.getElementById('txtAddress').addEventListener('focus', (e) => {
+	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
 
 	registerRefreshData(loadData);
 
-	document.getElementById('NavigateMenu').addEventListener('click', btnNavigateMenuClick);
-	document.getElementById('NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
-	document.getElementById('NavigateNext').addEventListener('click', btnNavigateNextClick);
-	document.getElementById('NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
-	document.getElementById('NavigatePlay').addEventListener('click', btnNavigatePlayClick);
-	document.getElementById('ToggleFullScreen').addEventListener('click', btnFullScreenClick);
-	const btnGetGps = document.getElementById('btnGetGps');
+	document.querySelector('#NavigateMenu').addEventListener('click', btnNavigateMenuClick);
+	document.querySelector('#NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
+	document.querySelector('#NavigateNext').addEventListener('click', btnNavigateNextClick);
+	document.querySelector('#NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
+	document.querySelector('#NavigatePlay').addEventListener('click', btnNavigatePlayClick);
+	document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR).addEventListener('click', btnFullScreenClick);
+	const btnGetGps = document.querySelector(BNT_GET_GPS_SELECTOR);
 	btnGetGps.addEventListener('click', btnGetGpsClick);
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
 
-	document.getElementById('divTwc').addEventListener('click', () => {
+	document.querySelector('#divTwc').addEventListener('click', () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
 
-	document.getElementById('txtAddress').addEventListener('keydown', (key) => { if (key.code === 'Enter') formSubmit(); });
-	document.getElementById('btnGetLatLng').addEventListener('click', () => formSubmit());
+	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('keydown', (key) => { if (key.code === 'Enter') formSubmit(); });
+	document.querySelector('#btnGetLatLng').addEventListener('click', () => formSubmit());
 
 	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (fullScreenOverride) e.preventDefault(); });
 
-	$('#txtAddress').devbridgeAutocomplete({
+	$(TXT_ADDRESS_SELECTOR).devbridgeAutocomplete({
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 		deferRequestBy: 300,
 		paramName: 'text',
@@ -75,7 +78,7 @@ const init = () => {
 	});
 
 	const formSubmit = () => {
-		const ac = $('#txtAddress').devbridgeAutocomplete();
+		const ac = $(TXT_ADDRESS_SELECTOR).devbridgeAutocomplete();
 		if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).trigger('click');
 		return false;
 	};
@@ -85,7 +88,7 @@ const init = () => {
 	const latLon = localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS');
 	if (query && latLon && !fromGPS) {
-		const txtAddress = document.getElementById('txtAddress');
+		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
 		loadData(JSON.parse(latLon));
 	}
@@ -96,14 +99,14 @@ const init = () => {
 	const play = localStorage.getItem('play');
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
-	document.getElementById('btnClearQuery').addEventListener('click', () => {
-		document.getElementById('spanCity').innerHTML = '';
-		document.getElementById('spanState').innerHTML = '';
-		document.getElementById('spanStationId').innerHTML = '';
-		document.getElementById('spanRadarId').innerHTML = '';
-		document.getElementById('spanZoneId').innerHTML = '';
+	document.querySelector('#btnClearQuery').addEventListener('click', () => {
+		document.querySelector('#spanCity').innerHTML = '';
+		document.querySelector('#spanState').innerHTML = '';
+		document.querySelector('#spanStationId').innerHTML = '';
+		document.querySelector('#spanRadarId').innerHTML = '';
+		document.querySelector('#spanZoneId').innerHTML = '';
 
-		document.getElementById('chkAutoRefresh').checked = true;
+		document.querySelector('#chkAutoRefresh').checked = true;
 		localStorage.removeItem('autoRefresh');
 
 		localStorage.removeItem('play');
@@ -112,12 +115,12 @@ const init = () => {
 		localStorage.removeItem('latLonQuery');
 		localStorage.removeItem('latLon');
 		localStorage.removeItem('latLonFromGPS');
-		document.getElementById('btnGetGps').classList.remove('active');
+		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');
 	});
 
 	// swipe functionality
-	document.getElementById('container').addEventListener('swiped-left', () => swipeCallBack('left'));
-	document.getElementById('container').addEventListener('swiped-right', () => swipeCallBack('right'));
+	document.querySelector('#container').addEventListener('swiped-left', () => swipeCallBack('left'));
+	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
 };
 
 const autocompleteOnSelect = async (suggestion, elem) => {
@@ -135,7 +138,7 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 	const loc = data.locations[0];
 	if (loc) {
 		localStorage.removeItem('latLonFromGPS');
-		document.getElementById('btnGetGps').classList.remove('active');
+		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');
 		doRedirectToGeometry(loc.feature.geometry);
 	} else {
 		console.error('An unexpected error occurred. Please try a different search string.');
@@ -145,7 +148,7 @@ const autocompleteOnSelect = async (suggestion, elem) => {
 const doRedirectToGeometry = (geom, haveDataCallback) => {
 	const latLon = { lat: round2(geom.y, 4), lon: round2(geom.x, 4) };
 	// Save the query
-	localStorage.setItem('latLonQuery', document.getElementById('txtAddress').value);
+	localStorage.setItem('latLonQuery', document.querySelector(TXT_ADDRESS_SELECTOR).value);
 	localStorage.setItem('latLon', JSON.stringify(latLon));
 
 	// get the data
@@ -153,10 +156,10 @@ const doRedirectToGeometry = (geom, haveDataCallback) => {
 };
 
 const btnFullScreenClick = () => {
-	if (!document.fullscreenElement) {
-		enterFullScreen();
-	} else {
+	if (document.fullscreenElement) {
 		exitFullscreen();
+	} else {
+		enterFullScreen();
 	}
 
 	if (isPlaying()) {
@@ -171,7 +174,7 @@ const btnFullScreenClick = () => {
 };
 
 const enterFullScreen = () => {
-	const element = document.getElementById('divTwc');
+	const element = document.querySelector('#divTwc');
 
 	// Supports most browsers and their versions.
 	const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
@@ -189,7 +192,7 @@ const enterFullScreen = () => {
 	updateFullScreenNavigate();
 
 	// change hover text and image
-	const img = document.getElementById('ToggleFullScreen');
+	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
 	img.title = 'Exit fullscreen';
 };
@@ -213,7 +216,7 @@ const exitFullscreen = () => {
 	}
 	resize();
 	// change hover text and image
-	const img = document.getElementById('ToggleFullScreen');
+	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
 	img.title = 'Enter fullscreen';
 };
@@ -232,7 +235,7 @@ const loadData = (_latLon, haveDataCallback) => {
 	// if there's no data stop
 	if (!latLon) return;
 
-	document.getElementById('txtAddress').blur();
+	document.querySelector(TXT_ADDRESS_SELECTOR).blur();
 	stopAutoRefreshTimer();
 	latLonReceived(latLon, haveDataCallback);
 };
@@ -276,8 +279,9 @@ let navigateFadeIntervalId = null;
 
 const updateFullScreenNavigate = () => {
 	document.activeElement.blur();
-	document.getElementById('divTwcBottom').classList.remove('hidden');
-	document.getElementById('divTwcBottom').classList.add('visible');
+	const divTwcBottom = document.querySelector('#divTwcBottom');
+	divTwcBottom.classList.remove('hidden');
+	divTwcBottom.classList.add('visible');
 
 	if (navigateFadeIntervalId) {
 		clearTimeout(navigateFadeIntervalId);
@@ -286,8 +290,8 @@ const updateFullScreenNavigate = () => {
 
 	navigateFadeIntervalId = setTimeout(() => {
 		if (document.fullscreenElement) {
-			document.getElementById('divTwcBottom').classList.remove('visible');
-			document.getElementById('divTwcBottom').classList.add('hidden');
+			divTwcBottom.classList.remove('visible');
+			divTwcBottom.classList.add('hidden');
 		}
 	}, 2000);
 };
@@ -355,7 +359,7 @@ const getPosition = async () => new Promise((resolve) => {
 
 const btnGetGpsClick = async () => {
 	if (!navigator.geolocation) return;
-	const btn = document.getElementById('btnGetGps');
+	const btn = document.querySelector(BNT_GET_GPS_SELECTOR);
 
 	// toggle first
 	if (btn.classList.contains('active')) {
@@ -371,7 +375,7 @@ const btnGetGpsClick = async () => {
 	const position = await getPosition();
 	const { latitude, longitude } = position.coords;
 
-	const txtAddress = document.getElementById('txtAddress');
+	const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
 	doRedirectToGeometry({ y: latitude, x: longitude }, (point) => {

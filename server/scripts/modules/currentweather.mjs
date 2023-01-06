@@ -59,8 +59,8 @@ class CurrentWeather extends WeatherDisplay {
 					observations = undefined;
 					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
 				}
-			} catch (e) {
-				console.error(e);
+			} catch (error) {
+				console.error(error);
 			}
 		}
 		// test for data received

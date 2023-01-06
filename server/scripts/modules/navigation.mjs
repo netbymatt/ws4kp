@@ -16,7 +16,8 @@ const weatherParameters = {};
 
 // auto refresh
 const AUTO_REFRESH_INTERVAL_MS = 500;
-const AUTO_REFRESH_TIME_MS = 600000; // 10 min.
+const AUTO_REFRESH_TIME_MS = 600_000; // 10 min.
+const CHK_AUTO_REFRESH_SELECTOR = '#chkAutoRefresh';
 let AutoRefreshIntervalId = null;
 let AutoRefreshCountMs = 0;
 
@@ -28,25 +29,19 @@ const init = async () => {
 	// auto refresh
 	const autoRefresh = localStorage.getItem('autoRefresh');
 	if (!autoRefresh || autoRefresh === 'true') {
-		document.getElementById('chkAutoRefresh').checked = true;
+		document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked = true;
 	} else {
-		document.getElementById('chkAutoRefresh').checked = false;
+		document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked = false;
 	}
-	document.getElementById('chkAutoRefresh').addEventListener('change', autoRefreshChange);
+	document.querySelector(CHK_AUTO_REFRESH_SELECTOR).addEventListener('change', autoRefreshChange);
 	generateCheckboxes();
 };
 
 const message = (data) => {
 	// dispatch event
-	if (!data.type) return;
-	switch (data.type) {
-	case 'navButton':
-		handleNavButton(data.message);
-		break;
-
-	default:
-		console.error(`Unknown event ${data.type}`);
-	}
+	if (!data.type) return false;
+	if (data.type === 'navButton') return handleNavButton(data.message);
+	return console.error(`Unknown event ${data.type}`);
 };
 
 const getWeather = async (latLon, haveDataCallback) => {
@@ -61,6 +56,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 	const StationId = stations.features[0].properties.stationIdentifier;
 
 	let { city } = point.properties.relativeLocation.properties;
+	const { state } = point.properties.relativeLocation.properties;
 
 	if (StationId in StationInfo) {
 		city = StationInfo[StationId].city;
@@ -76,7 +72,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 	weatherParameters.stationId = StationId;
 	weatherParameters.weatherOffice = point.properties.cwa;
 	weatherParameters.city = city;
-	weatherParameters.state = point.properties.relativeLocation.properties.state;
+	weatherParameters.state = state;
 	weatherParameters.timeZone = point.properties.timeZone;
 	weatherParameters.forecast = point.properties.forecast;
 	weatherParameters.forecastGridData = point.properties.forecastGridData;
@@ -87,7 +83,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 
 	// draw the progress canvas and hide others
 	hideAllCanvases();
-	document.getElementById('loading').style.display = 'none';
+	document.querySelector('#loading').style.display = 'none';
 	if (progress) {
 		await progress.drawCanvas();
 		progress.showCanvas();
@@ -200,9 +196,7 @@ const loadDisplay = (direction) => {
 		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
 	}
 	// if new display index is less than current display a wrap occurred, test for reload timeout
-	if (idx <= curIdx) {
-		if (refreshCheck()) return;
-	}
+	if (idx <= curIdx && refreshCheck()) return;
 	const newDisplay = displays[idx];
 	// hide all displays
 	hideAllCanvases();
@@ -212,15 +206,12 @@ const loadDisplay = (direction) => {
 };
 
 // get the current display index or value
-const currentDisplayIndex = () => {
-	const index = displays.findIndex((display) => display.active);
-	return index;
-};
+const currentDisplayIndex = () => displays.findIndex((display) => display.active);
 const currentDisplay = () => displays[currentDisplayIndex()];
 
 const setPlaying = (newValue) => {
 	playing = newValue;
-	const playButton = document.getElementById('NavigatePlay');
+	const playButton = document.querySelector('#NavigatePlay');
 	localStorage.setItem('play', playing);
 
 	if (playing) {
@@ -272,14 +263,14 @@ const getDisplay = (index) => displays[index];
 
 // resize the container on a page resize
 const resize = () => {
-	const widthZoomPercent = (document.getElementById('divTwcBottom').getBoundingClientRect().width) / 640;
+	const widthZoomPercent = (document.querySelector('#divTwcBottom').getBoundingClientRect().width) / 640;
 	const heightZoomPercent = (window.innerHeight) / 480;
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
 	if (scale < 1.0 || document.fullscreenElement) {
-		document.getElementById('container').style.zoom = scale;
+		document.querySelector('#container').style.zoom = scale;
 	} else {
-		document.getElementById('container').style.zoom = 1;
+		document.querySelector('#container').style.zoom = 1;
 	}
 };
 
@@ -297,7 +288,7 @@ const registerDisplay = (display) => {
 };
 
 const generateCheckboxes = () => {
-	const availableDisplays = document.getElementById('enabledDisplays');
+	const availableDisplays = document.querySelector('#enabledDisplays');
 
 	if (!availableDisplays) return;
 	// generate checkboxes
@@ -314,11 +305,11 @@ const registerProgress = (_progress) => {
 };
 
 const populateWeatherParameters = (params) => {
-	document.getElementById('spanCity').innerHTML = `${params.city}, `;
-	document.getElementById('spanState').innerHTML = params.state;
-	document.getElementById('spanStationId').innerHTML = params.stationId;
-	document.getElementById('spanRadarId').innerHTML = params.radarId;
-	document.getElementById('spanZoneId').innerHTML = params.zoneId;
+	document.querySelector('#spanCity').innerHTML = `${params.city}, `;
+	document.querySelector('#spanState').innerHTML = params.state;
+	document.querySelector('#spanStationId').innerHTML = params.stationId;
+	document.querySelector('#spanRadarId').innerHTML = params.radarId;
+	document.querySelector('#spanZoneId').innerHTML = params.zoneId;
 };
 
 const autoRefreshChange = (e) => {
@@ -335,12 +326,12 @@ const autoRefreshChange = (e) => {
 
 const AssignLastUpdate = (date) => {
 	if (date) {
-		document.getElementById('spanLastRefresh').innerHTML = date.toLocaleString('en-US', {
+		document.querySelector('#spanLastRefresh').innerHTML = date.toLocaleString('en-US', {
 			weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
 		});
-		if (document.getElementById('chkAutoRefresh').checked) startAutoRefreshTimer();
+		if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked) startAutoRefreshTimer();
 	} else {
-		document.getElementById('spanLastRefresh').innerHTML = '(none)';
+		document.querySelector('#spanLastRefresh').innerHTML = '(none)';
 	}
 };
 
@@ -367,7 +358,7 @@ const startAutoRefreshTimer = () => {
 			RemainingMs = 0;
 		}
 		const dt = new Date(RemainingMs);
-		document.getElementById('spanRefreshCountDown').innerHTML = `${dt.getMinutes() < 10 ? `0${dt.getMinutes()}` : dt.getMinutes()}:${dt.getSeconds() < 10 ? `0${dt.getSeconds()}` : dt.getSeconds()}`;
+		document.querySelector('#spanRefreshCountDown').innerHTML = `${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
 
 		// Time has elapsed.
 		if (AutoRefreshCountMs >= AUTO_REFRESH_TIME_MS && !isPlaying()) loadTwcData();
@@ -378,7 +369,7 @@ const startAutoRefreshTimer = () => {
 const stopAutoRefreshTimer = () => {
 	if (AutoRefreshIntervalId) {
 		window.clearInterval(AutoRefreshIntervalId);
-		document.getElementById('spanRefreshCountDown').innerHTML = '--:--';
+		document.querySelector('#spanRefreshCountDown').innerHTML = '--:--';
 		AutoRefreshIntervalId = null;
 	}
 };

@@ -92,7 +92,7 @@ class RegionalForecast extends WeatherDisplay {
 
 				// format the observation the same as the forecast
 				const regionalObservation = {
-					daytime: !!observation.icon.match(/\/day\//),
+					daytime: !!/\/day\//.test(observation.icon),
 					temperature: celsiusToFahrenheit(observation.temperature.value),
 					name: utils.formatCity(city.city),
 					icon: observation.icon,
@@ -113,9 +113,9 @@ class RegionalForecast extends WeatherDisplay {
 					utils.buildForecast(forecast.properties.periods[1], city, cityXY),
 					utils.buildForecast(forecast.properties.periods[2], city, cityXY),
 				];
-			} catch (e) {
+			} catch (error) {
 				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
-				console.log(e);
+				console.log(error);
 				return false;
 			}
 		}));
@@ -159,11 +159,9 @@ class RegionalForecast extends WeatherDisplay {
 			const dayName = forecastDate.toLocaleString({ weekday: 'long' });
 			titleTop.innerHTML = 'Forecast for';
 			// draw the title
-			if (data[0][this.screenIndex].daytime) {
-				titleBottom.innerHTML = dayName;
-			} else {
-				titleBottom.innerHTML = `${dayName} Night`;
-			}
+			titleBottom.innerHTML = data[0][this.screenIndex].daytime
+				? dayName
+				: `${dayName} Night`;
 		}
 
 		// draw the map
@@ -182,9 +180,11 @@ class RegionalForecast extends WeatherDisplay {
 			const { temperature } = period;
 			fill.temp = temperature;
 
+			const { x, y } = period;
+
 			const elem = this.fillTemplate('location', fill);
-			elem.style.left = `${period.x}px`;
-			elem.style.top = `${period.y}px`;
+			elem.style.left = `${x}px`;
+			elem.style.top = `${y}px`;
 
 			return elem;
 		});

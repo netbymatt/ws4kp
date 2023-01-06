@@ -45,9 +45,9 @@ class TravelForecast extends WeatherDisplay {
 					name: city.Name,
 					icon: getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
 				};
-			} catch (e) {
+			} catch (error) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);
-				console.error(e.status, e.responseJSON);
+				console.error(error.status, error.responseJSON);
 				return { name: city.Name, error: true };
 			}
 		});
@@ -77,10 +77,9 @@ class TravelForecast extends WeatherDisplay {
 
 		const lines = cities.map((city) => {
 			if (city.error) return false;
-			const fillValues = {};
-
-			// city name
-			fillValues.city = city;
+			const fillValues = {
+				city,
+			};
 
 			// check for forecast data
 			if (city.icon) {
@@ -94,8 +93,9 @@ class TravelForecast extends WeatherDisplay {
 
 				fillValues.low = lowString;
 				fillValues.high = highString;
+				const { icon } = city;
 
-				fillValues.icon = { type: 'img', src: city.icon };
+				fillValues.icon = { type: 'img', src: icon };
 			} else {
 				fillValues.error = 'NO TRAVEL DATA AVAILABLE';
 			}

@@ -34,9 +34,9 @@ class Hourly extends WeatherDisplay {
 		try {
 			// get the forecast
 			forecast = await json(weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
-		} catch (e) {
+		} catch (error) {
 			console.error('Get hourly forecast failed');
-			console.error(e.status, e.responseJSON);
+			console.error(error.status, error.responseJSON);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
 			// return undefined to other subscribers
 			this.getDataCallback(undefined);
@@ -183,7 +183,7 @@ const expand = (data) => {
 				result.push(item.value); // push data array
 			} // timestamp is after now
 			// increment start time by 1 hour
-			startTime += 3600000;
+			startTime += 3_600_000;
 		} while (startTime < endTime && result.length < 24);
 	}); // for each value
 

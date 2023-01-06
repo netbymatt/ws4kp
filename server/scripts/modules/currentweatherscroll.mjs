@@ -75,12 +75,10 @@ const screens = [
 
 	// wind
 	(data) => {
-		let text = '';
-		if (data.WindSpeed > 0) {
-			text = `Wind: ${data.WindDirection} ${data.WindSpeed} ${data.WindUnit}`;
-		} else {
-			text = 'Wind: Calm';
-		}
+		let text = data.WindSpeed > 0
+			? `Wind: ${data.WindDirection} ${data.WindSpeed} ${data.WindUnit}`
+			: 'Wind: Calm';
+
 		if (data.WindGust > 0) {
 			text += `  Gusts to ${data.WindGust}`;
 		}
@@ -88,7 +86,10 @@ const screens = [
 	},
 
 	// visibility
-	(data) => `Visib: ${data.Visibility} ${data.VisibilityUnit}  Ceiling: ${data.Ceiling === 0 ? 'Unlimited' : `${data.Ceiling} ${data.CeilingUnit}`}`,
+	(data) => {
+		const distance = `${data.Ceiling} ${data.CeilingUnit}`;
+		return `Visib: ${data.Visibility} ${data.VisibilityUnit}  Ceiling: ${data.Ceiling === 0 ? 'Unlimited' : distance}`;
+	},
 ];
 
 // internal draw function with preset parameters

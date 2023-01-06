@@ -18,7 +18,7 @@ class Progress extends WeatherDisplay {
 
 		// setup event listener for dom-required initialization
 		document.addEventListener('DOMContentLoaded', () => {
-			this.version = document.getElementById('version').innerHTML;
+			this.version = document.querySelector('#version').innerHTML;
 			this.elem.querySelector('.container').addEventListener('click', this.lineClick.bind(this));
 		});
 
@@ -36,9 +36,9 @@ class Progress extends WeatherDisplay {
 		if (!displays) return;
 		const lines = displays.map((display, index) => {
 			if (display.showOnProgress === false) return false;
-			const fill = {};
-
-			fill.name = display.name;
+			const fill = {
+				name: display.name,
+			};
 
 			const statusClass = calcStatusClass(display.status);
 

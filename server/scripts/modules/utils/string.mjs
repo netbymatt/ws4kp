@@ -2,11 +2,11 @@ const locationCleanup = (input) => {
 	// regexes to run
 	const regexes = [
 		// "Chicago / West Chicago", removes before slash
-		/^[A-Za-z ]+ \/ /,
+		/^[ A-Za-z]+ \/ /,
 		// "Chicago/Waukegan" removes before slash
-		/^[A-Za-z ]+\//,
+		/^[ A-Za-z]+\//,
 		// "Chicago, Chicago O'hare" removes before comma
-		/^[A-Za-z ]+, /,
+		/^[ A-Za-z]+, /,
 	];
 
 	// run all regexes
