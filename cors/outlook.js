@@ -11,7 +11,7 @@ module.exports = (req, res) => {
 	// add out-going headers
 	const headers = {};
 	headers['user-agent'] = '(WeatherStar 4000+, ws4000@netbymatt.com)';
-	headers['accept'] = req.headers.accept;
+	headers.accept = req.headers.accept;
 
 	// get query paramaters if the exist
 	const queryParams = Object.keys(req.query).reduce((acc, key) => {
@@ -20,16 +20,16 @@ module.exports = (req, res) => {
 		// add the paramter to the resulting object
 		acc[key] = req.query[key];
 		return acc;
-	},{});
+	}, {});
 	let query = queryString.encode(queryParams);
-	if (query.length > 0) query = '?' + query;
+	if (query.length > 0) query = `?${query}`;
 
 	// get the page
-	https.get('https://www.cpc.ncep.noaa.gov/' + req.path + query, {
+	https.get(`https://www.cpc.ncep.noaa.gov/${req.path}${query}`, {
 		headers,
-	}, getRes => {
+	}, (getRes) => {
 		// pull some info
-		const {statusCode} = getRes;
+		const { statusCode } = getRes;
 		// pass the status code through
 		res.status(statusCode);
 
@@ -38,8 +38,7 @@ module.exports = (req, res) => {
 		res.header('last-modified', getRes.headers['last-modified']);
 		// pipe to response
 		getRes.pipe(res);
-
-	}).on('error', e=>{
+	}).on('error', (e) => {
 		console.error(e);
 	});
 };
