@@ -97,6 +97,8 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 
 	case 'fzra':
 	case 'fzra-n':
+	case 'rain_fzra':
+	case 'rain_fzra-n':
 		return addPath('Freezing-Rain-1992.gif');
 
 	case 'snow_sleet':
