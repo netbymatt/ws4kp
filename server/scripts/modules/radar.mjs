@@ -213,8 +213,12 @@ class Radar extends WeatherDisplay {
 		const timePadded = time.length >= 8 ? time : `&nbsp;${time}`;
 		this.elem.querySelector('.header .right .time').innerHTML = timePadded;
 
+		// get image offset calculation
+		// is slides slightly because of scaling so we have to take a measurement from the rendered page
+		const actualFrameHeight = this.elem.querySelector('.frame').getBoundingClientRect().height;
+
 		// scroll to image
-		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * 371}px`;
+		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight}px`;
 
 		this.finishDraw();
 	}
