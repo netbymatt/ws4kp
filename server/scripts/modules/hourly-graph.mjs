@@ -8,7 +8,6 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 
 class HourlyGraph extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
-		// special height and width for scrolling
 		super(navId, elemId, 'Hourly Graph', defaultActive);
 
 		// move the top right data into the correct location on load

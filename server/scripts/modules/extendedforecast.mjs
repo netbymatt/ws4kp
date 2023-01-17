@@ -55,8 +55,8 @@ class ExtendedForecast extends WeatherDisplay {
 			const fill = {
 				icon: { type: 'img', src: Day.icon },
 				condition: Day.text,
+				date: Day.dayName,
 			};
-			fill.date = Day.dayName;
 
 			const { low } = Day;
 			if (low !== undefined) {
