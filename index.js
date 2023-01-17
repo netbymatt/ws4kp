@@ -31,17 +31,17 @@ const index = (req, res) => {
 };
 
 // debugging
-if (process.env?.DIST !== '1') {
-	// debugging
-	app.get('/index.html', index);
-	app.get('/', index);
-	app.get('*', express.static(path.join(__dirname, './server')));
-} else {
+if (process.env?.DIST === '1') {
 	// distribution
 	app.use('/images', express.static(path.join(__dirname, './server/images')));
 	app.use('/fonts', express.static(path.join(__dirname, './server/fonts')));
 	app.use('/scripts', express.static(path.join(__dirname, './server/scripts')));
 	app.use('/', express.static(path.join(__dirname, './dist')));
+} else {
+	// debugging
+	app.get('/index.html', index);
+	app.get('/', index);
+	app.get('*', express.static(path.join(__dirname, './server')));
 }
 
 const server = app.listen(port, () => {

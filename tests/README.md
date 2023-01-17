@@ -1,0 +1,1 @@
+Currently, tests take a different approach from typical unit testing. The test methodology loads several forecasts for different locations and logs them all to one logger so errors can be found such as missing icons, locations that do not have all of the necessary data or other changes that may occur between geographical locations.

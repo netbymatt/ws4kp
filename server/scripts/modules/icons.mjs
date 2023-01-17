@@ -123,10 +123,12 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 	case 'tropical_storm':
 		return addPath('Thunderstorm.gif');
 
+	case 'wind':
 	case 'wind_few':
 	case 'wind_sct':
 	case 'wind_bkn':
 	case 'wind_ovc':
+	case 'wind-n':
 	case 'wind_few-n':
 	case 'wind_bkn-n':
 	case 'wind_ovc-n':
@@ -210,6 +212,9 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 		return addPath('CC_Fog.gif');
 
 	case 'rain_sleet':
+	case 'rain_sleet-n':
+	case 'sleet':
+	case 'sleet-n':
 		return addPath('Sleet.gif');
 
 	case 'rain_showers':
@@ -245,6 +250,8 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 	case 'snow_fzra-n':
 	case 'fzra':
 	case 'fzra-n':
+	case 'rain_fzra':
+	case 'rain_fzra-n':
 		return addPath('CC_FreezingRain.gif');
 
 	case 'snow_sleet':
@@ -268,9 +275,10 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 	case 'wind_sct':
 	case 'wind_bkn':
 	case 'wind_ovc':
-		return addPath('CC_Windy.gif');
-
 	case 'wind_skc':
+	case 'wind_few-n':
+	case 'wind_bkn-n':
+	case 'wind_ovc-n':
 	case 'wind_skc-n':
 	case 'wind_sct-n':
 		return addPath('CC_Windy.gif');
