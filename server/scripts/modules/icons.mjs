@@ -127,6 +127,9 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 	case 'wind_sct':
 	case 'wind_bkn':
 	case 'wind_ovc':
+	case 'wind_few-n':
+	case 'wind_bkn-n':
+	case 'wind_ovc-n':
 		return addPath('Wind.gif');
 
 	case 'wind_skc':
