@@ -1,9 +1,5 @@
-name: cd
+name: build-docker
 on: push
-
-env:
-  DEPLOYMENT: weatherstar
-  YAMLPATH: clusters/home-kluster/apps/weatherstar/weatherstar/app/deployment.yaml
 
 jobs:
   build:
@@ -19,7 +15,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/rmitchellscott/ws4kp
+            ghcr.io/netbymatt/ws4kp
           tags: |
             type=raw,priority=1000,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=ref,event=branch
@@ -41,29 +37,8 @@ jobs:
           context: .
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  deploy:
-    runs-on: ubuntu-latest
-    name: Deploy to flux
-    needs: build
-    steps:
-      - name: Check out Kubernetes repo
-        uses: actions/checkout@v3
-        with:
-          repository: rmitchellscott/kubernetes-apps
-          token: ${{ secrets.PAT }}
-          ref: "master"
-      - id: short-sha
-        uses: benjlevesque/short-sha@v1.2
-      - name: Replace the image tag
-        env:
-          TAG: ${{ steps.short-sha.outputs.sha }}
-        run: yq -i e '(select(.kind=="Deployment" and .metadata.name==env(DEPLOYMENT)) | .spec.template.spec.containers.[].image) |= split(":").0 + ":" + env(TAG)' $YAMLPATH
-      - name: Commit and push
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update image tag for ${{env.DEPLOYMENT}} to ${{ steps.short-sha.outputs.sha }}
