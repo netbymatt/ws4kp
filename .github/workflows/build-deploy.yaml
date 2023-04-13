@@ -46,23 +46,24 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   name: Deploy to flux
-  #   needs: build
-  #   steps:
-  #     - name: Check out Kubernetes repo
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: rmitchellscott/kubernetes-apps
-  #         token: ${{ secrets.PAT }}
-  #     - id: short-sha
-  #       uses: benjlevesque/short-sha@v1.2
-  #     - name: Replace the image tag
-  #       env:
-  #         TAG: ${{ steps.short-sha.outputs.sha }}
-  #       run: yq -i e '(select(.kind=="Deployment" and .metadata.name==env(DEPLOYMENT)) | .spec.template.spec.containers.[].image) |= split(":").0 + ":" + env(TAG)' $YAMLPATH
-  #     - name: Commit and push
-  #       uses: stefanzweifel/git-auto-commit-action@v4
-  #       with:
-  #         commit_message: Update image tag for ${{env.DEPLOYMENT}} to ${{ steps.short-sha.outputs.sha }}
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to flux
+    needs: build
+    steps:
+      - name: Check out Kubernetes repo
+        uses: actions/checkout@v3
+        with:
+          repository: rmitchellscott/kubernetes-apps
+          token: ${{ secrets.PAT }}
+          ref: "master"
+      - id: short-sha
+        uses: benjlevesque/short-sha@v1.2
+      - name: Replace the image tag
+        env:
+          TAG: ${{ steps.short-sha.outputs.sha }}
+        run: yq -i e '(select(.kind=="Deployment" and .metadata.name==env(DEPLOYMENT)) | .spec.template.spec.containers.[].image) |= split(":").0 + ":" + env(TAG)' $YAMLPATH
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update image tag for ${{env.DEPLOYMENT}} to ${{ steps.short-sha.outputs.sha }}
