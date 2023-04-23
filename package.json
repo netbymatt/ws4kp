@@ -6,8 +6,8 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:css": "sass ./server/styles/scss/style.scss ./server/styles/compiled.css",
-		"lint": "eslint ./server/scripts/**",
-		"lint:fix": "eslint --fix ./server/scripts/**"
+		"lint": "eslint ./server/scripts/**/*.mjs",
+		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs"
 	},
 	"repository": {
 		"type": "git",
@@ -25,8 +25,8 @@
 		"eslint": "^8.21.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-plugin-import": "^2.26.0",
-		"eslint-plugin-sonarjs": "^0.17.0",
-		"eslint-plugin-unicorn": "^45.0.2",
+		"eslint-plugin-sonarjs": "^0.19.0",
+		"eslint-plugin-unicorn": "^46.0.0",
 		"express": "^4.17.1",
 		"gulp": "^4.0.2",
 		"gulp-concat": "^2.6.1",
