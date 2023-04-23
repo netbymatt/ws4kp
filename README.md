@@ -19,11 +19,17 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 ## Run Your WeatherStar
 There are a lot of CORS considerations and issues with api.weather.gov that are easiest to deal with by running a local server to see this in action (or use the live link above). You'll need Node.js >12.0 to run the local server.
 
+To run via Node locally:
 ```
 git clone https://github.com/netbymatt/ws4kp.git
 cd ws4kp
 npm i
 node index.js
+```
+
+To run via Docker: 
+```
+docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
 ```
 Open your web browser: http://localhost:8080/ 
 
