@@ -112,6 +112,12 @@ const updateStatus = (value) => {
 		value.status = displays[firstDisplayIndex].status;
 	}
 
+	// if hazards data arrives after the firstDisplayIndex loads, then we need to hot wire this to the first display
+	if (value.id === 0 && value.status === STATUS.loaded && displays[0].timing.totalScreens === 0) {
+		value.id = firstDisplayIndex;
+		value.status = displays[firstDisplayIndex].status;
+	}
+
 	// if this is the first display and we're playing, load it up so it starts playing
 	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
