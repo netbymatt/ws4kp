@@ -274,9 +274,9 @@ const resize = () => {
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
 	if (scale < 1.0 || document.fullscreenElement) {
-		document.querySelector('#container').style.zoom = scale;
+		document.querySelector('#container').style.transform = `scale(${scale})`;
 	} else {
-		document.querySelector('#container').style.zoom = 1;
+		document.querySelector('#container').style.transform = 'unset';
 	}
 };
 

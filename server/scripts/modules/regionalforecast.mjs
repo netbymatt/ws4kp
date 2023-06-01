@@ -167,9 +167,7 @@ class RegionalForecast extends WeatherDisplay {
 		// draw the map
 		const scale = 640 / (offsetXY.x * 2);
 		const map = this.elem.querySelector('.map');
-		map.style.zoom = scale;
-		map.style.top = `-${sourceXY.y}px`;
-		map.style.left = `-${sourceXY.x}px`;
+		map.style.transform = `scale(${scale}) translate(-${sourceXY.x}px, -${sourceXY.y}px)`;
 
 		const cities = data.map((city) => {
 			const fill = {};

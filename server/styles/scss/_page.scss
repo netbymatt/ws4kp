@@ -95,8 +95,9 @@ body {
 		}
 	}
 
-	
+
 }
+
 .autocomplete-suggestions {
 	background-color: #ffffff;
 	border: 1px solid #000000;
@@ -284,6 +285,7 @@ body {
 	height: 480px;
 	overflow: hidden;
 	background-image: url(../images/BackGround1_1.png);
+	transform-origin: 0 0;
 
 }
 
@@ -291,6 +293,7 @@ body {
 	background-image: none;
 	width: unset;
 	height: unset;
+	transform-origin: unset;
 }
 
 #loading {
@@ -373,7 +376,7 @@ body {
 }
 
 #divTwcBottom img {
-	zoom: 75%;
+	transform: scale(0.75);
 }
 
 #divTwc:fullscreen {
