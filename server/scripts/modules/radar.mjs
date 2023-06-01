@@ -91,7 +91,7 @@ class Radar extends WeatherDisplay {
 			const anchors = xmlDoc.querySelectorAll('a');
 			const urls = [];
 			Array.from(anchors).forEach((elem) => {
-				if (elem.innerHTML?.includes('.png') && elem.innerHTML?.includes('n0r_'))	{
+				if (elem.innerHTML?.match(/n0r_\d{12}\.png/))	{
 					urls.push(elem.href);
 				}
 			});
@@ -99,7 +99,8 @@ class Radar extends WeatherDisplay {
 		});
 
 		// get the last few images
-		const sortedPngs = pngs.sort((a, b) => (Date(a) < Date(b) ? -1 : 1));
+		const timestampRegex = /_(\d{12})\.png/;
+		const sortedPngs = pngs.sort((a, b) => (a.match(timestampRegex)[1] < b.match(timestampRegex)[1] ? -1 : 1));
 		const urls = sortedPngs.slice(-(this.dopplerRadarImageMax));
 
 		// calculate offsets and sizes
