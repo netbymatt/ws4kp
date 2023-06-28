@@ -151,6 +151,7 @@ class WeatherDisplay {
 	drawCanvas() {
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
+		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
 	}
 
 	finishDraw() {
@@ -159,14 +160,13 @@ class WeatherDisplay {
 			this.drawCurrentDateTime();
 			// auto clock refresh
 			if (!this.dateTimeInterval) {
-				setInterval(() => this.drawCurrentDateTime(), 100);
+				// only draw if canvas is active to conserve battery
+				setInterval(() => this.active && this.drawCurrentDateTime(), 100);
 			}
 		}
 	}
 
 	drawCurrentDateTime() {
-		// only draw if canvas is active to conserve battery
-		if (!this.active) return;
 		// Get the current date and time.
 		const now = DateTime.local().setZone(timeZone());
 
