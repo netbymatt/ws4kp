@@ -216,7 +216,7 @@ class Radar extends WeatherDisplay {
 
 		// get image offset calculation
 		// is slides slightly because of scaling so we have to take a measurement from the rendered page
-		const actualFrameHeight = this.elem.querySelector('.frame').getBoundingClientRect().height;
+		const actualFrameHeight = this.elem.querySelector('.frame').scrollHeight;
 
 		// scroll to image
 		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight}px`;
