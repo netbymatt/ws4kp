@@ -52,5 +52,6 @@
 			"editor.defaultFormatter": "j69.ejs-beautify"
 		},
 		"files.exclude": {},
+		"files.eol": "\n",
 	},
 }
