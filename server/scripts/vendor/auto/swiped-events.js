@@ -46,11 +46,19 @@
         // if the user released on a different target, cancel!
         if (startEl !== e.target) return;
 
-        var swipeThreshold = parseInt(getNearestAttribute(startEl, 'data-swipe-threshold', '20'), 10); // default 20px
+        var swipeThreshold = parseInt(getNearestAttribute(startEl, 'data-swipe-threshold', '20'), 10); // default 20 units
+        var swipeUnit = getNearestAttribute(startEl, 'data-swipe-unit', 'px'); // default px
         var swipeTimeout = parseInt(getNearestAttribute(startEl, 'data-swipe-timeout', '500'), 10);    // default 500ms
         var timeDiff = Date.now() - timeDown;
         var eventType = '';
         var changedTouches = e.changedTouches || e.touches || [];
+
+        if (swipeUnit === 'vh') {
+            swipeThreshold = Math.round((swipeThreshold / 100) * document.documentElement.clientHeight); // get percentage of viewport height in pixels
+        }
+        if (swipeUnit === 'vw') {
+            swipeThreshold = Math.round((swipeThreshold / 100) * document.documentElement.clientWidth); // get percentage of viewport height in pixels
+        }
 
         if (Math.abs(xDiff) > Math.abs(yDiff)) { // most significant
             if (Math.abs(xDiff) > swipeThreshold && timeDiff < swipeTimeout) {
@@ -139,7 +147,7 @@
      */
     function getNearestAttribute(el, attributeName, defaultValue) {
 
-        // walk up the dom tree looking for data-action and data-trigger
+        // walk up the dom tree looking for attributeName
         while (el && el !== document.documentElement) {
 
             var attributeValue = el.getAttribute(attributeName);
