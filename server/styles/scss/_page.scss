@@ -126,6 +126,17 @@ body {
 	color: #ffffff;
 	width: 100%;
 	max-width: 640px;
+
+	&.wide {
+		max-width: 854px;
+		background-color: red;
+	}
+}
+
+.wide #container {
+	padding-left: 107px;
+	padding-right: 107px;
+	background-repeat: no-repeat;
 }
 
 #divTwcLeft {
@@ -286,7 +297,6 @@ body {
 	// overflow: hidden;
 	background-image: url(../images/BackGround1_1.png);
 	transform-origin: 0 0;
-
 }
 
 #divTwc:fullscreen #container {
