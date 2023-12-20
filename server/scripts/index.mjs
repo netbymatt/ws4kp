@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
 
-let fullScreenOverride = false;
-
 const categories = [
 	'Land Features',
 	'Bay', 'Channel', 'Cove', 'Dam', 'Delta', 'Gulf', 'Lagoon', 'Lake', 'Ocean', 'Reef', 'Reservoir', 'Sea', 'Sound', 'Strait', 'Waterfall', 'Wharf', // Water Features
@@ -51,7 +49,7 @@ const init = () => {
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => formSubmit());
 
 	document.addEventListener('keydown', documentKeydown);
-	document.addEventListener('touchmove', (e) => { if (fullScreenOverride) e.preventDefault(); });
+	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
 
 	$(TXT_ADDRESS_SELECTOR).devbridgeAutocomplete({
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -186,7 +184,6 @@ const enterFullScreen = () => {
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
-		fullScreenOverride = true;
 	}
 	resize();
 	updateFullScreenNavigate();
@@ -199,10 +196,6 @@ const enterFullScreen = () => {
 
 const exitFullscreen = () => {
 	// exit full-screen
-
-	if (fullScreenOverride) {
-		fullScreenOverride = false;
-	}
 
 	if (document.exitFullscreen) {
 		// Chrome 71 broke this if the user pressed F11 to enter full screen mode.
@@ -219,6 +212,9 @@ const exitFullscreen = () => {
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
 	img.title = 'Enter fullscreen';
+	const divTwcBottom = document.querySelector('#divTwcBottom');
+	divTwcBottom.classList.remove('hidden');
+	divTwcBottom.classList.add('visible');
 };
 
 const btnNavigateMenuClick = () => {

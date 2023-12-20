@@ -129,14 +129,9 @@ body {
 
 	&.wide {
 		max-width: 854px;
-		background-color: red;
+		// background: url(../images/BackGround1_1_wide.png);
+		;
 	}
-}
-
-.wide #container {
-	padding-left: 107px;
-	padding-right: 107px;
-	background-repeat: no-repeat;
 }
 
 #divTwcLeft {
@@ -299,8 +294,15 @@ body {
 	transform-origin: 0 0;
 }
 
+.wide #container {
+	padding-left: 107px;
+	padding-right: 107px;
+	background-repeat: no-repeat;
+	background: url(../images/BackGround1_1_wide.png)
+}
+
 #divTwc:fullscreen #container {
-	background-image: none;
+	// background-image: none;
 	width: unset;
 	height: unset;
 	transform-origin: unset;
@@ -335,6 +337,10 @@ body {
 .heading {
 	font-weight: bold;
 	margin-top: 15px;
+}
+
+#settings {
+	margin-bottom: 15px;
 }
 
 #enabledDisplays {

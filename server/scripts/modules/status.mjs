@@ -4,7 +4,7 @@ const STATUS = {
 	failed: Symbol('failed'),
 	noData: Symbol('noData'),
 	disabled: Symbol('disabled'),
-	retrying: Symbol('retyring'),
+	retrying: Symbol('retrying'),
 };
 
 const calcStatusClass = (statusCode) => {

@@ -198,11 +198,14 @@ class WeatherDisplay {
 		this.startNavCount();
 
 		this.elem.classList.add('show');
+		document.querySelector('#divTwc').classList.add(this.elemId);
 	}
 
 	hideCanvas() {
 		this.resetNavBaseCount();
 		this.elem.classList.remove('show');
+		// used to change backgrounds for widescreen
+		document.querySelector('#divTwc').classList.remove(this.elemId);
 	}
 
 	get active() {
