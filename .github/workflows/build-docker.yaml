@@ -10,19 +10,22 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - id: short-sha
-        uses: benjlevesque/short-sha@v1.2
+        uses: actions/checkout@v4
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: |
             ghcr.io/netbymatt/ws4kp
+          flavor: |
+            latest=false
           tags: |
             type=raw,priority=1000,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=ref,event=branch
-            ${{ steps.short-sha.outputs.sha }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Buildx
