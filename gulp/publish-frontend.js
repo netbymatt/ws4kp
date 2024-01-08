@@ -165,6 +165,8 @@ gulp.task('invalidate', async () => cloudfront.createInvalidation({
 	},
 }).promise());
 
+gulp.task('build-dist', gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files')));
+
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-module.exports = gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files'), 'upload_images', 'upload', 'invalidate');
+module.exports = gulp.series('build-dist', 'upload_images', 'upload', 'invalidate');
