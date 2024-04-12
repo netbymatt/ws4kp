@@ -4,6 +4,8 @@ import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
+import { parseQueryString } from './modules/share.mjs';
+import settings from './modules/settings.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -81,10 +83,15 @@ const init = () => {
 		return false;
 	};
 
-	// Auto load the previous query
-	const query = localStorage.getItem('latLonQuery');
-	const latLon = localStorage.getItem('latLon');
-	const fromGPS = localStorage.getItem('latLonFromGPS');
+	// attempt to parse the url parameters
+	const parsedParameters = parseQueryString();
+
+	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
+
+	// Auto load the parsed parameters and fall back to the previous query
+	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
+	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
+	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
 	if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
@@ -94,7 +101,9 @@ const init = () => {
 		btnGetGpsClick();
 	}
 
-	const play = localStorage.getItem('play');
+	// if kiosk mode was set via the query string, also play immediately
+	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
+	const play = parsedParameters['settings-kiosk-checkbox'] ?? localStorage.getItem('play');
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
@@ -176,7 +185,7 @@ const enterFullScreen = () => {
 
 	// Supports most browsers and their versions.
 	const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
-			|| element.mozRequestFullScreen || element.msRequestFullscreen;
+		|| element.mozRequestFullScreen || element.msRequestFullscreen;
 
 	if (requestMethod) {
 		// Native full screen.
