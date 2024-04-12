@@ -19,6 +19,10 @@ body {
 			color: lightblue;
 		}
 	}
+
+	&.kiosk {
+		margin: 0px;
+	}
 }
 
 #divQuery {
@@ -302,11 +306,16 @@ body {
 	background: url(../images/BackGround1_1_wide.png)
 }
 
-#divTwc:fullscreen #container {
+#divTwc:fullscreen #container,
+.kiosk #divTwc #container {
 	// background-image: none;
 	width: unset;
 	height: unset;
 	transform-origin: unset;
+}
+
+.kiosk #divTwc #container {
+	transform-origin: 0 0;
 }
 
 #loading {
@@ -344,7 +353,7 @@ body {
 	margin-bottom: 15px;
 }
 
-#enabledDisplays {
+#enabledDisplays, #settings {
 	margin-bottom: 15px;
 	@include u.status-colors();
 
@@ -396,18 +405,24 @@ body {
 	transform: scale(0.75);
 }
 
-#divTwc:fullscreen {
+#divTwc:fullscreen,
+.kiosk #divTwc {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	align-content: center;
 }
+.kiosk #divTwc {
+	justify-content: unset;
+}
 
-#divTwc:fullscreen #display {
+#divTwc:fullscreen #display,
+.kiosk #divTwc #display {
 	position: relative;
 }
 
-#divTwc:fullscreen #divTwcBottom {
+#divTwc:fullscreen #divTwcBottom,
+.kiosk #divTwc #divTwcBottom {
 	display: flex;
 	flex-direction: row;
 	background-color: rgb(0 0 0 / 0.5);
@@ -415,6 +430,14 @@ body {
 	width: 100%;
 	position: absolute;
 	bottom: 0px;
+}
+
+.kiosk {
+	#divTwc #divTwcBottom {
+		>div {
+			display: none;
+		}
+	}
 }
 
 .navButton {
@@ -703,4 +726,16 @@ body {
 #share-link-copied {
 	color: c.$title-color;
 	display: none;
+}
+
+.kiosk {
+	#divQuery,
+	>.info,
+	>.heading,
+	#enabledDisplays,
+	#settings,
+	#divInfo,
+	#divRefresh {
+		display: none;
+	}
 }

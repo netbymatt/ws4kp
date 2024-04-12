@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => init());
 
+// shorthand mappings for frequently used values
+const specialMappings = {
+	kiosk: 'settings-kiosk-checkbox',
+};
+
 const init = () => {
 	// add action to existing link
 	document.querySelector('#share-link').addEventListener('click', createLink);
@@ -28,9 +33,6 @@ const createLink = async (e) => {
 
 	const url = new URL(`?${queryString}`, document.location.href);
 
-	console.log(queryStringElements);
-	console.log(queryString);
-	console.log(url.toString());
 	try {
 		await navigator.clipboard.writeText(url.toString());
 		const confirmSpan = document.querySelector('#share-link-copied');
@@ -47,8 +49,21 @@ const parseQueryString = () => {
 	// return memoized result
 	if (parseQueryString.params) return parseQueryString.params;
 	const urlSearchParams = new URLSearchParams(window.location.search);
+
+	// turn into an array of key-value pairs
+	const paramsArray = [...urlSearchParams];
+
+	// add additional expanded keys
+	paramsArray.forEach((paramPair) => {
+		const expandedKey = specialMappings[paramPair[0]];
+		if (expandedKey) {
+			paramsArray.push([expandedKey, paramPair[1]]);
+		}
+	});
+
 	// memoize result
-	parseQueryString.params = Object.fromEntries(urlSearchParams.entries());
+	parseQueryString.params = Object.fromEntries(paramsArray);
+
 	return parseQueryString.params;
 };
 

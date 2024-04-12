@@ -1,19 +1,19 @@
 const SETTINGS_KEY = 'Settings';
 
 class Setting {
-	constructor(shortName, name, type, defaultValue, changeAction) {
+	constructor(shortName, name, type, defaultValue, changeAction, sticky) {
 		// store values
 		this.shortName = shortName;
 		this.name = name;
 		this.defaultValue = defaultValue;
 		this.myValue = defaultValue;
 		this.type = type;
-		// a defualt blank change function is provded
+		// a default blank change function is provided
 		this.changeAction = changeAction ?? (() => {});
 
 		// get existing value if present
 		const storedValue = this.getFromLocalStorage();
-		if (storedValue !== null) {
+		if (sticky && storedValue !== null) {
 			this.myValue = storedValue;
 		}
 
@@ -53,6 +53,7 @@ class Setting {
 	}
 
 	storeToLocalStorage(value) {
+		if (!this.sticky) return;
 		const allSettingsString = localStorage?.getItem(SETTINGS_KEY) ?? '{}';
 		const allSettings = JSON.parse(allSettingsString);
 		allSettings[this.shortName] = value;
@@ -86,7 +87,13 @@ class Setting {
 	}
 
 	set value(newValue) {
+		// update the state
 		this.myValue = newValue;
+		this.checkbox.checked = newValue;
+		this.storeToLocalStorage(this.myValue);
+
+		// call change action
+		this.changeAction(this.myValue);
 	}
 }
 

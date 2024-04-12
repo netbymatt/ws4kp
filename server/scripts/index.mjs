@@ -5,6 +5,7 @@ import {
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
+import settings from './modules/settings.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -100,7 +101,9 @@ const init = () => {
 		btnGetGpsClick();
 	}
 
-	const play = localStorage.getItem('play');
+	// if kiosk mode was set via the query string, also play immediately
+	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
+	const play = parsedParameters['settings-kiosk-checkbox'] ?? localStorage.getItem('play');
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
