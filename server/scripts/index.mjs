@@ -4,7 +4,7 @@ import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
-import { readLink } from './modules/share.mjs';
+import { parseQueryString } from './modules/share.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -83,7 +83,7 @@ const init = () => {
 	};
 
 	// attempt to parse the url parameters
-	const parsedParameters = readLink();
+	const parsedParameters = parseQueryString();
 
 	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
 

@@ -43,12 +43,16 @@ const createLink = async (e) => {
 	}
 };
 
-const readLink = () => {
+const parseQueryString = () => {
+	// return memoized result
+	if (parseQueryString.params) return parseQueryString.params;
 	const urlSearchParams = new URLSearchParams(window.location.search);
-	return Object.fromEntries(urlSearchParams.entries());
+	// memoize result
+	parseQueryString.params = Object.fromEntries(urlSearchParams.entries());
+	return parseQueryString.params;
 };
 
 export {
 	createLink,
-	readLink,
+	parseQueryString,
 };
