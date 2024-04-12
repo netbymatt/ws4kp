@@ -1,4 +1,5 @@
 @use 'shared/_utils'as u;
+@use 'shared/_colors'as c;
 
 @font-face {
 	font-family: "Star4000";
@@ -697,4 +698,9 @@ body {
 			}
 		}
 	}
+}
+
+#share-link-copied {
+	color: c.$title-color;
+	display: none;
 }

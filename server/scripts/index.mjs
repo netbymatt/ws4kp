@@ -4,7 +4,7 @@ import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
-import { createLink, readLink } from './modules/share.mjs';
+import { readLink } from './modules/share.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -82,10 +82,15 @@ const init = () => {
 		return false;
 	};
 
-	// Auto load the previous query
-	const query = localStorage.getItem('latLonQuery');
-	const latLon = localStorage.getItem('latLon');
-	const fromGPS = localStorage.getItem('latLonFromGPS');
+	// attempt to parse the url parameters
+	const parsedParameters = readLink();
+
+	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
+
+	// Auto load the parsed parameters and fall back to the previous query
+	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
+	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
+	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
 	if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
@@ -239,14 +244,14 @@ const loadData = (_latLon, haveDataCallback) => {
 
 const swipeCallBack = (direction) => {
 	switch (direction) {
-		case 'left':
-			btnNavigateNextClick();
-			break;
+	case 'left':
+		btnNavigateNextClick();
+		break;
 
-		case 'right':
-		default:
-			btnNavigatePreviousClick();
-			break;
+	case 'right':
+	default:
+		btnNavigatePreviousClick();
+		break;
 	}
 };
 
@@ -298,41 +303,41 @@ const documentKeydown = (e) => {
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {
-			case ' ': // Space
-				// don't scroll
-				e.preventDefault();
-				btnNavigatePlayClick();
-				return false;
+		case ' ': // Space
+			// don't scroll
+			e.preventDefault();
+			btnNavigatePlayClick();
+			return false;
 
-			case 'ArrowRight':
-			case 'PageDown':
-				// don't scroll
-				e.preventDefault();
-				btnNavigateNextClick();
-				return false;
+		case 'ArrowRight':
+		case 'PageDown':
+			// don't scroll
+			e.preventDefault();
+			btnNavigateNextClick();
+			return false;
 
-			case 'ArrowLeft':
-			case 'PageUp':
-				// don't scroll
-				e.preventDefault();
-				btnNavigatePreviousClick();
-				return false;
+		case 'ArrowLeft':
+		case 'PageUp':
+			// don't scroll
+			e.preventDefault();
+			btnNavigatePreviousClick();
+			return false;
 
-			case 'ArrowUp': // Home
-				e.preventDefault();
-				btnNavigateMenuClick();
-				return false;
+		case 'ArrowUp': // Home
+			e.preventDefault();
+			btnNavigateMenuClick();
+			return false;
 
-			case '0': // "O" Restart
-				btnNavigateRefreshClick();
-				return false;
+		case '0': // "O" Restart
+			btnNavigateRefreshClick();
+			return false;
 
-			case 'F':
-			case 'f':
-				btnFullScreenClick();
-				return false;
+		case 'F':
+		case 'f':
+			btnFullScreenClick();
+			return false;
 
-			default:
+		default:
 		}
 	}
 	return false;

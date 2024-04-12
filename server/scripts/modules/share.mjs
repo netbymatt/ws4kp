@@ -5,7 +5,7 @@ const init = () => {
 	document.querySelector('#share-link').addEventListener('click', createLink);
 };
 
-const createLink = (e) => {
+const createLink = async (e) => {
 	// cancel default event (click on hyperlink)
 	e.preventDefault();
 	// get all checkboxes on page
@@ -21,7 +21,8 @@ const createLink = (e) => {
 	});
 
 	// add the location string
-	queryStringElements.txtAddress = document.querySelector('#txtAddress')?.value ?? '';
+	queryStringElements.latLonQuery = localStorage.getItem('latLonQuery');
+	queryStringElements.latLon = localStorage.getItem('latLon');
 
 	const queryString = (new URLSearchParams(queryStringElements)).toString();
 
@@ -30,9 +31,22 @@ const createLink = (e) => {
 	console.log(queryStringElements);
 	console.log(queryString);
 	console.log(url.toString());
+	try {
+		await navigator.clipboard.writeText(url.toString());
+		const confirmSpan = document.querySelector('#share-link-copied');
+		confirmSpan.style.display = 'inline';
+		setTimeout(() => {
+			confirmSpan.style.display = 'none';
+		}, 5000);
+	} catch (error) {
+		console.error(error);
+	}
 };
 
-const readLink = false;
+const readLink = () => {
+	const urlSearchParams = new URLSearchParams(window.location.search);
+	return Object.fromEntries(urlSearchParams.entries());
+};
 
 export {
 	createLink,

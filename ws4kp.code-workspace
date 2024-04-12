@@ -53,6 +53,9 @@
 		},
 		"files.exclude": {},
 		"files.eol": "\n",
-		"editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+			"source.fixAll.eslint": true
+		}
+
 	},
 }
