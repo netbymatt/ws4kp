@@ -66,7 +66,7 @@ class Hazards extends WeatherDisplay {
 		const lines = this.data.map((data) => {
 			const fillValues = {};
 			// text
-			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${data.properties.description.replace('\n', '<br/><br/>')}`;
+			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${data.properties.description.replaceAll('\n\n', '<br/><br/>').replaceAll('\n', ' ')}`;
 
 			return this.fillTemplate('hazard', fillValues);
 		});
