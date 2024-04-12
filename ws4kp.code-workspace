@@ -53,5 +53,6 @@
 		},
 		"files.exclude": {},
 		"files.eol": "\n",
+		"editor.formatOnSave": true,
 	},
 }
