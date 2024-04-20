@@ -28,7 +28,7 @@ class Setting {
 		}
 
 		// call the change function on startup
-		this.changeAction(this.myValue);
+		this.checkboxChange({ target: { checked: this.myValue } });
 	}
 
 	generateCheckbox() {
