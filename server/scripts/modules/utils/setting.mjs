@@ -1,3 +1,5 @@
+import { parseQueryString } from '../share.mjs';
+
 const SETTINGS_KEY = 'Settings';
 
 class Setting {
@@ -9,10 +11,17 @@ class Setting {
 		this.myValue = defaultValue;
 		this.type = type;
 		// a default blank change function is provided
-		this.changeAction = changeAction ?? (() => {});
+		this.changeAction = changeAction ?? (() => { });
+
+		// get value from url
+		const urlValue = parseQueryString()?.[`settings-${shortName}-checkbox`];
+		let urlState;
+		if (urlValue !== undefined) {
+			urlState = urlValue === 'true';
+		}
 
 		// get existing value if present
-		const storedValue = this.getFromLocalStorage();
+		const storedValue = urlState ?? this.getFromLocalStorage();
 		if (sticky && storedValue !== null) {
 			this.myValue = storedValue;
 		}
