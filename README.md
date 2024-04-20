@@ -95,6 +95,12 @@ And the following technical fixes.
 
 * Caching of the animated gifs, specifically after they are decompressed
 
+## Community Notes
+
+Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!
+
+* [Stream as FFMPEG](https://github.com/netbymatt/ws4kp/issues/37#issuecomment-2008491948)
+
 ## Issue reporting and feature requests
 
 Please do not report issues with api.weather.gov being down. It's a new service and not considered fully operational yet. Before reporting an issue or requesting a feature please consider that this is not intended to be a perfect recreation of the WeatherStar 4000, it's a best effort that fits within what's available from the API and within a web browser.
