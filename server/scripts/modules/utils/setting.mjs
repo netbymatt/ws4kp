@@ -10,6 +10,7 @@ class Setting {
 		this.defaultValue = defaultValue;
 		this.myValue = defaultValue;
 		this.type = type;
+		this.sticky = sticky;
 		// a default blank change function is provided
 		this.changeAction = changeAction ?? (() => { });
 
