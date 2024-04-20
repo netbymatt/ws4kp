@@ -35,6 +35,7 @@
     var yDiff = null;
     var timeDown = null;
     var startEl = null;
+    var touchCount = 0;
 
     /**
      * Fires swiped event if swipe detected on touchend
@@ -84,6 +85,7 @@
             var eventData = {
                 dir: eventType.replace(/swiped-/, ''),
                 touchType: (changedTouches[0] || {}).touchType || 'direct',
+                fingers: touchCount, // Number of fingers used
                 xStart: parseInt(xDown, 10),
                 xEnd: parseInt((changedTouches[0] || {}).clientX || -1, 10),
                 yStart: parseInt(yDown, 10),
@@ -102,7 +104,6 @@
         yDown = null;
         timeDown = null;
     }
-
     /**
      * Records current location on touchstart event
      * @param {object} e - browser event object
@@ -120,6 +121,7 @@
         yDown = e.touches[0].clientY;
         xDiff = 0;
         yDiff = 0;
+        touchCount = e.touches.length;
     }
 
     /**
