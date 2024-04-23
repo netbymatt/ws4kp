@@ -42,7 +42,7 @@
   <script type="module" src="scripts/modules/regionalforecast.mjs"></script>
   <script type="module" src="scripts/modules/travelforecast.mjs"></script>
   <script type="module" src="scripts/modules/progress.mjs"></script>
-  <script type="module" src="scripts/modules/radar.mjs"></script>
+  <script type="module" src="scripts/modules/marineforecast.mjs"></script>
 	<script type="module" src="scripts/index.mjs"></script>
 
   <!-- data -->
@@ -107,6 +107,9 @@
       </div>
       <div id="almanac-html" class="weather-display">
         <%- include('partials/almanac.ejs') %>
+      </div>
+			<div id="marine-forecast-html" class="weather-display">
+        <%- include('partials/marine-forecast.ejs') %>
       </div>
       <div id="extended-forecast-html" class="weather-display">
         <%- include('partials/extended-forecast.ejs') %>

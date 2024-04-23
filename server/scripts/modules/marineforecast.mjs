@@ -4,7 +4,6 @@
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import getExtendedForecast from './extendedforecast.mjs';
 import getHourlyForecast from './hourly.mjs';
 
 class MarineForecast extends WeatherDisplay {
@@ -19,11 +18,8 @@ class MarineForecast extends WeatherDisplay {
 	async getData() {
 		if (!super.getData()) return;
 
-		const [extendedForecast, hourlyForecast] = await Promise.all([
-			getExtendedForecast(() => this.stillWaiting()),
-			getHourlyForecast(() => this.stillWaiting()),
-		]);
-		if (extendedForecast === undefined || hourlyForecast === undefined) {
+		const hourlyForecast = await getHourlyForecast(() => this.stillWaiting());
+		if (hourlyForecast === undefined) {
 			this.setStatus(STATUS.failed);
 			return;
 		}
@@ -36,10 +32,7 @@ class MarineForecast extends WeatherDisplay {
 			return;
 		}
 
-		this.data = {
-			extendedForecast,
-			hourlyForecast,
-		};
+		this.data =	hourlyForecast;
 		this.screenIndex = 0;
 		this.setStatus(STATUS.loaded);
 	}
@@ -54,11 +47,12 @@ class MarineForecast extends WeatherDisplay {
 		// create each day template
 		const days = forecast.map((Day) => {
 			const fill = {};
+			const waveHeight = Math.round(Day.waveHeight * 3.281);
 			fill.date = Day.dayName;
-			fill['wind-dir'] = 'NW';
+			fill['wind-dir'] = Day.windDirection;
 			fill['wind-speed'] = '10 - 15kts';
-			fill['wave-height'] = '1\'';
-			fill['wave-desc'] = '';
+			fill['wave-height'] = `${waveHeight}'`;
+			fill['wave-desc'] = waveDesc(waveHeight);
 
 			const { low } = Day;
 			if (low !== undefined) {
@@ -133,6 +127,12 @@ const waveImage = (conditions) => {
 	context.stroke();
 
 	return canvas.toDataURL();
+};
+
+const waveDesc = (waveHeight) => {
+	if (waveHeight > 7) return 'ROUGH';
+	if (waveHeight > 4) return 'CHOPPY';
+	return 'LIGHT';
 };
 
 // register display
