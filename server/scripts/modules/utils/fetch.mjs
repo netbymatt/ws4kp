@@ -21,7 +21,7 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	if (params.cors === true) corsUrl = rewriteUrl(_url);
 	const url = new URL(corsUrl, `${window.location.origin}/`);
 	// match the security protocol when not on localhost
-	url.protocol = window.location.hostname === 'localhost' ? url.protocol : window.location.protocol;
+	// url.protocol = window.location.hostname === 'localhost' ? url.protocol : window.location.protocol;
 	// add parameters if necessary
 	if (params.data) {
 		Object.keys(params.data).forEach((key) => {
