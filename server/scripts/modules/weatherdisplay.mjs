@@ -169,7 +169,7 @@ class WeatherDisplay {
 			// auto clock refresh
 			if (!this.dateTimeInterval) {
 				// only draw if canvas is active to conserve battery
-				setInterval(() => this.active && this.drawCurrentDateTime(), 100);
+				this.dateTimeInterval = setInterval(() => this.active && this.drawCurrentDateTime(), 100);
 			}
 		}
 	}
