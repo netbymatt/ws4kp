@@ -91,15 +91,14 @@ As time allows I will be working on the following enhancements.
 
 * Better error reporting when api.weather.gov is down (happens more often than you would think)
 
-And the following technical fixes.
-
-* Caching of the animated gifs, specifically after they are decompressed
-
 ## Community Notes
 
 Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!
 
 * [Stream as FFMPEG](https://github.com/netbymatt/ws4kp/issues/37#issuecomment-2008491948)
+
+## Customization
+A hook is provided as `/server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. An sample file is provided at `/server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.
 
 ## Issue reporting and feature requests
 
