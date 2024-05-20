@@ -146,7 +146,7 @@ const imageSources = [
 	'server/fonts/**',
 	'server/images/**',
 ];
-gulp.task('upload_images', () => gulp.src(imageSources, { base: './server' })
+gulp.task('upload_images', () => gulp.src(imageSources, { base: './server', encoding: false })
 	.pipe(
 		s3({
 			Bucket: 'weatherstar',
