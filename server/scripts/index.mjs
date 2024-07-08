@@ -43,9 +43,12 @@ const init = () => {
 	btnGetGps.addEventListener('click', btnGetGpsClick);
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
 
-	document.querySelector('#divTwc').addEventListener('click', () => {
+	document.querySelector('#divTwc').addEventListener('mousemove', () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
+	// local change detection when exiting full screen via ESC key (or other non button click methods)
+	window.addEventListener('resize', fullScreenResizeCheck);
+	fullScreenResizeCheck.wasFull = false;
 
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('keydown', (key) => { if (key.code === 'Enter') formSubmit(); });
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => formSubmit());
@@ -189,7 +192,7 @@ const enterFullScreen = () => {
 
 	if (requestMethod) {
 		// Native full screen.
-		requestMethod.call(element, { navigationUI: 'hide' }); // https://bugs.chromium.org/p/chromium/issues/detail?id=933436#c7
+		requestMethod.call(element, { navigationUI: 'hide' });
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
@@ -217,6 +220,10 @@ const exitFullscreen = () => {
 		document.msExitFullscreen();
 	}
 	resize();
+	exitFullScreenVisibilityChanges();
+};
+
+const exitFullScreenVisibilityChanges = () => {
 	// change hover text and image
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
@@ -228,7 +235,6 @@ const exitFullscreen = () => {
 
 const btnNavigateMenuClick = () => {
 	postMessage('navButton', 'menu');
-	updateFullScreenNavigate();
 	return false;
 };
 
@@ -261,21 +267,18 @@ const swipeCallBack = (direction) => {
 const btnNavigateRefreshClick = () => {
 	resetStatuses();
 	loadData();
-	updateFullScreenNavigate();
 
 	return false;
 };
 
 const btnNavigateNextClick = () => {
 	postMessage('navButton', 'next');
-	updateFullScreenNavigate();
 
 	return false;
 };
 
 const btnNavigatePreviousClick = () => {
 	postMessage('navButton', 'previous');
-	updateFullScreenNavigate();
 
 	return false;
 };
@@ -348,7 +351,6 @@ const documentKeydown = (e) => {
 
 const btnNavigatePlayClick = () => {
 	postMessage('navButton', 'playToggle');
-	updateFullScreenNavigate();
 
 	return false;
 };
@@ -392,4 +394,19 @@ const btnGetGpsClick = async () => {
 		localStorage.setItem('latLonFromGPS', true);
 		txtAddress.value = `${location.city}, ${location.state}`;
 	});
+};
+
+// check for change in full screen triggered by browser and run local functions
+const fullScreenResizeCheck = () => {
+	if (fullScreenResizeCheck.wasFull && !document.fullscreenElement) {
+		// leaving full screen
+		exitFullScreenVisibilityChanges();
+	}
+	if (!fullScreenResizeCheck.wasFull && document.fullscreenElement) {
+		// entering full screen
+		// can't do much here because a UI interaction is required to change the full screen div element
+	}
+
+	// store state of fullscreen element for next change detection
+	fullScreenResizeCheck.wasFull = !!document.fullscreenElement;
 };
