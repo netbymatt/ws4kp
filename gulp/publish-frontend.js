@@ -164,7 +164,7 @@ gulp.task('invalidate', async () => cloudfront.send(new CreateInvalidationComman
 			Items: ['/*'],
 		},
 	},
-}).promise()));
+})));
 
 gulp.task('build-dist', gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files')));
 
