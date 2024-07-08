@@ -1,12 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const gulp = require('gulp');
-const del = require('del');
-const rename = require('gulp-rename');
+import { src, series, dest } from 'gulp';
+import { deleteAsync } from 'del';
+import rename from 'gulp-rename';
 
-const clean = (cb) => {
-	del(['./server/scripts/vendor/auto/**']);
-	cb();
-};
+const clean = () => deleteAsync(['./server/scripts/vendor/auto/**']);
 
 const vendorFiles = [
 	'./node_modules/luxon/build/es6/luxon.js',
@@ -17,13 +14,15 @@ const vendorFiles = [
 	'./node_modules/swiped-events/src/swiped-events.js',
 ];
 
-const copy = () => gulp.src(vendorFiles)
+const copy = () => src(vendorFiles)
 	.pipe(rename((path) => {
 		path.dirname = path.dirname.toLowerCase();
 		path.basename = path.basename.toLowerCase();
 		path.extname = path.extname.toLowerCase();
 		if (path.basename === 'luxon') path.extname = '.mjs';
 	}))
-	.pipe(gulp.dest('./server/scripts/vendor/auto'));
+	.pipe(dest('./server/scripts/vendor/auto'));
 
-module.exports = gulp.series(clean, copy);
+const updateVendor = series(clean, copy);
+
+export default updateVendor;

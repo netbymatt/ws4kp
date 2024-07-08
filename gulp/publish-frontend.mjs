@@ -1,20 +1,22 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const gulp = require('gulp');
-const concat = require('gulp-concat');
-const terser = require('gulp-terser');
-const ejs = require('gulp-ejs');
-const rename = require('gulp-rename');
-const htmlmin = require('gulp-htmlmin');
-const del = require('del');
-const s3Upload = require('gulp-s3-upload');
-const webpack = require('webpack-stream');
-const TerserPlugin = require('terser-webpack-plugin');
-const path = require('path');
-
-const clean = () => del(['./dist**']);
+import {
+	src, dest, series, parallel,
+} from 'gulp';
+import concat from 'gulp-concat';
+import terser from 'gulp-terser';
+import ejs from 'gulp-ejs';
+import rename from 'gulp-rename';
+import htmlmin from 'gulp-htmlmin';
+import { deleteAsync } from 'del';
+import s3Upload from 'gulp-s3-upload';
+import webpack from 'webpack-stream';
+import TerserPlugin from 'terser-webpack-plugin';
+import { readFile } from 'fs/promises';
 
 // get cloudfront
-const { CloudFrontClient, CreateInvalidationCommand } = require('@aws-sdk/client-cloudfront');
+import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+
+const clean = () => deleteAsync(['./dist**']);
 
 const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
@@ -34,7 +36,7 @@ const webpackOptions = {
 		filename: 'ws.min.js',
 	},
 	resolve: {
-		roots: [path.resolve(__dirname, './')],
+		roots: ['./'],
 	},
 	optimization: {
 		minimize: true,
@@ -52,10 +54,10 @@ const webpackOptions = {
 	},
 };
 
-gulp.task('compress_js_data', () => gulp.src(jsSourcesData)
+const compressJsData = () => src(jsSourcesData)
 	.pipe(concat('data.min.js'))
 	.pipe(terser())
-	.pipe(gulp.dest(RESOURCES_PATH)));
+	.pipe(dest(RESOURCES_PATH));
 
 const jsVendorSources = [
 	'server/scripts/vendor/auto/jquery.js',
@@ -65,10 +67,10 @@ const jsVendorSources = [
 	'server/scripts/vendor/auto/suncalc.js',
 ];
 
-gulp.task('compress_js_vendor', () => gulp.src(jsVendorSources)
+const compressJsVendor = () => src(jsVendorSources)
 	.pipe(concat('vendor.min.js'))
 	.pipe(terser())
-	.pipe(gulp.dest(RESOURCES_PATH)));
+	.pipe(dest(RESOURCES_PATH));
 
 const mjsSources = [
 	'server/scripts/modules/currentweatherscroll.mjs',
@@ -88,39 +90,40 @@ const mjsSources = [
 	'server/scripts/index.mjs',
 ];
 
-gulp.task('build_js', () => gulp.src(mjsSources)
+const buildJs = () => src(mjsSources)
 	.pipe(webpack(webpackOptions))
-	.pipe(gulp.dest(RESOURCES_PATH)));
+	.pipe(dest(RESOURCES_PATH));
 
 const cssSources = [
 	'server/styles/main.css',
 ];
-gulp.task('copy_css', () => gulp.src(cssSources)
+const copyCss = () => src(cssSources)
 	.pipe(concat('ws.min.css'))
-	.pipe(gulp.dest(RESOURCES_PATH)));
+	.pipe(dest(RESOURCES_PATH));
 
 const htmlSources = [
 	'views/*.ejs',
 ];
-gulp.task('compress_html', () => {
-	// eslint-disable-next-line global-require
-	const { version } = require('../package.json');
-	return gulp.src(htmlSources)
+const compressHtml = async () => {
+	const packageJson = await readFile('package.json');
+	const { version } = JSON.parse(packageJson);
+
+	return src(htmlSources)
 		.pipe(ejs({
 			production: version,
 			version,
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))
-		.pipe(gulp.dest('./dist'));
-});
+		.pipe(dest('./dist'));
+};
 
 const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
 ];
-gulp.task('copy_other_files', () => gulp.src(otherFiles, { base: 'server/' })
-	.pipe(gulp.dest('./dist')));
+const copyOtherFiles = () => src(otherFiles, { base: 'server/' })
+	.pipe(dest('./dist'));
 
 const s3 = s3Upload({
 	useIAM: true,
@@ -131,7 +134,7 @@ const uploadSources = [
 	'dist/**',
 	'!dist/**/*.map',
 ];
-gulp.task('upload', () => gulp.src(uploadSources, { base: './dist' })
+const upload = () => src(uploadSources, { base: './dist' })
 	.pipe(s3({
 		Bucket: 'weatherstar',
 		StorageClass: 'STANDARD',
@@ -141,21 +144,21 @@ gulp.task('upload', () => gulp.src(uploadSources, { base: './dist' })
 				return 'max-age=2592000'; // 1 month
 			},
 		},
-	})));
+	}));
 
 const imageSources = [
 	'server/fonts/**',
 	'server/images/**',
 ];
-gulp.task('upload_images', () => gulp.src(imageSources, { base: './server', encoding: false })
+const uploadImages = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(
 		s3({
 			Bucket: 'weatherstar',
 			StorageClass: 'STANDARD',
 		}),
-	));
+	);
 
-gulp.task('invalidate', async () => cloudfront.send(new CreateInvalidationCommand({
+const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
 	DistributionId: 'E9171A4KV8KCW',
 	InvalidationBatch: {
 		CallerReference: (new Date()).toLocaleString(),
@@ -164,10 +167,12 @@ gulp.task('invalidate', async () => cloudfront.send(new CreateInvalidationComman
 			Items: ['/*'],
 		},
 	},
-})));
+}));
 
-gulp.task('build-dist', gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files')));
+const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-module.exports = gulp.series('build-dist', 'upload_images', 'upload', 'invalidate');
+const publishFrontend = series(buildDist, uploadImages,	upload,	invalidate);
+
+export default publishFrontend;

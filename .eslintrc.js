@@ -22,7 +22,7 @@ module.exports = {
 
 	},
 	parserOptions: {
-		ecmaVersion: 2021,
+		ecmaVersion: 2023,
 	},
 	plugins: [
 		'unicorn',
