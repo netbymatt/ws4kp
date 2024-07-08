@@ -14,10 +14,11 @@ const path = require('path');
 const clean = () => del(['./dist**']);
 
 // get cloudfront
-const AWS = require('aws-sdk');
+const { CloudFrontClient, CreateInvalidationCommand } = require('@aws-sdk/client-cloudfront');
 
-AWS.config.update({ region: 'us-east-1' });
-const cloudfront = new AWS.CloudFront({ apiVersion: '2020-01-01' });
+const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
+
+const RESOURCES_PATH = './dist/resources';
 
 const jsSourcesData = [
 	'server/scripts/data/travelcities.js',
@@ -54,7 +55,7 @@ const webpackOptions = {
 gulp.task('compress_js_data', () => gulp.src(jsSourcesData)
 	.pipe(concat('data.min.js'))
 	.pipe(terser())
-	.pipe(gulp.dest('./dist/resources')));
+	.pipe(gulp.dest(RESOURCES_PATH)));
 
 const jsVendorSources = [
 	'server/scripts/vendor/auto/jquery.js',
@@ -67,7 +68,7 @@ const jsVendorSources = [
 gulp.task('compress_js_vendor', () => gulp.src(jsVendorSources)
 	.pipe(concat('vendor.min.js'))
 	.pipe(terser())
-	.pipe(gulp.dest('./dist/resources')));
+	.pipe(gulp.dest(RESOURCES_PATH)));
 
 const mjsSources = [
 	'server/scripts/modules/currentweatherscroll.mjs',
@@ -89,14 +90,14 @@ const mjsSources = [
 
 gulp.task('build_js', () => gulp.src(mjsSources)
 	.pipe(webpack(webpackOptions))
-	.pipe(gulp.dest('dist/resources')));
+	.pipe(gulp.dest(RESOURCES_PATH)));
 
 const cssSources = [
 	'server/styles/main.css',
 ];
 gulp.task('copy_css', () => gulp.src(cssSources)
 	.pipe(concat('ws.min.css'))
-	.pipe(gulp.dest('./dist/resources')));
+	.pipe(gulp.dest(RESOURCES_PATH)));
 
 const htmlSources = [
 	'views/*.ejs',
@@ -154,7 +155,7 @@ gulp.task('upload_images', () => gulp.src(imageSources, { base: './server', enco
 		}),
 	));
 
-gulp.task('invalidate', async () => cloudfront.createInvalidation({
+gulp.task('invalidate', async () => cloudfront.send(new CreateInvalidationCommand({
 	DistributionId: 'E9171A4KV8KCW',
 	InvalidationBatch: {
 		CallerReference: (new Date()).toLocaleString(),
@@ -163,7 +164,7 @@ gulp.task('invalidate', async () => cloudfront.createInvalidation({
 			Items: ['/*'],
 		},
 	},
-}).promise());
+}).promise()));
 
 gulp.task('build-dist', gulp.series(clean, gulp.parallel('build_js', 'compress_js_data', 'compress_js_vendor', 'copy_css', 'compress_html', 'copy_other_files')));
 
