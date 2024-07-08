@@ -353,7 +353,8 @@ body {
 	margin-bottom: 15px;
 }
 
-#enabledDisplays, #settings {
+#enabledDisplays,
+#settings {
 	margin-bottom: 15px;
 	@include u.status-colors();
 
@@ -412,6 +413,7 @@ body {
 	justify-content: center;
 	align-content: center;
 }
+
 .kiosk #divTwc {
 	justify-content: unset;
 }
@@ -728,7 +730,12 @@ body {
 	display: none;
 }
 
+#share-link-instructions {
+	display: none;
+}
+
 .kiosk {
+
 	#divQuery,
 	>.info,
 	>.heading,
