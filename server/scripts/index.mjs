@@ -228,6 +228,7 @@ const exitFullScreenVisibilityChanges = () => {
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
 	img.title = 'Enter fullscreen';
+	document.querySelector('#divTwc').classList.remove('no-cursor');
 	const divTwcBottom = document.querySelector('#divTwcBottom');
 	divTwcBottom.classList.remove('hidden');
 	divTwcBottom.classList.add('visible');
@@ -290,6 +291,7 @@ const updateFullScreenNavigate = () => {
 	const divTwcBottom = document.querySelector('#divTwcBottom');
 	divTwcBottom.classList.remove('hidden');
 	divTwcBottom.classList.add('visible');
+	document.querySelector('#divTwc').classList.remove('no-cursor');
 
 	if (navigateFadeIntervalId) {
 		clearTimeout(navigateFadeIntervalId);
@@ -300,6 +302,7 @@ const updateFullScreenNavigate = () => {
 		if (document.fullscreenElement) {
 			divTwcBottom.classList.remove('visible');
 			divTwcBottom.classList.add('hidden');
+			document.querySelector('#divTwc').classList.add('no-cursor');
 		}
 	}, 2000);
 };
