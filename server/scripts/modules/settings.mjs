@@ -4,20 +4,28 @@ document.addEventListener('DOMContentLoaded', () => {
 	init();
 });
 
-const settings = {};
+// default speed
+const settings = { speed: { value: 1.0 } };
 
 const init = () => {
 	// create settings
 	settings.wide = new Setting('wide', 'Widescreen', 'boolean', false, wideScreenChange, true);
 	settings.kiosk = new Setting('kiosk', 'Kiosk', 'boolean', false, kioskChange, false);
+	settings.speed = new Setting('speed', 'Speed', 'select', 1.0, null, true, [
+		[0.5, 'Very Fast'],
+		[0.75, 'Fast'],
+		[1.0, 'Normal'],
+		[1.25, 'Slow'],
+		[1.5, 'Very Slow'],
+	]);
 
-	// generate checkboxes
-	const checkboxes = Object.values(settings).map((d) => d.generateCheckbox());
+	// generate html objects
+	const settingHtml = Object.values(settings).map((d) => d.generate());
 
 	// write to page
 	const settingsSection = document.querySelector('#settings');
 	settingsSection.innerHTML = '';
-	settingsSection.append(...checkboxes);
+	settingsSection.append(...settingHtml);
 };
 
 const wideScreenChange = (value) => {

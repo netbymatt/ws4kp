@@ -31,6 +31,14 @@ const createLink = async (e) => {
 		}
 	});
 
+	// get all select boxes
+	const selects = document.querySelectorAll('select');
+	[...selects].forEach((elem) => {
+		if (elem?.id) {
+			queryStringElements[elem.id] = elem?.value ?? 0;
+		}
+	});
+
 	// add the location string
 	queryStringElements.latLonQuery = localStorage.getItem('latLonQuery');
 	queryStringElements.latLon = localStorage.getItem('latLon');

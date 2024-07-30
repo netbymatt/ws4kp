@@ -6,6 +6,7 @@ import {
 	msg, displayNavMessage, isPlaying, updateStatus, timeZone,
 } from './navigation.mjs';
 import { parseQueryString } from './share.mjs';
+import settings from './settings.mjs';
 
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
@@ -358,7 +359,7 @@ class WeatherDisplay {
 
 	// start and stop base counter
 	startNavCount() {
-		if (!this.navInterval) this.navInterval = setInterval(() => this.navBaseTime(), this.timing.baseDelay);
+		if (!this.navInterval) this.navInterval = setInterval(() => this.navBaseTime(), this.timing.baseDelay * settings.speed.value);
 	}
 
 	resetNavBaseCount() {
