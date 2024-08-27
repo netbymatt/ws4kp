@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/consistent-function-scoping */
 /* spell-checker: disable */
 
 const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
