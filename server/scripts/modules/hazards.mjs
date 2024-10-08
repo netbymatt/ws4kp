@@ -3,12 +3,18 @@
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, msg } from './navigation.mjs';
 
 const hazardLevels = {
 	Extreme: 10,
 	Severe: 5,
 };
+
+const hazardModifiers = {
+	'Hurricane Warning': 2,
+	'Tornado Warning': 3,
+	'Severe Thunderstorm Warning': 1,
+}
 
 class Hazards extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -34,8 +40,9 @@ class Hazards extends WeatherDisplay {
 			url.searchParams.append('limit', 5);
 			const alerts = await json(url, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
 			const unsortedAlerts = alerts.features ?? [];
-			const sortedAlerts = unsortedAlerts.sort((a, b) => (hazardLevels[b.properties.severity] ?? 0) - (hazardLevels[a.properties.severity] ?? 0));
-			const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown');
+			const hasImmediate = unsortedAlerts.reduce((acc, hazard) => acc || hazard.properties.urgency === 'Immediate', false);
+			const sortedAlerts = unsortedAlerts.sort((a, b) => (calcSeverity(b.properties.severity, b.properties.event)) - (calcSeverity(a.properties.severity, a.properties.event)));
+			const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown' && (!hasImmediate || (hazard.properties.urgency === 'Immediate')));
 			this.data = filteredAlerts;
 
 			// show alert indicator
@@ -134,6 +141,25 @@ class Hazards extends WeatherDisplay {
 			this.getDataCallbacks.push(() => resolve(this.data));
 		});
 	}
+
+	// after we roll through the hazards once, don't display again until the next refresh (10 minutes)
+	screenIndexFromBaseCount() {
+		const superValue = super.screenIndexFromBaseCount();
+		// false is returned when we reach the end of the scroll
+		if (superValue === false) {
+			// set total screens to zero to take this out of the rotation
+			this.timing.totalScreens = 0;
+		}
+		// return the value as expected
+		return superValue;
+	}
+}
+
+const calcSeverity = (severity, event) => {
+	// base severity plus some modifiers for specific types of warnings
+	const baseSeverity = hazardLevels[severity] ?? 0;
+	const modifiedSeverity = hazardModifiers[event] ?? 0;
+	return baseSeverity + modifiedSeverity;
 }
 
 // register display
