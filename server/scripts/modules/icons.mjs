@@ -72,14 +72,14 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 		case 'rain-n':
 			return addPath('Rain-1992.gif');
 
-		// case 'snow':
-		// 	return addPath('Light-Snow.gif');
-		// 	break;
+			// case 'snow':
+			// 	return addPath('Light-Snow.gif');
+			// 	break;
 
-		// case 'cc_snowshowers.gif':
-		// 	//case "heavy-snow.gif":
-		// 	return addPath('AM-Snow-1994.gif');
-		// 	break;
+			// case 'cc_snowshowers.gif':
+			// 	//case "heavy-snow.gif":
+			// 	return addPath('AM-Snow-1994.gif');
+			// 	break;
 
 		case 'snow':
 		case 'snow-n':
@@ -120,6 +120,8 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 		case 'tsra_hi-n':
 		case 'hurricane':
 		case 'tropical_storm':
+		case 'hurricane-n':
+		case 'tropical_storm-n':
 			return addPath('Thunderstorm.gif');
 
 		case 'wind':
@@ -228,14 +230,14 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 		case 'rain-n':
 			return addPath('CC_Rain.gif');
 
-		// case 'snow':
-		// 	return addPath('Light-Snow.gif');
-		// 	break;
+			// case 'snow':
+			// 	return addPath('Light-Snow.gif');
+			// 	break;
 
-		// case 'cc_snowshowers.gif':
-		// 	//case "heavy-snow.gif":
-		// 	return addPath('AM-Snow-1994.gif');
-		// 	break;
+			// case 'cc_snowshowers.gif':
+			// 	//case "heavy-snow.gif":
+			// 	return addPath('AM-Snow-1994.gif');
+			// 	break;
 
 		case 'snow':
 		case 'snow-n':
