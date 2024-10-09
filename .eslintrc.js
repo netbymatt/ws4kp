@@ -29,6 +29,9 @@ module.exports = {
 		indent: [
 			'error',
 			'tab',
+			{ 
+				SwitchCase: 1
+			},
 		],
 		'no-tabs': 0,
 		'no-console': 0,

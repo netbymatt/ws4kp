@@ -7,8 +7,6 @@
 			"format": "compressed",
 			"extensionName": ".css",
 			"savePath": "/server/styles",
-			"savePathSegmentKeys": null,
-			"savePathReplaceSegmentsWith": null
 		}
 	],
 	"search.exclude": {
@@ -21,5 +19,8 @@
 	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "explicit"
-	}
+	},
+	"eslint.validate": [
+		"javascript"
+	]
 }
