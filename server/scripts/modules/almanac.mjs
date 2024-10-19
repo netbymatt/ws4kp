@@ -94,7 +94,7 @@ class Almanac extends WeatherDisplay {
 		if (iteration % 2 === 0) test = (lastPhase, testPhase) => lastPhase > threshold && testPhase <= threshold;
 
 		do {
-		// store last phase
+			// store last phase
 			const lastPhase = phase;
 			// calculate new phase after step
 			moonDate = moonDate.plus(step);
@@ -103,7 +103,7 @@ class Almanac extends WeatherDisplay {
 			if (phase > 0.9) phase -= 1.0;
 			// compare
 			if (test(lastPhase, phase)) {
-			// last iteration is three, return value
+				// last iteration is three, return value
 				if (iteration >= 3) break;
 				// iterate recursively
 				return this.getMoonTransition(threshold, phaseName, moonDate, iteration + 1);
@@ -160,15 +160,15 @@ class Almanac extends WeatherDisplay {
 
 const imageName = (type) => {
 	switch (type) {
-	case 'Full':
-		return 'images/2/Full-Moon.gif';
-	case 'Last':
-		return 'images/2/Last-Quarter.gif';
-	case 'New':
-		return 'images/2/New-Moon.gif';
-	case 'First':
-	default:
-		return 'images/2/First-Quarter.gif';
+		case 'Full':
+			return 'images/2/Full-Moon.gif';
+		case 'Last':
+			return 'images/2/Last-Quarter.gif';
+		case 'New':
+			return 'images/2/New-Moon.gif';
+		case 'First':
+		default:
+			return 'images/2/First-Quarter.gif';
 	}
 };
 
