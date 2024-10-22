@@ -33,12 +33,12 @@ class Setting {
 
 		// call the change function on startup
 		switch (type) {
-		case 'select':
-			this.selectChange({ target: { value: this.myValue } });
-			break;
-		case 'checkbox':
-		default:
-			this.checkboxChange({ target: { checked: this.myValue } });
+			case 'select':
+				this.selectChange({ target: { value: this.myValue } });
+				break;
+			case 'checkbox':
+			default:
+				this.checkboxChange({ target: { checked: this.myValue } });
 		}
 	}
 
@@ -129,12 +129,12 @@ class Setting {
 				const storedValue = JSON.parse(allSettings)?.[this.shortName];
 				if (storedValue !== undefined) {
 					switch (this.type) {
-					case 'boolean':
-						return storedValue;
-					case 'select':
-						return storedValue;
-					default:
-						return null;
+						case 'boolean':
+							return storedValue;
+						case 'select':
+							return storedValue;
+						default:
+							return null;
 					}
 				}
 			}
@@ -152,12 +152,12 @@ class Setting {
 		// update the state
 		this.myValue = newValue;
 		switch (this.type) {
-		case 'select':
-			this.selectHighlight(newValue);
-			break;
-		case 'checkbox':
-		default:
-			this.element.checked = newValue;
+			case 'select':
+				this.selectHighlight(newValue);
+				break;
+			case 'checkbox':
+			default:
+				this.element.checked = newValue;
 		}
 		this.storeToLocalStorage(this.myValue);
 
@@ -174,11 +174,11 @@ class Setting {
 
 	generate() {
 		switch (this.type) {
-		case 'select':
-			return this.generateSelect();
-		case 'checkbox':
-		default:
-			return this.generateCheckbox();
+			case 'select':
+				return this.generateSelect();
+			case 'checkbox':
+			default:
+				return this.generateCheckbox();
 		}
 	}
 }

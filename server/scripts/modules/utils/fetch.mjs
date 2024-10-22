@@ -39,14 +39,14 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${response.url}`);
 	// return the requested response
 	switch (responseType) {
-	case 'json':
-		return response.json();
-	case 'text':
-		return response.text();
-	case 'blob':
-		return response.blob();
-	default:
-		return response;
+		case 'json':
+			return response.json();
+		case 'text':
+			return response.text();
+		case 'blob':
+			return response.blob();
+		default:
+			return response;
 	}
 };
 
@@ -84,11 +84,11 @@ const delay = (time, func, ...args) => new Promise((resolve) => {
 
 const retryDelay = (retryNumber) => {
 	switch (retryNumber) {
-	case 1: return 1000;
-	case 2: return 2000;
-	case 3: return 5000;
-	case 4: return 10_000;
-	default: return 30_000;
+		case 1: return 1000;
+		case 2: return 2000;
+		case 3: return 5000;
+		case 4: return 10_000;
+		default: return 30_000;
 	}
 };
 

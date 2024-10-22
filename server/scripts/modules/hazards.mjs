@@ -3,7 +3,7 @@
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay, msg } from './navigation.mjs';
+import { registerDisplay } from './navigation.mjs';
 
 const hazardLevels = {
 	Extreme: 10,
@@ -14,7 +14,7 @@ const hazardModifiers = {
 	'Hurricane Warning': 2,
 	'Tornado Warning': 3,
 	'Severe Thunderstorm Warning': 1,
-}
+};
 
 class Hazards extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -160,7 +160,7 @@ const calcSeverity = (severity, event) => {
 	const baseSeverity = hazardLevels[severity] ?? 0;
 	const modifiedSeverity = hazardModifiers[event] ?? 0;
 	return baseSeverity + modifiedSeverity;
-}
+};
 
 // register display
 registerDisplay(new Hazards(0, 'hazards', true));

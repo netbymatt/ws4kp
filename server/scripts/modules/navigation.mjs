@@ -238,30 +238,30 @@ const setPlaying = (newValue) => {
 // handle all navigation buttons
 const handleNavButton = (button) => {
 	switch (button) {
-	case 'play':
-		setPlaying(true);
-		break;
-	case 'playToggle':
-		setPlaying(!playing);
-		break;
-	case 'stop':
-		setPlaying(false);
-		break;
-	case 'next':
-		setPlaying(false);
-		navTo(msg.command.nextFrame);
-		break;
-	case 'previous':
-		setPlaying(false);
-		navTo(msg.command.previousFrame);
-		break;
-	case 'menu':
-		setPlaying(false);
-		progress.showCanvas();
-		hideAllCanvases();
-		break;
-	default:
-		console.error(`Unknown navButton ${button}`);
+		case 'play':
+			setPlaying(true);
+			break;
+		case 'playToggle':
+			setPlaying(!playing);
+			break;
+		case 'stop':
+			setPlaying(false);
+			break;
+		case 'next':
+			setPlaying(false);
+			navTo(msg.command.nextFrame);
+			break;
+		case 'previous':
+			setPlaying(false);
+			navTo(msg.command.previousFrame);
+			break;
+		case 'menu':
+			setPlaying(false);
+			progress.showCanvas();
+			hideAllCanvases();
+			break;
+		default:
+			console.error(`Unknown navButton ${button}`);
 	}
 };
 

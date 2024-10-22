@@ -254,14 +254,14 @@ const loadData = (_latLon, haveDataCallback) => {
 
 const swipeCallBack = (direction) => {
 	switch (direction) {
-	case 'left':
-		btnNavigateNextClick();
-		break;
+		case 'left':
+			btnNavigateNextClick();
+			break;
 
-	case 'right':
-	default:
-		btnNavigatePreviousClick();
-		break;
+		case 'right':
+		default:
+			btnNavigatePreviousClick();
+			break;
 	}
 };
 
@@ -312,41 +312,41 @@ const documentKeydown = (e) => {
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {
-		case ' ': // Space
-			// don't scroll
-			e.preventDefault();
-			btnNavigatePlayClick();
-			return false;
+			case ' ': // Space
+				// don't scroll
+				e.preventDefault();
+				btnNavigatePlayClick();
+				return false;
 
-		case 'ArrowRight':
-		case 'PageDown':
-			// don't scroll
-			e.preventDefault();
-			btnNavigateNextClick();
-			return false;
+			case 'ArrowRight':
+			case 'PageDown':
+				// don't scroll
+				e.preventDefault();
+				btnNavigateNextClick();
+				return false;
 
-		case 'ArrowLeft':
-		case 'PageUp':
-			// don't scroll
-			e.preventDefault();
-			btnNavigatePreviousClick();
-			return false;
+			case 'ArrowLeft':
+			case 'PageUp':
+				// don't scroll
+				e.preventDefault();
+				btnNavigatePreviousClick();
+				return false;
 
-		case 'ArrowUp': // Home
-			e.preventDefault();
-			btnNavigateMenuClick();
-			return false;
+			case 'ArrowUp': // Home
+				e.preventDefault();
+				btnNavigateMenuClick();
+				return false;
 
-		case '0': // "O" Restart
-			btnNavigateRefreshClick();
-			return false;
+			case '0': // "O" Restart
+				btnNavigateRefreshClick();
+				return false;
 
-		case 'F':
-		case 'f':
-			btnFullScreenClick();
-			return false;
+			case 'F':
+			case 'f':
+				btnFullScreenClick();
+				return false;
 
-		default:
+			default:
 		}
 	}
 	return false;

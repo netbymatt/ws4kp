@@ -9,20 +9,20 @@ const STATUS = {
 
 const calcStatusClass = (statusCode) => {
 	switch (statusCode) {
-	case STATUS.loading:
-		return 'loading';
-	case STATUS.loaded:
-		return 'press-here';
-	case STATUS.failed:
-		return 'failed';
-	case STATUS.noData:
-		return 'no-data';
-	case STATUS.disabled:
-		return 'disabled';
-	case STATUS.retrying:
-		return 'retrying';
-	default:
-		return '';
+		case STATUS.loading:
+			return 'loading';
+		case STATUS.loaded:
+			return 'press-here';
+		case STATUS.failed:
+			return 'failed';
+		case STATUS.noData:
+			return 'no-data';
+		case STATUS.disabled:
+			return 'disabled';
+		case STATUS.retrying:
+			return 'retrying';
+		default:
+			return '';
 	}
 };
 
