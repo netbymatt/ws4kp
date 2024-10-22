@@ -106,23 +106,26 @@ body {
 .autocomplete-suggestions {
 	background-color: #ffffff;
 	border: 1px solid #000000;
+	position: absolute;
+	z-index: 9999;
 
 	@media (prefers-color-scheme: dark) {
 		background-color: #000000;
 	}
 
-	.autocomplete-suggestion {
+	div {
 		/*padding: 2px 5px;*/
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		font-size: 16pt;
+
+		&.selected {
+			background-color: #0000ff;
+			color: #ffffff;
+		}
 	}
 
-	.autocomplete-selected {
-		background-color: #0000ff;
-		color: #ffffff;
-	}
 }
 
 #divTwc {

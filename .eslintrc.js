@@ -4,7 +4,6 @@ module.exports = {
 		commonjs: true,
 		es6: true,
 		node: true,
-		jquery: true,
 	},
 	extends: [
 		'airbnb-base',
@@ -29,8 +28,8 @@ module.exports = {
 		indent: [
 			'error',
 			'tab',
-			{ 
-				SwitchCase: 1
+			{
+				SwitchCase: 1,
 			},
 		],
 		'no-tabs': 0,

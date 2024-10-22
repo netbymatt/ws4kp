@@ -6,6 +6,7 @@ import {
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
+import AutoComplete from './modules/autocomplete.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -56,7 +57,7 @@ const init = () => {
 	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
 
-	$(TXT_ADDRESS_SELECTOR).devbridgeAutocomplete({
+	const autoComplete = new AutoComplete(document.querySelector(TXT_ADDRESS_SELECTOR), {
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 		deferRequestBy: 300,
 		paramName: 'text',
@@ -76,13 +77,12 @@ const init = () => {
 		minChars: 3,
 		showNoSuggestionNotice: true,
 		noSuggestionNotice: 'No results found. Please try a different search string.',
-		onSelect(suggestion) { autocompleteOnSelect(suggestion, this); },
+		onSelect(suggestion) { autocompleteOnSelect(suggestion); },
 		width: 490,
 	});
 
 	const formSubmit = () => {
-		const ac = $(TXT_ADDRESS_SELECTOR).devbridgeAutocomplete();
-		if (ac.suggestions[0]) $(ac.suggestionsContainer.children[0]).trigger('click');
+		if (autoComplete.suggestions[0]) autoComplete.suggestionsContainer.children[0].trigger('click');
 		return false;
 	};
 
@@ -133,10 +133,7 @@ const init = () => {
 	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
 };
 
-const autocompleteOnSelect = async (suggestion, elem) => {
-	// Do not auto get the same city twice.
-	if (elem.previousSuggestionValue === suggestion.value) return;
-
+const autocompleteOnSelect = async (suggestion) => {
 	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 		data: {
 			text: suggestion.value,

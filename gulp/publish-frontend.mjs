@@ -60,8 +60,6 @@ const compressJsData = () => src(jsSourcesData)
 	.pipe(dest(RESOURCES_PATH));
 
 const jsVendorSources = [
-	'server/scripts/vendor/auto/jquery.js',
-	'server/scripts/vendor/jquery.autocomplete.min.js',
 	'server/scripts/vendor/auto/nosleep.js',
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/vendor/auto/suncalc.js',
@@ -173,6 +171,6 @@ const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVend
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-const publishFrontend = series(buildDist, uploadImages,	upload,	invalidate);
+const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
 
 export default publishFrontend;
