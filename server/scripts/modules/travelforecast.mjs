@@ -131,7 +131,7 @@ class TravelForecast extends WeatherDisplay {
 	// base count change callback
 	baseCountChange(count) {
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.travel-lines').getBoundingClientRect().height - 289, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.travel-lines').offsetHeight - 289, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
