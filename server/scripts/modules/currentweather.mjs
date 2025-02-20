@@ -25,55 +25,57 @@ class CurrentWeather extends WeatherDisplay {
 		// always load the data for use in the lower scroll
 		const superResult = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
-
+		
 		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
-		const filteredStations = weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
+		// const filteredStations = weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
 
-		// Load the observations
-		let observations;
-		let station;
+		// // Load the observations
+		// let observations;
+		// let station;
 
-		// station number counter
-		let stationNum = 0;
-		while (!observations && stationNum < filteredStations.length) {
-			// get the station
-			station = filteredStations[stationNum];
-			stationNum += 1;
-			try {
-				// station observations
-				// eslint-disable-next-line no-await-in-loop
-				observations = await json(`${station.id}/observations`, {
-					cors: true,
-					data: {
-						limit: 2,
-					},
-					retryCount: 3,
-					stillWaiting: () => this.stillWaiting(),
-				});
+		// // station number counter
+		// let stationNum = 0;
+		// while (!observations && stationNum < filteredStations.length) {
+		// 	// get the station
+		// 	station = filteredStations[stationNum];
+		// 	stationNum += 1;
+		// 	try {
+		// 		// station observations
+		// 		// eslint-disable-next-line no-await-in-loop
+		// 		observations = await json(`${station.id}/observations`, {
+		// 			cors: true,
+		// 			data: {
+		// 				limit: 2,
+		// 			},
+		// 			retryCount: 3,
+		// 			stillWaiting: () => this.stillWaiting(),
+		// 		});
 
-				// test data quality
-				if (observations.features[0].properties.temperature.value === null
-					|| observations.features[0].properties.windSpeed.value === null
-					|| observations.features[0].properties.textDescription === null
-					|| observations.features[0].properties.textDescription === ''
-					|| observations.features[0].properties.icon === null
-					|| observations.features[0].properties.dewpoint.value === null
-					|| observations.features[0].properties.barometricPressure.value === null) {
-					observations = undefined;
-					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
-				}
-			} catch (error) {
-				console.error(error);
-			}
-		}
-		// test for data received
-		if (!observations) {
-			console.error('All current weather stations exhausted');
-			if (this.isEnabled) this.setStatus(STATUS.failed);
-			// send failed to subscribers
-			this.getDataCallback(undefined);
-			return;
-		}
+		// 		// test data quality
+		// 		if (observations.features[0].properties.temperature.value === null
+		// 			|| observations.features[0].properties.windSpeed.value === null
+		// 			|| observations.features[0].properties.textDescription === null
+		// 			|| observations.features[0].properties.textDescription === ''
+		// 			|| observations.features[0].properties.icon === null
+		// 			|| observations.features[0].properties.dewpoint.value === null
+		// 			|| observations.features[0].properties.barometricPressure.value === null) {
+		// 			observations = undefined;
+		// 			throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
+		// 		}
+		// 	} catch (error) {
+		// 		console.error(error);
+		// 	}
+		// }
+		// // test for data received
+		// if (!observations) {
+		// 	console.error('All current weather stations exhausted');
+		// 	if (this.isEnabled) this.setStatus(STATUS.failed);
+		// 	// send failed to subscribers
+		// 	this.getDataCallback(undefined);
+		// 	return;
+		// }
+
+		console.log(weatherParameters);
 
 		// we only get here if there was no error above
 		this.data = parseData({ ...observations, station });
@@ -158,6 +160,8 @@ const shortConditions = (_condition) => {
 };
 
 // format the received data
+
+// @todo - resume here!
 const parseData = (data) => {
 	const observations = data.features[0].properties;
 	// values from api are provided in metric
