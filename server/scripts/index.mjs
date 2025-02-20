@@ -62,7 +62,6 @@ const init = () => {
 		paramName: 'text',
 		params: {
 			f: 'json',
-			countryCode: 'USA', // 'USA,PRI,VIR,GUM,ASM',
 			category,
 			maxSuggestions: 10,
 		},
