@@ -155,28 +155,35 @@ const getWeatherRegionalIconFromIconLink = (link, _isNightTime) => {
 	}
 };
 
-const getWeatherIconFromIconLink = (link, _isNightTime) => {
-	if (!link) return false;
+const getWeatherIconFromIconLink = (text, _isNightTime) => {
+	if (!text) return false;
 
-	// internal function to add path to returned icon
+	// // internal function to add path to returned icon
 	const addPath = (icon) => `images/${icon}`;
-	// extract day or night if not provided
-	const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
+	// // extract day or night if not provided
+	// const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
 
-	// grab everything after the last slash ending at any of these: ?&,
-	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
-	let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
-	// using probability as a crude heavy/light indication where possible
-	const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
+	// // grab everything after the last slash ending at any of these: ?&,
+	// const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
+	// let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
+	// // using probability as a crude heavy/light indication where possible
+	// const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
 
-	// if a 'DualImage' is captured, adjust to just the j parameter
-	if (conditionName === 'dualimage') {
-		const match = link.match(/&j=(.*)&/);
-		[, conditionName] = match;
-	}
+	// // if a 'DualImage' is captured, adjust to just the j parameter
+	// if (conditionName === 'dualimage') {
+	// 	const match = link.match(/&j=(.*)&/);
+	// 	[, conditionName] = match;
+	// }
 
+	const tidyText = text.toLowerCase().replace(' ', '-');
+	console.log(`Tidy text: ${tidyText}`);
+
+	// @todo - resume here - map out icons to new weather conditions
 	// find the icon
-	switch (conditionName + (isNightTime ? '-n' : '')) {
+	switch (tidyText) {
+		case 'overcast':
+			return addPath('CC_MostlyCloudy0.gif');
+
 		case 'skc':
 		case 'hot':
 		case 'haze':
@@ -291,7 +298,8 @@ const getWeatherIconFromIconLink = (link, _isNightTime) => {
 			return addPath('Blowing-Snow.gif');
 
 		default:
-			console.log(`Unable to locate icon for ${conditionName} ${link} ${isNightTime}`);
+			// console.log(`Unable to locate icon for ${conditionName} ${text} ${isNightTime}`);
+			console.log(`Unable to locate icon for: ${text}`);
 			return false;
 	}
 };

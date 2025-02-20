@@ -1,10 +1,10 @@
 import { json } from './fetch.mjs';
 
-const openMeteoAdditionalForecastParameters = '&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,uv_index,uv_index_clear_sky,is_day,sunshine_duration,wet_bulb_temperature_2m&models=best_match';
+const openMeteoAdditionalForecastParameters = '&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,uv_index,uv_index_clear_sky,is_day,sunshine_duration,wet_bulb_temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m&models=best_match';
 
 const getPoint = async (lat, lon) => {
 	try {
-		return await json(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+ openMeteoAdditionalForecastParameters);
+		return await json(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${openMeteoAdditionalForecastParameters}`);
 	} catch (error) {
 		console.log(`Unable to get point ${lat}, ${lon}`);
 		console.error(error);
@@ -22,8 +22,34 @@ const getGeocoding = async (name) => {
 	}
 };
 
+const weatherConditions = [
+	{ codes: [0], text: 'Clear sky' },
+	{ codes: [1, 2, 3], text: ['Mainly clear', 'Partly cloudy', 'Overcast'] },
+	{ codes: [45, 48], text: ['Fog', 'Depositing rime fog'] },
+	{ codes: [51, 53, 55], text: ['Light Drizzle', 'Moderate Drizzle', 'Dense Drizzle'] },
+	{ codes: [56, 57], text: ['Light Freezing Drizzle', 'Dense Freezing Drizzle'] },
+	{ codes: [61, 63, 65], text: ['Slight Rain', 'Moderate Rain', 'Heavy Rain'] },
+	{ codes: [66, 67], text: ['Light Freezing Rain', 'Heavy Freezing Rain'] },
+	{ codes: [71, 73, 75], text: ['Slight Snow fall', 'Moderate Snow fall', 'Heavy Snow fall'] },
+	{ codes: [77], text: 'Snow grains' },
+	{ codes: [80, 81, 82], text: ['Slight Rain showers', 'Moderate Rain showers', 'Violent Rain showers'] },
+	{ codes: [85, 86], text: ['Slight Snow showers', 'Heavy Snow Showers'] },
+	{ codes: [95], text: 'Thunderstorm' },
+	{ codes: [96, 99], text: ['Thunderstorm with slight hail', 'Thunderstorm with heavy hail'] },
+];
+
+const getConditionText = (code) => {
+	const conditionIndex = weatherConditions.findIndex((condition) => condition.codes.includes(code));
+	const weatherConditionObject = weatherConditions[conditionIndex];
+
+	const weatherTextIndex = weatherConditionObject.codes.findIndex((conditionCode) => conditionCode === code);
+	const weatherText = weatherConditionObject.text[weatherTextIndex];
+
+	return conditionIndex ? weatherText : 'Unknown weather condition';
+};
+
 /**
- * 
+ *
  * @param {*} forecast expects the forecast object from open-meteo as the response from `getPoint`
  * @returns  A map indexed by date, with averaged values for each unit in "hourly_units" from the forecast object
  */
@@ -77,8 +103,8 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 	// 	},
 	// }
 
-	const { hourly, hourly_units } = getPointResponse;
-	const keys = Object.keys(hourly).filter(key => key !== "time");
+	const { hourly } = getPointResponse;
+	const keys = Object.keys(hourly).filter((key) => key !== 'time');
 
 	const dailyData = {};
 
@@ -86,23 +112,31 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 		const date = timestamp.split('T')[0];
 
 		if (!dailyData[date]) {
-			dailyData[date] = {};
-			keys.forEach(key => {
+			dailyData[date] = { hours: [] };
+			keys.forEach((key) => {
 				dailyData[date][key] = { sum: 0, count: 0 };
 			});
 		}
 
-		keys.forEach(key => {
+		// Collect per-hour data
+		const hourData = { time: timestamp };
+		keys.forEach((key) => {
+			hourData[key] = hourly[key][index];
+
+			// Aggregate sums for daily averages
 			dailyData[date][key].sum += hourly[key][index];
 			dailyData[date][key].count += 1;
 		});
+
+		// Append the hourly entry to the "hours" array
+		dailyData[date].hours.push(hourData);
 	});
 
+	// Compute daily averages
 	const dailyAverages = {};
-
 	Object.entries(dailyData).forEach(([date, data]) => {
-		dailyAverages[date] = {};
-		keys.forEach(key => {
+		dailyAverages[date] = { hours: data.hours };
+		keys.forEach((key) => {
 			dailyAverages[date][key] = data[key].sum / data[key].count;
 		});
 	});
@@ -114,5 +148,6 @@ export {
 	// eslint-disable-next-line import/prefer-default-export
 	getPoint,
 	getGeocoding,
-	aggregateWeatherForecastData
+	aggregateWeatherForecastData,
+	getConditionText,
 };
