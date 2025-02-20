@@ -3,7 +3,7 @@ import noSleep from './utils/nosleep.mjs';
 import STATUS from './status.mjs';
 import { wrap } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
-import { getPoint } from './utils/weather.mjs';
+import { getPoint, getGeocoding, aggregateWeatherForecastData } from './utils/weather.mjs';
 import settings from './settings.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,35 +49,41 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// get initial weather data
 	const point = await getPoint(latLon.lat, latLon.lon);
 
+	const aggregatedForecastData = aggregateWeatherForecastData(point);
+
 	if (typeof haveDataCallback === 'function') haveDataCallback(point);
 
-	// get stations
-	const stations = await json(point.properties.observationStations);
+	// Get locality data from open-meteo and local storage
+	const localityName = localStorage.getItem('latLonQuery');
+	// 'latLonQuery' is set in server>scripts>index.mjs in the format of "Amsterdam, NLD" 
+	// therefore we need to split on the "," to get the locality name for open-meteo
+	const locality = await getGeocoding(localityName.split(',')[0]);
 
-	const StationId = stations.features[0].properties.stationIdentifier;
-
-	let { city } = point.properties.relativeLocation.properties;
-	const { state } = point.properties.relativeLocation.properties;
-
-	if (StationId in StationInfo) {
-		city = StationInfo[StationId].city;
-		[city] = city.split('/');
-		city = city.replace(/\s+$/, '');
-	}
+	// set the city and state
+	let city = locality.results[0].name;
+	let country = locality.results[0].country;
+	let state = locality.results[0].admin1;	// admin1 is usually the state / province
+	let timezone = locality.results[0].timezone;
 
 	// populate the weather parameters
 	weatherParameters.latitude = latLon.lat;
 	weatherParameters.longitude = latLon.lon;
-	weatherParameters.zoneId = point.properties.forecastZone.substr(-6);
-	weatherParameters.radarId = point.properties.radarStation.substr(-3);
-	weatherParameters.stationId = StationId;
-	weatherParameters.weatherOffice = point.properties.cwa;
 	weatherParameters.city = city;
 	weatherParameters.state = state;
-	weatherParameters.timeZone = point.properties.timeZone;
-	weatherParameters.forecast = point.properties.forecast;
-	weatherParameters.forecastGridData = point.properties.forecastGridData;
-	weatherParameters.stations = stations.features;
+	weatherParameters.country = country;
+	weatherParameters.timeZone = timezone;
+	
+	// WeatherParameters to modify...
+	weatherParameters.forecast = aggregatedForecastData;
+	// weatherParameters.forecastGridData = point.properties.forecastGridData;
+	// weatherParameters.stations = stations.features;
+	
+	// WeatherParameters that might be optional to modify 
+	// or aren't obviously used anywhere for data retrieval...
+	weatherParameters.stationId = 'stationId-dont-matter-anymore';
+	weatherParameters.zoneId = 'zoneId-dont-matter';
+	weatherParameters.radarId = 'radarId-dont-matter';
+	weatherParameters.weatherOffice = 'weatherOffice-dont-matter';
 
 	// update the main process for display purposes
 	populateWeatherParameters(weatherParameters);
