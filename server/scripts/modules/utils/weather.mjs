@@ -1,6 +1,6 @@
 import { json } from './fetch.mjs';
 
-const openMeteoAdditionalForecastParameters = '&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,uv_index,uv_index_clear_sky,is_day,sunshine_duration,wet_bulb_temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m&models=best_match';
+const openMeteoAdditionalForecastParameters = '&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,uv_index,uv_index_clear_sky,is_day,sunshine_duration,wet_bulb_temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m&models=best_match';
 
 const getPoint = async (lat, lon) => {
 	try {
@@ -106,7 +106,7 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 	// 	},
 	// }
 
-	const { hourly } = getPointResponse;
+	const { hourly, daily } = getPointResponse;
 	const keys = Object.keys(hourly).filter((key) => key !== 'time');
 
 	const dailyData = {};
@@ -115,7 +115,7 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 		const date = timestamp.split('T')[0];
 
 		if (!dailyData[date]) {
-			dailyData[date] = { hours: [] };
+			dailyData[date] = { hours: [], weather_code_counts: {} };
 			keys.forEach((key) => {
 				dailyData[date][key] = { sum: 0, count: 0 };
 			});
@@ -131,6 +131,12 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 			dailyData[date][key].count += 1;
 		});
 
+		// Track weather code occurrences
+		if (hourly.weather_code) {
+			const weatherCode = hourly.weather_code[index];
+			dailyData[date].weather_code_counts[weatherCode] = (dailyData[date].weather_code_counts[weatherCode] || 0) + 1;
+		}
+
 		// Append the hourly entry to the "hours" array
 		dailyData[date].hours.push(hourData);
 	});
@@ -142,6 +148,21 @@ const aggregateWeatherForecastData = (getPointResponse) => {
 		keys.forEach((key) => {
 			dailyAverages[date][key] = data[key].sum / data[key].count;
 		});
+
+		// Determine most common weather code
+		const weatherCodes = Object.entries(data.weather_code_counts);
+		if (weatherCodes.length > 0) {
+			[dailyAverages[date].weather_code] = weatherCodes.reduce((a, b) => (b[1] > a[1] ? b : a));
+		}
+	});
+
+	// Add temperature_2m_max and temperature_2m_min from the daily section
+	daily.time.forEach((date, index) => {
+		if (!dailyData[date]) {
+			dailyData[date] = { hours: [] };
+		}
+		dailyAverages[date].temperature_2m_max = daily.temperature_2m_max[index];
+		dailyAverages[date].temperature_2m_min = daily.temperature_2m_min[index];
 	});
 
 	return dailyAverages;
