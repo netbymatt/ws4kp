@@ -23,7 +23,7 @@ const getGeocoding = async (name) => {
 };
 
 const weatherConditions = [
-	{ codes: [0], text: 'Clear sky' },
+	{ codes: [0], text: ['Clear sky'] },
 	{ codes: [1, 2, 3], text: ['Mainly clear', 'Partly cloudy', 'Overcast'] },
 	{ codes: [45, 48], text: ['Fog', 'Depositing rime fog'] },
 	{ codes: [51, 53, 55], text: ['Light Drizzle', 'Moderate Drizzle', 'Dense Drizzle'] },
@@ -31,10 +31,10 @@ const weatherConditions = [
 	{ codes: [61, 63, 65], text: ['Slight Rain', 'Moderate Rain', 'Heavy Rain'] },
 	{ codes: [66, 67], text: ['Light Freezing Rain', 'Heavy Freezing Rain'] },
 	{ codes: [71, 73, 75], text: ['Slight Snow fall', 'Moderate Snow fall', 'Heavy Snow fall'] },
-	{ codes: [77], text: 'Snow grains' },
+	{ codes: [77], text: ['Snow grains'] },
 	{ codes: [80, 81, 82], text: ['Slight Rain showers', 'Moderate Rain showers', 'Violent Rain showers'] },
 	{ codes: [85, 86], text: ['Slight Snow showers', 'Heavy Snow Showers'] },
-	{ codes: [95], text: 'Thunderstorm' },
+	{ codes: [95], text: ['Thunderstorm'] },
 	{ codes: [96, 99], text: ['Thunderstorm with slight hail', 'Thunderstorm with heavy hail'] },
 ];
 
@@ -45,7 +45,10 @@ const getConditionText = (code) => {
 	const weatherTextIndex = weatherConditionObject.codes.findIndex((conditionCode) => conditionCode === code);
 	const weatherText = weatherConditionObject.text[weatherTextIndex];
 
-	return conditionIndex ? weatherText : 'Unknown weather condition';
+	if (conditionIndex !== -1) return weatherText;
+
+	console.log('unable to determine weather condition from code: ', code);
+	return `unknown weather condition with code: ${code}`;
 };
 
 /**
