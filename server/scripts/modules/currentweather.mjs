@@ -96,7 +96,7 @@ class CurrentWeather extends WeatherDisplay {
 			condition = shortConditions(condition);
 		}
 
-		const iconImage = getWeatherIconFromIconLink(condition);
+		const iconImage = getWeatherIconFromIconLink(condition, this.data.timeZone);
 
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),
