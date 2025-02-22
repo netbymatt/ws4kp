@@ -1,14 +1,12 @@
 // hourly forecast list
 
 import STATUS from './status.mjs';
-import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
-import { json } from './utils/fetch.mjs';
-import { celsiusToFahrenheit, kilometersToMiles } from './utils/units.mjs';
-import { getHourlyIcon } from './icons.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
+import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import getSun from './almanac.mjs';
+import { getConditionText } from './utils/weather.mjs';
 
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -28,24 +26,8 @@ class Hourly extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters) {
-		// super checks for enabled
-		const superResponse = super.getData(weatherParameters);
-		let forecast;
-		try {
-			// get the forecast
-			forecast = await json(weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
-		} catch (error) {
-			console.error('Get hourly forecast failed');
-			console.error(error.status, error.responseJSON);
-			if (this.isEnabled) this.setStatus(STATUS.failed);
-			// return undefined to other subscribers
-			this.getDataCallback(undefined);
-			return;
-		}
-
-		this.data = await parseForecast(forecast.properties);
+		this.data = await parseForecast(weatherParameters);
 		this.getDataCallback();
-		if (!superResponse) return;
 
 		this.setStatus(STATUS.loaded);
 		this.drawLongCanvas();
@@ -60,6 +42,7 @@ class Hourly extends WeatherDisplay {
 
 		const lines = this.data.map((data, index) => {
 			const fillValues = {};
+
 			// hour
 			const hour = startingHour.plus({ hours: index });
 			const formattedHour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
@@ -77,7 +60,8 @@ class Hourly extends WeatherDisplay {
 			let wind = 'Calm';
 			if (data.windSpeed > 0) {
 				const windSpeed = Math.round(data.windSpeed).toString();
-				wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
+				const windDirection = directionToNSEW(data.windDirection);
+				wind = windDirection + (Array(6 - windDirection.length - windSpeed.length).join(' ')) + windSpeed;
 			}
 			fillValues.wind = wind;
 
@@ -130,64 +114,51 @@ class Hourly extends WeatherDisplay {
 	}
 }
 
+const getCurrentWeatherByHourFromTime = (data) => {
+	const currentTime = new Date();
+	const onlyDate = currentTime.toISOString().split('T')[0]; // Extracts "YYYY-MM-DD"
+
+	const availableTimes = data.forecast[onlyDate].hours;
+	const nextDate = DateTime.fromISO(onlyDate).plus({ days: 1 }).toISODate();
+
+	const availableTimesNextDay = data.forecast[nextDate]?.hours || [];
+	const allAvailableTimes = [...availableTimes, ...availableTimesNextDay];
+
+	let closestIndex = 0;
+	let closestTime = availableTimes[0];
+	let minDiff = Math.abs(new Date(closestTime.time) - currentTime);
+
+	availableTimes.forEach((entry, index) => {
+		const diff = Math.abs(new Date(entry.time) - currentTime);
+		if (diff < minDiff) {
+			minDiff = diff;
+			closestTime = entry;
+			closestIndex = index;
+		}
+	});
+
+	return { closestTime, index: closestIndex, todayAndTomorrow: allAvailableTimes };
+};
+
 // extract specific values from forecast and format as an array
 const parseForecast = async (data) => {
-	const temperature = expand(data.temperature.values);
-	const apparentTemperature = expand(data.apparentTemperature.values);
-	const windSpeed = expand(data.windSpeed.values);
-	const windDirection = expand(data.windDirection.values);
-	const skyCover = expand(data.skyCover.values);	// cloud icon
-	const weather = expand(data.weather.values);	// fog icon
-	const iceAccumulation = expand(data.iceAccumulation.values); 	// ice icon
-	const probabilityOfPrecipitation = expand(data.probabilityOfPrecipitation.values);	// rain icon
-	const snowfallAmount = expand(data.snowfallAmount.values);	// snow icon
+	const currentForecast = getCurrentWeatherByHourFromTime(data);
 
-	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
-
-	return temperature.map((val, idx) => ({
-		temperature: celsiusToFahrenheit(temperature[idx]),
-		apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
-		windSpeed: kilometersToMiles(windSpeed[idx]),
-		windDirection: directionToNSEW(windDirection[idx]),
-		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
-		skyCover: skyCover[idx],
-		icon: icons[idx],
+	// Split today's date at the returned hourly index and iterate through 'todayAndTomorrow' from currentForecast to create hourly rows
+	const iterableHourlyData = currentForecast.todayAndTomorrow.slice(currentForecast.index).map((hour) => ({
+		temperature: hour.temperature_2m,
+		apparentTemperature: hour.apparent_temperature,
+		windSpeed: hour.wind_speed_10m,
+		windDirection: hour.wind_direction_10m,
+		probabilityOfPrecipitation: hour.precipitation_probability,
+		skyCover: hour.cloud_cover,
+		icon: getWeatherRegionalIconFromIconLink(getConditionText(hour.weather_code), hour.is_day),
+		// is_day appears to be "buggy," in that it uses the calling application's IP/location to
+		// determine whether is_day is day or night relative to the calling machine's timezone....
+		isDay: hour.is_day,
 	}));
-};
 
-// given forecast paramaters determine a suitable icon
-const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) => {
-	const startOfHour = DateTime.local().startOf('hour');
-	const sunTimes = (await getSun()).sun;
-	const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
-	const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
-	return skyCover.map((val, idx) => {
-		const hour = startOfHour.plus({ hours: idx });
-		const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-		return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
-	});
-};
-
-// expand a set of values with durations to an hour-by-hour array
-const expand = (data) => {
-	const startOfHour = DateTime.utc().startOf('hour').toMillis();
-	const result = []; // resulting expanded values
-	data.forEach((item) => {
-		let startTime = Date.parse(item.validTime.substr(0, item.validTime.indexOf('/')));
-		const duration = Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
-		const endTime = startTime + duration;
-		// loop through duration at one hour intervals
-		do {
-			// test for timestamp greater than now
-			if (startTime >= startOfHour && result.length < 24) {
-				result.push(item.value); // push data array
-			} // timestamp is after now
-			// increment start time by 1 hour
-			startTime += 3_600_000;
-		} while (startTime < endTime && result.length < 24);
-	}); // for each value
-
-	return result;
+	return iterableHourlyData;
 };
 
 // register display
