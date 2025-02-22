@@ -1,9 +1,8 @@
 // current weather conditions display
 import STATUS from './status.mjs';
-import { loadImg, preloadImg } from './utils/image.mjs';
+import { loadImg } from './utils/image.mjs';
 import { json } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
-import { locationCleanup } from './utils/string.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -11,9 +10,6 @@ import {
 	celsiusToFahrenheit, kphToMph, pascalToInHg, metersToFeet, kilometersToMiles,
 } from './utils/units.mjs';
 import { getConditionText } from './utils/weather.mjs';
-
-// some stations prefixed do not provide all the necessary data
-const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -26,55 +22,6 @@ class CurrentWeather extends WeatherDisplay {
 		// always load the data for use in the lower scroll
 		const superResult = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
-		
-		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
-		// const filteredStations = weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
-
-		// // Load the observations
-		// let observations;
-		// let station;
-
-		// // station number counter
-		// let stationNum = 0;
-		// while (!observations && stationNum < filteredStations.length) {
-		// 	// get the station
-		// 	station = filteredStations[stationNum];
-		// 	stationNum += 1;
-		// 	try {
-		// 		// station observations
-		// 		// eslint-disable-next-line no-await-in-loop
-		// 		observations = await json(`${station.id}/observations`, {
-		// 			cors: true,
-		// 			data: {
-		// 				limit: 2,
-		// 			},
-		// 			retryCount: 3,
-		// 			stillWaiting: () => this.stillWaiting(),
-		// 		});
-
-		// 		// test data quality
-		// 		if (observations.features[0].properties.temperature.value === null
-		// 			|| observations.features[0].properties.windSpeed.value === null
-		// 			|| observations.features[0].properties.textDescription === null
-		// 			|| observations.features[0].properties.textDescription === ''
-		// 			|| observations.features[0].properties.icon === null
-		// 			|| observations.features[0].properties.dewpoint.value === null
-		// 			|| observations.features[0].properties.barometricPressure.value === null) {
-		// 			observations = undefined;
-		// 			throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
-		// 		}
-		// 	} catch (error) {
-		// 		console.error(error);
-		// 	}
-		// }
-		// // test for data received
-		// if (!observations) {
-		// 	console.error('All current weather stations exhausted');
-		// 	if (this.isEnabled) this.setStatus(STATUS.failed);
-		// 	// send failed to subscribers
-		// 	this.getDataCallback(undefined);
-		// 	return;
-		// }
 
 		// we only get here if there was no error above
 		this.data = parseData(weatherParameters);
@@ -83,8 +30,6 @@ class CurrentWeather extends WeatherDisplay {
 		// stop here if we're disabled
 		if (!superResult) return;
 
-		// preload the icon
-		// preloadImg(getWeatherIconFromIconLink(observations.features[0].properties.icon));
 		this.setStatus(STATUS.loaded);
 	}
 
@@ -112,15 +57,6 @@ class CurrentWeather extends WeatherDisplay {
 		};
 
 		if (this.data.WindGust) fill['wind-gusts'] = `Gusts to ${this.data.WindGust}`;
-
-		// @todo - figure out heat index
-		// if (this.data.observations.heatIndex.value && this.data.HeatIndex !== this.data.Temperature) {
-		// 	fill['heat-index-label'] = 'Heat Index:';
-		// 	fill['heat-index'] = this.data.HeatIndex + String.fromCharCode(176);
-		// } else if (this.data.observations.windChill.value && this.data.WindChill !== '' && this.data.WindChill < this.data.Temperature) {
-		// 	fill['heat-index-label'] = 'Wind Chill:';
-		// 	fill['heat-index'] = this.data.WindChill + String.fromCharCode(176);
-		// }
 
 		const area = this.elem.querySelector('.main');
 
