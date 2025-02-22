@@ -1,14 +1,10 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { loadImg } from './utils/image.mjs';
-import { json } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { getWeatherIconFromIconLink } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
-import {
-	celsiusToFahrenheit, kphToMph, pascalToInHg, metersToFeet, kilometersToMiles,
-} from './utils/units.mjs';
 import { getConditionText } from './utils/weather.mjs';
 
 class CurrentWeather extends WeatherDisplay {
@@ -135,45 +131,6 @@ const parseData = (data) => {
 	data.PressureDirection = 'hPa';
 	data.TextConditions = currentForecast.weather_code;
 
-	// data.observations = observations;
-	// data.Temperature = Math.round(observations.temperature.value);
-	// data.TemperatureUnit = 'C';
-	// data.DewPoint = Math.round(observations.dewpoint.value);
-	// data.Ceiling = Math.round(observations.cloudLayers[0]?.base?.value ?? 0);
-	// data.CeilingUnit = 'm.';
-	// data.Visibility = Math.round(observations.visibility.value / 1000);
-	// data.VisibilityUnit = ' km.';
-	// data.WindSpeed = Math.round(observations.windSpeed.value);
-	// data.WindDirection = directionToNSEW(observations.windDirection.value);
-	// data.Pressure = Math.round(observations.barometricPressure.value);
-	// data.HeatIndex = Math.round(observations.heatIndex.value);
-	// data.WindChill = Math.round(observations.windChill.value);
-	// data.WindGust = Math.round(observations.windGust.value);
-	// data.WindUnit = 'KPH';
-	// data.Humidity = Math.round(observations.relativeHumidity.value);
-	// data.Icon = getWeatherIconFromIconLink(observations.icon);
-	// data.PressureDirection = '';
-	// data.TextConditions = observations.textDescription;
-
-	// difference since last measurement (pascals, looking for difference of more than 150)
-	// const pressureDiff = (observations.barometricPressure.value - data.features[1].properties.barometricPressure.value);
-	// if (pressureDiff > 150) data.PressureDirection = 'R';
-	// if (pressureDiff < -150) data.PressureDirection = 'F';
-
-	// // convert to us units
-	// data.Temperature = celsiusToFahrenheit(data.Temperature);
-	// data.TemperatureUnit = 'F';
-	// data.DewPoint = celsiusToFahrenheit(data.DewPoint);
-	// data.Ceiling = Math.round(metersToFeet(data.Ceiling) / 100) * 100;
-	// data.CeilingUnit = 'ft.';
-	// data.Visibility = kilometersToMiles(observations.visibility.value / 1000);
-	// data.VisibilityUnit = ' mi.';
-	// data.WindSpeed = kphToMph(data.WindSpeed);
-	// data.WindUnit = 'MPH';
-	// data.Pressure = pascalToInHg(data.Pressure).toFixed(2);
-	// data.HeatIndex = celsiusToFahrenheit(data.HeatIndex);
-	// data.WindChill = celsiusToFahrenheit(data.WindChill);
-	// data.WindGust = kphToMph(data.WindGust);
 	return data;
 };
 
