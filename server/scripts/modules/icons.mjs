@@ -21,7 +21,6 @@ const getWeatherRegionalIconFromIconLink = (text, isDay) => {
 
 	if (isDay === 0) tidyText += '-night';
 
-	console.log(`transformed input is: ${tidyText}`);
 	// find the icon
 	switch (tidyText) {
 		case 0:
