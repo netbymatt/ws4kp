@@ -1,7 +1,6 @@
 // display text based local forecast
 
 import STATUS from './status.mjs';
-import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import { generateLocalForecast } from './utils/localForecastTextGenerator.mjs';
