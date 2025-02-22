@@ -2,7 +2,6 @@
 import noSleep from './utils/nosleep.mjs';
 import STATUS from './status.mjs';
 import { wrap } from './utils/calc.mjs';
-import { json } from './utils/fetch.mjs';
 import { getPoint, getGeocoding, aggregateWeatherForecastData } from './utils/weather.mjs';
 import settings from './settings.mjs';
 
@@ -59,6 +58,10 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// therefore we need to split on the "," to get the locality name for open-meteo
 	const locality = await getGeocoding(localityName.split(',')[0]);
 
+	// @todo - this shouldn't be hardcoded
+	// when a user searches for a location that doesn't have a city
+	// this will error out.
+
 	// set the city and state
 	let city = locality.results[0].name;
 	let country = locality.results[0].country;
@@ -72,13 +75,13 @@ const getWeather = async (latLon, haveDataCallback) => {
 	weatherParameters.state = state;
 	weatherParameters.country = country;
 	weatherParameters.timeZone = timezone;
-	
+
 	// WeatherParameters to modify...
 	weatherParameters.forecast = aggregatedForecastData;
 	// weatherParameters.forecastGridData = point.properties.forecastGridData;
 	// weatherParameters.stations = stations.features;
-	
-	// WeatherParameters that might be optional to modify 
+
+	// WeatherParameters that might be optional to modify
 	// or aren't obviously used anywhere for data retrieval...
 	weatherParameters.stationId = 'stationId-dont-matter-anymore';
 	weatherParameters.zoneId = 'zoneId-dont-matter';
