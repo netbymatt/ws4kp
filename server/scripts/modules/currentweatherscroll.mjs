@@ -1,4 +1,3 @@
-import { locationCleanup } from './utils/string.mjs';
 import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
@@ -54,16 +53,11 @@ const drawScreen = async () => {
 // the "screens" are stored in an array for easy addition and removal
 const screens = [
 	// station name
-	(data) => `Conditions at ${locationCleanup(data.station.properties.name).substr(0, 20)}`,
+	(data) => `Conditions at ${data.city}`,
 
 	// temperature
 	(data) => {
-		let text = `Temp: ${data.Temperature}${degree}${data.TemperatureUnit}`;
-		if (data.observations.heatIndex.value) {
-			text += `    Heat Index: ${data.HeatIndex}${degree}${data.TemperatureUnit}`;
-		} else if (data.observations.windChill.value) {
-			text += `    Wind Chill: ${data.WindChill}${degree}${data.TemperatureUnit}`;
-		}
+		const text = `Temp: ${data.Temperature}${degree}${data.TemperatureUnit}`;
 		return text;
 	},
 
