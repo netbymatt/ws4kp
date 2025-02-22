@@ -4,7 +4,9 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import { generateLocalForecast } from './utils/localForecastTextGenerator.mjs';
 
+// 3 days, morning night; including the current day's morning/night
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Forecast', true);
@@ -15,17 +17,28 @@ class LocalForecast extends WeatherDisplay {
 
 	async getData(_weatherParameters) {
 		if (!super.getData(_weatherParameters)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
-		// get raw data
-		const rawData = await this.getRawData(weatherParameters);
-		// check for data
-		if (!rawData) {
-			this.setStatus(STATUS.failed);
-			return;
-		}
-		// parse raw data
-		const conditions = parse(rawData);
+		// get today + 2 more days hourly forecasts
+		const days = Object.keys(_weatherParameters.forecast).slice(0, 3);
+		const daysWeatherData = Object.values(_weatherParameters.forecast).slice(0, 3);
+
+		const localForecastTextByDay = [];
+
+		daysWeatherData.forEach((day, index) => {
+			const result = generateLocalForecast(days[index], day.hours);
+			localForecastTextByDay.push(JSON.parse(result));
+		});
+
+		const conditions = [];
+
+		localForecastTextByDay.forEach((forecast) => {
+			const page = Object.values(forecast.periods).map((forecastText) => ({
+				DayName: forecast.date,
+				Text: forecastText.text,
+			}));
+
+			conditions.push(...page);
+		});
 
 		// read each text
 		this.screenTexts = conditions.map((condition) => {
@@ -55,25 +68,6 @@ class LocalForecast extends WeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
-	// get the unformatted data (also used by extended forecast)
-	async getRawData(weatherParameters) {
-		// request us or si units
-		try {
-			return await json(weatherParameters.forecast, {
-				data: {
-					units: 'us',
-				},
-				retryCount: 3,
-				stillWaiting: () => this.stillWaiting(),
-			});
-		} catch (error) {
-			console.error(`GetWeatherForecast failed: ${weatherParameters.forecast}`);
-			console.error(error.status, error.responseJSON);
-			this.setStatus(STATUS.failed);
-			return false;
-		}
-	}
-
 	async drawCanvas() {
 		super.drawCanvas();
 
@@ -84,12 +78,5 @@ class LocalForecast extends WeatherDisplay {
 	}
 }
 
-// format the forecast
-// only use the first 6 lines
-const parse = (forecast) => forecast.properties.periods.slice(0, 6).map((text) => ({
-	// format day and text
-	DayName: text.name.toUpperCase(),
-	Text: text.detailedForecast,
-}));
 // register display
 registerDisplay(new LocalForecast(7, 'local-forecast'));
