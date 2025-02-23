@@ -1,39 +1,60 @@
-# WeatherStar 4000+
+# WeatherStar 4000+ (International)
 
-A live version of this project is available at https://weatherstar.netbymatt.com
+This project is a fork of [`ws4kp`](https://github.com/netbymatt/ws4kp) by [@netbymatt](https://github.com/netbymatt), which has been refactored to run on [Open Meteo's aggregated forecast API](https://open-meteo.com/en/docs). This means this fork of the `ws4kp` works for locations outside of the USA.
+
+<!-- A live version of this project is available at https://weatherstar.netbymatt.com -->
 
 ## About
 
-This project aims to bring back the feel of the 90's with a weather forecast that has the look and feel of The Weather Channel at that time but available in a modern way. This is by no means intended to be a perfect emulation of the WeatherStar 4000, the hardware that produced those wonderful blue and orange graphics you saw during the local forecast on The Weather Channel. If you would like a much more accurate project please see the [WS4000 Simulator](http://www.taiganet.com/). Instead, this project intends to create a simple to use interface with minimal configuration fuss. Some changes have been made to the screens available because either more or less forecast information is available today than was in the 90's. Most of these changes are captured in sections below.
+This project aims to bring back the feel of the 90's with a weather forecast that has the look and feel of The Weather Channel at that time but available in a modern way. 
+
+This is by no means intended to be a perfect emulation of the WeatherStar 4000, the hardware that produced those wonderful blue and orange graphics you saw during the local forecast on The Weather Channel. If you would like a much more accurate project please see the [WS4000 Simulator](http://www.taiganet.com/). 
+
+Instead, this project intends to create a simple to use interface with minimal configuration fuss. Some changes have been made to the screens available because either more or less forecast information is available today than was in the 90's. Most of these changes are captured in sections below.
 
 ## Acknowledgements
 
-This project is based on the work of [Mike Battaglia](https://github.com/vbguyny/ws4kp). It was forked from his work in August 2020.
+This project is based on the work of [Mike Battaglia](https://github.com/vbguyny/ws4kp) and [@netbymatt](https://github.com/netbymatt). This internationalized version was forked in February 2025.
 
 * Mike Battaglia for the original project and all of the code which draws the weather displays. This code remains largely intact and was a huge amount of work to get exactly right. He's also responsible for all of the background graphics including the maps used in the application.
 * The team at [TWCClassics](https://twcclassics.com/) for several resources.
 	* A [font](https://twcclassics.com/downloads.html) set used on the original WeatherStar 4000
 	* [Icon](https://twcclassics.com/downloads.html) sets
 	* Countless photos and videos of WeatherStar 4000 forecasts used as references.
+* [@netbymatt](https://github.com/netbymatt) for modernizing & module'ing Mike's original project. 
 
 ## Run Your WeatherStar
 There are a lot of CORS considerations and issues with api.weather.gov that are easiest to deal with by running a local server to see this in action (or use the live link above). You'll need Node.js >12.0 to run the local server.
 
-To run via Node locally:
+### To run via Node locally:
 ```
-git clone https://github.com/netbymatt/ws4kp.git
+git clone https://github.com/mwood77/ws4kp-international.git
 cd ws4kp
 npm i
 npm run start
 ```
 
-To run via Docker: 
+### To run via Docker: 
 ```
-docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
+docker run -p 8080:8080 ghcr.io/mwood77/ws4kp-international
 ```
-Open your web browser: http://localhost:8080/ 
 
-## Updates in 5.0
+After running this project in either way, pen your web browser: 
+- http://localhost:8080/ 
+
+## Updates in 6.0.0 (Internationalization w/ Open Meteo)
+This is a significant divergence from 5.0.0 and is exclusive to this fork.
+
+This migrates the project away from NOAA's USA exclusive weather API to [Open Meteo's global weather API](https://open-meteo.com/en/docs). This means that _this fork_ is capable of rendering weather data across the globe.
+
+However, there are some caveats. Migrating to Open Meteo means that there is some loss of functionality, namely the loss of radar imagery, and observation station data, and hazards. This means that the following screens are no longer functional:
+- Hazards
+- Latest Observations
+- Travel Forecast
+- Regional Forecast
+- Local Radar
+
+## Updates in 5.0.0
 The change to 5.0 changes from drawing the weather graphics on canvas elements and instead uses HTML and CSS to style all of the weather graphics. A lot of other changes and fixes were implemented at the same time.
 
 * Replace all canvas elements with HTML and CSS

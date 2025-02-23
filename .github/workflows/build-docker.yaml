@@ -16,7 +16,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/netbymatt/ws4kp
+            ghcr.io/mwood77/ws4kp-international
           flavor: |
             latest=false
           tags: |
