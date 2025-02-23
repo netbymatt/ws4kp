@@ -1,4 +1,4 @@
-# WeatherStar 4000+
+# WeatherStar 4000+ (International)
 
 A live version of this project is available at https://weatherstar.netbymatt.com
 
