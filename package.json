@@ -9,18 +9,19 @@
 		"lint": "eslint ./server/scripts/**/*.mjs",
 		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs",
 		"start": "nodemon index.js",
-		"pages": "node index.js"
+		"pages": "node dist/index.js",
+		"build": "rm -rf /dist && node build.mjs"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/netbymatt/ws4kp.git"
+		"url": "git+https://github.com/mwood77/ws4kp-international.git"
 	},
 	"author": "Matt Walsh",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/netbymatt/ws4kp/issues"
+		"url": "https://github.com/mwood77/ws4kp-international/issues"
 	},
-	"homepage": "https://github.com/netbymatt/ws4kp#readme",
+	"homepage": "https://github.com/mwood77/ws4kp-international#readme",
 	"devDependencies": {
 		"@aws-sdk/client-cloudfront": "^3.609.0",
 		"del": "^7.1.0",
