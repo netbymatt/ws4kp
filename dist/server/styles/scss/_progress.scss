@@ -1,0 +1,120 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+.weather-display .progress {
+	@include u.text-shadow();
+	font-family: 'Star4000 Extended';
+	font-size: 19pt;
+
+	.container {
+		position: relative;
+		top: 15px;
+		margin: 0px 10px;
+		box-sizing: border-box;
+		height: 310px;
+		overflow: hidden;
+
+		.item {
+			position: relative;
+
+			.name {
+				white-space: nowrap;
+
+				&::after {
+					content: '........................................................................';
+				}
+			}
+
+			.links {
+				position: absolute;
+				text-align: right;
+				right: 0px;
+				top: 0px;
+
+				>div {
+					background-color: c.$blue-box;
+					display: none;
+					padding-left: 4px;
+				}
+
+				@include u.status-colors();
+
+				&.loading .loading,
+				&.press-here .press-here,
+				&.failed .failed,
+				&.no-data .no-data,
+				&.disabled .disabled,
+				&.retrying .retrying {
+					display: block;
+				}
+
+			}
+		}
+	}
+
+
+}
+
+#progress-html.weather-display .scroll {
+
+	@keyframes progress-scroll {
+		0% {
+			background-position: -40px 0;
+		}
+
+		100% {
+			background-position: 40px 0;
+		}
+	}
+
+	.progress-bar-container {
+		border: 2px solid black;
+		background-color: white;
+		margin: 20px auto;
+		width: 524px;
+		position: relative;
+		display: none;
+
+		&.show {
+			display: block;
+		}
+
+		.progress-bar {
+			height: 20px;
+			margin: 2px;
+			width: 520px;
+			background: repeating-linear-gradient(90deg,
+					c.$gradient-loading-1 0px,
+					c.$gradient-loading-1 5px,
+					c.$gradient-loading-2 5px,
+					c.$gradient-loading-2 10px,
+					c.$gradient-loading-3 10px,
+					c.$gradient-loading-3 15px,
+					c.$gradient-loading-4 15px,
+					c.$gradient-loading-4 20px,
+					c.$gradient-loading-3 20px,
+					c.$gradient-loading-3 25px,
+					c.$gradient-loading-2 25px,
+					c.$gradient-loading-2 30px,
+					c.$gradient-loading-1 30px,
+					c.$gradient-loading-1 40px,
+				);
+			// animation
+			animation-duration: 2s;
+			animation-fill-mode: forwards;
+			animation-iteration-count: infinite;
+			animation-name: progress-scroll;
+			animation-timing-function: steps(8, end);
+		}
+
+		.cover {
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			background-color: white;
+			width: 100%;
+			height: 24px;
+			transition: width 1s steps(6);
+		}
+	}
+}

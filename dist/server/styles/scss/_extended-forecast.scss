@@ -1,0 +1,73 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#extended-forecast-html.weather-display {
+	background-image: url('../images/BackGround2_1.png');
+}
+
+.weather-display .main.extended-forecast {
+	.day-container {
+		margin-top: 16px;
+		margin-left: 27px;
+	}
+
+	.day {
+		@include u.text-shadow();
+		padding: 5px;
+		height: 285px;
+		width: 155px;
+		display: inline-block;
+		margin: 0px 15px;
+		font-family: 'Star4000';
+		font-size: 24pt;
+
+		.date {
+			text-transform: uppercase;
+			text-align: center;
+			color: c.$title-color;
+		}
+
+		.condition {
+			text-align: center;
+			height: 74px;
+			margin-top: 10px;
+		}
+
+		.icon {
+			text-align: center;
+			height: 75px;
+
+			img {
+				max-height: 75px;
+			}
+		}
+
+		.temperatures {
+			width: 100%;
+			margin-top: 5px;
+
+			.temperature-block {
+				display: inline-block;
+				width: 44%;
+				vertical-align: top;
+
+				>div {
+					text-align: center;
+				}
+
+				.value {
+					font-family: 'Star4000 Large';
+					margin-top: 4px;
+				}
+
+				&.lo .label {
+					color: c.$extended-low;
+				}
+
+				&.hi .label {
+					color: c.$title-color;
+				}
+			}
+		}
+	}
+}

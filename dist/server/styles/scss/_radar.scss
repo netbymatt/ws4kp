@@ -1,0 +1,118 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#radar-html.weather-display {
+	background-image: url('../images/BackGround4_1.png');
+
+	.header {
+		height: 83px;
+
+		.title.dual {
+			color: white;
+			font-family: 'Arial', sans-serif;
+			font-weight: bold;
+			font-size: 28pt;
+			left: 155px;
+
+			.top {
+				top: -4px;
+			}
+
+			.bottom {
+				top: 31px;
+			}
+		}
+
+		.right {
+			position: absolute;
+			right: 0px;
+			width: 360px;
+			margin-top: 2px;
+			font-family: 'Star4000';
+			font-size: 18pt;
+			font-weight: bold;
+			@include u.text-shadow();
+			text-align: center;
+
+			.scale>div {
+				display: inline-block;
+			}
+
+			.scale-table {
+				display: table-row;
+				border-collapse: collapse;
+
+				.box {
+					display: table-cell;
+					border: 2px solid black;
+					width: 17px;
+					height: 24px;
+					padding: 0
+				}
+
+				.box-1 {
+					background-color: rgb(49, 210, 22);
+				}
+
+				.box-2 {
+					background-color: rgb(28, 138, 18);
+				}
+
+				.box-3 {
+					background-color: rgb(20, 90, 15);
+				}
+
+				.box-4 {
+					background-color: rgb(10, 40, 10);
+				}
+
+				.box-5 {
+					background-color: rgb(196, 179, 70);
+				}
+
+				.box-6 {
+					background-color: rgb(190, 72, 19);
+				}
+
+				.box-7 {
+					background-color: rgb(171, 14, 14);
+				}
+
+				.box-8 {
+					background-color: rgb(115, 31, 4);
+				}
+			}
+
+			.scale {
+				.text {
+					position: relative;
+					top: -5px;
+				}
+			}
+
+			.time {
+				position: relative;
+				font-weight: normal;
+				top: -14px;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+			}
+		}
+	}
+}
+
+.weather-display .main.radar {
+	overflow: hidden;
+	height: 367px;
+
+	.container {
+
+		.scroll-area {
+			position: relative;
+		}
+	}
+}
+
+.wide.radar #container {
+	background: url(../images/BackGround4_1_wide.png);
+}

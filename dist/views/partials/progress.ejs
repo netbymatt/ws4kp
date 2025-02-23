@@ -1,0 +1,22 @@
+<%- include('header.ejs', {titleDual:{ top: 'WeatherStar' , bottom: '4000+  v' + version }, hasTime: true}) %>
+<div class="main has-box progress">
+  <div class="container">
+    <div class="item template">
+      <div class="name">Current Conditions</div>
+      <div class="links loading">
+        <div class="loading">Loading</div>
+        <div class="press-here">Press Here</div>
+        <div class="failed">Failed</div>
+        <div class="no-data">No Data</div>
+        <div class="disabled">Disabled</div>
+        <div class="retrying">Retrying</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="scroll">
+  <div class="progress-bar-container show">
+    <div class="progress-bar"></div>
+    <div class="cover"></div>
+  </div>
+</div>

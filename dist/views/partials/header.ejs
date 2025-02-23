@@ -1,0 +1,28 @@
+<div class="header">
+	<div class="logo"><img src="images/Logo3.png" /></div>
+	<% if (locals?.titleDual) { %>
+		<div class="title dual">
+			<div class="top">
+				<%-titleDual.top %>
+			</div>
+			<div class="bottom">
+				<%-titleDual.bottom %>
+			</div>
+		</div>
+		<% } else { %>
+			<div class="title single">
+				<%-title %>
+			</div>
+			<% } %>
+				<% if (locals?.hasTime) { %>
+					<div class="date-time date"></div>
+					<div class="date-time time"></div>
+					<% } else if (!locals?.noaaLogo) { %>
+						<div class="right"></div>
+					<% } %>
+						<% if (locals?.noaaLogo) { %>
+							<div class="noaa-logo">
+								<img src="images/noaa5.gif" />
+							</div>
+							<%}%>
+</div>

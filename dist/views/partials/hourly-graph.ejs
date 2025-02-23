@@ -1,0 +1,24 @@
+<%- include('header.ejs', {title: 'Hourly Graph' , hasTime: false }) %>
+<div class="main has-scroll hourly-graph">
+		<div class="top-right template ">
+			<div class="temperature">Temperature</div>
+			<div class="cloud">Cloud %</div>
+			<div class="rain">Precip %</div>
+		</div>
+		<div class="y-axis">
+			<div class="label l-1">75</div>
+			<div class="label l-2">65</div>
+			<div class="label l-3">55</div>
+		</div>
+		<div class="chart">
+			<img id="chart-area"></img>
+		</div>
+		<div class="x-axis">
+			<div class="label l-1">12a</div>
+			<div class="label l-2">6a</div>
+			<div class="label l-3">12p</div>
+			<div class="label l-4">6p</div>
+			<div class="label l-5">12a</div>
+		</div>
+	</div>
+	<%- include('scroll.ejs') %>

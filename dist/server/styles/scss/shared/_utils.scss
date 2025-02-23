@@ -1,0 +1,42 @@
+@use 'colors'as c;
+
+@mixin text-shadow($offset: 3px, $outline: 1.5px) {
+	/* eventually, when chrome supports paint-order for html elements */
+	/* -webkit-text-stroke: 2px black; */
+	/* paint-order: stroke fill; */
+	text-shadow:
+		$offset $offset 0 c.$text-shadow,
+		(-$outline) (-$outline) 0 c.$text-shadow,
+		0 (-$outline) 0 c.$text-shadow,
+		$outline (-$outline) 0 c.$text-shadow,
+		$outline 0 0 c.$text-shadow,
+		$outline $outline 0 c.$text-shadow,
+		0 $outline 0 c.$text-shadow,
+		(-$outline) $outline 0 c.$text-shadow,
+		(-$outline) 0 0 c.$text-shadow;
+}
+
+@mixin status-colors() {
+
+	.loading,
+	.retrying {
+		color: #ffff00;
+	}
+
+	.press-here {
+		color: #00ff00;
+		cursor: pointer;
+	}
+
+	.failed {
+		color: #ff0000;
+	}
+
+	.no-data {
+		color: #C0C0C0;
+	}
+
+	.disabled {
+		color: #C0C0C0;
+	}
+}

@@ -1,0 +1,52 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#regional-forecast-html.weather-display {
+	background-image: url('../images/BackGround5_1.png');
+}
+
+.weather-display .main.regional-forecast {
+
+
+	position: relative;
+
+	.map {
+		position: absolute;
+		transform-origin: 0 0;
+	}
+
+	.location {
+		position: absolute;
+		width: 140px;
+		margin-left: -40px;
+		margin-top: -35px;
+
+		>div {
+			position: absolute;
+			@include u.text-shadow();
+		}
+
+		.icon {
+			top: 26px;
+			left: 44px;
+
+			img {
+				max-height: 32px;
+			}
+		}
+
+		.temp {
+			font-family: 'Star4000 Large';
+			font-size: 28px;
+			color: c.$title-color;
+			top: 28px;
+			text-align: right;
+			width: 40px;
+		}
+
+		.city {
+			font-family: Star4000;
+			font-size: 20px;
+		}
+	}
+}

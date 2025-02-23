@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <title>WeatherStar 4000+ International</title>
+  <meta name="description" content="Web based WeatherStar 4000 simulator that reports current and forecast weather conditions plus a few extras!" />
+  <meta name="keywords" content="WeatherStar 4000+" />
+  <meta name="author" content="Matt Walsh" />
+  <meta name="application-name" content="WeatherStar 4000+" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="images/Logo192.png" />
+
+  <% if (production) { %>
+  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
+  <script type="text/javascript" src="resources/data.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="scripts/custom.js?_=<%=production%>"></script>
+  <% } else { %>
+  <link rel="stylesheet" type="text/css" href="styles/main.css" />
+  <script type="text/javascript" src="scripts/vendor/auto/jquery.js"></script>
+  <script type="text/javascript" src="scripts/vendor/jquery.autocomplete.min.js"></script>
+  <script type="text/javascript" src="scripts/vendor/auto/nosleep.js"></script>
+  <script type="text/javascript" src="scripts/vendor/auto/swiped-events.js"></script>
+  <script type="text/javascript" src="scripts/vendor/auto/suncalc.js"></script>
+  <script type="module" src="scripts/modules/hazards.mjs"></script>
+  <script type="module" src="scripts/modules/currentweatherscroll.mjs"></script>
+  <script type="module" src="scripts/modules/currentweather.mjs"></script>
+  <script type="module" src="scripts/modules/almanac.mjs"></script>
+  <script type="module" src="scripts/modules/icons.mjs"></script>
+  <script type="module" src="scripts/modules/extendedforecast.mjs"></script>
+  <script type="module" src="scripts/modules/hourly-graph.mjs"></script>
+  <script type="module" src="scripts/modules/hourly.mjs"></script>
+  <script type="module" src="scripts/modules/latestobservations.mjs"></script>
+  <script type="module" src="scripts/modules/localforecast.mjs"></script>
+  <script type="module" src="scripts/modules/radar.mjs"></script>
+  <script type="module" src="scripts/modules/regionalforecast.mjs"></script>
+  <script type="module" src="scripts/modules/travelforecast.mjs"></script>
+  <script type="module" src="scripts/modules/progress.mjs"></script>
+  <script type="module" src="scripts/modules/radar.mjs"></script>
+  <script type="module" src="scripts/modules/settings.mjs"></script>
+	<script type="module" src="scripts/index.mjs"></script>
+	<script type="text/javascript" src="scripts/custom.js"></script>
+  <!-- data -->
+  <script type="text/javascript" src="scripts/data/travelcities.js"></script>
+  <script type="text/javascript" src="scripts/data/regionalcities.js"></script>
+  <script type="text/javascript" src="scripts/data/stations.js"></script>
+
+  <script type="text/javascript" src="scripts/custom.js"></script>
+
+  <% } %>
+
+</head>
+
+<body>
+
+
+  <div id="divQuery">
+		<input id="txtAddress" type="text" value="" placeholder="Zip or City, State" />
+		<div class="buttons">
+			<button id="btnGetGps" type="button" title="Get GPS Location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light"/>
+				<img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark"/>
+			</button>
+			<button id="btnGetLatLng" type="submit">GO</button>
+			<button id="btnClearQuery" type="reset">Reset</button>
+		</div>
+  </div>
+  <div id="version" style="display:none">
+    <%- version %>
+  </div>
+
+  <div id="divTwc">
+    <div id="container">
+      <div id="loading" width="640" height="480">
+        <div>
+          <div class="title">WeatherStar 4000+</div>
+					<div class="version">v<%- version %></div>
+          <div class="instructions">Enter your location above to continue</div>
+        </div>
+      </div>
+      <div id="progress-html" class="weather-display">
+        <%- include('partials/progress.ejs') %>
+      </div>
+      <div id="hourly-html" class="weather-display">
+        <%- include('partials/hourly.ejs') %>
+      </div>
+      <div id="hourly-graph-html" class="weather-display">
+        <%- include('partials/hourly-graph.ejs') %>
+      </div>
+      <div id="travel-html" class="weather-display">
+        <%- include('partials/travel.ejs') %>
+      </div>
+      <div id="current-weather-html" class="weather-display">
+        <%- include('partials/current-weather.ejs') %>
+      </div>
+      <div id="local-forecast-html" class="weather-display">
+        <%- include('partials/local-forecast.ejs') %>
+      </div>
+      <div id="latest-observations-html" class="weather-display">
+        <%- include('partials/latest-observations.ejs') %>
+      </div>
+      <div id="regional-forecast-html" class="weather-display">
+        <%- include('partials/regional-forecast.ejs') %>
+      </div>
+      <div id="almanac-html" class="weather-display">
+        <%- include('partials/almanac.ejs') %>
+      </div>
+      <div id="extended-forecast-html" class="weather-display">
+        <%- include('partials/extended-forecast.ejs') %>
+      </div>
+      <div id="radar-html" class="weather-display">
+        <%- include('partials/radar.ejs') %>
+      </div>
+      <div id="hazards-html" class="weather-display">
+        <%- include('partials/hazards.ejs') %>
+      </div>
+    </div>
+    <div id="divTwcBottom">
+      <div id="divTwcBottomLeft">
+        <img id="NavigateMenu" class="navButton" src="images/nav/ic_menu_white_24dp_2x.png" title="Menu" />
+        <img id="NavigatePrevious" class="navButton" src="images/nav/ic_skip_previous_white_24dp_2x.png" title="Previous" />
+        <img id="NavigateNext" class="navButton" src="images/nav/ic_skip_next_white_24dp_2x.png" title="Next" />
+        <img id="NavigatePlay" class="navButton" src="images/nav/ic_play_arrow_white_24dp_2x.png" title="Play" />
+      </div>
+      <div id="divTwcBottomMiddle">
+        <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
+      </div>
+      <div id="divTwcBottomRight">
+        <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_2x.png" title="Enter Fullscreen" />
+      </div>
+    </div>
+  </div>
+
+  <br />
+
+  <div class="info">
+    <a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
+  </div>
+
+  <div class='heading'>Selected displays</div>
+  <div id='enabledDisplays'>
+
+  </div>
+
+	<div class='heading'>Settings</div>
+	<div id='settings'>
+	</div>
+
+	<div class='heading'>Sharing</div>
+	<div class='info'>
+		<a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
+		<div id="share-link-instructions">
+			Copy this long URL:
+			<input type='text' id="share-link-url"></div>
+		</div>
+	</div>
+
+	<div class='heading'>Forecast Information</div>
+  <div id="divInfo">
+    Location: <span id="spanCity"></span> <span id="spanState"></span><br />
+    Station Id: <span id="spanStationId"></span><br />
+    Radar Id: <span id="spanRadarId"></span><br />
+    Zone Id: <span id="spanZoneId"></span><br />
+  </div>
+
+  <div id="divRefresh">
+    Last Update: <span id="spanLastRefresh">(None)</span><br />
+    <input id="chkAutoRefresh" name="chkAutoRefresh" type="checkbox" /><label id="lblRefreshCountDown" for="chkAutoRefresh">Auto Refresh: <span id="spanRefreshCountDown">--:--</span></label>
+  </div>
+
+</body>
+
+</html>

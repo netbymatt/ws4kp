@@ -1,0 +1,150 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#hourly-graph-html {
+	background-image: url(../images/BackGround1_1_Chart.png);
+
+	.header {
+		.right {
+			position: absolute;
+			top: 35px;
+			right: 60px;
+			width: 360px;
+			font-family: 'Star4000 Small';
+			font-size: 32px;
+			@include u.text-shadow();
+			text-align: right;
+
+			div {
+				margin-top: -18px;
+			}
+
+			.temperature {
+				color: red;
+			}
+
+			.cloud {
+				color: lightgrey;
+			}
+
+			.rain {
+				color: aqua;
+			}
+		}
+	}
+}
+
+.weather-display .main.hourly-graph {
+
+	&.main {
+		>div {
+			position: absolute;
+		}
+
+		.label {
+			font-family: 'Star4000 Small';
+			font-size: 24pt;
+			color: c.$column-header-text;
+			@include u.text-shadow();
+			margin-top: -15px;
+			position: absolute;
+		}
+
+		.x-axis {
+			bottom: 0px;
+			left: 0px;
+			width: 640px;
+			height: 20px;
+
+			.label {
+				text-align: center;
+				width: 50px;
+
+				&.l-1 {
+					left: 25px;
+				}
+
+				&.l-2 {
+					left: 158px;
+				}
+
+				&.l-3 {
+					left: 291px;
+				}
+
+				&.l-4 {
+					left: 424px;
+				}
+
+				&.l-5 {
+					left: 557px;
+				}
+			}
+
+
+
+		}
+
+		.chart {
+			top: 0px;
+			left: 50px;
+
+			img {
+				width: 532px;
+				height: 285px;
+			}
+		}
+
+		.y-axis {
+			top: 0px;
+			left: 0px;
+			width: 50px;
+			height: 285px;
+
+			.label {
+				text-align: right;
+				right: 0px;
+
+				&.l-1 {
+					top: 0px;
+				}
+
+				&.l-2 {
+					top: 140px;
+				}
+
+				&.l-3 {
+					bottom: 0px;
+				}
+			}
+		}
+
+		.column-headers {
+			background-color: c.$column-header;
+			height: 20px;
+			position: absolute;
+			width: 100%;
+		}
+
+		.column-headers {
+			position: sticky;
+			top: 0px;
+			z-index: 5;
+
+
+			.temp {
+				left: 355px;
+			}
+
+			.like {
+				left: 435px;
+			}
+
+			.wind {
+				left: 535px;
+			}
+		}
+
+
+	}
+}
