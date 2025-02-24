@@ -16,6 +16,13 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 	* [Icon](https://twcclassics.com/downloads.html) sets
 	* Countless photos and videos of WeatherStar 4000 forecasts used as references.
 
+## Does WeatherStar 4000+ work outside of the USA?
+
+This project is tightly coupled to [NOAA's Weather API](https://www.weather.gov/documentation/services-web-api), which is exclsuive to the United States. Using NOAA's Weather API is a crucial requirement to provide an authentic WeatherStar 4000+ experience.
+
+If you would like to display weather information for international locations (outside of the USA), please checkout a fork of this project created by [@mwood77](https://github.com/mwood77):
+- [`ws4kp-international`](https://github.com/mwood77/ws4kp-international)
+
 ## Run Your WeatherStar
 There are a lot of CORS considerations and issues with api.weather.gov that are easiest to deal with by running a local server to see this in action (or use the live link above). You'll need Node.js >12.0 to run the local server.
 
