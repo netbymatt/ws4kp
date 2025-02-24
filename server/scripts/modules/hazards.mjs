@@ -122,7 +122,7 @@ class Hazards extends WeatherDisplay {
 	// base count change callback
 	baseCountChange(count) {
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.hazard-lines').getBoundingClientRect().height - 390, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.hazard-lines').offsetHeight - 390, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
