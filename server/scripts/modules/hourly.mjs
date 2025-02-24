@@ -3,7 +3,7 @@
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { json } from './utils/fetch.mjs';
-import { celsiusToFahrenheit, kilometersToMiles } from './utils/units.mjs';
+import { temperature as temperatureUnit, distanceKilometers } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -56,6 +56,9 @@ class Hourly extends WeatherDisplay {
 		const list = this.elem.querySelector('.hourly-lines');
 		list.innerHTML = '';
 
+		// get a unit converter
+		const temperatureConverter = temperatureUnit();
+
 		const startingHour = DateTime.local();
 
 		const lines = this.data.map((data, index) => {
@@ -66,7 +69,7 @@ class Hourly extends WeatherDisplay {
 			fillValues.hour = formattedHour;
 
 			// temperatures, convert to strings with no decimal
-			const temperature = Math.round(data.temperature).toString().padStart(3);
+			const temperature = temperatureConverter(data.temperature).toString().padStart(3);
 			const feelsLike = Math.round(data.apparentTemperature).toString().padStart(3);
 			fillValues.temp = temperature;
 			// only plot apparent temperature if there is a difference
@@ -132,6 +135,11 @@ class Hourly extends WeatherDisplay {
 
 // extract specific values from forecast and format as an array
 const parseForecast = async (data) => {
+	// get unit converters
+	const temperatureConverter = temperatureUnit();
+	const distanceConverter = distanceKilometers();
+
+	// parse data
 	const temperature = expand(data.temperature.values);
 	const apparentTemperature = expand(data.apparentTemperature.values);
 	const windSpeed = expand(data.windSpeed.values);
@@ -145,9 +153,11 @@ const parseForecast = async (data) => {
 	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
 	return temperature.map((val, idx) => ({
-		temperature: celsiusToFahrenheit(temperature[idx]),
-		apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
-		windSpeed: kilometersToMiles(windSpeed[idx]),
+		temperature: temperatureConverter(temperature[idx]),
+		temperatureUnit: temperatureConverter.units,
+		apparentTemperature: temperatureConverter(apparentTemperature[idx]),
+		windSpeed: distanceConverter(windSpeed[idx]),
+		windUnit: distanceConverter.units,
 		windDirection: directionToNSEW(windDirection[idx]),
 		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
 		skyCover: skyCover[idx],

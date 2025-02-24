@@ -4,7 +4,7 @@
 import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
-import { celsiusToFahrenheit } from './utils/units.mjs';
+import { temperature as temperatureUnit } from './utils/units.mjs';
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
@@ -59,7 +59,7 @@ class RegionalForecast extends WeatherDisplay {
 		const regionalCities = [];
 		combinedCities.forEach((city) => {
 			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat
-						&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
+				&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
 				// default to 1 for cities loaded from RegionalCities, use value calculate above for remaining stations
 				const targetDist = city.targetDistance || 1;
 				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
@@ -70,6 +70,9 @@ class RegionalForecast extends WeatherDisplay {
 				if (okToAddCity) regionalCities.push(city);
 			}
 		});
+
+		// get a unit converter
+		const temperatureConverter = temperatureUnit();
 
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
 		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
@@ -93,7 +96,7 @@ class RegionalForecast extends WeatherDisplay {
 				// format the observation the same as the forecast
 				const regionalObservation = {
 					daytime: !!/\/day\//.test(observation.icon),
-					temperature: celsiusToFahrenheit(observation.temperature.value),
+					temperature: temperatureConverter(observation.temperature.value),
 					name: utils.formatCity(city.city),
 					icon: observation.icon,
 					x: cityXY.x,

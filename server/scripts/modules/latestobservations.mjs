@@ -3,9 +3,10 @@ import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
 import { locationCleanup } from './utils/string.mjs';
-import { celsiusToFahrenheit, kphToMph } from './utils/units.mjs';
+import { temperature, windSpeed } from './utils/units.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import settings from './settings.mjs';
 
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -64,14 +65,22 @@ class LatestObservations extends WeatherDisplay {
 		// sort array by station name
 		const sortedConditions = conditions.sort((a, b) => ((a.Name < b.Name) ? -1 : 1));
 
-		this.elem.querySelector('.column-headers .temp.english').classList.add('show');
-		this.elem.querySelector('.column-headers .temp.metric').classList.remove('show');
+		if (settings.units.value === 'us') {
+			this.elem.querySelector('.column-headers .temp.english').classList.add('show');
+			this.elem.querySelector('.column-headers .temp.metric').classList.remove('show');
+		} else {
+			this.elem.querySelector('.column-headers .temp.english').classList.remove('show');
+			this.elem.querySelector('.column-headers .temp.metric').classList.add('show');
+		}
+		// get unit converters
+		const windConverter = windSpeed();
+		const temperatureConverter = temperature();
 
 		const lines = sortedConditions.map((condition) => {
 			const windDirection = directionToNSEW(condition.windDirection.value);
 
-			const	Temperature = Math.round(celsiusToFahrenheit(condition.temperature.value));
-			const WindSpeed = Math.round(kphToMph(condition.windSpeed.value));
+			const Temperature = temperatureConverter(condition.temperature.value);
+			const WindSpeed = windConverter(condition.windSpeed.value);
 
 			const fill = {
 				location: locationCleanup(condition.city).substr(0, 14),
@@ -93,6 +102,8 @@ class LatestObservations extends WeatherDisplay {
 		const linesContainer = this.elem.querySelector('.observation-lines');
 		linesContainer.innerHTML = '';
 		linesContainer.append(...lines);
+
+		// update temperature unit header
 
 		this.finishDraw();
 	}
@@ -122,8 +133,8 @@ const getStations = async (stations) => {
 			const data = await json(`https://api.weather.gov/stations/${station.id}/observations/latest`, { retryCount: 1, stillWaiting: () => this.stillWaiting() });
 			// test for temperature, weather and wind values present
 			if (data.properties.temperature.value === null
-			|| data.properties.textDescription === ''
-			|| data.properties.windSpeed.value === null) return false;
+				|| data.properties.textDescription === ''
+				|| data.properties.windSpeed.value === null) return false;
 			// format the return values
 			return {
 				...data.properties,

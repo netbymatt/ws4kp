@@ -8,6 +8,7 @@ import { getWeatherIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import settings from './settings.mjs';
 
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -26,7 +27,7 @@ class ExtendedForecast extends WeatherDisplay {
 		try {
 			forecast = await json(weatherParameters.forecast, {
 				data: {
-					units: 'us',
+					units: settings.units.value,
 				},
 				retryCount: 3,
 				stillWaiting: () => this.stillWaiting(),
@@ -131,7 +132,7 @@ const shortenExtendedForecastText = (long) => {
 		[/dense /gi, ''],
 		[/Thunderstorm/g, 'T\'Storm'],
 	];
-		// run all regexes
+	// run all regexes
 	const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
 
 	let conditions = short.split(' ');

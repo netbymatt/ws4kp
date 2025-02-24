@@ -5,6 +5,7 @@ import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import settings from './settings.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -34,7 +35,11 @@ class TravelForecast extends WeatherDisplay {
 			try {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');
-				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
+				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
+					data: {
+						units: settings.units.value,
+					},
+				});
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
 				// return a pared-down forecast

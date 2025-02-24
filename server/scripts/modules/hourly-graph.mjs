@@ -38,7 +38,7 @@ class HourlyGraph extends WeatherDisplay {
 		const skyCover = data.map((d) => d.skyCover);
 
 		this.data = {
-			skyCover, temperature, probabilityOfPrecipitation,
+			skyCover, temperature, probabilityOfPrecipitation, temperatureUnit: data[0].temperatureUnit,
 		};
 
 		this.setStatus(STATUS.loaded);
@@ -106,6 +106,9 @@ class HourlyGraph extends WeatherDisplay {
 
 		// set the image source
 		this.image.src = canvas.toDataURL();
+
+		// change the units in the header
+		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
 
 		super.drawCanvas();
 		this.finishDraw();

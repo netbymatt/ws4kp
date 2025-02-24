@@ -18,6 +18,10 @@ const init = () => {
 		[1.25, 'Slow'],
 		[1.5, 'Very Slow'],
 	]);
+	settings.units = new Setting('units', 'Units', 'select', 'us', unitChange, true, [
+		['us', 'US'],
+		['si', 'Metric'],
+	]);
 
 	// generate html objects
 	const settingHtml = Object.values(settings).map((d) => d.generate());
@@ -45,6 +49,15 @@ const kioskChange = (value) => {
 	} else {
 		body.classList.remove('kiosk');
 	}
+};
+
+const unitChange = () => {
+	// reload the data at the top level to refresh units
+	// after the initial load
+	if (unitChange.firstRunDone) {
+		window.location.reload();
+	}
+	unitChange.firstRunDone = true;
 };
 
 export default settings;

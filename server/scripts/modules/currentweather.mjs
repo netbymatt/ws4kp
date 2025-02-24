@@ -8,7 +8,7 @@ import { getWeatherIconFromIconLink } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import {
-	celsiusToFahrenheit, kphToMph, pascalToInHg, metersToFeet, kilometersToMiles,
+	temperature, windSpeed, pressure, distanceMeters, distanceKilometers,
 } from './utils/units.mjs';
 
 // some stations prefixed do not provide all the necessary data
@@ -159,23 +159,32 @@ const shortConditions = (_condition) => {
 
 // format the received data
 const parseData = (data) => {
+	// get the unit converter
+	const windConverter = windSpeed();
+	const temperatureConverter = temperature();
+	const metersConverter = distanceMeters();
+	const kilometersConverter = distanceKilometers();
+	const pressureConverter = pressure();
+
 	const observations = data.features[0].properties;
 	// values from api are provided in metric
 	data.observations = observations;
-	data.Temperature = Math.round(observations.temperature.value);
-	data.TemperatureUnit = 'C';
-	data.DewPoint = Math.round(observations.dewpoint.value);
-	data.Ceiling = Math.round(observations.cloudLayers[0]?.base?.value ?? 0);
-	data.CeilingUnit = 'm.';
-	data.Visibility = Math.round(observations.visibility.value / 1000);
-	data.VisibilityUnit = ' km.';
-	data.WindSpeed = Math.round(observations.windSpeed.value);
+	data.Temperature = temperatureConverter(observations.temperature.value);
+	data.TemperatureUnit = temperatureConverter.units;
+	data.DewPoint = temperatureConverter(observations.dewpoint.value);
+	data.Ceiling = metersConverter(observations.cloudLayers[0]?.base?.value ?? 0);
+	data.CeilingUnit = metersConverter.units;
+	data.Visibility = kilometersConverter(observations.visibility.value);
+	data.VisibilityUnit = kilometersConverter.units;
+	data.Pressure = pressureConverter(observations.barometricPressure.value);
+	data.PressureUnit = pressureConverter.units;
+	data.HeatIndex = temperatureConverter(observations.heatIndex.value);
+	data.WindChill = temperatureConverter(observations.windChill.value);
+	data.WindSpeed = windConverter(observations.windSpeed.value);
 	data.WindDirection = directionToNSEW(observations.windDirection.value);
-	data.Pressure = Math.round(observations.barometricPressure.value);
-	data.HeatIndex = Math.round(observations.heatIndex.value);
-	data.WindChill = Math.round(observations.windChill.value);
-	data.WindGust = Math.round(observations.windGust.value);
-	data.WindUnit = 'KPH';
+	data.WindGust = windConverter(observations.windGust.value);
+	data.WindSpeed = windConverter(data.WindSpeed);
+	data.WindUnit = windConverter.units;
 	data.Humidity = Math.round(observations.relativeHumidity.value);
 	data.Icon = getWeatherIconFromIconLink(observations.icon);
 	data.PressureDirection = '';
@@ -186,20 +195,6 @@ const parseData = (data) => {
 	if (pressureDiff > 150) data.PressureDirection = 'R';
 	if (pressureDiff < -150) data.PressureDirection = 'F';
 
-	// convert to us units
-	data.Temperature = celsiusToFahrenheit(data.Temperature);
-	data.TemperatureUnit = 'F';
-	data.DewPoint = celsiusToFahrenheit(data.DewPoint);
-	data.Ceiling = Math.round(metersToFeet(data.Ceiling) / 100) * 100;
-	data.CeilingUnit = 'ft.';
-	data.Visibility = kilometersToMiles(observations.visibility.value / 1000);
-	data.VisibilityUnit = ' mi.';
-	data.WindSpeed = kphToMph(data.WindSpeed);
-	data.WindUnit = 'MPH';
-	data.Pressure = pascalToInHg(data.Pressure).toFixed(2);
-	data.HeatIndex = celsiusToFahrenheit(data.HeatIndex);
-	data.WindChill = celsiusToFahrenheit(data.WindChill);
-	data.WindGust = kphToMph(data.WindGust);
 	return data;
 };
 

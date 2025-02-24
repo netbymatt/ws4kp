@@ -24,6 +24,10 @@ class Setting {
 		if (type === 'select' && urlValue !== undefined) {
 			urlState = parseFloat(urlValue);
 		}
+		if (type === 'select' && urlValue !== undefined && Number.isNaN(urlState)) {
+			// couldn't parse as a float, store as a string
+			urlState = urlValue;
+		}
 
 		// get existing value if present
 		const storedValue = urlState ?? this.getFromLocalStorage();
@@ -59,7 +63,11 @@ class Setting {
 
 		this.values.forEach(([value, text]) => {
 			const option = document.createElement('option');
-			option.value = value.toFixed(2);
+			if (typeof value === 'number') {
+				option.value = value.toFixed(2);
+			} else {
+				option.value = value;
+			}
 
 			option.innerHTML = text;
 			select.append(option);
@@ -108,6 +116,10 @@ class Setting {
 	selectChange(e) {
 		// update the value
 		this.myValue = parseFloat(e.target.value);
+		if (Number.isNaN(this.myValue)) {
+			// was a string, store as such
+			this.myValue = e.target.value;
+		}
 		this.storeToLocalStorage(this.myValue);
 
 		// call the change action
@@ -168,7 +180,7 @@ class Setting {
 	selectHighlight(newValue) {
 		// set the dropdown to the provided value
 		this.element.querySelectorAll('option').forEach((elem) => {
-			elem.selected = newValue.toFixed(2) === elem.value;
+			elem.selected = (newValue?.toFixed?.(2) === elem.value) || (newValue === elem.value);
 		});
 	}
 

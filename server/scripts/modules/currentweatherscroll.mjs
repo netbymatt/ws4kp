@@ -71,7 +71,7 @@ const screens = [
 	(data) => `Humidity: ${data.Humidity}%   Dewpoint: ${data.DewPoint}${degree}${data.TemperatureUnit}`,
 
 	// barometric pressure
-	(data) => `Barometric Pressure: ${data.Pressure} ${data.PressureDirection}`,
+	(data) => `Barometric Pressure: ${data.Pressure} ${data.PressureUnit} ${data.PressureDirection}`,
 
 	// wind
 	(data) => {
