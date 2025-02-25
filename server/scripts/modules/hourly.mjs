@@ -56,9 +56,6 @@ class Hourly extends WeatherDisplay {
 		const list = this.elem.querySelector('.hourly-lines');
 		list.innerHTML = '';
 
-		// get a unit converter
-		const temperatureConverter = temperatureUnit();
-
 		const startingHour = DateTime.local().setZone(timeZone());
 
 		const lines = this.data.map((data, index) => {
@@ -69,8 +66,8 @@ class Hourly extends WeatherDisplay {
 			fillValues.hour = formattedHour;
 
 			// temperatures, convert to strings with no decimal
-			const temperature = temperatureConverter(data.temperature).toString().padStart(3);
-			const feelsLike = Math.round(data.apparentTemperature).toString().padStart(3);
+			const temperature = data.temperature.toString().padStart(3);
+			const feelsLike = data.apparentTemperature.toString().padStart(3);
 			fillValues.temp = temperature;
 			// only plot apparent temperature if there is a difference
 			// if (temperature !== feelsLike) line.querySelector('.like').innerHTML = feelsLike;
