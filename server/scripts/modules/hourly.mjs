@@ -7,7 +7,7 @@ import { temperature as temperatureUnit, distanceKilometers } from './utils/unit
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, timeZone } from './navigation.mjs';
 import getSun from './almanac.mjs';
 
 class Hourly extends WeatherDisplay {
@@ -59,7 +59,7 @@ class Hourly extends WeatherDisplay {
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
 
-		const startingHour = DateTime.local();
+		const startingHour = DateTime.local().setZone(timeZone());
 
 		const lines = this.data.map((data, index) => {
 			const fillValues = {};
