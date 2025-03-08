@@ -7,6 +7,7 @@ const round2 = (value, decimals) => Math.trunc(value * 10 ** decimals) / 10 ** d
 
 const kphToMph = (Kph) => Math.round(Kph / 1.609_34);
 const celsiusToFahrenheit = (Celsius) => Math.round((Celsius * 9) / 5 + 32);
+const fahrenheitToCelsius = (Fahrenheit) => Math.round((Fahrenheit - 32) * 5 / 9);
 const kilometersToMiles = (Kilometers) => Math.round(Kilometers / 1.609_34);
 const metersToFeet = (Meters) => Math.round(Meters / 0.3048);
 const pascalToInHg = (Pascal) => round2(Pascal * 0.000_295_3, 2);
@@ -35,7 +36,11 @@ const temperature = (defaultUnit = 'si') => {
 	let converter = (passthru) => Math.round(passthru);
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
-		converter = celsiusToFahrenheit;
+		if (defaultUnit === 'us') {
+			converter = fahrenheitToCelsius;
+		} else {
+			converter = celsiusToFahrenheit;
+		}
 	}
 	// append units
 	if (settings.units.value === 'si') {
