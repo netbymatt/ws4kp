@@ -3,6 +3,7 @@ import fs from 'fs';
 import corsPassThru from './cors/index.mjs';
 import radarPassThru from './cors/radar.mjs';
 import outlookPassThru from './cors/outlook.mjs';
+import playlist from './src/playlist.mjs';
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
@@ -14,6 +15,7 @@ app.set('view engine', 'ejs');
 app.get('/stations/*', corsPassThru);
 app.get('/Conus/*', radarPassThru);
 app.get('/products/*', outlookPassThru);
+app.get('/playlist.json', playlist);
 
 // version
 const { version } = JSON.parse(fs.readFileSync('package.json'));
