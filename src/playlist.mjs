@@ -8,8 +8,10 @@ const playlistGenerator = async (req, res) => {
 		});
 	} catch (e) {
 		console.error(e);
+		res.json({
+			availableFiles: [],
+		});
 	}
-	res.send();
 };
 
 export default playlistGenerator;

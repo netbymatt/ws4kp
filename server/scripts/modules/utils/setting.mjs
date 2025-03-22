@@ -167,6 +167,8 @@ class Setting {
 			case 'select':
 				this.selectHighlight(newValue);
 				break;
+			case 'boolean':
+				break;
 			case 'checkbox':
 			default:
 				this.element.checked = newValue;

@@ -87,6 +87,7 @@ const mjsSources = [
 	'server/scripts/modules/regionalforecast.mjs',
 	'server/scripts/modules/travelforecast.mjs',
 	'server/scripts/modules/progress.mjs',
+	'server/scripts/modules/media.mjs',
 	'server/scripts/index.mjs',
 ];
 
@@ -173,6 +174,6 @@ const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVend
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-const publishFrontend = series(buildDist, uploadImages,	upload,	invalidate);
+const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
 
 export default publishFrontend;
