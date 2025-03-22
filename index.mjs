@@ -1,18 +1,14 @@
-// express
-const express = require('express');
+import express from 'express';
+import fs from 'fs';
+import corsPassThru from './cors/index.mjs';
+import radarPassThru from './cors/radar.mjs';
+import outlookPassThru from './cors/outlook.mjs';
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
-const path = require('path');
 
 // template engine
 app.set('view engine', 'ejs');
-
-// cors pass through
-const fs = require('fs');
-const corsPassThru = require('./cors');
-const radarPassThru = require('./cors/radar');
-const outlookPassThru = require('./cors/outlook');
 
 // cors pass-thru to api.weather.gov
 app.get('/stations/*', corsPassThru);
@@ -23,7 +19,7 @@ app.get('/products/*', outlookPassThru);
 const { version } = JSON.parse(fs.readFileSync('package.json'));
 
 const index = (req, res) => {
-	res.render(path.join(__dirname, 'views/index'), {
+	res.render('index', {
 		production: false,
 		version,
 	});
@@ -32,15 +28,15 @@ const index = (req, res) => {
 // debugging
 if (process.env?.DIST === '1') {
 	// distribution
-	app.use('/images', express.static(path.join(__dirname, './server/images')));
-	app.use('/fonts', express.static(path.join(__dirname, './server/fonts')));
-	app.use('/scripts', express.static(path.join(__dirname, './server/scripts')));
-	app.use('/', express.static(path.join(__dirname, './dist')));
+	app.use('/images', express.static('./server/images'));
+	app.use('/fonts', express.static('./server/fonts'));
+	app.use('/scripts', express.static('./server/scripts'));
+	app.use('/', express.static('./dist'));
 } else {
 	// debugging
 	app.get('/index.html', index);
 	app.get('/', index);
-	app.get('*', express.static(path.join(__dirname, './server')));
+	app.get('*', express.static('./server'));
 }
 
 const server = app.listen(port, () => {

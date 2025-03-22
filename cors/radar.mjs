@@ -1,13 +1,13 @@
 // pass through api requests
 
 // http(s) modules
-const https = require('https');
+import https from 'https';
 
 // url parsing
-const queryString = require('querystring');
+import queryString from 'querystring';
 
 // return an express router
-module.exports = (req, res) => {
+const radar = (req, res) => {
 	// add out-going headers
 	const headers = {};
 	headers['user-agent'] = '(WeatherStar 4000+, ws4000@netbymatt.com)';
@@ -25,7 +25,7 @@ module.exports = (req, res) => {
 	if (query.length > 0) query = `?${query}`;
 
 	// get the page
-	https.get(`https://www.cpc.ncep.noaa.gov/${req.path}${query}`, {
+	https.get(`https://radar.weather.gov${req.path}${query}`, {
 		headers,
 	}, (getRes) => {
 		// pull some info
@@ -42,3 +42,5 @@ module.exports = (req, res) => {
 		console.error(e);
 	});
 };
+
+export default radar;
