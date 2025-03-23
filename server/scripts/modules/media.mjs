@@ -29,6 +29,8 @@ const getMedia = async () => {
 const enableMediaPlayer = () => {
 	// see if files are available
 	if (playlist?.availableFiles?.length > 0) {
+		// randomize the list
+		randomizePlaylist();
 		// enable the icon
 		const icon = document.getElementById('ToggleMedia');
 		icon.classList.add('available');
@@ -76,6 +78,20 @@ const stateChanged = () => {
 	} else {
 		stopMedia();
 	}
+};
+
+const randomizePlaylist = () => {
+	let availableFiles = [...playlist.availableFiles];
+	const randomPlaylist = [];
+	while (availableFiles.length > 0) {
+		// get a randon item from the available files
+		const i = Math.floor(Math.random() * availableFiles.length);
+		// add it to the final list
+		randomPlaylist.push(availableFiles[i]);
+		// remove the file from the available files
+		availableFiles = availableFiles.filter((file, index) => index !== i);
+	}
+	playlist.availableFiles = randomPlaylist;
 };
 
 export {
