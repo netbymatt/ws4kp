@@ -1,5 +1,5 @@
 node_modules
 **/debug.log
 server/scripts/custom.js
-music
-
+server/music/*
+!server/music/readme.txt

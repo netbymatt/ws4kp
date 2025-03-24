@@ -2,6 +2,8 @@ import { json } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 
 let playlist;
+let currentTrack = 0;
+let player;
 
 const mediaPlaying = new Setting('mediaPlaying', 'Media Playing', 'boolean', false, null, true);
 
@@ -62,11 +64,17 @@ const toggleMedia = (forcedState) => {
 };
 
 const startMedia = () => {
-
+	// if there's not media player yet, enable it
+	if (!player) {
+		initializePlayer();
+	} else {
+		player.play();
+	}
 };
 
 const stopMedia = () => {
-
+	if (!player) return;
+	player.pause();
 };
 
 const stateChanged = () => {
@@ -92,6 +100,48 @@ const randomizePlaylist = () => {
 		availableFiles = availableFiles.filter((file, index) => index !== i);
 	}
 	playlist.availableFiles = randomPlaylist;
+};
+
+const initializePlayer = () => {
+	// basic sanity checks
+	if (!playlist.availableFiles || playlist?.availableFiles.length === 0) {
+		throw new Error('No playlist available');
+	}
+	if (player) {
+		return;
+	}
+	// create the player
+	player = new Audio();
+
+	// reset the playlist index
+	currentTrack = 0;
+
+	// add event handlers
+	player.addEventListener('canplay', playerCanPlay);
+	player.addEventListener('ended', playerEnded);
+
+	// add the tracks
+	const tracks = playlist.availableFiles.map((file) => {
+		const elem = document.createElement('source');
+		elem.src = `music/${file}`;
+		elem.type = 'audio/mpeg';
+		return elem;
+	});
+
+	// add the track to the player
+	player.append(...tracks);
+	console.log('tracks added');
+};
+
+const playerCanPlay = () => {
+	// check to make sure they user still wants music (protect against slow loading music)
+	if (!mediaPlaying.value) return;
+	// start playing
+	player.play();
+};
+
+const playerEnded = () => {
+	console.log('end of playlist reached');
 };
 
 export {
