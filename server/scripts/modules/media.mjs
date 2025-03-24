@@ -120,17 +120,12 @@ const initializePlayer = () => {
 	player.addEventListener('canplay', playerCanPlay);
 	player.addEventListener('ended', playerEnded);
 
-	// add the tracks
-	const tracks = playlist.availableFiles.map((file) => {
-		const elem = document.createElement('source');
-		elem.src = `music/${file}`;
-		elem.type = 'audio/mpeg';
-		return elem;
-	});
+	// get the first file
+	player.src = `music/${playlist.availableFiles[currentTrack]}`;
+	player.type = 'audio/mpeg';
 
-	// add the track to the player
-	player.append(...tracks);
-	console.log('tracks added');
+	// reload the player
+	console.log('player initialized');
 };
 
 const playerCanPlay = () => {
@@ -141,7 +136,15 @@ const playerCanPlay = () => {
 };
 
 const playerEnded = () => {
-	console.log('end of playlist reached');
+	// next track
+	currentTrack += 1;
+	// roll over and re-randomize the tracks
+	if (currentTrack >= playlist.availableFiles) {
+		randomizePlaylist();
+		currentTrack = 0;
+	}
+	// update the player source
+	player.src = `music/${playlist.availableFiles[currentTrack]}`;
 };
 
 export {
