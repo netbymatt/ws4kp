@@ -1,5 +1,13 @@
 node_modules
 **/debug.log
 server/scripts/custom.js
+
+#music folder
 server/music/*
+#except for the readme
 !server/music/readme.txt
+#and the sample songs
+!server/music/Catch the Sun.mp3
+!server/music/Crisp day.mp3
+!server/music/Rolling Clouds.mp3
+!server/music/Strong Breeze.mp3
