@@ -12,11 +12,13 @@ import s3Upload from 'gulp-s3-upload';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
+import reader from '../src/playlist-reader.mjs';
+import file from "gulp-file";
 
 // get cloudfront
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 
-const clean = () => deleteAsync(['./dist**']);
+const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
 
 const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
@@ -122,8 +124,9 @@ const compressHtml = async () => {
 const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
+	'server/music/**/*.mp3'
 ];
-const copyOtherFiles = () => src(otherFiles, { base: 'server/' })
+const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
 
 const s3 = s3Upload({
@@ -170,10 +173,20 @@ const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
 	},
 }));
 
-const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles));
+const buildPlaylist = async () => {
+	const availableFiles = await reader();
+	const playlist = { availableFiles };
+	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'))
+}
+
+const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
 const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
 
 export default publishFrontend;
+
+export {
+	buildDist,
+}

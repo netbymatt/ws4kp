@@ -7,6 +7,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
+		"build": "gulp buildDist",
 		"lint": "eslint ./server/scripts/**/*.mjs",
 		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs"
 	},
@@ -21,32 +22,33 @@
 	},
 	"homepage": "https://github.com/netbymatt/ws4kp#readme",
 	"devDependencies": {
-		"del": "^8.0.0",
-		"jquery": "^3.6.0",
-		"jquery-touchswipe": "^1.6.19",
-		"luxon": "^3.0.0",
-		"nosleep.js": "^0.12.0",
-		"suncalc": "^1.8.0",
-		"swiped-events": "^1.1.4",
 		"@aws-sdk/client-cloudfront": "^3.609.0",
-		"gulp-awspublish": "^8.0.0",
-		"gulp-s3-upload": "^1.7.3",
+		"del": "^8.0.0",
 		"eslint": "^8.2.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-plugin-import": "^2.10.0",
 		"gulp": "^5.0.0",
+		"gulp-awspublish": "^8.0.0",
 		"gulp-concat": "^2.6.1",
 		"gulp-ejs": "^5.1.0",
+		"gulp-file": "^0.4.0",
 		"gulp-htmlmin": "^5.0.1",
 		"gulp-rename": "^2.0.0",
+		"gulp-s3-upload": "^1.7.3",
 		"gulp-sass": "^6.0.0",
 		"gulp-terser": "^2.0.0",
+		"jquery": "^3.6.0",
+		"jquery-touchswipe": "^1.6.19",
+		"luxon": "^3.0.0",
+		"nosleep.js": "^0.12.0",
+		"sass": "^1.54.0",
+		"suncalc": "^1.8.0",
+		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
-		"webpack-stream": "^7.0.0",
-		"sass": "^1.54.0"
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
-		"express": "^4.17.1",
-		"ejs": "^3.1.5"
+		"ejs": "^3.1.5",
+		"express": "^4.17.1"
 	}
 }

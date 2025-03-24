@@ -98,6 +98,13 @@ As time allows I will be working on the following enhancements.
 
 * Better error reporting when api.weather.gov is down (happens more often than you would think)
 
+## Serving static files
+The app can be served as a static set of files on any web server. Run the provided gulp task to create a set of static distribution files:
+```
+npm run buildDist
+```
+The resulting files will be in the /dist folder in the root of the project. These can then be uploaded to a web server for hosting, no server-side scripting is required.
+
 ## Community Notes
 
 Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!

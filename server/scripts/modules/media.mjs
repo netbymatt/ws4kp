@@ -63,12 +63,17 @@ const toggleMedia = (forcedState) => {
 	stateChanged();
 };
 
-const startMedia = () => {
+const startMedia = async () => {
 	// if there's not media player yet, enable it
 	if (!player) {
 		initializePlayer();
 	} else {
-		player.play();
+		try {
+			await player.play();
+		} catch (e) {
+			console.error('Couldn\'t play music');
+			console.error(e);
+		}
 	}
 };
 
@@ -128,11 +133,12 @@ const initializePlayer = () => {
 	console.log('player initialized');
 };
 
-const playerCanPlay = () => {
+const playerCanPlay = async () => {
 	// check to make sure they user still wants music (protect against slow loading music)
 	if (!mediaPlaying.value) return;
 	// start playing
-	player.play();
+	startMedia();
+
 };
 
 const playerEnded = () => {
