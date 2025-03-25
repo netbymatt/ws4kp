@@ -1,7 +1,7 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
@@ -31,8 +31,6 @@ const init = () => {
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
-
-	registerRefreshData(loadData);
 
 	document.querySelector('#NavigateMenu').addEventListener('click', btnNavigateMenuClick);
 	document.querySelector('#NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
@@ -249,7 +247,6 @@ const loadData = (_latLon, haveDataCallback) => {
 	if (!latLon) return;
 
 	document.querySelector(TXT_ADDRESS_SELECTOR).blur();
-	stopAutoRefreshTimer();
 	latLonReceived(latLon, haveDataCallback);
 };
 
