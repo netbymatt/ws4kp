@@ -14,8 +14,7 @@ const reader = async () => {
 
 	// fall back to the default folder
 	const defaultFiles = await fs.readdir('./server/music/default');
-	return defaultFiles.map(file => `default/${file}`).filter(mp3Filter);
-
+	return defaultFiles.map((file) => `default/${file}`).filter(mp3Filter);
 };
 
 export default reader;

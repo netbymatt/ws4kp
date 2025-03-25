@@ -38,6 +38,10 @@ const enableMediaPlayer = () => {
 		icon.classList.add('available');
 		// set the button type
 		setIcon();
+		// if we're already playing (sticky option) then try to start playing
+		if (mediaPlaying.value === true) {
+			startMedia();
+		}
 	}
 };
 
@@ -71,8 +75,12 @@ const startMedia = async () => {
 		try {
 			await player.play();
 		} catch (e) {
+			// report the error
 			console.error('Couldn\'t play music');
 			console.error(e);
+			// set state back to not playing for good UI experience
+			mediaPlaying.value = false;
+			stateChanged();
 		}
 	}
 };
@@ -128,9 +136,6 @@ const initializePlayer = () => {
 	// get the first file
 	player.src = `music/${playlist.availableFiles[currentTrack]}`;
 	player.type = 'audio/mpeg';
-
-	// reload the player
-	console.log('player initialized');
 };
 
 const playerCanPlay = async () => {
@@ -138,7 +143,6 @@ const playerCanPlay = async () => {
 	if (!mediaPlaying.value) return;
 	// start playing
 	startMedia();
-
 };
 
 const playerEnded = () => {
