@@ -12,11 +12,11 @@ import s3Upload from 'gulp-s3-upload';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
-import reader from '../src/playlist-reader.mjs';
-import file from "gulp-file";
+import file from 'gulp-file';
 
 // get cloudfront
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import reader from '../src/playlist-reader.mjs';
 
 const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
 
@@ -124,7 +124,7 @@ const compressHtml = async () => {
 const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
-	'server/music/**/*.mp3'
+	'server/music/**/*.mp3',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
@@ -145,6 +145,7 @@ const upload = () => src(uploadSources, { base: './dist' })
 		maps: {
 			CacheControl: (keyname) => {
 				if (keyname.indexOf('index.html') > -1) return 'max-age=300'; // 10 minutes
+				if (keyname.indexOf('.mp3') > -1) return 'max-age=31536000'; // 1 year for mp3 files
 				return 'max-age=2592000'; // 1 month
 			},
 		},
@@ -176,8 +177,8 @@ const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
 const buildPlaylist = async () => {
 	const availableFiles = await reader();
 	const playlist = { availableFiles };
-	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'))
-}
+	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
+};
 
 const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, buildPlaylist));
 
@@ -189,4 +190,4 @@ export default publishFrontend;
 
 export {
 	buildDist,
-}
+};
