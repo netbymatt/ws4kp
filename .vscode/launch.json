@@ -50,7 +50,7 @@
 			"skipFiles": [
 				"<node_internals>/**",
 			],
-			"program": "${workspaceFolder}/index.js",
+			"program": "${workspaceFolder}/index.mjs",
 		},
 		{
 			"type": "node",
@@ -59,7 +59,7 @@
 			"skipFiles": [
 				"<node_internals>/**",
 			],
-			"program": "${workspaceFolder}/index.js",
+			"program": "${workspaceFolder}/index.mjs",
 			"env": {
 				"DIST": "1"
 			}

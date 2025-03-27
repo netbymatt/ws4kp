@@ -1,0 +1,34 @@
+.media {
+	display: none;
+}
+
+#ToggleMedia {
+	display: none;
+
+	&.available {
+		display: inline-block;
+
+		img.on {
+			display: none;
+		}
+
+		img.off {
+			display: block;
+		}
+
+		// icon switch is handled by adding/removing the .playing class
+		&.playing {
+			img.on {
+				display: block;
+			}
+
+			img.off {
+				display: none;
+			}
+
+		}
+
+
+	}
+
+}

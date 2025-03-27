@@ -10,7 +10,7 @@ const settings = { speed: { value: 1.0 } };
 const init = () => {
 	// create settings
 	settings.wide = new Setting('wide', 'Widescreen', 'checkbox', false, wideScreenChange, true);
-	settings.kiosk = new Setting('kiosk', 'Kiosk', 'boolean', false, kioskChange, false);
+	settings.kiosk = new Setting('kiosk', 'Kiosk', 'checkbox', false, kioskChange, false);
 	settings.speed = new Setting('speed', 'Speed', 'select', 1.0, null, true, [
 		[0.5, 'Very Fast'],
 		[0.75, 'Fast'],

@@ -98,11 +98,37 @@ As time allows I will be working on the following enhancements.
 
 * Better error reporting when api.weather.gov is down (happens more often than you would think)
 
+## Serving static files
+The app can be served as a static set of files on any web server. Run the provided gulp task to create a set of static distribution files:
+```
+npm run buildDist
+```
+The resulting files will be in the /dist folder in the root of the project. These can then be uploaded to a web server for hosting, no server-side scripting is required.
+
+## Music
+The WeatherStar had wonderful background music from the smooth jazz and new age genres by artists of the time. Lists of the music that played are available by searching online, but it's all copyrighted music and would be difficult to provide as part of this repository.
+
+I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. Too keep the size down, I've only included 4 tracks. Additional tracks will be posted in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
+
+### Customizing the music
+Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. Subdirectories will not be scanned. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
+
+If using docker, you must pass a local accessible folder to the container in the `/app/server/music` directory. 
+```
+docker run -p 8080:8080 -v /path/to/local/music:/app/server/music ghcr.io/netbymatt/ws4kp
+```
+
+### Music doesn't auto play
+Ws4kp is muted by default, but if it was unmuted on the last visit it is coded to try and auto play music on subsequent visits. But, it's considered bad form to have a web site play music automatically on load, and I fully agree with this. [Chrome](https://developer.chrome.com/blog/autoplay/#media_engagement_index) and [Firefox](https://hacks.mozilla.org/2019/02/firefox-66-to-block-automatically-playing-audible-video-and-audio/) have extensive details on how and when auto play is allowed.
+
+Chrome seems to be more lenient on auto play and will eventually let a site auto-play music if you're visited it enough recently and manually clicked to start playing music on each visit. It also has a flag you can add to the command line when launching Chrome: `chrome.exe --autoplay-policy=no-user-gesture-required`. This is the best solution when using Kiosk-style setup.
+
 ## Community Notes
 
 Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!
 
 * [Stream as FFMPEG](https://github.com/netbymatt/ws4kp/issues/37#issuecomment-2008491948)
+* [Weather like it's 1999](https://blog.scottlabs.io/2024/02/weather-like-its-1999/) Raspberry pi, streaming, music and CRT all combined into a complete solution.
 
 ## Customization
 A hook is provided as `/server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. An sample file is provided at `/server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.

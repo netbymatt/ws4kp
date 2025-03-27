@@ -14,6 +14,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="images/Logo192.png" />
+	<link rel="preload" href="playlist.json" as="fetch"/>
+	<meta property="og:image" content="https://weatherstar.netbymatt.com/images/social/1200x600.png">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="627">
 
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
@@ -43,6 +47,7 @@
   <script type="module" src="scripts/modules/progress.mjs"></script>
   <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/settings.mjs"></script>
+	<script type="module" src="scripts/modules/media.mjs"></script>
 	<script type="module" src="scripts/index.mjs"></script>
   <!-- data -->
   <script type="text/javascript" src="scripts/data/travelcities.js"></script>
@@ -126,6 +131,10 @@
         <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
       </div>
       <div id="divTwcBottomRight">
+				<div id="ToggleMedia">
+					<img class="navButton off" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Unmute" />
+					<img class="navButton on" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Unmute" />
+				</div>
         <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_2x.png" title="Enter Fullscreen" />
       </div>
     </div>
@@ -136,6 +145,7 @@
   <div class="info">
     <a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
   </div>
+	<div class="media"></div>
 
   <div class='heading'>Selected displays</div>
   <div id='enabledDisplays'>

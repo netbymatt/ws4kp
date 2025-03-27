@@ -7,4 +7,4 @@ COPY package-lock.json .
 RUN npm ci
 
 COPY . .
-CMD ["node", "index.js"]
+CMD ["node", "index.mjs"]
