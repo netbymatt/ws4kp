@@ -111,7 +111,12 @@ The WeatherStar had wonderful background music from the smooth jazz and new age 
 I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. Too keep the size down, I've only included 4 tracks. Additional tracks will be posted in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
 
 ### Customizing the music
-Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
+Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. Subdirectories will not be scanned. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
+
+If using docker, you must pass a local accessible folder to the container in the `/app/server/music` directory. 
+```
+docker run -p 8080:8080 -v /path/to/local/music:/app/server/music ghcr.io/netbymatt/ws4kp
+```
 
 ### Music doesn't auto play
 Ws4kp is muted by default, but if it was unmuted on the last visit it is coded to try and auto play music on subsequent visits. But, it's considered bad form to have a web site play music automatically on load, and I fully agree with this. [Chrome](https://developer.chrome.com/blog/autoplay/#media_engagement_index) and [Firefox](https://hacks.mozilla.org/2019/02/firefox-66-to-block-automatically-playing-audible-video-and-audio/) have extensive details on how and when auto play is allowed.
