@@ -138,7 +138,7 @@ const uploadSources = [
 	'dist/**',
 	'!dist/**/*.map',
 ];
-const upload = () => src(uploadSources, { base: './dist' })
+const upload = () => src(uploadSources, { base: './dist', encoding: false })
 	.pipe(s3({
 		Bucket: 'weatherstar',
 		StorageClass: 'STANDARD',
