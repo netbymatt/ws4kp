@@ -42,7 +42,7 @@ class Radar extends WeatherDisplay {
 		];
 	}
 
-	async getData(_weatherParameters) {
+	async getData(_weatherParameters, refresh) {
 		if (!super.getData(_weatherParameters)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
@@ -70,7 +70,7 @@ class Radar extends WeatherDisplay {
 
 		const lists = (await Promise.all(baseUrls.map(async (url) => {
 			try {
-			// get a list of available radars
+				// get a list of available radars
 				return text(url, { cors: true });
 			} catch (error) {
 				console.log('Unable to get list of radars');
@@ -91,7 +91,7 @@ class Radar extends WeatherDisplay {
 			const anchors = xmlDoc.querySelectorAll('a');
 			const urls = [];
 			Array.from(anchors).forEach((elem) => {
-				if (elem.innerHTML?.match(/n0r_\d{12}\.png/))	{
+				if (elem.innerHTML?.match(/n0r_\d{12}\.png/)) {
 					urls.push(elem.href);
 				}
 			});

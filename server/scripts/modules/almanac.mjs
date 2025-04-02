@@ -21,7 +21,7 @@ class Almanac extends WeatherDisplay {
 		this.timing.totalScreens = 1;
 	}
 
-	async getData(_weatherParameters) {
+	async getData(_weatherParameters, refresh) {
 		const superResponse = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 

@@ -27,7 +27,7 @@ class Hourly extends WeatherDisplay {
 		this.timing.delay.push(150);
 	}
 
-	async getData(weatherParameters) {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
 		const superResponse = super.getData(weatherParameters);
 		let forecast;

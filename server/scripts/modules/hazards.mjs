@@ -26,7 +26,7 @@ class Hazards extends WeatherDisplay {
 		this.timing.totalScreens = 0;
 	}
 
-	async getData(weatherParameters) {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
 		const superResult = super.getData(weatherParameters);
 

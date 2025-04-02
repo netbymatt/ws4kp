@@ -21,7 +21,7 @@ class RegionalForecast extends WeatherDisplay {
 		this.timing.totalScreens = 3;
 	}
 
-	async getData(_weatherParameters) {
+	async getData(_weatherParameters, refresh) {
 		if (!super.getData(_weatherParameters)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 

@@ -23,7 +23,7 @@ class HourlyGraph extends WeatherDisplay {
 		this.elem.querySelector('.header .right').append(header);
 	}
 
-	async getData() {
+	async getData(_weatherParameters, refresh) {
 		if (!super.getData()) return;
 
 		const data = await getHourlyData(() => this.stillWaiting());

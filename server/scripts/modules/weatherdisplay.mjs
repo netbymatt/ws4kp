@@ -22,6 +22,7 @@ class WeatherDisplay {
 		this.okToDrawCurrentConditions = true;
 		this.okToDrawCurrentDateTime = true;
 		this.showOnProgress = true;
+		this.autoRefreshHandle = null;
 
 		// default navigation timing
 		this.timing = {
@@ -129,9 +130,14 @@ class WeatherDisplay {
 	}
 
 	// get necessary data for this display
-	getData(weatherParameters) {
-		// clear current data
-		this.data = undefined;
+	getData(weatherParameters, refresh) {
+		// refresh doesn't delete existing data, and is resued if the silent refresh fails
+		if (!refresh) {
+			this.data = undefined;
+		}
+		// clear any refresh timers
+		clearTimeout(this.autoRefreshHandle);
+		this.autoRefreshHandle = null;
 
 		// store weatherParameters locally in case we need them later
 		if (weatherParameters) this.weatherParameters = weatherParameters;
@@ -143,6 +149,9 @@ class WeatherDisplay {
 			this.setStatus(STATUS.disabled);
 			return false;
 		}
+
+		// set up auto reload
+		this.autoRefreshHandle = setTimeout(() => this.getData(false, true), settings.refreshTime.value);
 
 		// recalculate navigation timing (in case it was modified in the constructor)
 		this.calcNavTiming();

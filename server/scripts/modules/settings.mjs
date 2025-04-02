@@ -22,6 +22,13 @@ const init = () => {
 		['us', 'US'],
 		['si', 'Metric'],
 	]);
+	settings.refreshTime = new Setting('refreshTime', 'Refresh Time', 'select', 30_000, null, false, [
+		[30_000, 'TESTING'],
+		[300_000, '5 minutes'],
+		[600_000, '10 minutes'],
+		[900_000, '15 minutes'],
+		[1_800_000, '30 minutes'],
+	]);
 
 	// generate html objects
 	const settingHtml = Object.values(settings).map((d) => d.generate());

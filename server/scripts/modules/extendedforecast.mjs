@@ -18,7 +18,7 @@ class ExtendedForecast extends WeatherDisplay {
 		this.timing.totalScreens = 2;
 	}
 
-	async getData(_weatherParameters) {
+	async getData(_weatherParameters, refresh) {
 		if (!super.getData(_weatherParameters)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 

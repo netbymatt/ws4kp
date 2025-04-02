@@ -28,9 +28,9 @@ class TravelForecast extends WeatherDisplay {
 		this.timing.delay.push(150);
 	}
 
-	async getData() {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		if (!super.getData()) return;
+		if (!super.getData(this.weatherParameters)) return;
 		const forecastPromises = TravelCities.map(async (city) => {
 			try {
 				// get point then forecast

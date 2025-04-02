@@ -21,7 +21,7 @@ class CurrentWeather extends WeatherDisplay {
 		this.backgroundImage = loadImg('images/BackGround1_1.png');
 	}
 
-	async getData(_weatherParameters) {
+	async getData(_weatherParameters, refresh) {
 		// always load the data for use in the lower scroll
 		const superResult = super.getData(_weatherParameters);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
