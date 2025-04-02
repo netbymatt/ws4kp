@@ -28,7 +28,7 @@ class Hazards extends WeatherDisplay {
 
 	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		const superResult = super.getData(weatherParameters);
+		const superResult = super.getData(weatherParameters, refresh);
 
 		const alert = this.checkbox.querySelector('.alert');
 		alert.classList.remove('show');

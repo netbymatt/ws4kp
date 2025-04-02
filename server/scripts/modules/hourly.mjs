@@ -29,21 +29,28 @@ class Hourly extends WeatherDisplay {
 
 	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		const superResponse = super.getData(weatherParameters);
+		const superResponse = super.getData(weatherParameters, refresh);
 		let forecast;
 		try {
 			// get the forecast
-			forecast = await json(weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
+			forecast = await json(this.weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
+			// parse the forecast
+			this.data = await parseForecast(forecast.properties);
 		} catch (error) {
 			console.error('Get hourly forecast failed');
 			console.error(error.status, error.responseJSON);
-			if (this.isEnabled) this.setStatus(STATUS.failed);
-			// return undefined to other subscribers
-			this.getDataCallback(undefined);
-			return;
+			// use old data if available
+			if (this.data) {
+				console.log('Using previous hourly forecast');
+				// don't return, this.data is usable from the previous update
+			} else {
+				if (this.isEnabled) this.setStatus(STATUS.failed);
+				// return undefined to other subscribers
+				this.getDataCallback(undefined);
+				return;
+			}
 		}
 
-		this.data = await parseForecast(forecast.properties);
 		this.getDataCallback();
 		if (!superResponse) return;
 

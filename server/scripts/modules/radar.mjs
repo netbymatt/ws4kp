@@ -43,7 +43,7 @@ class Radar extends WeatherDisplay {
 	}
 
 	async getData(_weatherParameters, refresh) {
-		if (!super.getData(_weatherParameters)) return;
+		if (!super.getData(_weatherParameters, refresh)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// ALASKA AND HAWAII AREN'T SUPPORTED!

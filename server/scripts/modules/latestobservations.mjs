@@ -17,7 +17,7 @@ class LatestObservations extends WeatherDisplay {
 	}
 
 	async getData(_weatherParameters, refresh) {
-		if (!super.getData(_weatherParameters)) return;
+		if (!super.getData(_weatherParameters, refresh)) return;
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// calculate distance to each station

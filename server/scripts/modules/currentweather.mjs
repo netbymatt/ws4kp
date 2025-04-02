@@ -23,7 +23,7 @@ class CurrentWeather extends WeatherDisplay {
 
 	async getData(_weatherParameters, refresh) {
 		// always load the data for use in the lower scroll
-		const superResult = super.getData(_weatherParameters);
+		const superResult = super.getData(_weatherParameters, refresh);
 		const weatherParameters = _weatherParameters ?? this.weatherParameters;
 
 		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
