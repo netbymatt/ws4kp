@@ -42,19 +42,17 @@ class Radar extends WeatherDisplay {
 		];
 	}
 
-	async getData(_weatherParameters, refresh) {
-		if (!super.getData(_weatherParameters, refresh)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		if (!super.getData(weatherParameters, refresh)) return;
 
 		// ALASKA AND HAWAII AREN'T SUPPORTED!
-		if (weatherParameters.state === 'AK' || weatherParameters.state === 'HI') {
+		if (this.weatherParameters.state === 'AK' || this.weatherParameters.state === 'HI') {
 			this.setStatus(STATUS.noData);
 			return;
 		}
 
 		// get the base map
-		let src = 'images/4000RadarMap2.jpg';
-		if (weatherParameters.State === 'HI') src = 'images/HawaiiRadarMap2.png';
+		const src = 'images/4000RadarMap2.jpg';
 		this.baseMap = await loadImg(src);
 
 		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
@@ -110,19 +108,12 @@ class Radar extends WeatherDisplay {
 		const height = 1600;
 		offsetX *= 2;
 		offsetY *= 2;
-		const sourceXY = utils.getXYFromLatitudeLongitudeMap(weatherParameters, offsetX, offsetY);
-
-		// create working context for manipulation
-		const workingCanvas = document.createElement('canvas');
-		workingCanvas.width = width;
-		workingCanvas.height = height;
-		const workingContext = workingCanvas.getContext('2d');
-		workingContext.imageSmoothingEnabled = false;
+		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters, offsetX, offsetY);
 
 		// calculate radar offsets
 		const radarOffsetX = 120;
 		const radarOffsetY = 70;
-		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(weatherParameters, offsetX, offsetY);
+		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters, offsetX, offsetY);
 		const radarSourceX = radarSourceXY.x / 2;
 		const radarSourceY = radarSourceXY.y / 2;
 
@@ -134,6 +125,13 @@ class Radar extends WeatherDisplay {
 			canvas.height = 367;
 			const context = canvas.getContext('2d');
 			context.imageSmoothingEnabled = false;
+
+			// create working context for manipulation
+			const workingCanvas = document.createElement('canvas');
+			workingCanvas.width = width;
+			workingCanvas.height = height;
+			const workingContext = workingCanvas.getContext('2d');
+			workingContext.imageSmoothingEnabled = false;
 
 			// get the image
 			const response = await fetch(rewriteUrl(url));
@@ -170,7 +168,7 @@ class Radar extends WeatherDisplay {
 			workingContext.drawImage(imgBlob, 0, 0, width, 1600);
 
 			// get the base map
-			context.drawImage(await this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
+			context.drawImage(this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
 
 			// crop the radar image
 			const cropCanvas = document.createElement('canvas');

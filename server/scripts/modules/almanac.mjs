@@ -21,12 +21,11 @@ class Almanac extends WeatherDisplay {
 		this.timing.totalScreens = 1;
 	}
 
-	async getData(_weatherParameters, refresh) {
-		const superResponse = super.getData(_weatherParameters, refresh);
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		const superResponse = super.getData(weatherParameters, refresh);
 
 		// get sun/moon data
-		const { sun, moon } = this.calcSunMoonData(weatherParameters);
+		const { sun, moon } = this.calcSunMoonData(this.weatherParameters);
 
 		// store the data
 		this.data = {

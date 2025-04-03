@@ -24,6 +24,8 @@ class CurrentWeather extends WeatherDisplay {
 	async getData(weatherParameters, refresh) {
 		// always load the data for use in the lower scroll
 		const superResult = super.getData(weatherParameters, refresh);
+		// note: current weather does not use old data on a silent refresh
+		// this is deliberate because it can pull data from more than one station in sequence
 
 		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
 		const filteredStations = this.weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
