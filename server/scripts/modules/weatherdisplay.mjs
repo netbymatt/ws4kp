@@ -131,7 +131,7 @@ class WeatherDisplay {
 
 	// get necessary data for this display
 	getData(weatherParameters, refresh) {
-		// refresh doesn't delete existing data, and is resued if the silent refresh fails
+		// refresh doesn't delete existing data, and is reused if the silent refresh fails
 		if (!refresh) {
 			this.data = undefined;
 		}

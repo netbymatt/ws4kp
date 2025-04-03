@@ -12,9 +12,9 @@ const port = process.env.WS4KP_PORT ?? 8080;
 app.set('view engine', 'ejs');
 
 // cors pass-thru to api.weather.gov
-app.get('/stations/*', corsPassThru);
-app.get('/Conus/*', radarPassThru);
-app.get('/products/*', outlookPassThru);
+app.get('/stations/*station', corsPassThru);
+app.get('/Conus/*radar', radarPassThru);
+app.get('/products/*product', outlookPassThru);
 app.get('/playlist.json', playlist);
 
 // version
@@ -38,7 +38,7 @@ if (process.env?.DIST === '1') {
 	// debugging
 	app.get('/index.html', index);
 	app.get('/', index);
-	app.get('*', express.static('./server'));
+	app.get('*name', express.static('./server'));
 }
 
 const server = app.listen(port, () => {
