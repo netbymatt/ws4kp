@@ -16,14 +16,15 @@ class LatestObservations extends WeatherDisplay {
 		this.MaximumRegionalStations = 7;
 	}
 
-	async getData(_weatherParameters, refresh) {
-		if (!super.getData(_weatherParameters, refresh)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		if (!super.getData(weatherParameters, refresh)) return;
+		// latest observations does a silent refresh but will not fall back to previously fetched data
+		// this is intentional because up to 30 stations are available to pull data from
 
 		// calculate distance to each station
 		const stationsByDistance = Object.keys(StationInfo).map((key) => {
 			const station = StationInfo[key];
-			const distance = calcDistance(station.lat, station.lon, weatherParameters.latitude, weatherParameters.longitude);
+			const distance = calcDistance(station.lat, station.lon, this.weatherParameters.latitude, this.weatherParameters.longitude);
 			return { ...station, distance };
 		});
 
