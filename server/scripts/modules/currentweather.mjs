@@ -21,13 +21,12 @@ class CurrentWeather extends WeatherDisplay {
 		this.backgroundImage = loadImg('images/BackGround1_1.png');
 	}
 
-	async getData(_weatherParameters, refresh) {
+	async getData(weatherParameters, refresh) {
 		// always load the data for use in the lower scroll
-		const superResult = super.getData(_weatherParameters, refresh);
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+		const superResult = super.getData(weatherParameters, refresh);
 
 		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
-		const filteredStations = weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
+		const filteredStations = this.weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
 
 		// Load the observations
 		let observations;

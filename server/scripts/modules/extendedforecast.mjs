@@ -18,14 +18,13 @@ class ExtendedForecast extends WeatherDisplay {
 		this.timing.totalScreens = 2;
 	}
 
-	async getData(_weatherParameters, refresh) {
-		if (!super.getData(_weatherParameters, refresh)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		if (!super.getData(weatherParameters, refresh)) return;
 
 		// request us or si units
 		let forecast;
 		try {
-			forecast = await json(weatherParameters.forecast, {
+			forecast = await json(this.weatherParameters.forecast, {
 				data: {
 					units: settings.units.value,
 				},
