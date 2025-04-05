@@ -149,7 +149,7 @@ const playerEnded = () => {
 	// next track
 	currentTrack += 1;
 	// roll over and re-randomize the tracks
-	if (currentTrack >= playlist.availableFiles) {
+	if (currentTrack >= playlist.availableFiles.length) {
 		randomizePlaylist();
 		currentTrack = 0;
 	}
