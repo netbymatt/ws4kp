@@ -1,11 +1,10 @@
 // list all stations in a single file
 // only find stations with 4 letter codes
 
-const fs = require('fs');
-const path = require('path');
-const https = require('./https');
-const states = require('./stations-states');
-const chunk = require('./chunk');
+import { writeFileSync } from 'fs';
+import https from './https.mjs';
+import states from './stations-states.mjs';
+import chunk from './chunk.mjs';
 
 // skip stations starting with these letters
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
@@ -28,7 +27,7 @@ const start = async () => {
 				let stations;
 				let next = `https://api.weather.gov/stations?state=${state}`;
 				do {
-				// get list and parse the JSON
+					// get list and parse the JSON
 					// eslint-disable-next-line no-await-in-loop
 					const stationsRaw = await https(next);
 					stations = JSON.parse(stationsRaw);
@@ -53,8 +52,7 @@ const start = async () => {
 					});
 					next = stations?.pagination?.next;
 					// write the output
-					// write the output
-					fs.writeFileSync(path.join(__dirname, 'output/stations.json'), JSON.stringify(output, null, 2));
+					writeFileSync('./datagenerators/output/stations.json', JSON.stringify(output, null, 2));
 				}
 				while (next && stations.features.length > 0);
 				console.log(`Complete: ${state}`);
@@ -68,6 +66,4 @@ const start = async () => {
 };
 
 // immediately invoked function allows access to async
-(async () => {
-	await start();
-})();
+await start();

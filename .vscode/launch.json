@@ -18,7 +18,7 @@
 		},
 		{
 			"name": "Data:stations",
-			"program": "${workspaceFolder}/datagenerators/stations.js",
+			"program": "${workspaceFolder}/datagenerators/stations.mjs",
 			"request": "launch",
 			"skipFiles": [
 				"<node_internals>/**"
@@ -27,7 +27,7 @@
 		},
 		{
 			"name": "Data:regionalcities",
-			"program": "${workspaceFolder}/datagenerators/regionalcities.js",
+			"program": "${workspaceFolder}/datagenerators/regionalcities.mjs",
 			"request": "launch",
 			"skipFiles": [
 				"<node_internals>/**"
@@ -36,7 +36,7 @@
 		},
 		{
 			"name": "Data:travelcities",
-			"program": "${workspaceFolder}/datagenerators/travelcities.js",
+			"program": "${workspaceFolder}/datagenerators/travelcities.mjs",
 			"request": "launch",
 			"skipFiles": [
 				"<node_internals>/**"

@@ -19,4 +19,4 @@ const chunk = (data, chunkSize = 10) => {
 	return chunks;
 };
 
-module.exports = chunk;
+export default chunk;

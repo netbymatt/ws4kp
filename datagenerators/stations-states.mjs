@@ -1,4 +1,4 @@
-module.exports = [
+export default [
 	'AZ',
 	'AL',
 	'AK',
