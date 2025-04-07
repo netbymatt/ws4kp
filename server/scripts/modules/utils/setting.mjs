@@ -181,7 +181,7 @@ class Setting {
 
 	selectHighlight(newValue) {
 		// set the dropdown to the provided value
-		this.element.querySelectorAll('option').forEach((elem) => {
+		this?.element?.querySelectorAll('option')?.forEach?.((elem) => {
 			elem.selected = (newValue?.toFixed?.(2) === elem.value) || (newValue === elem.value);
 		});
 	}

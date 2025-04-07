@@ -22,7 +22,7 @@ const init = () => {
 		['us', 'US'],
 		['si', 'Metric'],
 	]);
-	settings.refreshTime = new Setting('refreshTime', 'Refresh Time', 'select', 30_000, null, false, [
+	settings.refreshTime = new Setting('refreshTime', 'Refresh Time', 'select', 600_000, null, false, [
 		[30_000, 'TESTING'],
 		[300_000, '5 minutes'],
 		[600_000, '10 minutes'],
