@@ -76,9 +76,9 @@ class Hourly extends WeatherDisplay {
 			const temperature = data.temperature.toString().padStart(3);
 			const feelsLike = data.apparentTemperature.toString().padStart(3);
 			fillValues.temp = temperature;
-			// only plot apparent temperature if there is a difference
-			// if (temperature !== feelsLike) line.querySelector('.like').innerHTML = feelsLike;
-			if (temperature !== feelsLike) fillValues.like = feelsLike;
+
+			// apparent temperature is color coded if different from actual temperature (after fill is applied)
+			fillValues.like = feelsLike;
 
 			// wind
 			let wind = 'Calm';
@@ -91,7 +91,17 @@ class Hourly extends WeatherDisplay {
 			// image
 			fillValues.icon = { type: 'img', src: data.icon };
 
-			return this.fillTemplate('hourly-row', fillValues);
+			const filledRow = this.fillTemplate('hourly-row', fillValues);
+
+			// alter the color of the feels like column to reflect wind chill or heat index
+			if (feelsLike < temperature) {
+				filledRow.querySelector('.like').classList.add('wind-chill');
+			}
+			if (feelsLike > temperature) {
+				filledRow.querySelector('.like').classList.add('heat-index');
+			}
+
+			return filledRow;
 		});
 
 		list.append(...lines);
