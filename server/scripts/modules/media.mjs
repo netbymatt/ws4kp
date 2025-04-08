@@ -5,7 +5,12 @@ let playlist;
 let currentTrack = 0;
 let player;
 
-const mediaPlaying = new Setting('mediaPlaying', 'Media Playing', 'boolean', false, null, true);
+const mediaPlaying = new Setting('mediaPlaying', {
+	name: 'Media Playing',
+	type: 'boolean',
+	defaultValue: false,
+	sticky: true,
+});
 
 document.addEventListener('DOMContentLoaded', () => {
 	// add the event handler to the page

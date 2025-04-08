@@ -8,27 +8,54 @@ document.addEventListener('DOMContentLoaded', () => {
 const settings = { speed: { value: 1.0 } };
 
 const init = () => {
-	// create settings
-	settings.wide = new Setting('wide', 'Widescreen', 'checkbox', false, wideScreenChange, true);
-	settings.kiosk = new Setting('kiosk', 'Kiosk', 'checkbox', false, kioskChange, false);
-	settings.speed = new Setting('speed', 'Speed', 'select', 1.0, null, true, [
-		[0.5, 'Very Fast'],
-		[0.75, 'Fast'],
-		[1.0, 'Normal'],
-		[1.25, 'Slow'],
-		[1.5, 'Very Slow'],
-	]);
-	settings.units = new Setting('units', 'Units', 'select', 'us', unitChange, true, [
-		['us', 'US'],
-		['si', 'Metric'],
-	]);
-	settings.refreshTime = new Setting('refreshTime', 'Refresh Time', 'select', 600_000, null, false, [
-		[30_000, 'TESTING'],
-		[300_000, '5 minutes'],
-		[600_000, '10 minutes'],
-		[900_000, '15 minutes'],
-		[1_800_000, '30 minutes'],
-	]);
+	// create settings see setting.mjs for defaults
+	settings.wide = new Setting('wide', {
+		name: 'Widescreen',
+		defaultValue: false,
+		changeAction: wideScreenChange,
+		sticky: true,
+	});
+	settings.kiosk = new Setting('kiosk', {
+		name: 'Kiosk',
+		defaultValue: false,
+		changeAction: kioskChange,
+		sticky: false,
+	});
+	settings.speed = new Setting('speed', {
+		name: 'Speed',
+		type: 'select',
+		defaultValue: 1.0,
+		values: [
+			[0.5, 'Very Fast'],
+			[0.75, 'Fast'],
+			[1.0, 'Normal'],
+			[1.25, 'Slow'],
+			[1.5, 'Very Slow'],
+		],
+	});
+	settings.units = new Setting('units', {
+		name: 'Units',
+		type: 'select',
+		defaultValue: 'us',
+		changeAction: unitChange,
+		values: [
+			['us', 'US'],
+			['si', 'Metric'],
+		],
+	});
+	settings.refreshTime = new Setting('refreshTime', {
+		type: 'select',
+		defaultValue: 600_000,
+		sticky: false,
+		values: [
+			[30_000, 'TESTING'],
+			[300_000, '5 minutes'],
+			[600_000, '10 minutes'],
+			[900_000, '15 minutes'],
+			[1_800_000, '30 minutes'],
+		],
+		visible: false,
+	});
 
 	// generate html objects
 	const settingHtml = Object.values(settings).map((d) => d.generate());
