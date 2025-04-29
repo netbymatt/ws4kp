@@ -1151,7 +1151,7 @@ const RegionalCities = [
 		}
 	},
 	{
-		"city": "Tucsan",
+		"city": "Tucson",
 		"lat": 32.2216,
 		"lon": -110.9698,
 		"point": {
