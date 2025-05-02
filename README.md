@@ -129,6 +129,7 @@ Thanks to the WeatherStar community for providing these discussions to further e
 
 * [Stream as FFMPEG](https://github.com/netbymatt/ws4kp/issues/37#issuecomment-2008491948)
 * [Weather like it's 1999](https://blog.scottlabs.io/2024/02/weather-like-its-1999/) Raspberry pi, streaming, music and CRT all combined into a complete solution.
+* [ws4channels](https://github.com/rice9797/ws4channels) A Dockerized Node.js application to stream WeatherStar 4000 data into Channels DVR using Puppeteer and FFmpeg.
 
 ## Customization
 A hook is provided as `/server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. An sample file is provided at `/server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.
