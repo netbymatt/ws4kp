@@ -134,10 +134,9 @@ class WeatherDisplay {
 		// refresh doesn't delete existing data, and is reused if the silent refresh fails
 		if (!refresh) {
 			this.data = undefined;
+			// clear any refresh timers
+			this.clearAutoReload();
 		}
-		// clear any refresh timers
-		clearTimeout(this.autoRefreshHandle);
-		this.autoRefreshHandle = null;
 
 		// store weatherParameters locally in case we need them later
 		if (weatherParameters) this.weatherParameters = weatherParameters;
@@ -150,8 +149,8 @@ class WeatherDisplay {
 			return false;
 		}
 
-		// set up auto reload
-		this.autoRefreshHandle = setTimeout(() => this.getData(false, true), settings.refreshTime.value);
+		// set up auto reload if necessary
+		this.setAutoReload();
 
 		// recalculate navigation timing (in case it was modified in the constructor)
 		this.calcNavTiming();
@@ -434,6 +433,15 @@ class WeatherDisplay {
 		// handle still waiting callbacks
 		this.stillWaitingCallbacks.forEach((callback) => callback());
 		this.stillWaitingCallbacks = [];
+	}
+
+	clearAutoReload() {
+		clearInterval(this.autoRefreshHandle);
+		this.autoRefreshHandle = null;
+	}
+
+	setAutoReload() {
+		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(false, true), settings.refreshTime.value);
 	}
 }
 

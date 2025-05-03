@@ -139,6 +139,8 @@ class Hourly extends WeatherDisplay {
 	// promise allows for data to be requested before it is available
 	async getCurrentData(stillWaiting) {
 		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
+		// an external caller has requested data, set up auto reload
+		this.setAutoReload();
 		return new Promise((resolve) => {
 			if (this.data) resolve(this.data);
 			// data not available, put it into the data callback queue
