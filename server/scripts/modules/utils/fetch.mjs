@@ -73,7 +73,7 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 		// out of retries
 		return resolve(response);
 	})
-		.catch((error) => reject(error));
+		.catch(reject);
 });
 
 const delay = (time, func, ...args) => new Promise((resolve) => {

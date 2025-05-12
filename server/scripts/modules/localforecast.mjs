@@ -4,6 +4,7 @@ import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import settings from './settings.mjs';
 
 class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -13,19 +14,21 @@ class LocalForecast extends WeatherDisplay {
 		this.timing.baseDelay = 5000;
 	}
 
-	async getData(_weatherParameters) {
-		if (!super.getData(_weatherParameters)) return;
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		if (!super.getData(weatherParameters, refresh)) return;
 
 		// get raw data
-		const rawData = await this.getRawData(weatherParameters);
-		// check for data
-		if (!rawData) {
+		const rawData = await this.getRawData(this.weatherParameters);
+		// check for data, or if there's old data available
+		if (!rawData && !this.data) {
+			// fail for no old or new data
 			this.setStatus(STATUS.failed);
 			return;
 		}
+		// store the data
+		this.data = rawData || this.data;
 		// parse raw data
-		const conditions = parse(rawData);
+		const conditions = parse(this.data);
 
 		// read each text
 		this.screenTexts = conditions.map((condition) => {
@@ -61,7 +64,7 @@ class LocalForecast extends WeatherDisplay {
 		try {
 			return await json(weatherParameters.forecast, {
 				data: {
-					units: 'us',
+					units: settings.units.value,
 				},
 				retryCount: 3,
 				stillWaiting: () => this.stillWaiting(),
@@ -69,7 +72,6 @@ class LocalForecast extends WeatherDisplay {
 		} catch (error) {
 			console.error(`GetWeatherForecast failed: ${weatherParameters.forecast}`);
 			console.error(error.status, error.responseJSON);
-			this.setStatus(STATUS.failed);
 			return false;
 		}
 	}

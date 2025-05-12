@@ -3,7 +3,7 @@ import { loadImg, preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, timeZone } from './navigation.mjs';
 
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -21,12 +21,11 @@ class Almanac extends WeatherDisplay {
 		this.timing.totalScreens = 1;
 	}
 
-	async getData(_weatherParameters) {
-		const superResponse = super.getData(_weatherParameters);
-		const weatherParameters = _weatherParameters ?? this.weatherParameters;
+	async getData(weatherParameters, refresh) {
+		const superResponse = super.getData(weatherParameters, refresh);
 
 		// get sun/moon data
-		const { sun, moon } = this.calcSunMoonData(weatherParameters);
+		const { sun, moon } = this.calcSunMoonData(this.weatherParameters);
 
 		// store the data
 		this.data = {
@@ -123,10 +122,10 @@ class Almanac extends WeatherDisplay {
 		// sun and moon data
 		this.elem.querySelector('.day-1').innerHTML = Today.toLocaleString({ weekday: 'long' });
 		this.elem.querySelector('.day-2').innerHTML = Tomorrow.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.rise-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.rise-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunrise).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunset).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.rise-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunrise).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.rise-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunrise).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.set-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunset).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.set-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunset).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
 
 		const days = info.moon.map((MoonPhase) => {
 			const fill = {};

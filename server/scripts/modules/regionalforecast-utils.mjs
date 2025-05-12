@@ -1,16 +1,21 @@
 import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { json } from './utils/fetch.mjs';
+import { temperature as temperatureUnit } from './utils/units.mjs';
 
-const buildForecast = (forecast, city, cityXY) => ({
-	daytime: forecast.isDaytime,
-	temperature: forecast.temperature || 0,
-	name: formatCity(city.city),
-	icon: forecast.icon,
-	x: cityXY.x,
-	y: cityXY.y,
-	time: forecast.startTime,
-});
+const buildForecast = (forecast, city, cityXY) => {
+	// get a unit converter
+	const temperatureConverter = temperatureUnit('us');
+	return {
+		daytime: forecast.isDaytime,
+		temperature: temperatureConverter(forecast.temperature || 0),
+		name: formatCity(city.city),
+		icon: forecast.icon,
+		x: cityXY.x,
+		y: cityXY.y,
+		time: forecast.startTime,
+	};
+};
 
 const getRegionalObservation = async (point, city) => {
 	try {

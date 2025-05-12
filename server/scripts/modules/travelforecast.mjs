@@ -5,6 +5,7 @@ import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import settings from './settings.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -25,16 +26,42 @@ class TravelForecast extends WeatherDisplay {
 		if (extra !== 0) this.timing.delay.push(Math.round(this.extra * this.cityHeight));
 		// add the final 3 second delay
 		this.timing.delay.push(150);
+
+		// add previous data cache
+		this.previousData = [];
 	}
 
-	async getData() {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		if (!super.getData()) return;
-		const forecastPromises = TravelCities.map(async (city) => {
+		if (!super.getData(weatherParameters, refresh)) return;
+
+		// clear stored data if not refresh
+		if (!refresh) {
+			this.previousData = [];
+		}
+
+		const forecastPromises = TravelCities.map(async (city, index) => {
 			try {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');
-				const forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`);
+				let forecast;
+				try {
+					forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
+						data: {
+							units: settings.units.value,
+						},
+					});
+					// store for the next run
+					this.previousData[index] = forecast;
+				} catch (e) {
+					// if there's previous data use it
+					if (this.previousData?.[index]) {
+						forecast = this.previousData?.[index];
+					} else {
+						// otherwise re-throw for the standard error handling
+						throw (e);
+					}
+				}
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
 				// return a pared-down forecast
@@ -131,7 +158,7 @@ class TravelForecast extends WeatherDisplay {
 	// base count change callback
 	baseCountChange(count) {
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.travel-lines').getBoundingClientRect().height - 289, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.travel-lines').offsetHeight - 289, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;

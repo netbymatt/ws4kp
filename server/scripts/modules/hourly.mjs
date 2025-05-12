@@ -3,11 +3,11 @@
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { json } from './utils/fetch.mjs';
-import { celsiusToFahrenheit, kilometersToMiles } from './utils/units.mjs';
+import { temperature as temperatureUnit, distanceKilometers } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, timeZone } from './navigation.mjs';
 import getSun from './almanac.mjs';
 
 class Hourly extends WeatherDisplay {
@@ -27,23 +27,30 @@ class Hourly extends WeatherDisplay {
 		this.timing.delay.push(150);
 	}
 
-	async getData(weatherParameters) {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		const superResponse = super.getData(weatherParameters);
+		const superResponse = super.getData(weatherParameters, refresh);
 		let forecast;
 		try {
 			// get the forecast
-			forecast = await json(weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
+			forecast = await json(this.weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
+			// parse the forecast
+			this.data = await parseForecast(forecast.properties);
 		} catch (error) {
 			console.error('Get hourly forecast failed');
 			console.error(error.status, error.responseJSON);
-			if (this.isEnabled) this.setStatus(STATUS.failed);
-			// return undefined to other subscribers
-			this.getDataCallback(undefined);
-			return;
+			// use old data if available
+			if (this.data) {
+				console.log('Using previous hourly forecast');
+				// don't return, this.data is usable from the previous update
+			} else {
+				if (this.isEnabled) this.setStatus(STATUS.failed);
+				// return undefined to other subscribers
+				this.getDataCallback(undefined);
+				return;
+			}
 		}
 
-		this.data = await parseForecast(forecast.properties);
 		this.getDataCallback();
 		if (!superResponse) return;
 
@@ -56,7 +63,7 @@ class Hourly extends WeatherDisplay {
 		const list = this.elem.querySelector('.hourly-lines');
 		list.innerHTML = '';
 
-		const startingHour = DateTime.local();
+		const startingHour = DateTime.local().setZone(timeZone());
 
 		const lines = this.data.map((data, index) => {
 			const fillValues = {};
@@ -66,12 +73,12 @@ class Hourly extends WeatherDisplay {
 			fillValues.hour = formattedHour;
 
 			// temperatures, convert to strings with no decimal
-			const temperature = Math.round(data.temperature).toString().padStart(3);
-			const feelsLike = Math.round(data.apparentTemperature).toString().padStart(3);
+			const temperature = data.temperature.toString().padStart(3);
+			const feelsLike = data.apparentTemperature.toString().padStart(3);
 			fillValues.temp = temperature;
-			// only plot apparent temperature if there is a difference
-			// if (temperature !== feelsLike) line.querySelector('.like').innerHTML = feelsLike;
-			if (temperature !== feelsLike) fillValues.like = feelsLike;
+
+			// apparent temperature is color coded if different from actual temperature (after fill is applied)
+			fillValues.like = feelsLike;
 
 			// wind
 			let wind = 'Calm';
@@ -84,7 +91,17 @@ class Hourly extends WeatherDisplay {
 			// image
 			fillValues.icon = { type: 'img', src: data.icon };
 
-			return this.fillTemplate('hourly-row', fillValues);
+			const filledRow = this.fillTemplate('hourly-row', fillValues);
+
+			// alter the color of the feels like column to reflect wind chill or heat index
+			if (feelsLike < temperature) {
+				filledRow.querySelector('.like').classList.add('wind-chill');
+			}
+			if (feelsLike > temperature) {
+				filledRow.querySelector('.like').classList.add('heat-index');
+			}
+
+			return filledRow;
 		});
 
 		list.append(...lines);
@@ -109,7 +126,7 @@ class Hourly extends WeatherDisplay {
 	// base count change callback
 	baseCountChange(count) {
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.hourly-lines').getBoundingClientRect().height - 289, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.hourly-lines').offsetHeight - 289, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
@@ -122,6 +139,8 @@ class Hourly extends WeatherDisplay {
 	// promise allows for data to be requested before it is available
 	async getCurrentData(stillWaiting) {
 		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
+		// an external caller has requested data, set up auto reload
+		this.setAutoReload();
 		return new Promise((resolve) => {
 			if (this.data) resolve(this.data);
 			// data not available, put it into the data callback queue
@@ -132,6 +151,11 @@ class Hourly extends WeatherDisplay {
 
 // extract specific values from forecast and format as an array
 const parseForecast = async (data) => {
+	// get unit converters
+	const temperatureConverter = temperatureUnit();
+	const distanceConverter = distanceKilometers();
+
+	// parse data
 	const temperature = expand(data.temperature.values);
 	const apparentTemperature = expand(data.apparentTemperature.values);
 	const windSpeed = expand(data.windSpeed.values);
@@ -145,9 +169,11 @@ const parseForecast = async (data) => {
 	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
 	return temperature.map((val, idx) => ({
-		temperature: celsiusToFahrenheit(temperature[idx]),
-		apparentTemperature: celsiusToFahrenheit(apparentTemperature[idx]),
-		windSpeed: kilometersToMiles(windSpeed[idx]),
+		temperature: temperatureConverter(temperature[idx]),
+		temperatureUnit: temperatureConverter.units,
+		apparentTemperature: temperatureConverter(apparentTemperature[idx]),
+		windSpeed: distanceConverter(windSpeed[idx]),
+		windUnit: distanceConverter.units,
 		windDirection: directionToNSEW(windDirection[idx]),
 		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
 		skyCover: skyCover[idx],

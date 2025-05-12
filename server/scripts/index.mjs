@@ -1,7 +1,7 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, stopAutoRefreshTimer, registerRefreshData,
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
@@ -10,6 +10,7 @@ import AutoComplete from './modules/autocomplete.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
+	getCustomCode();
 });
 
 const categories = [
@@ -31,8 +32,6 @@ const init = () => {
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
-
-	registerRefreshData(loadData);
 
 	document.querySelector('#NavigateMenu').addEventListener('click', btnNavigateMenuClick);
 	document.querySelector('#NavigateRefresh').addEventListener('click', btnNavigateRefreshClick);
@@ -245,7 +244,6 @@ const loadData = (_latLon, haveDataCallback) => {
 	if (!latLon) return;
 
 	document.querySelector(TXT_ADDRESS_SELECTOR).blur();
-	stopAutoRefreshTimer();
 	latLonReceived(latLon, haveDataCallback);
 };
 
@@ -409,4 +407,16 @@ const fullScreenResizeCheck = () => {
 
 	// store state of fullscreen element for next change detection
 	fullScreenResizeCheck.wasFull = !!document.fullscreenElement;
+};
+
+const getCustomCode = async () => {
+	// fetch the custom file and see if it returns a 200 status
+	const response = await fetch('scripts/custom.js', { method: 'HEAD' });
+	if (response.ok) {
+		// add the script element to the page
+		const customElem = document.createElement('script');
+		customElem.src = 'scripts/custom.js';
+		customElem.type = 'text/javascript';
+		document.body.append(customElem);
+	}
 };

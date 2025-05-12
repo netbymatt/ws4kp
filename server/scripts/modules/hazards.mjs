@@ -26,9 +26,11 @@ class Hazards extends WeatherDisplay {
 		this.timing.totalScreens = 0;
 	}
 
-	async getData(weatherParameters) {
+	async getData(weatherParameters, refresh) {
 		// super checks for enabled
-		const superResult = super.getData(weatherParameters);
+		const superResult = super.getData(weatherParameters, refresh);
+		// hazards performs a silent refresh, but does not fall back to a previous fetch if no data is available
+		// this is intentional to ensure the latest alerts only are displayed.
 
 		const alert = this.checkbox.querySelector('.alert');
 		alert.classList.remove('show');
@@ -122,7 +124,7 @@ class Hazards extends WeatherDisplay {
 	// base count change callback
 	baseCountChange(count) {
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.hazard-lines').getBoundingClientRect().height - 390, (count - 150));
+		let offsetY = Math.min(this.elem.querySelector('.hazard-lines').offsetHeight - 390, (count - 150));
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;

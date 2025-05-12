@@ -82,6 +82,14 @@
 
 				.like {
 					left: 425px;
+
+					&.heat-index {
+						color: #e00;
+					}
+
+					&.wind-chill {
+						color: c.$extended-low;
+					}
 				}
 
 				.wind {

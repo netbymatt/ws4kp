@@ -15,26 +15,11 @@ let playing = false;
 let progress;
 const weatherParameters = {};
 
-// auto refresh
-const AUTO_REFRESH_INTERVAL_MS = 500;
-const AUTO_REFRESH_TIME_MS = 600_000; // 10 min.
-const CHK_AUTO_REFRESH_SELECTOR = '#chkAutoRefresh';
-let AutoRefreshIntervalId = null;
-let AutoRefreshCountMs = 0;
-
 const init = async () => {
 	// set up resize handler
 	window.addEventListener('resize', resize);
 	resize();
 
-	// auto refresh
-	const autoRefresh = localStorage.getItem('autoRefresh');
-	if (!autoRefresh || autoRefresh === 'true') {
-		document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked = true;
-	} else {
-		document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked = false;
-	}
-	document.querySelector(CHK_AUTO_REFRESH_SELECTOR).addEventListener('change', autoRefreshChange);
 	generateCheckboxes();
 };
 
@@ -123,12 +108,6 @@ const updateStatus = (value) => {
 	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
 	}
-
-	// send loaded messaged to parent
-	if (countLoadedDisplays() < displays.length) return;
-
-	// everything loaded, set timestamps
-	AssignLastUpdate(new Date());
 };
 
 // note: a display that is "still waiting"/"retrying" is considered loaded intentionally
@@ -202,8 +181,6 @@ const loadDisplay = (direction) => {
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
 		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
 	}
-	// if new display index is less than current display a wrap occurred, test for reload timeout
-	if (idx <= curIdx && refreshCheck()) return;
 	const newDisplay = displays[idx];
 	// hide all displays
 	hideAllCanvases();
@@ -320,83 +297,8 @@ const populateWeatherParameters = (params) => {
 	document.querySelector('#spanZoneId').innerHTML = params.zoneId;
 };
 
-const autoRefreshChange = (e) => {
-	const { checked } = e.target;
-
-	if (checked) {
-		startAutoRefreshTimer();
-	} else {
-		stopAutoRefreshTimer();
-	}
-
-	localStorage.setItem('autoRefresh', checked);
-};
-
-const AssignLastUpdate = (date) => {
-	if (date) {
-		document.querySelector('#spanLastRefresh').innerHTML = date.toLocaleString('en-US', {
-			weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short',
-		});
-		if (document.querySelector(CHK_AUTO_REFRESH_SELECTOR).checked) startAutoRefreshTimer();
-	} else {
-		document.querySelector('#spanLastRefresh').innerHTML = '(none)';
-	}
-};
-
 const latLonReceived = (data, haveDataCallback) => {
 	getWeather(data, haveDataCallback);
-	AssignLastUpdate(null);
-};
-
-const startAutoRefreshTimer = () => {
-	// Ensure that any previous timer has already stopped.
-	// check if timer is running
-	if (AutoRefreshIntervalId) return;
-
-	// Reset the time elapsed.
-	AutoRefreshCountMs = 0;
-
-	const AutoRefreshTimer = () => {
-		// Increment the total time elapsed.
-		AutoRefreshCountMs += AUTO_REFRESH_INTERVAL_MS;
-
-		// Display the count down.
-		let RemainingMs = (AUTO_REFRESH_TIME_MS - AutoRefreshCountMs);
-		if (RemainingMs < 0) {
-			RemainingMs = 0;
-		}
-		const dt = new Date(RemainingMs);
-		document.querySelector('#spanRefreshCountDown').innerHTML = `${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`;
-
-		// Time has elapsed.
-		if (AutoRefreshCountMs >= AUTO_REFRESH_TIME_MS && !isPlaying()) loadTwcData();
-	};
-	AutoRefreshIntervalId = window.setInterval(AutoRefreshTimer, AUTO_REFRESH_INTERVAL_MS);
-	AutoRefreshTimer();
-};
-const stopAutoRefreshTimer = () => {
-	if (AutoRefreshIntervalId) {
-		window.clearInterval(AutoRefreshIntervalId);
-		document.querySelector('#spanRefreshCountDown').innerHTML = '--:--';
-		AutoRefreshIntervalId = null;
-	}
-};
-
-const refreshCheck = () => {
-	// Time has elapsed.
-	if (AutoRefreshCountMs >= AUTO_REFRESH_TIME_MS && isPlaying()) {
-		loadTwcData();
-		return true;
-	}
-	return false;
-};
-
-const loadTwcData = () => {
-	if (loadTwcData.callback) loadTwcData.callback();
-};
-
-const registerRefreshData = (callback) => {
-	loadTwcData.callback = callback;
 };
 
 const timeZone = () => weatherParameters.timeZone;
@@ -414,7 +316,5 @@ export {
 	msg,
 	message,
 	latLonReceived,
-	stopAutoRefreshTimer,
-	registerRefreshData,
 	timeZone,
 };

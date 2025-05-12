@@ -2,37 +2,58 @@ import { parseQueryString } from '../share.mjs';
 
 const SETTINGS_KEY = 'Settings';
 
+const DEFAULTS = {
+	shortName: undefined,
+	name: undefined,
+	type: 'checkbox',
+	defaultValue: undefined,
+	changeAction: () => { },
+	sticky: true,
+	values: [],
+	visible: true,
+};
+
 class Setting {
-	constructor(shortName, name, type, defaultValue, changeAction, sticky, values) {
-		// store values
+	constructor(shortName, _options) {
+		if (shortName === undefined) {
+			throw new Error('No name provided for setting');
+		}
+		// merge options with defaults
+		const options = { ...DEFAULTS, ...(_options ?? {}) };
+
+		// store values and combine with defaults
 		this.shortName = shortName;
-		this.name = name;
-		this.defaultValue = defaultValue;
-		this.myValue = defaultValue;
-		this.type = type ?? 'checkbox';
-		this.sticky = sticky;
-		this.values = values;
-		// a default blank change function is provided
-		this.changeAction = changeAction ?? (() => { });
+		this.name = options.name ?? shortName;
+		this.defaultValue = options.defaultValue;
+		this.myValue = this.defaultValue;
+		this.type = options?.type;
+		this.sticky = options.sticky;
+		this.values = options.values;
+		this.visible = options.visible;
+		this.changeAction = options.changeAction;
 
 		// get value from url
-		const urlValue = parseQueryString()?.[`settings-${shortName}-${type}`];
+		const urlValue = parseQueryString()?.[`settings-${shortName}-${this.type}`];
 		let urlState;
-		if (type === 'checkbox' && urlValue !== undefined) {
+		if (this.type === 'checkbox' && urlValue !== undefined) {
 			urlState = urlValue === 'true';
 		}
-		if (type === 'select' && urlValue !== undefined) {
+		if (this.type === 'select' && urlValue !== undefined) {
 			urlState = parseFloat(urlValue);
+		}
+		if (this.type === 'select' && urlValue !== undefined && Number.isNaN(urlState)) {
+			// couldn't parse as a float, store as a string
+			urlState = urlValue;
 		}
 
 		// get existing value if present
 		const storedValue = urlState ?? this.getFromLocalStorage();
-		if (sticky && storedValue !== null) {
+		if ((this.sticky || urlValue !== undefined) && storedValue !== null) {
 			this.myValue = storedValue;
 		}
 
 		// call the change function on startup
-		switch (type) {
+		switch (this.type) {
 			case 'select':
 				this.selectChange({ target: { value: this.myValue } });
 				break;
@@ -59,7 +80,11 @@ class Setting {
 
 		this.values.forEach(([value, text]) => {
 			const option = document.createElement('option');
-			option.value = value.toFixed(2);
+			if (typeof value === 'number') {
+				option.value = value.toFixed(2);
+			} else {
+				option.value = value;
+			}
 
 			option.innerHTML = text;
 			select.append(option);
@@ -108,6 +133,10 @@ class Setting {
 	selectChange(e) {
 		// update the value
 		this.myValue = parseFloat(e.target.value);
+		if (Number.isNaN(this.myValue)) {
+			// was a string, store as such
+			this.myValue = e.target.value;
+		}
 		this.storeToLocalStorage(this.myValue);
 
 		// call the change action
@@ -130,6 +159,7 @@ class Setting {
 				if (storedValue !== undefined) {
 					switch (this.type) {
 						case 'boolean':
+						case 'checkbox':
 							return storedValue;
 						case 'select':
 							return storedValue;
@@ -155,6 +185,8 @@ class Setting {
 			case 'select':
 				this.selectHighlight(newValue);
 				break;
+			case 'boolean':
+				break;
 			case 'checkbox':
 			default:
 				this.element.checked = newValue;
@@ -167,12 +199,15 @@ class Setting {
 
 	selectHighlight(newValue) {
 		// set the dropdown to the provided value
-		this.element.querySelectorAll('option').forEach((elem) => {
-			elem.selected = newValue.toFixed(2) === elem.value;
+		this?.element?.querySelectorAll('option')?.forEach?.((elem) => {
+			elem.selected = (newValue?.toFixed?.(2) === elem.value) || (newValue === elem.value);
 		});
 	}
 
 	generate() {
+		// don't generate a control for not visible items
+		if (!this.visible) return '';
+		// call the appropriate control generator
 		switch (this.type) {
 			case 'select':
 				return this.generateSelect();
