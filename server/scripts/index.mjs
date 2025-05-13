@@ -50,8 +50,7 @@ const init = () => {
 	window.addEventListener('resize', fullScreenResizeCheck);
 	fullScreenResizeCheck.wasFull = false;
 
-	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('keydown', (key) => { if (key.code === 'Enter') formSubmit(); });
-	document.querySelector('#btnGetLatLng').addEventListener('click', () => formSubmit());
+	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
 	document.addEventListener('keydown', documentKeydown);
 	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
@@ -79,11 +78,6 @@ const init = () => {
 		onSelect(suggestion) { autocompleteOnSelect(suggestion); },
 		width: 490,
 	});
-
-	const formSubmit = () => {
-		if (autoComplete.suggestions[0]) autoComplete.suggestionsContainer.children[0].trigger('click');
-		return false;
-	};
 
 	// attempt to parse the url parameters
 	const parsedParameters = parseQueryString();

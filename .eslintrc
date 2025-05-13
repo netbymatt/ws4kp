@@ -2,8 +2,7 @@
 	"env": {
 		"browser": true,
 		"es6": true,
-		"node": true,
-		"jquery": true
+		"node": true
 	},
 	"extends": [
 		"airbnb-base"
@@ -12,7 +11,8 @@
 		"TravelCities": "readonly",
 		"RegionalCities": "readonly",
 		"StationInfo": "readonly",
-		"SunCalc": "readonly"
+		"SunCalc": "readonly",
+		"NoSleep": "readonly"
 	},
 	"parserOptions": {
 		"ecmaVersion": 2023,

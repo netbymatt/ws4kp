@@ -37,8 +37,6 @@
 		"gulp-s3-upload": "^1.7.3",
 		"gulp-sass": "^6.0.0",
 		"gulp-terser": "^2.0.0",
-		"jquery": "^3.6.0",
-		"jquery-touchswipe": "^1.6.19",
 		"luxon": "^3.0.0",
 		"nosleep.js": "^0.12.0",
 		"sass": "^1.54.0",

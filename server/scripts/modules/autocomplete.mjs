@@ -9,16 +9,17 @@ const KEYS = {
 	UP: 38,
 	RIGHT: 39,
 	DOWN: 40,
+	ENTER: 13,
 };
 
 const DEFAULT_OPTIONS = {
 	autoSelectFirst: false,
 	serviceUrl: null,
 	lookup: null,
-	onSelect: null,
+	onSelect: () => { },
 	onHint: null,
 	width: 'auto',
-	minChars: 1,
+	minChars: 3,
 	maxHeight: 300,
 	deferRequestBy: 0,
 	params: {},
@@ -85,8 +86,11 @@ class AutoComplete {
 		this.results = results;
 		this.elem.after(results);
 
-		// add handlers for typing text
+		// add handlers for typing text and submitting the form
 		this.elem.addEventListener('keyup', (e) => this.keyUp(e));
+		this.elem.closest('form')?.addEventListener('submit', (e) => this.directFormSubmit(e));
+		this.elem.addEventListener('click', () => this.deselectAll());
+		this.elem.addEventListener('focusout', () => this.hideSuggestions());
 	}
 
 	mouseOver(e) {
@@ -129,14 +133,29 @@ class AutoComplete {
 	}
 
 	keyUp(e) {
-		// ignore some keys
+		// reset the change timeout
+		clearTimeout(this.onChangeTimeout);
+
+		// up/down direction
 		switch (e.which) {
 			case KEYS.UP:
 			case KEYS.DOWN:
+				// move up or down the selection list
+				this.keySelect(e.which);
+				return;
+			case KEYS.ENTER:
+				// if the text entry field is active call direct form submit
+				// if there is a suggestion highlighted call the click function on that element
+				if (this.getSelected() !== undefined) {
+					this.click({ target: this.results.querySelector('.suggestion.selected') });
+					return;
+				}
+				if (document.activeElement.id === this.elem.id) {
+					// call the direct submit routine
+					this.directFormSubmit();
+				}
 				return;
 		}
-
-		clearTimeout(this.onChangeTimeout);
 
 		if (this.currentValue !== this.elem.value) {
 			if (this.options.deferRequestBy > 0) {
@@ -169,7 +188,7 @@ class AutoComplete {
 		this.getSuggestions(this.currentValue);
 	}
 
-	async getSuggestions(search) {
+	async getSuggestions(search, skipHtml = false) {
 		// assemble options
 		const searchOptions = { ...this.options.params };
 		searchOptions[this.options.paramName] = search;
@@ -190,8 +209,10 @@ class AutoComplete {
 		}
 
 		// store suggestions
-		this.cachedResponses[search] = result.suggestions;
+		this.cachedResponses[search] = result;
 		this.suggestions = result.suggestions;
+
+		if (skipHtml) return;
 
 		// populate the suggestion area
 		this.populateSuggestions();
@@ -223,6 +244,63 @@ class AutoComplete {
 	noSuggestionNotice() {
 		this.results.innerHTML = `<div>${this.options.noSuggestionNotice}</div>`;
 		this.showSuggestions();
+	}
+
+	// the submit button has been pressed and we'll just use the first suggestion found
+	async directFormSubmit() {
+		// check for minimum length
+		if (this.currentValue.length < this.options.minChars) return;
+		await this.getSuggestions(this.elem.value, true);
+		const suggestion = this.suggestions?.[0];
+		if (suggestion) {
+			this.options.onSelect(suggestion);
+			this.elem.value = suggestion.value;
+			this.hideSuggestions();
+		}
+	}
+
+	// return the index of the selected item in suggestions
+	getSelected() {
+		const index = this.results.querySelector('.selected')?.dataset?.item;
+		if (index !== undefined) return parseInt(index, 10);
+		return index;
+	}
+
+	// move the selection highlight up or down
+	keySelect(key) {
+		// if the suggestions are hidden do nothing
+		if (this.results.style.display === 'none') return;
+		// if there are no suggestions do nothing
+		if (this.suggestions.length <= 0) return;
+
+		// get the currently selected index (or default to off the top of the list)
+		let index = this.getSelected();
+
+		// adjust the index per the key
+		// and include defaults in case no index is selected
+		switch (key) {
+			case KEYS.UP:
+				index = (index ?? 0) - 1;
+				break;
+			case KEYS.DOWN:
+				index = (index ?? -1) + 1;
+				break;
+		}
+
+		// wrap the index (and account for negative)
+		index = ((index % this.suggestions.length) + this.suggestions.length) % this.suggestions.length;
+
+		// set this index
+		this.deselectAll();
+		this.mouseOver({
+			target: this.results.querySelectorAll('.suggestion')[index],
+		});
+	}
+
+	deselectAll() {
+		// clear other selected indexes
+		[...this.results.querySelectorAll('.suggestion.selected')].forEach((elem) => elem.classList.remove('selected'));
+		this.selectedItem = 0;
 	}
 }
 
