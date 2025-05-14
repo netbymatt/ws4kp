@@ -22,6 +22,7 @@ const formatter = async (message) => {
 	for (let i = 0; i < args.length; i += 1) {
 		text += `[${i}] ${args[i]} `;
 	}
+	text += message?.stackTrace()?.[0]?.url ?? '';
 	console.log(color(`CONSOLE.${type}: ${message.text()}\n${text} `));
 };
 

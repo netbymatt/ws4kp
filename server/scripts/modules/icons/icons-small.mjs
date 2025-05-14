@@ -1,9 +1,9 @@
-/* spell-checker: disable */
+// internal function to add path to returned icon
+const addPath = (icon) => `images/icons/regional-maps/${icon}`;
+
 const smallIcon = (link, _isNightTime) => {
 	// extract day or night if not provided
 	const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
-	// internal function to add path to returned icon
-	const addPath = (icon) => `images/r/${icon}`;
 
 	// grab everything after the last slash ending at any of these: ?&,
 	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
@@ -20,8 +20,6 @@ const smallIcon = (link, _isNightTime) => {
 	// find the icon
 	switch (conditionName + (isNightTime ? '-n' : '')) {
 		case 'skc':
-		case 'hot':
-		case 'haze':
 			return addPath('Sunny.gif');
 
 		case 'skc-n':
@@ -31,13 +29,13 @@ const smallIcon = (link, _isNightTime) => {
 			return addPath('Clear-1992.gif');
 
 		case 'bkn':
-			return addPath('Mostly-Cloudy-1994-2.gif');
+			return addPath('Mostly-Cloudy-1994.gif');
 
 		case 'bkn-n':
 		case 'few-n':
 		case 'nfew-n':
 		case 'nfew':
-			return addPath('Partly-Clear-1994-2.gif');
+			return addPath('Partly-Clear-1994.gif');
 
 		case 'sct':
 		case 'few':
@@ -46,7 +44,7 @@ const smallIcon = (link, _isNightTime) => {
 		case 'sct-n':
 		case 'nsct':
 		case 'nsct-n':
-			return addPath('Mostly-Clear.gif');
+			return addPath('Partly-Cloudy-Night.gif');
 
 		case 'ovc':
 		case 'ovc-n':
@@ -57,30 +55,23 @@ const smallIcon = (link, _isNightTime) => {
 			return addPath('Fog.gif');
 
 		case 'rain_sleet':
-			return addPath('Sleet.gif');
+			return addPath('Rain-Sleet.gif');
 
 		case 'rain_showers':
 		case 'rain_showers_high':
-			return addPath('Scattered-Showers-1994-2.gif');
+			return addPath('Scattered-Showers-1994.gif');
 
 		case 'rain_showers-n':
 		case 'rain_showers_high-n':
-			return addPath('Scattered-Showers-Night-1994-2.gif');
+			return addPath('Scattered-Showers-Night-1994.gif');
 
 		case 'rain':
 		case 'rain-n':
 			return addPath('Rain-1992.gif');
 
-		// case 'snow':
-		// 	return addPath('Light-Snow.gif');
-		// 	break;
-		// case 'cc_snowshowers.gif':
-		// 	//case "heavy-snow.gif":
-		// 	return addPath('AM-Snow-1994.gif');
-		// 	break;
 		case 'snow':
 		case 'snow-n':
-			if (value > 50) return addPath('Heavy-Snow-1994-2.gif');
+			if (value > 50) return addPath('Heavy-Snow-1994.gif');
 			return addPath('Light-Snow.gif');
 
 		case 'rain_snow':
@@ -89,7 +80,7 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'snow_fzra':
 		case 'snow_fzra-n':
-			return addPath('Freezing-Rain-Snow-1992.gif');
+			return addPath('Freezing-Rain-Snow-1994.gif');
 
 		case 'fzra':
 		case 'fzra-n':
@@ -99,7 +90,7 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'snow_sleet':
 		case 'snow_sleet-n':
-			return addPath('Snow and Sleet.gif');
+			return addPath('Snow-Sleet.gif');
 
 		case 'sleet':
 		case 'sleet-n':
@@ -107,11 +98,11 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'tsra_sct':
 		case 'tsra':
-			return addPath('Scattered-Tstorms-1994-2.gif');
+			return addPath('Scattered-Tstorms-1994.gif');
 
 		case 'tsra_sct-n':
 		case 'tsra-n':
-			return addPath('Scattered-Tstorms-Night-1994-2.gif');
+			return addPath('Scattered-Tstorms-Night-1994.gif');
 
 		case 'tsra_hi':
 		case 'tsra_hi-n':
@@ -124,13 +115,15 @@ const smallIcon = (link, _isNightTime) => {
 		case 'wind':
 		case 'wind_few':
 		case 'wind_sct':
-		case 'wind_bkn':
-		case 'wind_ovc':
 		case 'wind-n':
 		case 'wind_few-n':
+			return addPath('Wind.gif');
+
+		case 'wind_bkn':
+		case 'wind_ovc':
 		case 'wind_bkn-n':
 		case 'wind_ovc-n':
-			return addPath('Wind.gif');
+			return addPath('Cloudy-Wind.gif');
 
 		case 'wind_skc':
 			return addPath('Sunny-Wind-1994.gif');
@@ -144,7 +137,17 @@ const smallIcon = (link, _isNightTime) => {
 			return addPath('Blowing Snow.gif');
 
 		case 'cold':
-			return addPath('cold.gif');
+			return addPath('Cold.gif');
+
+		case 'smoke':
+		case 'smoke-n':
+			return addPath('Smoke.gif');
+
+		case 'hot':
+			return addPath('Hot.gif');
+
+		case 'haze':
+			return addPath('Haze.gif');
 
 		default:
 			console.log(`Unable to locate regional icon for ${conditionName} ${link} ${isNightTime}`);

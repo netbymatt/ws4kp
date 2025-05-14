@@ -13,10 +13,10 @@ class Almanac extends WeatherDisplay {
 		this.backgroundImage0 = loadImg('images/backgrounds/1.png');
 
 		// preload the moon images
-		preloadImg('images/2/Full-Moon.gif');
-		preloadImg('images/2/Last-Quarter.gif');
-		preloadImg('images/2/New-Moon.gif');
-		preloadImg('images/2/First-Quarter.gif');
+		preloadImg(imageName('Full'));
+		preloadImg(imageName('Last'));
+		preloadImg(imageName('New'));
+		preloadImg(imageName('First'));
 
 		this.timing.totalScreens = 1;
 	}
@@ -160,14 +160,14 @@ class Almanac extends WeatherDisplay {
 const imageName = (type) => {
 	switch (type) {
 		case 'Full':
-			return 'images/2/Full-Moon.gif';
+			return 'images/icons/moon-phases/Full-Moon.gif';
 		case 'Last':
-			return 'images/2/Last-Quarter.gif';
+			return 'images/icons/moon-phases/Last-Quarter.gif';
 		case 'New':
-			return 'images/2/New-Moon.gif';
+			return 'images/icons/moon-phases/New-Moon.gif';
 		case 'First':
 		default:
-			return 'images/2/First-Quarter.gif';
+			return 'images/icons/moon-phases/First-Quarter.gif';
 	}
 };
 
