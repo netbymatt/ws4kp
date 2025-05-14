@@ -1,4 +1,4 @@
-import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
+import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { json } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
@@ -28,7 +28,7 @@ const getRegionalObservation = async (point, city) => {
 		const observation = await json(`${station}/observations/latest`);
 		// preload the image
 		if (!observation.properties.icon) return false;
-		const icon = getWeatherRegionalIconFromIconLink(observation.properties.icon, !observation.properties.daytime);
+		const icon = getSmallIcon(observation.properties.icon, !observation.properties.daytime);
 		if (!icon) return false;
 		preloadImg(icon);
 		// return the observation

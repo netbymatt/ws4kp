@@ -1,7 +1,7 @@
 // travel forecast display
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
-import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
+import { getSmallIcon } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -70,7 +70,7 @@ class TravelForecast extends WeatherDisplay {
 					high: forecast.properties.periods[todayShift].temperature,
 					low: forecast.properties.periods[todayShift + 1].temperature,
 					name: city.Name,
-					icon: getWeatherRegionalIconFromIconLink(forecast.properties.periods[todayShift].icon),
+					icon: getSmallIcon(forecast.properties.periods[todayShift].icon),
 				};
 			} catch (error) {
 				console.error(`GetTravelWeather for ${city.Name} failed`);

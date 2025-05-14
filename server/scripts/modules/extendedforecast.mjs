@@ -4,7 +4,7 @@
 import STATUS from './status.mjs';
 import { json } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { getWeatherIconFromIconLink } from './icons.mjs';
+import { getLargeIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -101,7 +101,7 @@ const parse = (fullForecast) => {
 		// get the object to modify/populate
 		const fDay = forecast[destIndex];
 		// high temperature will always be last in the source array so it will overwrite the low values assigned below
-		fDay.icon = getWeatherIconFromIconLink(period.icon);
+		fDay.icon = getLargeIcon(period.icon);
 		fDay.text = shortenExtendedForecastText(period.shortForecast);
 		fDay.dayName = dates[destIndex];
 

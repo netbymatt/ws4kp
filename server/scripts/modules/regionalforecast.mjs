@@ -5,7 +5,7 @@ import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
 import { json } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
-import { getWeatherRegionalIconFromIconLink } from './icons.mjs';
+import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -28,7 +28,7 @@ class RegionalForecast extends WeatherDisplay {
 		// there are enough other cities available to populate the map sufficiently even if some do not load
 
 		// pre-load the base map
-		let baseMap = 'images/map/basemap.png';
+		let baseMap = 'images/maps/basemap.png';
 		if (weatherParameters.state === 'HI') {
 			baseMap = 'images/maps/radar-hawaii.png';
 		} else if (weatherParameters.state === 'AK') {
@@ -106,7 +106,7 @@ class RegionalForecast extends WeatherDisplay {
 				};
 
 				// preload the icon
-				preloadImg(getWeatherRegionalIconFromIconLink(regionalObservation.icon, !regionalObservation.daytime));
+				preloadImg(getSmallIcon(regionalObservation.icon, !regionalObservation.daytime));
 
 				// return a pared-down forecast
 				// 0th object is the current conditions
@@ -178,7 +178,7 @@ class RegionalForecast extends WeatherDisplay {
 			const fill = {};
 			const period = city[this.screenIndex];
 
-			fill.icon = { type: 'img', src: getWeatherRegionalIconFromIconLink(period.icon, !period.daytime) };
+			fill.icon = { type: 'img', src: getSmallIcon(period.icon, !period.daytime) };
 			fill.city = period.name;
 			const { temperature } = period;
 			fill.temp = temperature;
