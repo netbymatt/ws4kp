@@ -33,7 +33,7 @@
 		"gulp-ejs": "^5.1.0",
 		"gulp-file": "^0.4.0",
 		"gulp-rename": "^2.0.0",
-		"gulp-s3-upload": "^1.7.3",
+		"gulp-s3-uploader": "^1.0.6",
 		"gulp-sass": "^6.0.0",
 		"gulp-terser": "^2.0.0",
 		"luxon": "^3.0.0",
