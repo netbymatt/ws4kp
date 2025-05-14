@@ -15,7 +15,7 @@
 		"NoSleep": "readonly"
 	},
 	"parserOptions": {
-		"ecmaVersion": 2023,
+		"ecmaVersion": "latest",
 		"sourceType": "module"
 	},
 	"plugins": [],
