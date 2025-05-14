@@ -6,7 +6,7 @@ import concat from 'gulp-concat';
 import terser from 'gulp-terser';
 import ejs from 'gulp-ejs';
 import rename from 'gulp-rename';
-import htmlmin from 'gulp-htmlmin';
+import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import s3Upload from 'gulp-s3-upload';
 import webpack from 'webpack-stream';

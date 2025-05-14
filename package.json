@@ -32,7 +32,6 @@
 		"gulp-concat": "^2.6.1",
 		"gulp-ejs": "^5.1.0",
 		"gulp-file": "^0.4.0",
-		"gulp-htmlmin": "^5.0.1",
 		"gulp-rename": "^2.0.0",
 		"gulp-s3-upload": "^1.7.3",
 		"gulp-sass": "^6.0.0",
@@ -48,6 +47,7 @@
 	"dependencies": {
 		"dotenv": "^16.5.0",
 		"ejs": "^3.1.5",
-		"express": "^5.1.0"
+		"express": "^5.1.0",
+		"gulp-html-minifier-terser": "^7.1.0"
 	}
 }
