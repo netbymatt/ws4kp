@@ -46,6 +46,7 @@
 		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
+		"dotenv": "^16.5.0",
 		"ejs": "^3.1.5",
 		"express": "^5.1.0"
 	}
