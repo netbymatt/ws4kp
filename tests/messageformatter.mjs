@@ -1,6 +1,6 @@
-const chalk = require('chalk');
+import chalk from 'chalk';
 
-const describe = (jsHandle) => jsHandle.executionContext().evaluate(
+const describe = (jsHandle) => jsHandle.evaluate(
 	// serialize |obj| however you want
 	(obj) => `OBJ: ${typeof obj}, ${obj}`,
 	jsHandle,
@@ -25,4 +25,4 @@ const formatter = async (message) => {
 	console.log(color(`CONSOLE.${type}: ${message.text()}\n${text} `));
 };
 
-module.exports = formatter;
+export default formatter;

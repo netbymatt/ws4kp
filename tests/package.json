@@ -1,15 +1,16 @@
 {
-  "name": "ws4kp-tests",
-  "version": "1.0.0",
-  "description": "Currently, tests take a different approach from typical unit testing. The test methodology loads several forecasts for different locations and logs them all to one logger so errors can be found such as missing icons, locations that do not have all of the necessary data or other changes that may occur between geographical locations.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "chalk": "^4.0.0",
-    "puppeteer": "^19.5.2"
-  }
+	"name": "ws4kp-tests",
+	"version": "1.0.0",
+	"description": "Currently, tests take a different approach from typical unit testing. The test methodology loads several forecasts for different locations and logs them all to one logger so errors can be found such as missing icons, locations that do not have all of the necessary data or other changes that may occur between geographical locations.",
+	"main": "index.mjs",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"chalk": "^5.4.1",
+		"puppeteer": "^24.8.2"
+	},
+	"type": "module"
 }

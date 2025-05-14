@@ -69,13 +69,13 @@
 		},
 		{
 			"name": "Test",
-			"program": "${workspaceFolder}/tests/index.js",
+			"program": "${workspaceFolder}/tests/index.mjs",
 			"request": "launch",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
 			"type": "node",
-			"outputCapture": "std"
+			"console": "integratedTerminal"
 		},
 	],
 	"compounds": [

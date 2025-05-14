@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import 'dotenv/config';
 import {
 	src, dest, series, parallel,
 } from 'gulp';
@@ -32,8 +33,6 @@ const jsSourcesData = [
 
 const webpackOptions = {
 	mode: 'production',
-	// mode: 'development',
-	// devtool: 'source-map',
 	output: {
 		filename: 'ws.min.js',
 	},
@@ -138,7 +137,7 @@ const uploadSources = [
 ];
 const upload = () => src(uploadSources, { base: './dist', encoding: false })
 	.pipe(s3({
-		Bucket: 'weatherstar',
+		Bucket: process.env.BUCKET,
 		StorageClass: 'STANDARD',
 		maps: {
 			CacheControl: (keyname) => {
@@ -156,13 +155,13 @@ const imageSources = [
 const uploadImages = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(
 		s3({
-			Bucket: 'weatherstar',
+			Bucket: process.env.BUCKET,
 			StorageClass: 'STANDARD',
 		}),
 	);
 
 const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
-	DistributionId: 'E9171A4KV8KCW',
+	DistributionId: process.env.DISTRIBUTION_ID,
 	InvalidationBatch: {
 		CallerReference: (new Date()).toLocaleString(),
 		Paths: {

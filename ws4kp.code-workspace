@@ -42,7 +42,8 @@
 			"Tucsan",
 			"Malek",
 			"mwood",
-			"unmuted"
+			"unmuted",
+			"dumpio"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
