@@ -52,7 +52,7 @@ class Radar extends WeatherDisplay {
 		}
 
 		// get the base map
-		const src = 'images/4000RadarMap2.jpg';
+		const src = 'images/maps/radar.jpg';
 		this.baseMap = await loadImg(src);
 
 		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';

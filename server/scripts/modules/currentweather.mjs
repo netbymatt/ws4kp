@@ -18,7 +18,7 @@ class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
 		// pre-load background image (returns promise)
-		this.backgroundImage = loadImg('images/BackGround1_1.png');
+		this.backgroundImage = loadImg('images/backgrounds/1.png');
 	}
 
 	async getData(weatherParameters, refresh) {

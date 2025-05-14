@@ -10,7 +10,7 @@ class Almanac extends WeatherDisplay {
 		super(navId, elemId, 'Almanac', true);
 
 		// pre-load background images (returns promises)
-		this.backgroundImage0 = loadImg('images/BackGround3_1.png');
+		this.backgroundImage0 = loadImg('images/backgrounds/1.png');
 
 		// preload the moon images
 		preloadImg('images/2/Full-Moon.gif');

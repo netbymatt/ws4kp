@@ -11,7 +11,7 @@ class Progress extends WeatherDisplay {
 		super(navId, elemId, '', false);
 
 		// pre-load background image (returns promise)
-		this.backgroundImage = loadImg('images/BackGround1_1.png');
+		this.backgroundImage = loadImg('images/backgrounds/1.png');
 
 		// disable any navigation timing
 		this.timing = false;

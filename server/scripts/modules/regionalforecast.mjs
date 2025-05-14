@@ -28,11 +28,11 @@ class RegionalForecast extends WeatherDisplay {
 		// there are enough other cities available to populate the map sufficiently even if some do not load
 
 		// pre-load the base map
-		let baseMap = 'images/Basemap2.png';
+		let baseMap = 'images/map/basemap.png';
 		if (weatherParameters.state === 'HI') {
-			baseMap = 'images/HawaiiRadarMap4.png';
+			baseMap = 'images/maps/radar-hawaii.png';
 		} else if (weatherParameters.state === 'AK') {
-			baseMap = 'images/AlaskaRadarMap6.png';
+			baseMap = 'images/maps/radar-alaska.png';
 		}
 		this.elem.querySelector('.map img').src = baseMap;
 
