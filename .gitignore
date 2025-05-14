@@ -12,3 +12,6 @@ server/music/*
 #dist folder
 dist/*
 !dist/readme.txt
+
+#environment variables
+.env

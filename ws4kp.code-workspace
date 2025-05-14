@@ -33,7 +33,8 @@
 			"T'storm",
 			"uscomp",
 			"Visib",
-			"Waukegan"
+			"Waukegan",
+			"WSQS"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
