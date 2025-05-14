@@ -14,8 +14,12 @@
 			"**/vendor": true,
 			"dist/**": true
 		},
+		"cSpell.enabledFileTypes": {
+			"markdown": true,
+			"JavaScript": true
+		},
 		"cSpell.enabled": true,
-		"cSpell.words": [
+		"cSpell.ignoreWords": [
 			"'storm",
 			"arcgis",
 			"Battaglia",
@@ -34,7 +38,11 @@
 			"uscomp",
 			"Visib",
 			"Waukegan",
-			"WSQS"
+			"WSQS",
+			"Tucsan",
+			"Malek",
+			"mwood",
+			"unmuted"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
@@ -44,7 +52,6 @@
 			".vscode",
 			".vscode-insiders",
 			"**/vendor/auto/**",
-			"**/twc3.js",
 		],
 		"editor.tabSize": 2,
 		"emmet.includeLanguages": {
@@ -58,6 +65,6 @@
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
-		}
+		},
 	},
 }

@@ -1,7 +1,4 @@
 {
-	"cSpell.enableFiletypes": [
-		"javascript"
-	],
 	"liveSassCompile.settings.formats": [
 		{
 			"format": "compressed",
@@ -23,7 +20,4 @@
 	"eslint.validate": [
 		"javascript"
 	],
-	"cSpell.words": [
-		"Tucsan"
-	]
 }

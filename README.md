@@ -18,7 +18,7 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 
 ## Does WeatherStar 4000+ work outside of the USA?
 
-This project is tightly coupled to [NOAA's Weather API](https://www.weather.gov/documentation/services-web-api), which is exclsuive to the United States. Using NOAA's Weather API is a crucial requirement to provide an authentic WeatherStar 4000+ experience.
+This project is tightly coupled to [NOAA's Weather API](https://www.weather.gov/documentation/services-web-api), which is exclusive to the United States. Using NOAA's Weather API is a crucial requirement to provide an authentic WeatherStar 4000+ experience.
 
 If you would like to display weather information for international locations (outside of the USA), please checkout a fork of this project created by [@mwood77](https://github.com/mwood77):
 - [`ws4kp-international`](https://github.com/mwood77/ws4kp-international)
