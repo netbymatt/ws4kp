@@ -113,9 +113,11 @@ const smallIcon = (link, _isNightTime) => {
 			return addPath('Thunderstorm.gif');
 
 		case 'wind':
+		case 'wind_':
 		case 'wind_few':
 		case 'wind_sct':
 		case 'wind-n':
+		case 'wind_-n':
 		case 'wind_few-n':
 			return addPath('Wind.gif');
 
