@@ -151,6 +151,7 @@ const upload = () => src(uploadSources, { base: './dist', encoding: false })
 const imageSources = [
 	'server/fonts/**',
 	'server/images/**',
+	'!server/images/gimp/**',
 ];
 const uploadImages = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(

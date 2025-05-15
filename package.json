@@ -42,12 +42,12 @@
 		"suncalc": "^1.8.0",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
-		"webpack-stream": "^7.0.0"
+		"webpack-stream": "^7.0.0",
+		"gulp-html-minifier-terser": "^7.1.0"
 	},
 	"dependencies": {
 		"dotenv": "^16.5.0",
 		"ejs": "^3.1.5",
-		"express": "^5.1.0",
-		"gulp-html-minifier-terser": "^7.1.0"
+		"express": "^5.1.0"
 	}
 }
