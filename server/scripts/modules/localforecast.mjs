@@ -47,7 +47,7 @@ class LocalForecast extends WeatherDisplay {
 		forecastsElem.append(...templates);
 
 		// increase each forecast height to a multiple of container height
-		this.pageHeight = forecastsElem.parentNode.scrollHeight;
+		this.pageHeight = forecastsElem.parentNode.offsetHeight;
 		templates.forEach((forecast) => {
 			const newHeight = Math.ceil(forecast.scrollHeight / this.pageHeight) * this.pageHeight;
 			forecast.style.height = `${newHeight}px`;
