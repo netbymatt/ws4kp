@@ -41,6 +41,8 @@ const barSizes = {
 class SpcOutlook extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'SPC Outlook', true);
+		// don't display on progress/navigation screen
+		this.showOnProgress = false;
 
 		// calculate file names
 		this.files = [null, null, null].map((v, i) => urlPattern(i + 1));
@@ -69,6 +71,14 @@ class SpcOutlook extends WeatherDisplay {
 		}
 		// do the initial parsing of the data
 		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], initialData);
+
+		// if all the data returns false the there's nothing to do, skip this screen
+		if (this.data.reduce((prev, cur) => prev || !!cur, false)) {
+			this.timing.totalScreens = 1;
+		} else {
+			this.timing.totalScreens = 0;
+		}
+		this.calcNavTiming();
 
 		// we only get here if there was no error above
 		this.screenIndex = 0;
