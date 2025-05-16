@@ -109,9 +109,6 @@ const init = () => {
 		document.querySelector('#spanRadarId').innerHTML = '';
 		document.querySelector('#spanZoneId').innerHTML = '';
 
-		document.querySelector('#chkAutoRefresh').checked = true;
-		localStorage.removeItem('autoRefresh');
-
 		localStorage.removeItem('play');
 		postMessage('navButton', 'play');
 
