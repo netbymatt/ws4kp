@@ -90,7 +90,9 @@ class AutoComplete {
 		this.elem.addEventListener('keyup', (e) => this.keyUp(e));
 		this.elem.closest('form')?.addEventListener('submit', (e) => this.directFormSubmit(e));
 		this.elem.addEventListener('click', () => this.deselectAll());
-		this.elem.addEventListener('focusout', () => this.hideSuggestions());
+
+		// clicking outside the suggestion box requires a bit of work to determine if suggestions should be hidden
+		document.addEventListener('click', (e) => this.checkOutsideClick(e));
 	}
 
 	mouseOver(e) {
@@ -138,6 +140,9 @@ class AutoComplete {
 
 		// up/down direction
 		switch (e.which) {
+			case KEYS.ESC:
+				this.hideSuggestions();
+				return;
 			case KEYS.UP:
 			case KEYS.DOWN:
 				// move up or down the selection list
@@ -301,6 +306,13 @@ class AutoComplete {
 		// clear other selected indexes
 		[...this.results.querySelectorAll('.suggestion.selected')].forEach((elem) => elem.classList.remove('selected'));
 		this.selectedItem = 0;
+	}
+
+	// if a click is detected on the page, generally we hide the suggestions, unless the click was within the autocomplete elements
+	checkOutsideClick(e) {
+		if (e.target.id === 'txtAddress') return;
+		if (e.target?.parentNode?.classList.contains(this.options.containerClass)) return;
+		this.hideSuggestions();
 	}
 }
 
