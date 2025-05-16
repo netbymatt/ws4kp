@@ -109,7 +109,7 @@ The resulting files will be in the /dist folder in the root of the project. Thes
 ## Music
 The WeatherStar had wonderful background music from the smooth jazz and new age genres by artists of the time. Lists of the music that played are available by searching online, but it's all copyrighted music and would be difficult to provide as part of this repository.
 
-I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. Too keep the size down, I've only included 4 tracks. Additional tracks will be posted in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
+I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. Too keep the size down, I've only included 4 tracks. Additional tracks are in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
 
 ### Customizing the music
 Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. Subdirectories will not be scanned. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
