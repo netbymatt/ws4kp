@@ -23,10 +23,35 @@
 		font-size: 32px;
 		@include u.text-shadow();
 
+
 		.risk-level {
 			position: relative;
 			top: -14px;
 			height: 20px;
+
+			&:nth-child(1) {
+				left: calc(20px * 5);
+			}
+
+			&:nth-child(2) {
+				left: calc(20px * 4);
+			}
+
+			&:nth-child(3) {
+				left: calc(20px * 3);
+			}
+
+			&:nth-child(4) {
+				left: calc(20px * 2);
+			}
+
+			&:nth-child(5) {
+				left: calc(20px * 1);
+			}
+
+			&:nth-child(6) {
+				left: calc(20px * 0);
+			}
 		}
 	}
 
