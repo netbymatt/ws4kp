@@ -54,23 +54,25 @@ class SpcOutlook extends WeatherDisplay {
 	async getData(weatherParameters, refresh) {
 		if (!super.getData(weatherParameters, refresh)) return;
 
-		let initialData;
-		try {
-			// get the three categorical files to get started
-			const filePromises = await Promise.allSettled(this.files.map((file) => json(file)));
-			// store the data, promise will always be fulfilled
-			initialData = filePromises.map((outlookDay) => outlookDay.value);
-		} catch (error) {
-			console.error('Unable to get spc outlook');
-			console.error(error.status, error.responseJSON);
-			// if there's no previous data, fail
-			if (!this.data) {
-				this.setStatus(STATUS.failed);
-				return;
+		// initial data does not need to be reloaded on a location change, only during silent refresh
+		if (!this.initialData || refresh) {
+			try {
+				// get the three categorical files to get started
+				const filePromises = await Promise.allSettled(this.files.map((file) => json(file)));
+				// store the data, promise will always be fulfilled
+				this.initialData = filePromises.map((outlookDay) => outlookDay.value);
+			} catch (error) {
+				console.error('Unable to get spc outlook');
+				console.error(error.status, error.responseJSON);
+				// if there's no previous data, fail
+				if (!this.initialData) {
+					this.setStatus(STATUS.failed);
+					return;
+				}
 			}
 		}
 		// do the initial parsing of the data
-		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], initialData);
+		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], this.initialData);
 
 		// if all the data returns false the there's nothing to do, skip this screen
 		if (this.data.reduce((prev, cur) => prev || !!cur, false)) {
