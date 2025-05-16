@@ -33,6 +33,7 @@
   <script type="module" src="scripts/modules/currentweatherscroll.mjs"></script>
   <script type="module" src="scripts/modules/currentweather.mjs"></script>
   <script type="module" src="scripts/modules/almanac.mjs"></script>
+  <script type="module" src="scripts/modules/spc-outlook.mjs"></script>
   <script type="module" src="scripts/modules/icons.mjs"></script>
   <script type="module" src="scripts/modules/extendedforecast.mjs"></script>
   <script type="module" src="scripts/modules/hourly-graph.mjs"></script>
@@ -108,6 +109,9 @@
       </div>
       <div id="almanac-html" class="weather-display">
         <%- include('partials/almanac.ejs') %>
+      </div>
+      <div id="spc-outlook-html" class="weather-display">
+        <%- include('partials/spc-outlook.ejs') %>
       </div>
       <div id="extended-forecast-html" class="weather-display">
         <%- include('partials/extended-forecast.ejs') %>
