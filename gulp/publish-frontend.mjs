@@ -189,4 +189,5 @@ export default publishFrontend;
 
 export {
 	buildDist,
+	invalidate,
 };
