@@ -141,6 +141,10 @@ Please do not report issues with api.weather.gov being down. It's a new service 
 
 Note: not all units are converted to metric, if selected. Some text-based products such as warnings are simple text strings provided from the national weather service and thus have baked-in units such as "gusts up to 60 mph." These values will not be converted.
 
+## Related Projects
+
+Not retro enough? Try the [Weatherstar 3000+](https://github.com/netbymatt/ws3kp)
+
 ## Disclaimer
 
 This web site should NOT be used in life threatening weather situations, or be relied on to inform the public of such situations. The Internet is an unreliable network subject to server and network outages and by nature is not suitable for such mission critical use. If you require such access to NWS data, please consider one of their subscription services. The authors of this web site shall not be held liable in the event of injury, death or property damage that occur as a result of disregarding this warning.
