@@ -113,7 +113,7 @@
 
 	.scroll {
 		@include u.text-shadow(3px, 1.5px);
-		width: 640px;
+		width: calc(640px - 2 * 30px);
 		height: 70px;
 		overflow: hidden;
 		margin-top: 10px;
@@ -122,6 +122,15 @@
 			font-family: 'Star4000';
 			font-size: 24pt;
 			margin-left: 55px;
+			overflow: hidden;
+
+			.scroll-area {
+				text-wrap: nowrap;
+				position: relative;
+				// the following added by js code as it is dependent on the content of the element
+				// transition: left (x)s;
+				// left: calc((elem width) - 640px);
+			}
 		}
 	}
 }
