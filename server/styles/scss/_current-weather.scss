@@ -90,7 +90,9 @@
 
 		.location {
 			color: c.$title-color;
+			max-height: 32px;
 			margin-bottom: 10px;
+			overflow: hidden;
 		}
 	}
 }
