@@ -60,16 +60,34 @@ const index = (req, res) => {
 	});
 };
 
+const geoip = (req, res) => {
+	res.set({
+		'x-geoip-city': 'Orlando',
+		'x-geoip-country': 'US',
+		'x-geoip-country-name': 'United States',
+		'x-geoip-country-region': 'FL',
+		'x-geoip-country-region-name': 'Florida',
+		'x-geoip-latitude': '28.52135',
+		'x-geoip-longitude': '-81.41079',
+		'x-geoip-postal-code': '32789',
+		'x-geoip-time-zone': 'America/New_York',
+		'content-type': 'application/json',
+	});
+	res.json({});
+};
+
 // debugging
 if (process.env?.DIST === '1') {
 	// distribution
 	app.use('/images', express.static('./server/images'));
 	app.use('/fonts', express.static('./server/fonts'));
 	app.use('/scripts', express.static('./server/scripts'));
+	app.use('/geoip', geoip);
 	app.use('/', express.static('./dist'));
 } else {
 	// debugging
 	app.get('/index.html', index);
+	app.use('/geoip', geoip);
 	app.get('/', index);
 	app.get('*name', express.static('./server'));
 }

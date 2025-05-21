@@ -172,6 +172,11 @@ class AutoComplete {
 		}
 	}
 
+	setValue(newValue) {
+		this.currentValue = newValue;
+		this.elem.value = newValue;
+	}
+
 	onValueChange() {
 		clearTimeout(this.onValueChange);
 

@@ -78,6 +78,7 @@ const init = () => {
 		onSelect(suggestion) { autocompleteOnSelect(suggestion); },
 		width: 490,
 	});
+	window.autoComplete = autoComplete;
 
 	// attempt to parse the url parameters
 	const parsedParameters = parseQueryString();
@@ -371,6 +372,10 @@ const btnGetGpsClick = async () => {
 	const position = await getPosition();
 	const { latitude, longitude } = position.coords;
 
+	getForecastFromLatLon(latitude, longitude, true);
+};
+
+const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {
 	const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 	txtAddress.value = `${round2(latitude, 4)}, ${round2(longitude, 4)}`;
 
@@ -380,7 +385,7 @@ const btnGetGpsClick = async () => {
 		const query = `${location.city}, ${location.state}`;
 		localStorage.setItem('latLon', JSON.stringify({ lat: latitude, lon: longitude }));
 		localStorage.setItem('latLonQuery', query);
-		localStorage.setItem('latLonFromGPS', true);
+		localStorage.setItem('latLonFromGPS', fromGps);
 		txtAddress.value = `${location.city}, ${location.state}`;
 	});
 };
@@ -411,3 +416,6 @@ const getCustomCode = async () => {
 		document.body.append(customElem);
 	}
 };
+
+// expose functions for external use
+window.getForecastFromLatLon = getForecastFromLatLon;
