@@ -254,35 +254,24 @@ body {
 @font-face {
 	font-family: "Star4000";
 	src: url('../fonts/Star4000.woff') format('woff');
-}
-
-@font-face {
-	font-family: "Star 4 Radar";
-	src: url('../fonts/Star 4 Radar.woff') format('woff');
+	font-display: swap;
 }
 
 @font-face {
 	font-family: 'Star4000 Extended';
 	src: url('../fonts/Star4000 Extended.woff') format('woff');
-}
-
-@font-face {
-	font-family: 'Star4000LCN';
-	src: url('../fonts/Star4000LCN.woff') format('woff');
-}
-
-@font-face {
-	font-family: 'Star4000 Large Compressed';
-	src: url('../fonts/Star4000 Large Compressed.woff') format('woff');
+	font-display: swap;
 }
 
 @font-face {
 	font-family: 'Star4000 Large';
-	src: url('../fonts/Star4000 Large.ttf') format('truetype');
+	src: url('../fonts/Star4000 Large.woff') format('woff');
+	font-display: swap;
 }
 
 @font-face {
 	font-family: 'Star4000 Small';
+	font-display: swap;
 	src: url('../fonts/Star4000 Small.woff') format('woff');
 }
 

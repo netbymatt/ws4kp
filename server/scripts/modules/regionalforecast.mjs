@@ -28,7 +28,7 @@ class RegionalForecast extends WeatherDisplay {
 		// there are enough other cities available to populate the map sufficiently even if some do not load
 
 		// pre-load the base map
-		let baseMap = 'images/maps/basemap.png';
+		let baseMap = 'images/maps/basemap.webp';
 		if (weatherParameters.state === 'HI') {
 			baseMap = 'images/maps/radar-hawaii.png';
 		} else if (weatherParameters.state === 'AK') {
