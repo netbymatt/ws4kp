@@ -119,18 +119,14 @@ class Radar extends WeatherDisplay {
 		const radarSourceY = radarSourceXY.y / 2;
 
 		// Load the most recent doppler radar images.
-		const radarInfo = await Promise.all(urls.map(async (url) => {
+		const radarInfo = await Promise.all(urls.map(async (url, index) => {
 			// create destination context
-			const canvas = document.createElement('canvas');
-			canvas.width = 640;
-			canvas.height = 367;
+			const canvas = new OffscreenCanvas(640, 367);
 			const context = canvas.getContext('2d');
 			context.imageSmoothingEnabled = false;
 
 			// create working context for manipulation
-			const workingCanvas = document.createElement('canvas');
-			workingCanvas.width = width;
-			workingCanvas.height = height;
+			const workingCanvas = new OffscreenCanvas(width, height);
 			const workingContext = workingCanvas.getContext('2d');
 			workingContext.imageSmoothingEnabled = false;
 
@@ -161,32 +157,47 @@ class Radar extends WeatherDisplay {
 			} else {
 				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone(timeZone());
 			}
-
+			console.time(`Radar-${index}`);
 			// assign to an html image element
+			console.time(`Radar-${index}-loadimg`);
 			const imgBlob = await loadImg(blob);
-
+			console.timeEnd(`Radar-${index}-loadimg`);
 			// draw the entire image
 			workingContext.clearRect(0, 0, width, 1600);
+			console.time(`Radar-${index}-drawimage`);
 			workingContext.drawImage(imgBlob, 0, 0, width, 1600);
-
+			console.timeEnd(`Radar-${index}-drawimage`);
 			// get the base map
+			console.time(`Radar-${index}-drawbasemap`);
 			context.drawImage(this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
-
+			console.timeEnd(`Radar-${index}-drawbasemap`);
 			// crop the radar image
 			const cropCanvas = document.createElement('canvas');
 			cropCanvas.width = 640;
 			cropCanvas.height = 367;
 			const cropContext = cropCanvas.getContext('2d', { willReadFrequently: true });
 			cropContext.imageSmoothingEnabled = false;
+			console.time(`Radar-${index}-copy-radar`);
 			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
-			// clean the image
+			console.timeEnd(`Radar-${index}-copy-radar`);
+			// clean the im`age
+			console.time(`Radar-${index}-clean-image`);
 			utils.removeDopplerRadarImageNoise(cropContext);
+			console.timeEnd(`Radar-${index}-clean-image`);
 
 			// merge the radar and map
+			console.time(`Radar-${index}-merge`);
 			utils.mergeDopplerRadarImage(context, cropContext);
+			console.timeEnd(`Radar-${index}-merge`);
 
-			const elem = this.fillTemplate('frame', { map: { type: 'img', src: canvas.toDataURL() } });
-
+			console.time(`Radar-${index}-dataurl`);
+			const onscreenCanvas = document.createElement('canvas');
+			onscreenCanvas.width = canvas.width;
+			onscreenCanvas.height = canvas.height;
+			onscreenCanvas.getContext('bitmaprenderer').transferFromImageBitmap(canvas.transferToImageBitmap());
+			const elem = this.fillTemplate('frame', { map: { type: 'canvas', canvas: onscreenCanvas } });
+			console.timeEnd(`Radar-${index}-dataurl`);
+			console.timeEnd(`Radar-${index}`);
 			return {
 				canvas,
 				time,
