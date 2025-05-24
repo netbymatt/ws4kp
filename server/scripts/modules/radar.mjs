@@ -56,7 +56,7 @@ class Radar extends WeatherDisplay {
 		this.baseMap = await loadImg(src);
 
 		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
-		const baseUrlEnd = '/GIS/uscomp/';
+		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
 		const baseUrls = [];
 		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
 
