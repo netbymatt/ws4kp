@@ -5,6 +5,7 @@ import corsPassThru from './cors/index.mjs';
 import radarPassThru from './cors/radar.mjs';
 import outlookPassThru from './cors/outlook.mjs';
 import playlist from './src/playlist.mjs';
+import OVERRIDES from './src/overrides.mjs';
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
@@ -57,6 +58,7 @@ const index = (req, res) => {
 	res.render('index', {
 		production: false,
 		version,
+		OVERRIDES,
 	});
 };
 

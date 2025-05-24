@@ -14,9 +14,10 @@ import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
 import file from 'gulp-file';
+import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
-import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import reader from '../src/playlist-reader.mjs';
 
 const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
@@ -113,6 +114,7 @@ const compressHtml = async () => {
 		.pipe(ejs({
 			production: version,
 			version,
+			OVERRIDES,
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))

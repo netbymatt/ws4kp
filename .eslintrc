@@ -12,7 +12,8 @@
 		"RegionalCities": "readonly",
 		"StationInfo": "readonly",
 		"SunCalc": "readonly",
-		"NoSleep": "readonly"
+		"NoSleep": "readonly",
+		"OVERRIDES": "readonly"
 	},
 	"parserOptions": {
 		"ecmaVersion": "latest",

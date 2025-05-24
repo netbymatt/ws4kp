@@ -8,6 +8,7 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 
+const RADAR_HOST = 'mesonet.agron.iastate.edu';
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Radar', true);
@@ -55,7 +56,7 @@ class Radar extends WeatherDisplay {
 		const src = 'images/maps/radar.webp';
 		this.baseMap = await loadImg(src);
 
-		const baseUrl = 'https://mesonet.agron.iastate.edu/archive/data/';
+		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
 		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
 		const baseUrls = [];
 		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
@@ -134,7 +135,8 @@ class Radar extends WeatherDisplay {
 			workingContext.imageSmoothingEnabled = false;
 
 			// get the image
-			const response = await fetch(rewriteUrl(url));
+			const modifiedUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
+			const response = await fetch(rewriteUrl(modifiedUrl));
 
 			// test response
 			if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
