@@ -1,7 +1,6 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { loadImgElement } from './utils/image.mjs';
 import { text } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
@@ -110,10 +109,8 @@ class Radar extends WeatherDisplay {
 
 		// Load the most recent doppler radar images.
 		const radarInfo = await Promise.all(urls.map(async (url, index) => {
-			console.time(`Radar-${index}`);
 			const processedRadar = await this.workers[index].processRadar({
 				url,
-				index,
 				RADAR_HOST,
 				OVERRIDES,
 				sourceXY,
@@ -136,16 +133,13 @@ class Radar extends WeatherDisplay {
 				zone: 'UTC',
 			}).setZone(timeZone());
 
-			console.time(`Radar-${index}-transfer-canvas`);
 			const onscreenCanvas = document.createElement('canvas');
-			onscreenCanvas.width = 640;
-			onscreenCanvas.height = 367;
+			onscreenCanvas.width = processedRadar.width;
+			onscreenCanvas.height = processedRadar.height;
 			const onscreenContext = onscreenCanvas.getContext('bitmaprenderer');
 			onscreenContext.transferFromImageBitmap(processedRadar);
 
 			const elem = this.fillTemplate('frame', { map: { type: 'canvas', canvas: onscreenCanvas } });
-			console.timeEnd(`Radar-${index}-transfer-canvas`);
-			console.timeEnd(`Radar-${index}`);
 			return {
 				time,
 				elem,
@@ -184,7 +178,7 @@ class Radar extends WeatherDisplay {
 // create a radar worker with helper functions
 const radarWorker = () => {
 	// create the worker
-	const worker = new Worker('scripts/modules/radar-worker.mjs', { type: 'module' });
+	const worker = new Worker(new URL('./radar-worker.mjs', import.meta.url), { type: 'module' });
 
 	const processRadar = (url) => new Promise((resolve, reject) => {
 		// prepare for done message

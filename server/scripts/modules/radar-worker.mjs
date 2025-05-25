@@ -1,78 +1,106 @@
 import * as utils from './radar-utils.mjs';
 
+const radarFullSize = { width: 2550, height: 1600 };
+const radarFinalSize = { width: 640, height: 367 };
+
 const fetchAsBlob = async (url) => {
 	const response = await fetch(url);
 	return response.blob();
 };
 
-onmessage = async (e) => {
-	const baseMapImage = createImageBitmap(await fetchAsBlob('/images/maps/radar.webp'));
+const baseMapImages = new Promise((resolve) => {
+	fetchAsBlob('/images/maps/radar.webp').then((blob) => {
+		createImageBitmap(blob).then((imageBitmap) => {
+			// extract the black pixels to overlay on to the final image (boundaries)
+			console.time('radar-overlay');
+			const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+			const context = canvas.getContext('2d');
+			context.drawImage(imageBitmap, 0, 0);
+			const imageData = context.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
 
+			// go through the image data and preserve the black pixels, making the rest transparent
+			for (let i = 0; i < imageData.data.length; i += 4) {
+				if (imageData.data[i + 0] >= 116 || imageData.data[i + 1] >= 116 || imageData.data[i + 2] >= 116) {
+					// make it transparent
+					imageData.data[i + 3] = 0;
+				}
+			}
+			// write the image data back
+			context.putImageData(imageData, 0, 0);
+
+			console.timeEnd('radar-overlay');
+			resolve({
+				fullMap: imageBitmap,
+				overlay: canvas,
+			});
+		});
+	});
+});
+
+onmessage = async (e) => {
 	const {
-		url, index, RADAR_HOST, OVERRIDES, radarSourceXY, sourceXY, offsetX, offsetY,
+		url, RADAR_HOST, OVERRIDES, radarSourceXY, sourceXY, offsetX, offsetY,
 	} = e.data;
 
+	// get the image
+	const modifiedRadarUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
+	const radarResponsePromise = fetch(modifiedRadarUrl);
+
 	// calculate offsets and sizes
-	const width = 2550;
-	const height = 1600;
-	const radarOffsetX = 120;
-	const radarOffsetY = 70;
-	const radarSourceX = Math.round(radarSourceXY.x / 2);
-	const radarSourceY = Math.round(radarSourceXY.y / 2);
+
+	const radarSource = {
+		width: 240,
+		height: 163,
+		x: Math.round(radarSourceXY.x / 2),
+		y: Math.round(radarSourceXY.y / 2),
+	};
 
 	// create destination context
-	const baseCanvas = new OffscreenCanvas(640, 367);
-	const baseContext = baseCanvas.getContext('2d', { alpha: false });
+	const baseCanvas = new OffscreenCanvas(radarFinalSize.width, radarFinalSize.height);
+	const baseContext = baseCanvas.getContext('2d');
 	baseContext.imageSmoothingEnabled = false;
 
 	// create working context for manipulation
-	const radarCanvas = new OffscreenCanvas(width, height);
-	const radarContext = radarCanvas.getContext('2d', { alpha: false });
+	const radarCanvas = new OffscreenCanvas(radarFullSize.width, radarFullSize.height);
+	const radarContext = radarCanvas.getContext('2d');
 	radarContext.imageSmoothingEnabled = false;
 
-	// get the image
-	const modifiedUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
-	console.time(`Radar-${index}-fetch`);
-	const response = await fetch(modifiedUrl);
-	console.timeEnd(`Radar-${index}-fetch`);
+	// get the base map
+	const baseMaps = await baseMapImages;
+	baseContext.drawImage(baseMaps.fullMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, radarFinalSize.width, radarFinalSize.height);
 
 	// test response
-	if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
+	const radarResponse = await radarResponsePromise;
+	if (!radarResponse.ok) throw new Error(`Unable to fetch radar error ${radarResponse.status} ${radarResponse.statusText} from ${radarResponse.url}`);
 
 	// get the blob
-	console.time(`Radar-${index}-blob`);
-	const radarImgBlob = await response.blob();
-	console.timeEnd(`Radar-${index}-blob`);
+	const radarImgBlob = await radarResponse.blob();
 
 	// assign to an html image element
-	console.time(`Radar-${index}-loadimg-element`);
 	const radarImgElement = await createImageBitmap(radarImgBlob);
-	console.timeEnd(`Radar-${index}-loadimg-element`);
 	// draw the entire image
-	radarContext.clearRect(0, 0, width, 1600);
-	console.time(`Radar-${index}-drawimage`);
-	radarContext.drawImage(radarImgElement, 0, 0, width, 1600);
-	console.timeEnd(`Radar-${index}-drawimage`);
-	// get the base map
-	console.time(`Radar-${index}-drawbasemap`);
-	baseContext.drawImage(await baseMapImage, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
-	console.timeEnd(`Radar-${index}-drawbasemap`);
-	// crop the radar image
-	const cropCanvas = new OffscreenCanvas(640, 367);
-	const cropContext = cropCanvas.getContext('2d', { willReadFrequently: true });
-	cropContext.imageSmoothingEnabled = false;
-	console.time(`Radar-${index}-copy-radar`);
-	cropContext.drawImage(radarCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), Math.round(radarOffsetY * 2.33), 0, 0, 640, 367);
-	console.timeEnd(`Radar-${index}-copy-radar`);
-	// clean the image
-	console.time(`Radar-${index}-clean-image`);
-	utils.removeDopplerRadarImageNoise(cropContext);
-	console.timeEnd(`Radar-${index}-clean-image`);
+	radarContext.clearRect(0, 0, radarFullSize.width, radarFullSize.height);
+	radarContext.drawImage(radarImgElement, 0, 0, radarFullSize.width, radarFullSize.height);
 
-	// merge the radar and map
-	console.time(`Radar-${index}-merge`);
-	utils.mergeDopplerRadarImage(baseContext, cropContext);
-	console.timeEnd(`Radar-${index}-merge`);
+	// crop the radar image without scaling
+	const croppedRadarCanvas = new OffscreenCanvas(radarSource.width, radarSource.height);
+	const croppedRadarContext = croppedRadarCanvas.getContext('2d');
+	croppedRadarContext.imageSmoothingEnabled = false;
+	croppedRadarContext.drawImage(radarCanvas, radarSource.x, radarSource.y, croppedRadarCanvas.width, croppedRadarCanvas.height, 0, 0, croppedRadarCanvas.width, croppedRadarCanvas.height);
+
+	// clean the image
+	utils.removeDopplerRadarImageNoise(croppedRadarContext);
+
+	// stretch the radar image
+	const stretchCanvas = new OffscreenCanvas(radarFinalSize.width, radarFinalSize.height);
+	const stretchContext = stretchCanvas.getContext('2d', { willReadFrequently: true });
+	stretchContext.imageSmoothingEnabled = false;
+	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, radarFinalSize.width, radarFinalSize.height);
+
+	// put the radar on the base map
+	baseContext.drawImage(stretchCanvas, 0, 0);
+	// put the road/boundaries overlay on the map
+	baseContext.drawImage(baseMaps.overlay, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, radarFinalSize.width, radarFinalSize.height);
 
 	const processedRadar = baseCanvas.transferToImageBitmap();
 
