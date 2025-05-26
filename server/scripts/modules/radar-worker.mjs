@@ -12,7 +12,6 @@ const baseMapImages = new Promise((resolve) => {
 	fetchAsBlob('/images/maps/radar.webp').then((blob) => {
 		createImageBitmap(blob).then((imageBitmap) => {
 			// extract the black pixels to overlay on to the final image (boundaries)
-			console.time('radar-overlay');
 			const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
 			const context = canvas.getContext('2d');
 			context.drawImage(imageBitmap, 0, 0);
@@ -28,7 +27,6 @@ const baseMapImages = new Promise((resolve) => {
 			// write the image data back
 			context.putImageData(imageData, 0, 0);
 
-			console.timeEnd('radar-overlay');
 			resolve({
 				fullMap: imageBitmap,
 				overlay: canvas,
