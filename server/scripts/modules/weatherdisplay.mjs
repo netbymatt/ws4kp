@@ -421,6 +421,8 @@ class WeatherDisplay {
 			} else if (value?.type === 'img') {
 				// fill the image source
 				elem.querySelector('img').src = value.src;
+			} else if (value?.type === 'canvas') {
+				elem.append(value.canvas);
 			}
 		});
 

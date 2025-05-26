@@ -28,7 +28,15 @@ const preloadImg = (src) => {
 	return true;
 };
 
+const loadImgElement = (url) => new Promise((resolve, reject) => {
+	const image = new Image();
+	image.onload = () => resolve(image);
+	image.onerror = reject;
+	image.src = url;
+});
+
 export {
 	loadImg,
 	preloadImg,
+	loadImgElement,
 };

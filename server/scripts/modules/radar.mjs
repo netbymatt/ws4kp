@@ -1,9 +1,7 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { loadImg } from './utils/image.mjs';
 import { text } from './utils/fetch.mjs';
-import { rewriteUrl } from './utils/cors.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
@@ -41,6 +39,9 @@ class Radar extends WeatherDisplay {
 			{ time: 1, si: 4 },
 			{ time: 12, si: 5 },
 		];
+
+		// get some web workers started
+		this.workers = (new Array(this.dopplerRadarImageMax)).fill(null).map(() => radarWorker());
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -51,10 +52,6 @@ class Radar extends WeatherDisplay {
 			this.setStatus(STATUS.noData);
 			return;
 		}
-
-		// get the base map
-		const src = 'images/maps/radar.webp';
-		this.baseMap = await loadImg(src);
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
 		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
@@ -105,90 +102,45 @@ class Radar extends WeatherDisplay {
 		// calculate offsets and sizes
 		let offsetX = 120;
 		let offsetY = 69;
-		const width = 2550;
-		const height = 1600;
 		offsetX *= 2;
 		offsetY *= 2;
 		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters, offsetX, offsetY);
-
-		// calculate radar offsets
-		const radarOffsetX = 120;
-		const radarOffsetY = 70;
 		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters, offsetX, offsetY);
-		const radarSourceX = radarSourceXY.x / 2;
-		const radarSourceY = radarSourceXY.y / 2;
 
 		// Load the most recent doppler radar images.
-		const radarInfo = await Promise.all(urls.map(async (url) => {
-			// create destination context
-			const canvas = document.createElement('canvas');
-			canvas.width = 640;
-			canvas.height = 367;
-			const context = canvas.getContext('2d');
-			context.imageSmoothingEnabled = false;
-
-			// create working context for manipulation
-			const workingCanvas = document.createElement('canvas');
-			workingCanvas.width = width;
-			workingCanvas.height = height;
-			const workingContext = workingCanvas.getContext('2d');
-			workingContext.imageSmoothingEnabled = false;
-
-			// get the image
-			const modifiedUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
-			const response = await fetch(rewriteUrl(modifiedUrl));
-
-			// test response
-			if (!response.ok) throw new Error(`Unable to fetch radar error ${response.status} ${response.statusText} from ${response.url}`);
-
-			// get the blob
-			const blob = await response.blob();
+		const radarInfo = await Promise.all(urls.map(async (url, index) => {
+			const processedRadar = await this.workers[index].processRadar({
+				url,
+				RADAR_HOST,
+				OVERRIDES,
+				sourceXY,
+				radarSourceXY,
+				offsetX,
+				offsetY,
+			});
 
 			// store the time
 			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
-			let time;
-			if (timeMatch) {
-				const [, year, month, day, hour, minute] = timeMatch;
-				time = DateTime.fromObject({
-					year,
-					month,
-					day,
-					hour,
-					minute,
-				}, {
-					zone: 'UTC',
-				}).setZone(timeZone());
-			} else {
-				time = DateTime.fromHTTP(response.headers.get('last-modified')).setZone(timeZone());
-			}
 
-			// assign to an html image element
-			const imgBlob = await loadImg(blob);
+			const [, year, month, day, hour, minute] = timeMatch;
+			const time = DateTime.fromObject({
+				year,
+				month,
+				day,
+				hour,
+				minute,
+			}, {
+				zone: 'UTC',
+			}).setZone(timeZone());
 
-			// draw the entire image
-			workingContext.clearRect(0, 0, width, 1600);
-			workingContext.drawImage(imgBlob, 0, 0, width, 1600);
+			const onscreenCanvas = document.createElement('canvas');
+			onscreenCanvas.width = processedRadar.width;
+			onscreenCanvas.height = processedRadar.height;
+			const onscreenContext = onscreenCanvas.getContext('bitmaprenderer');
+			onscreenContext.transferFromImageBitmap(processedRadar);
 
-			// get the base map
-			context.drawImage(this.baseMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, 640, 367);
-
-			// crop the radar image
-			const cropCanvas = document.createElement('canvas');
-			cropCanvas.width = 640;
-			cropCanvas.height = 367;
-			const cropContext = cropCanvas.getContext('2d', { willReadFrequently: true });
-			cropContext.imageSmoothingEnabled = false;
-			cropContext.drawImage(workingCanvas, radarSourceX, radarSourceY, (radarOffsetX * 2), (radarOffsetY * 2.33), 0, 0, 640, 367);
-			// clean the image
-			utils.removeDopplerRadarImageNoise(cropContext);
-
-			// merge the radar and map
-			utils.mergeDopplerRadarImage(context, cropContext);
-
-			const elem = this.fillTemplate('frame', { map: { type: 'img', src: canvas.toDataURL() } });
-
+			const elem = this.fillTemplate('frame', { map: { type: 'canvas', canvas: onscreenCanvas } });
 			return {
-				canvas,
 				time,
 				elem,
 			};
@@ -201,8 +153,6 @@ class Radar extends WeatherDisplay {
 
 		// set max length
 		this.timing.totalScreens = radarInfo.length;
-		// store the images
-		this.data = radarInfo.map((radar) => radar.canvas);
 
 		this.times = radarInfo.map((radar) => radar.time);
 		this.setStatus(STATUS.loaded);
@@ -224,6 +174,31 @@ class Radar extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+// create a radar worker with helper functions
+const radarWorker = () => {
+	// create the worker
+	const worker = new Worker(new URL('./radar-worker.mjs', import.meta.url), { type: 'module' });
+
+	const processRadar = (url) => new Promise((resolve, reject) => {
+		// prepare for done message
+		worker.onmessage = (e) => {
+			if (e?.data instanceof Error) {
+				reject(e.data);
+			} else if (e?.data instanceof ImageBitmap) {
+				resolve(e.data);
+			}
+		};
+
+		// start up the worker
+		worker.postMessage(url);
+	});
+
+	// return the object
+	return {
+		processRadar,
+	};
+};
 
 // register display
 registerDisplay(new Radar(11, 'radar'));
