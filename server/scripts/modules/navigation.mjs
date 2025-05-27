@@ -253,9 +253,9 @@ const resize = () => {
 
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
 	if (scale < 1.0 || document.fullscreenElement || settings.kiosk) {
-		document.querySelector('#container').style.transform = `scale(${scale})`;
+		document.querySelector('#container').style.zoom = scale;
 	} else {
-		document.querySelector('#container').style.transform = 'unset';
+		document.querySelector('#container').style.zoom = 'unset';
 	}
 };
 
@@ -266,6 +266,7 @@ const resetStatuses = () => {
 
 // allow displays to register themselves
 const registerDisplay = (display) => {
+	if (displays[display.navId]) console.warn(`Display nav ID ${display.navId} already in use`);
 	displays[display.navId] = display;
 
 	// generate checkboxes
