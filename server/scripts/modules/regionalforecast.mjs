@@ -7,7 +7,7 @@ import { json } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
-import { DateTime } from '../vendor/auto/luxon.mjs';
+import { DateTime, Interval } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
@@ -77,6 +77,9 @@ class RegionalForecast extends WeatherDisplay {
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
 
+		// get now as DateTime for calculations below
+		const now = DateTime.now();
+
 		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
 		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
 			try {
@@ -110,14 +113,24 @@ class RegionalForecast extends WeatherDisplay {
 				preloadImg(getSmallIcon(regionalObservation.icon, !regionalObservation.daytime));
 
 				// return a pared-down forecast
-				// 0th object is the current conditions
-				// first object is the next period i.e. if it's daytime then it's the "tonight" forecast
-				// second object is the following period
-				// always skip the first forecast index because it's what's going on right now
+				// 0th object should contain the current conditions, but when WFOs go offline or otherwise don't post
+				// an updated forecast it's possible that the 0th object is in the past.
+				// so we go on a search for the current time in the start/end times provided in the forecast periods
+				const { periods } = forecast.properties;
+				const currentPeriod = periods.reduce((prev, period, index) => {
+					const start = DateTime.fromISO(period.startTime);
+					const end = DateTime.fromISO(period.endTime);
+					const interval = Interval.fromDateTimes(start, end);
+					if (interval.contains(now)) {
+						return index;
+					}
+					return prev;
+				}, 0);
+				// group together the current observation and next two periods
 				return [
 					regionalObservation,
-					utils.buildForecast(forecast.properties.periods[1], city, cityXY),
-					utils.buildForecast(forecast.properties.periods[2], city, cityXY),
+					utils.buildForecast(forecast.properties.periods[currentPeriod + 1], city, cityXY),
+					utils.buildForecast(forecast.properties.periods[currentPeriod + 2], city, cityXY),
 				];
 			} catch (error) {
 				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
