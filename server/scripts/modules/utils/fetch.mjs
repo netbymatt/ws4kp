@@ -5,6 +5,11 @@ const text = (url, params) => fetchAsync(url, 'text', params);
 const blob = (url, params) => fetchAsync(url, 'blob', params);
 
 const fetchAsync = async (_url, responseType, _params = {}) => {
+	// add user agent header to json request at api.weather.gov
+	const headers = {};
+	if (_url.match(/api\.weather\.gov/)) {
+		headers['user-agent'] = 'Weatherstar 4000+; weatherstar@netbymatt.com';
+	}
 	// combine default and provided parameters
 	const params = {
 		method: 'GET',
@@ -12,6 +17,7 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 		type: 'GET',
 		retryCount: 0,
 		..._params,
+		headers,
 	};
 	// store original number of retries
 	params.originalRetries = params.retryCount;
