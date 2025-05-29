@@ -1,3 +1,5 @@
+import { elemForEach } from './utils/elem.mjs';
+
 document.addEventListener('DOMContentLoaded', () => init());
 
 // shorthand mappings for frequently used values
@@ -19,21 +21,18 @@ const init = () => {
 const createLink = async (e) => {
 	// cancel default event (click on hyperlink)
 	e.preventDefault();
-	// get all checkboxes on page
-	const checkboxes = document.querySelectorAll('input[type=checkbox]');
 
 	// list to receive checkbox statuses
 	const queryStringElements = {};
 
-	[...checkboxes].forEach((elem) => {
+	elemForEach('input[type=checkbox]', (elem) => {
 		if (elem?.id) {
 			queryStringElements[elem.id] = elem?.checked ?? false;
 		}
 	});
 
 	// get all select boxes
-	const selects = document.querySelectorAll('select');
-	[...selects].forEach((elem) => {
+	elemForEach('select', (elem) => {
 		if (elem?.id) {
 			queryStringElements[elem.id] = elem?.value ?? 0;
 		}

@@ -3,43 +3,24 @@ import { json } from './utils/fetch.mjs';
 
 const KEYS = {
 	ESC: 27,
-	TAB: 9,
-	RETURN: 13,
-	LEFT: 37,
 	UP: 38,
-	RIGHT: 39,
 	DOWN: 40,
 	ENTER: 13,
 };
 
 const DEFAULT_OPTIONS = {
-	autoSelectFirst: false,
 	serviceUrl: null,
-	lookup: null,
-	onSelect: () => { },
-	onHint: null,
-	width: 'auto',
 	minChars: 3,
 	maxHeight: 300,
 	deferRequestBy: 0,
 	params: {},
-	delimiter: null,
 	zIndex: 9999,
 	type: 'GET',
-	noCache: false,
-	preserveInput: false,
 	containerClass: 'autocomplete-suggestions',
-	tabDisabled: false,
-	dataType: 'text',
-	currentRequest: null,
-	triggerSelectOnValidInput: true,
-	preventBadQueries: true,
 	paramName: 'query',
 	transformResult: (a) => a,
 	showNoSuggestionNotice: false,
 	noSuggestionNotice: 'No results',
-	orientation: 'bottom',
-	forceFixPosition: false,
 };
 
 const escapeRegExChars = (string) => string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');

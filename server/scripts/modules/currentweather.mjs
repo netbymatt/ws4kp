@@ -1,6 +1,6 @@
 // current weather conditions display
 import STATUS from './status.mjs';
-import { loadImg, preloadImg } from './utils/image.mjs';
+import { preloadImg } from './utils/image.mjs';
 import { json } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
@@ -17,8 +17,6 @@ const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F'
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
-		// pre-load background image (returns promise)
-		this.backgroundImage = loadImg('images/backgrounds/1.png');
 	}
 
 	async getData(weatherParameters, refresh) {

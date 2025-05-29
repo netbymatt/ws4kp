@@ -1,5 +1,5 @@
 // display sun and moon data
-import { loadImg, preloadImg } from './utils/image.mjs';
+import { preloadImg } from './utils/image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -8,9 +8,6 @@ import { registerDisplay, timeZone } from './navigation.mjs';
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Almanac', true);
-
-		// pre-load background images (returns promises)
-		this.backgroundImage0 = loadImg('images/backgrounds/1.png');
 
 		// preload the moon images
 		preloadImg(imageName('Full'));
@@ -122,10 +119,10 @@ class Almanac extends WeatherDisplay {
 		// sun and moon data
 		this.elem.querySelector('.day-1').innerHTML = Today.toLocaleString({ weekday: 'long' });
 		this.elem.querySelector('.day-2').innerHTML = Tomorrow.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.rise-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunrise).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.rise-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunrise).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-1').innerHTML = DateTime.fromJSDate(info.sun[0].sunset).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
-		this.elem.querySelector('.set-2').innerHTML = DateTime.fromJSDate(info.sun[1].sunset).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+		this.elem.querySelector('.rise-1').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[0].sunrise));
+		this.elem.querySelector('.rise-2').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[1].sunrise));
+		this.elem.querySelector('.set-1').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[0].sunset));
+		this.elem.querySelector('.set-2').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[1].sunset));
 
 		const days = info.moon.map((MoonPhase) => {
 			const fill = {};
@@ -170,6 +167,8 @@ const imageName = (type) => {
 			return 'images/icons/moon-phases/First-Quarter.gif';
 	}
 };
+
+const timeFormat = (dt) => dt.setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
 
 // register display
 const display = new Almanac(9, 'almanac');

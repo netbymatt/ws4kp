@@ -100,10 +100,8 @@ class Radar extends WeatherDisplay {
 		const urls = sortedPngs.slice(-(this.dopplerRadarImageMax));
 
 		// calculate offsets and sizes
-		let offsetX = 120;
-		let offsetY = 69;
-		offsetX *= 2;
-		offsetY *= 2;
+		const offsetX = 120 * 2;
+		const offsetY = 69 * 2;
 		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters, offsetX, offsetY);
 		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters, offsetX, offsetY);
 

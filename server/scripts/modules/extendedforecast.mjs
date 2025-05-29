@@ -59,11 +59,10 @@ class ExtendedForecast extends WeatherDisplay {
 				date: Day.dayName,
 			};
 
-			const { low } = Day;
+			const { low, high } = Day;
 			if (low !== undefined) {
 				fill['value-lo'] = Math.round(low);
 			}
-			const { high } = Day;
 			fill['value-hi'] = Math.round(high);
 
 			// return the filled template
@@ -121,17 +120,17 @@ const parse = (fullForecast) => {
 	return forecast;
 };
 
+const regexList = [
+	[/ and /gi, ' '],
+	[/slight /gi, ''],
+	[/chance /gi, ''],
+	[/very /gi, ''],
+	[/patchy /gi, ''],
+	[/areas /gi, ''],
+	[/dense /gi, ''],
+	[/Thunderstorm/g, 'T\'Storm'],
+];
 const shortenExtendedForecastText = (long) => {
-	const regexList = [
-		[/ and /gi, ' '],
-		[/slight /gi, ''],
-		[/chance /gi, ''],
-		[/very /gi, ''],
-		[/patchy /gi, ''],
-		[/areas /gi, ''],
-		[/dense /gi, ''],
-		[/Thunderstorm/g, 'T\'Storm'],
-	];
 	// run all regexes
 	const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
 

@@ -22,8 +22,7 @@ class LatestObservations extends WeatherDisplay {
 		// this is intentional because up to 30 stations are available to pull data from
 
 		// calculate distance to each station
-		const stationsByDistance = Object.keys(StationInfo).map((key) => {
-			const station = StationInfo[key];
+		const stationsByDistance = Object.values(StationInfo).map((station) => {
 			const distance = calcDistance(station.lat, station.lon, this.weatherParameters.latitude, this.weatherParameters.longitude);
 			return { ...station, distance };
 		});
@@ -103,8 +102,6 @@ class LatestObservations extends WeatherDisplay {
 		const linesContainer = this.elem.querySelector('.observation-lines');
 		linesContainer.innerHTML = '';
 		linesContainer.append(...lines);
-
-		// update temperature unit header
 
 		this.finishDraw();
 	}

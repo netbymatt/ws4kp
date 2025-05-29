@@ -1,5 +1,4 @@
 // regional forecast and observations
-import { loadImg } from './utils/image.mjs';
 import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import {
@@ -9,9 +8,6 @@ import {
 class Progress extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, '', false);
-
-		// pre-load background image (returns promise)
-		this.backgroundImage = loadImg('images/backgrounds/1.png');
 
 		// disable any navigation timing
 		this.timing = false;

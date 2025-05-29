@@ -2,7 +2,7 @@ import { json } from './fetch.mjs';
 
 const getPoint = async (lat, lon) => {
 	try {
-		return await json(`https://api.weather.gov/points/${lat},${lon}`);
+		return await json(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`);
 	} catch (error) {
 		console.log(`Unable to get point ${lat}, ${lon}`);
 		console.error(error);

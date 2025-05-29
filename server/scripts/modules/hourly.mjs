@@ -69,8 +69,7 @@ class Hourly extends WeatherDisplay {
 			const fillValues = {};
 			// hour
 			const hour = startingHour.plus({ hours: index });
-			const formattedHour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
-			fillValues.hour = formattedHour;
+			fillValues.hour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
 
 			// temperatures, convert to strings with no decimal
 			const temperature = data.temperature.toString().padStart(3);
@@ -81,12 +80,11 @@ class Hourly extends WeatherDisplay {
 			fillValues.like = feelsLike;
 
 			// wind
-			let wind = 'Calm';
+			fillValues.wind = 'Calm';
 			if (data.windSpeed > 0) {
 				const windSpeed = Math.round(data.windSpeed).toString();
-				wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
+				fillValues.wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
 			}
-			fillValues.wind = wind;
 
 			// image
 			fillValues.icon = { type: 'img', src: data.icon };
@@ -96,8 +94,7 @@ class Hourly extends WeatherDisplay {
 			// alter the color of the feels like column to reflect wind chill or heat index
 			if (feelsLike < temperature) {
 				filledRow.querySelector('.like').classList.add('wind-chill');
-			}
-			if (feelsLike > temperature) {
+			} else if (feelsLike > temperature) {
 				filledRow.querySelector('.like').classList.add('heat-index');
 			}
 

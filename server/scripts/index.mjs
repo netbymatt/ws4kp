@@ -61,7 +61,7 @@ const init = () => {
 		paramName: 'text',
 		params: {
 			f: 'json',
-			countryCode: 'USA', // 'USA,PRI,VIR,GUM,ASM',
+			countryCode: 'USA',
 			category,
 			maxSuggestions: 10,
 		},
@@ -82,7 +82,6 @@ const init = () => {
 
 	// attempt to parse the url parameters
 	const parsedParameters = parseQueryString();
-
 	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
 
 	// Auto load the parsed parameters and fall back to the previous query

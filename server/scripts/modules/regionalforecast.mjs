@@ -13,6 +13,12 @@ import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
 
+// map offset
+const mapOffsetXY = {
+	x: 240,
+	y: 117,
+};
+
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Regional Forecast', true);
@@ -36,23 +42,18 @@ class RegionalForecast extends WeatherDisplay {
 		}
 		this.elem.querySelector('.map img').src = baseMap;
 
-		// map offset
-		const offsetXY = {
-			x: 240,
-			y: 117,
-		};
 		// get user's location in x/y
-		const sourceXY = utils.getXYFromLatitudeLongitude(this.weatherParameters.latitude, this.weatherParameters.longitude, offsetXY.x, offsetXY.y, weatherParameters.state);
+		const sourceXY = utils.getXYFromLatitudeLongitude(this.weatherParameters.latitude, this.weatherParameters.longitude, mapOffsetXY.x, mapOffsetXY.y, weatherParameters.state);
 
 		// get latitude and longitude limits
-		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, offsetXY.x, offsetXY.y, this.weatherParameters.state);
+		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, mapOffsetXY.x, mapOffsetXY.y, this.weatherParameters.state);
 
 		// get a target distance
 		let targetDistance = 2.5;
 		if (this.weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
-		const stationInfoArray = Object.values(StationInfo).map((value) => ({ ...value, targetDistance }));
+		const stationInfoArray = Object.values(StationInfo).map((station) => ({ ...station, targetDistance }));
 		// combine regional cities with station info for additional stations
 		// stations are intentionally after cities to allow cities priority when drawing the map
 		const combinedCities = [...RegionalCities, ...stationInfoArray];
@@ -137,7 +138,7 @@ class RegionalForecast extends WeatherDisplay {
 		// return the weather data and offsets
 		this.data = {
 			regionalData,
-			offsetXY,
+			mapOffsetXY,
 			sourceXY,
 		};
 
@@ -147,7 +148,7 @@ class RegionalForecast extends WeatherDisplay {
 	drawCanvas() {
 		super.drawCanvas();
 		// break up data into useful values
-		const { regionalData: data, sourceXY, offsetXY } = this.data;
+		const { regionalData: data, sourceXY } = this.data;
 
 		// draw the header graphics
 
@@ -170,7 +171,7 @@ class RegionalForecast extends WeatherDisplay {
 		}
 
 		// draw the map
-		const scale = 640 / (offsetXY.x * 2);
+		const scale = 640 / (mapOffsetXY.x * 2);
 		const map = this.elem.querySelector('.map');
 		map.style.transform = `scale(${scale}) translate(-${sourceXY.x}px, -${sourceXY.y}px)`;
 

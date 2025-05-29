@@ -6,6 +6,10 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 
+// get available space
+const availableWidth = 532;
+const availableHeight = 285;
+
 class HourlyGraph extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		super(navId, elemId, 'Hourly Graph', defaultActive);
@@ -46,10 +50,6 @@ class HourlyGraph extends WeatherDisplay {
 
 	drawCanvas() {
 		if (!this.image) this.image = this.elem.querySelector('.chart img');
-
-		// get available space
-		const availableWidth = 532;
-		const availableHeight = 285;
 
 		this.image.width = availableWidth;
 		this.image.height = availableHeight;

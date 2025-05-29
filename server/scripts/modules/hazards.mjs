@@ -50,7 +50,7 @@ class Hazards extends WeatherDisplay {
 			// show alert indicator
 			if (this.data.length > 0) alert.classList.add('show');
 		} catch (error) {
-			console.error('Get hourly forecast failed');
+			console.error('Get hazards failed');
 			console.error(error.status, error.responseJSON);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
 			// return undefined to other subscribers
@@ -129,7 +129,7 @@ class Hazards extends WeatherDisplay {
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
 
-		// copy the scrolled portion of the canvas
+		// move the element
 		this.elem.querySelector('.main').scrollTo(0, offsetY);
 	}
 

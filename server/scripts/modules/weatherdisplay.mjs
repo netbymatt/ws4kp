@@ -7,6 +7,7 @@ import {
 } from './navigation.mjs';
 import { parseQueryString } from './share.mjs';
 import settings from './settings.mjs';
+import { elemForEach } from './utils/elem.mjs';
 
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
@@ -391,8 +392,7 @@ class WeatherDisplay {
 		this.templates = {};
 		this.elem = document.querySelector(`#${this.elemId}-html`);
 		if (!this.elem) return;
-		const templates = this.elem.querySelectorAll('.template');
-		templates.forEach((template) => {
+		elemForEach(`#${this.elemId}-html .template`, (template) => {
 			const className = template.classList[0];
 			const node = template.cloneNode(true);
 			node.classList.remove('template');

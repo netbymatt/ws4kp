@@ -20,7 +20,7 @@ const buildForecast = (forecast, city, cityXY) => {
 const getRegionalObservation = async (point, city) => {
 	try {
 		// get stations
-		const stations = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations`);
+		const stations = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=1`);
 
 		// get the first station
 		const station = stations.features[0].id;
