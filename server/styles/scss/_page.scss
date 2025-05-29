@@ -458,6 +458,30 @@ body {
 	cursor: pointer;
 }
 
+#ToggleScanlines {
+	display: inline-block;
+
+	.on {
+		display: none;
+	}
+
+	.off {
+		display: inline-block;
+	}
+
+
+	&.on {
+		.on {
+			display: inline-block;
+		}
+
+		.off {
+			display: none;
+		}
+
+	}
+}
+
 .visible {
 	visibility: visible;
 	opacity: 1;

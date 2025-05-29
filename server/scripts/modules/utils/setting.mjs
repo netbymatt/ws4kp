@@ -189,7 +189,7 @@ class Setting {
 				break;
 			case 'checkbox':
 			default:
-				this.element.checked = newValue;
+				this.element.querySelector('input').checked = newValue;
 		}
 		this.storeToLocalStorage(this.myValue);
 

@@ -33,6 +33,12 @@ const init = () => {
 			[1.5, 'Very Slow'],
 		],
 	});
+	settings.scanLines = new Setting('scanLines', {
+		name: 'Scan Lines',
+		defaultValue: false,
+		changeAction: scanLineChange,
+		sticky: true,
+	});
 	settings.units = new Setting('units', {
 		name: 'Units',
 		type: 'select',
@@ -82,6 +88,18 @@ const kioskChange = (value) => {
 		window.dispatchEvent(new Event('resize'));
 	} else {
 		body.classList.remove('kiosk');
+	}
+};
+
+const scanLineChange = (value) => {
+	const container = document.getElementById('container');
+	const navIcons = document.getElementById('ToggleScanlines');
+	if (value) {
+		container.classList.add('scanlines');
+		navIcons.classList.add('on');
+	} else {
+		container.classList.remove('scanlines');
+		navIcons.classList.remove('on');
 	}
 };
 

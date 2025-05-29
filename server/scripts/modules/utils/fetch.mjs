@@ -7,7 +7,7 @@ const blob = (url, params) => fetchAsync(url, 'blob', params);
 const fetchAsync = async (_url, responseType, _params = {}) => {
 	// add user agent header to json request at api.weather.gov
 	const headers = {};
-	if (_url.match(/api\.weather\.gov/)) {
+	if (_url.toString().match(/api\.weather\.gov/)) {
 		headers['user-agent'] = 'Weatherstar 4000+; weatherstar@netbymatt.com';
 	}
 	// combine default and provided parameters
