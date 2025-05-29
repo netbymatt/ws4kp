@@ -31,7 +31,7 @@ To run via Node locally:
 git clone https://github.com/netbymatt/ws4kp.git
 cd ws4kp
 npm i
-node index.js
+node index.mjs
 ```
 
 To run via Docker: 
