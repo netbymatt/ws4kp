@@ -189,11 +189,33 @@ body {
 #divTwcBottom>div {
 	padding-left: 6px;
 	padding-right: 6px;
+
+	// scale down the buttons on narrower screens
+	@media (max-width: 550px) {
+		zoom: 0.90;
+	}
+
+	@media (max-width: 500px) {
+		zoom: 0.80;
+	}
+
+	@media (max-width: 450px) {
+		zoom: 0.70;
+	}
+
+	@media (max-width: 400px) {
+		zoom: 0.60;
+	}
+
+	@media (max-width: 350px) {
+		zoom: 0.50;
+	}
 }
 
 #divTwcBottomLeft {
 	flex: 1;
 	text-align: left;
+
 }
 
 #divTwcBottomMiddle {
