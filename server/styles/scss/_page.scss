@@ -23,6 +23,8 @@ body {
 
 	&.kiosk {
 		margin: 0px;
+		overflow: hidden;
+		width: 100vw;
 	}
 }
 
@@ -139,6 +141,10 @@ body {
 	&.wide {
 		max-width: 854px;
 	}
+}
+
+.kiosk #divTwc {
+	max-width: unset;
 }
 
 #divTwcLeft {
@@ -322,10 +328,6 @@ body {
 	transform-origin: unset;
 }
 
-.kiosk #divTwc #container {
-	transform-origin: 0 0;
-}
-
 #loading {
 	width: 640px;
 	height: 480px;
@@ -424,10 +426,6 @@ body {
 	&.no-cursor {
 		cursor: none;
 	}
-}
-
-.kiosk #divTwc {
-	justify-content: unset;
 }
 
 #divTwc:fullscreen #display,
@@ -774,6 +772,7 @@ body {
 
 	#divQuery,
 	>.info,
+	>.related-links,
 	>.heading,
 	#enabledDisplays,
 	#settings,
