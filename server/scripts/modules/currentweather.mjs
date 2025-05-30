@@ -50,6 +50,8 @@ class CurrentWeather extends WeatherDisplay {
 					stillWaiting: () => this.stillWaiting(),
 				});
 
+				if (observations.features.length === 0) throw new Error(`No features returned for station: ${station.properties.stationIdentifier}, trying next station`);
+
 				// test data quality
 				if (observations.features[0].properties.temperature.value === null
 					|| observations.features[0].properties.windSpeed.value === null
@@ -59,10 +61,11 @@ class CurrentWeather extends WeatherDisplay {
 					|| observations.features[0].properties.dewpoint.value === null
 					|| observations.features[0].properties.barometricPressure.value === null) {
 					observations = undefined;
-					throw new Error(`Unable to get observations: ${station.properties.stationIdentifier}, trying next station`);
+					throw new Error(`Incomplete data set for: ${station.properties.stationIdentifier}, trying next station`);
 				}
 			} catch (error) {
 				console.error(error);
+				observations = undefined;
 			}
 		}
 		// test for data received
