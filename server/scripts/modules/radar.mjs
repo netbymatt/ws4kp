@@ -39,9 +39,6 @@ class Radar extends WeatherDisplay {
 			{ time: 1, si: 4 },
 			{ time: 12, si: 5 },
 		];
-
-		// get some web workers started
-		this.workers = (new Array(this.dopplerRadarImageMax)).fill(null).map(() => radarWorker());
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -51,6 +48,12 @@ class Radar extends WeatherDisplay {
 		if (this.weatherParameters.state === 'AK' || this.weatherParameters.state === 'HI') {
 			this.setStatus(STATUS.noData);
 			return;
+		}
+
+		// get the workers started
+		if (!this.workers) {
+			// get some web workers started
+			this.workers = (new Array(this.dopplerRadarImageMax)).fill(null).map(() => radarWorker());
 		}
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
