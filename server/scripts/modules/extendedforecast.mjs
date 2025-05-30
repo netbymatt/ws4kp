@@ -126,6 +126,7 @@ const regexList = [
 	[/chance /gi, ''],
 	[/very /gi, ''],
 	[/patchy /gi, ''],
+	[/Areas Of /gi, ''],
 	[/areas /gi, ''],
 	[/dense /gi, ''],
 	[/Thunderstorm/g, 'T\'Storm'],
