@@ -99,8 +99,11 @@ const server = app.listen(port, () => {
 });
 
 // graceful shutdown
-process.on('SIGINT', () => {
+const gracefulShutdown = () => {
 	server.close(() => {
 		console.log('Server closed');
 	});
-});
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
