@@ -295,6 +295,8 @@ const updateFullScreenNavigate = () => {
 };
 
 const documentKeydown = (e) => {
+	// don't trigger on ctrl/alt/shift modified key
+	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 	const { key } = e;
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
