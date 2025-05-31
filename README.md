@@ -87,6 +87,17 @@ I've made several changes to this Weather Star 4000 simulation compared to the o
 ## Sharing a permalink (bookmarking)
 Selected displays, the forecast city and widescreen setting are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it click the "Copy Permalink" (or get "Get Parmalink") near the bottom of the page. A URL will be copied to your clipboard with all of you selected displays and location (or copy it from the page if your browser doesn't support clipboard transfers directly). You can then share this link or add it to your bookmarks.
 
+Your permalink will be very long. Here is an example for the Orlando Internation Airport:
+```
+https://weatherstar.netbymatt.com/?hazards-checkbox=false&current-weather-checkbox=true&latest-observations-checkbox=true&hourly-checkbox=false&hourly-graph-checkbox=true&travel-checkbox=false&regional-forecast-checkbox=true&local-forecast-checkbox=true&extended-forecast-checkbox=true&almanac-checkbox=false&spc-outlook-checkbox=true&radar-checkbox=true&settings-wide-checkbox=false&settings-kiosk-checkbox=false&settings-scanLines-checkbox=false&settings-speed-select=1.00&settings-units-select=us&latLonQuery=Orlando+International+Airport%2C+Orlando%2C+FL%2C+USA&latLon=%7B%22lat%22%3A28.431%2C%22lon%22%3A-81.3076%7D
+```
+You can also build your own permalink. Any omitted settings will be filled with defaults. Here are a few examples:
+```
+https://weatherstar.netbymatt.com/?latLonQuery=Orlando+International+Airport
+https://weatherstar.netbymatt.com/?kiosk=true
+https://weatherstar.netbymatt.com/?settings-units-select=metric
+```
+
 ## Kiosk mode
 Kiosk mode can be activated by a checkbox on the page. Note that there is no way out of kiosk mode (except refresh or closing the browser), and the play/pause and other controls will not be available. This is deliberate as a browser's kiosk mode it intended not to be exited or significantly modified.
 
@@ -144,6 +155,10 @@ Note: not all units are converted to metric, if selected. Some text-based produc
 ## Related Projects
 
 Not retro enough? Try the [Weatherstar 3000+](https://github.com/netbymatt/ws3kp)
+
+## Use
+
+Linking directly to the live web site at https://weatherstar.netbymatt.com is encouraged. As is using the live site for digital signage, home dashboards, streaming and public display. Please note the disclaimer below.
 
 ## Disclaimer
 
