@@ -6,10 +6,15 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 
+// TEMPORARY fix to disable radar on ios safari
+const isIos = /iP(ad|od|hone)/i.test(window.navigator.userAgent);
+const isSafari = !!navigator.userAgent.match(/Version\/[\d.]+.*Safari/);
+const safariIos = isIos && isSafari;
+
 const RADAR_HOST = 'mesonet.agron.iastate.edu';
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Radar', true);
+		super(navId, elemId, 'Local Radar', !safariIos);
 
 		this.okToDrawCurrentConditions = false;
 		this.okToDrawCurrentDateTime = false;
@@ -202,4 +207,7 @@ const radarWorker = () => {
 };
 
 // register display
-registerDisplay(new Radar(11, 'radar'));
+// TEMPORARY: except on safari on IOS
+if (!safariIos) {
+	registerDisplay(new Radar(11, 'radar'));
+}
