@@ -65,6 +65,10 @@ const largeIcon = (link, _isNightTime) => {
 		case 'sleet-n':
 			return addPath('Sleet.gif');
 
+		case 'smoke':
+		case 'smoke-n':
+			return addPath('Smoke.gif');
+
 		case 'rain_showers':
 		case 'rain_showers_high':
 		case 'rain_showers-n':
