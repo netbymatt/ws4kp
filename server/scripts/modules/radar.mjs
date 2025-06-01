@@ -6,9 +6,10 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 
-// TEMPORARY fix to disable radar on ios safari
+// TEMPORARY fix to disable radar on ios safari. The same engine (webkit) is
+// used for all ios browers (chrome, brave, firefox, etc) so it's safe to skip
+// any subsequent narrowing of the user-agent.
 const isIos = /iP(ad|od|hone)/i.test(window.navigator.userAgent);
-const isSafari = !!navigator.userAgent.match(/Version\/[\d.]+.*Safari/);
 // NOTE: iMessages/Messages preview is provided by an Apple scraper that uses a
 // user-agent similar to: `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1)
 // AppleWebKit/601.2.4 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.4
@@ -21,12 +22,11 @@ const isSafari = !!navigator.userAgent.match(/Version\/[\d.]+.*Safari/);
 // https://github.com/netbymatt/ws4kp/issues/74#issuecomment-2921154962 for more
 // context.
 const isBot = /twitterbot|Facebot/i.test(window.navigator.userAgent);
-const safariIos = isIos && isSafari;
 
 const RADAR_HOST = 'mesonet.agron.iastate.edu';
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
-		super(navId, elemId, 'Local Radar', !safariIos && !isBot);
+		super(navId, elemId, 'Local Radar', !isIos && !isBot);
 
 		this.okToDrawCurrentConditions = false;
 		this.okToDrawCurrentDateTime = false;
@@ -219,7 +219,7 @@ const radarWorker = () => {
 };
 
 // register display
-// TEMPORARY: except on safari on IOS and bots
-if (!safariIos && !isBot) {
+// TEMPORARY: except on IOS and bots
+if (!isIos && !isBot) {
 	registerDisplay(new Radar(11, 'radar'));
 }
