@@ -19,6 +19,8 @@ let hazardData;
 // start drawing conditions
 // reset starts from the first item in the text scroll list
 const start = () => {
+	// if already started, nothing to do
+	if (interval) return;
 	// set up the interval if needed
 	if (!interval) {
 		interval = setInterval(incrementInterval, 500);
@@ -211,6 +213,7 @@ const drawScrollCondition = (screen) => {
 const parseMessage = (event) => {
 	if (event?.data?.type === 'current-weather-scroll') {
 		if (event.data?.method === 'start') start();
+		if (event.data?.method === 'reload') stop(true);
 	}
 };
 
