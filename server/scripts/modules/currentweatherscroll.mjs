@@ -19,8 +19,6 @@ let hazardData;
 // start drawing conditions
 // reset starts from the first item in the text scroll list
 const start = () => {
-	// store see if the context is new
-
 	// set up the interval if needed
 	if (!interval) {
 		interval = setInterval(incrementInterval, 500);
@@ -74,8 +72,10 @@ const drawScreen = async () => {
 	const thisScreen = screens[screenIndex](data);
 
 	// update classes on the scroll area
-	elemForEach('.weather-display .scroll .fixed', (elem) => {
-		elem.classList.forEach((cls) => { if (cls !== 'fixed') elem.classList.remove(cls); });
+	elemForEach('.weather-display .scroll', (elem) => {
+		elem.classList.forEach((cls) => { if (cls !== 'scroll') elem.classList.remove(cls); });
+		// no scroll on progress
+		if (elem.parentElement.id === 'progress-html') return;
 		thisScreen?.classes?.forEach((cls) => elem.classList.add(cls));
 	});
 
@@ -159,9 +159,6 @@ const drawCondition = (text) => {
 		elem.innerHTML = text;
 	});
 };
-document.addEventListener('DOMContentLoaded', () => {
-	start();
-});
 
 // store the original number of screens
 const originalScreens = screens.length;
@@ -211,7 +208,23 @@ const drawScrollCondition = (screen) => {
 	}, 1000);
 };
 
+const parseMessage = (event) => {
+	if (event?.data?.type === 'current-weather-scroll') {
+		if (event.data?.method === 'start') start();
+	}
+};
+
+// add event listener for start message
+window.addEventListener('message', parseMessage);
+
 window.CurrentWeatherScroll = {
 	addScreen,
 	reset,
+	start,
+};
+
+export {
+	addScreen,
+	reset,
+	start,
 };

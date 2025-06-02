@@ -170,6 +170,7 @@ class WeatherDisplay {
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
 		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
+		if (this.okToDrawCurrentConditions) postMessage({ type: 'current-weather-scroll', method: 'start' });
 	}
 
 	finishDraw() {
