@@ -4,6 +4,7 @@
 .weather-display .main.hazards {
 	&.main {
 		overflow-y: hidden;
+		height: 480px;
 
 		.hazard-lines {
 			min-height: 400px;
@@ -18,9 +19,10 @@
 				@include u.text-shadow(0px);
 				position: relative;
 				text-transform: uppercase;
-				margin-top: 110px;
+				margin-top: 10px;
 				margin-left: 80px;
 				margin-right: 80px;
+				padding-bottom: 10px;
 			}
 		}
 	}

@@ -21,6 +21,7 @@ class Hazards extends WeatherDisplay {
 		// special height and width for scrolling
 		super(navId, elemId, 'Hazards', defaultActive);
 		this.showOnProgress = false;
+		this.okToDrawCurrentConditions = false;
 
 		// 0 screens skips this during "play"
 		this.timing.totalScreens = 0;
@@ -155,6 +156,17 @@ class Hazards extends WeatherDisplay {
 		// return the value as expected
 		return superValue;
 	}
+
+	// make data available outside this class
+	// promise allows for data to be requested before it is available
+	async getHazards(stillWaiting) {
+		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
+		return new Promise((resolve) => {
+			if (this.data) resolve(this.data);
+			// data not available, put it into the data callback queue
+			this.getDataCallbacks.push(() => resolve(this.data));
+		});
+	}
 }
 
 const calcSeverity = (severity, event) => {
@@ -165,4 +177,7 @@ const calcSeverity = (severity, event) => {
 };
 
 // register display
-registerDisplay(new Hazards(0, 'hazards', true));
+const display = new Hazards(0, 'hazards', true);
+registerDisplay(display);
+
+export default display.getHazards.bind(display);

@@ -2,6 +2,7 @@ import { locationCleanup } from './utils/string.mjs';
 import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
+import getHazards from './hazards.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
@@ -13,6 +14,7 @@ let interval;
 let screenIndex = 0;
 let sinceLastUpdate = 0;
 let nextUpdate = DEFAULT_UPDATE;
+let hazardData;
 
 // start drawing conditions
 // reset starts from the first item in the text scroll list
@@ -51,6 +53,8 @@ const incrementInterval = (force) => {
 		return;
 	}
 	screenIndex = (screenIndex + 1) % (lastScreen);
+	// only show hazards when present
+	if (hazardData?.length > 0) screenIndex = 0;
 	// draw new text
 	drawScreen();
 };
@@ -58,11 +62,23 @@ const incrementInterval = (force) => {
 const drawScreen = async () => {
 	// get the conditions
 	const data = await getCurrentWeather();
+	const hazards = await getHazards(() => this.stillWaiting());
+
+	// combine data
+	data.hazards = hazards;
+	hazardData = hazards;
 
 	// nothing to do if there's no data yet
 	if (!data) return;
 
 	const thisScreen = screens[screenIndex](data);
+
+	// update classes on the scroll area
+	elemForEach('.weather-display .scroll .fixed', (elem) => {
+		elem.classList.forEach((cls) => { if (cls !== 'fixed') elem.classList.remove(cls); });
+		thisScreen?.classes?.forEach((cls) => elem.classList.add(cls));
+	});
+
 	if (typeof thisScreen === 'string') {
 		// only a string
 		drawCondition(thisScreen);
@@ -80,8 +96,23 @@ const drawScreen = async () => {
 	}
 };
 
+const hazards = (data) => {
+	// test for data
+	if (!data.hazards || data.hazards.length === 0) return false;
+
+	const hazard = `${data.hazards[0].properties.event} ${data.hazards[0].properties.description}`;
+
+	return {
+		text: hazard,
+		type: 'scroll',
+		classes: ['hazard'],
+	};
+};
+
 // the "screens" are stored in an array for easy addition and removal
 const screens = [
+	// hazards
+	hazards,
 	// station name
 	(data) => `Conditions at ${locationCleanup(data.station.properties.name).substr(0, 20)}`,
 
