@@ -87,7 +87,7 @@ class Radar extends WeatherDisplay {
 		const lists = (await Promise.all(baseUrls.map(async (url) => {
 			try {
 				// get a list of available radars
-				return text(url, { cors: true });
+				return text(url);
 			} catch (error) {
 				console.log('Unable to get list of radars');
 				console.error(error);
