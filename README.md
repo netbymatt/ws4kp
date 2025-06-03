@@ -64,7 +64,8 @@ services:
       - WSQS_settings_units_select=us
       - WSQS_latLonQuery="90210 Beverly Hills CA USA"
       # There are more possibilities, check the permalink for a complete list
-
+    ports:
+      - 8080:8080 # change the first 8080 to meet your local network needs
     restart: unless-stopped
 ```
 
