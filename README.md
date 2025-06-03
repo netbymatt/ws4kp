@@ -54,6 +54,25 @@ docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
 ```
 Open your web browser: http://localhost:8080/ 
 
+To run via Docker Compose (docker-compose.yaml):
+```
+---
+services:
+  ws4kp:
+    image: ghcr.io/netbymatt/ws4kp
+    container_name: ws4kp
+    environment: 
+      # Each argument in the permalink URL can become an environment variable on the Docker host by adding WSQS_
+      # Following the "Sharing a Permalink" example below, here are a few environment variables defined. Visit that section for a
+      # more complete list of configuration options.
+      - WSQS_latLonQuery="Orlando International Airport Orlando FL USA"
+      - WSQS_hazards_checkbox=false
+      - WSQS_current_weather_checkbox=true
+    ports:
+      - 8080:8080 # change the first 8080 to meet your local network needs
+    restart: unless-stopped
+```
+
 ### Serving static files
 The app can be served as a static set of files on any web server. Run the provided gulp task to create a set of static distribution files:
 ```
