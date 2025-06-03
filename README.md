@@ -40,30 +40,20 @@ docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
 ```
 Open your web browser: http://localhost:8080/ 
 
-To run via Docker Compose:
+To run via Docker Compose (docker-compose.yaml):
 ```
 ---
 services:
   ws4kp:
     image: ghcr.io/netbymatt/ws4kp
     container_name: ws4kp
-    environment:
-      - WSQS_hazards_checkbox=true
-      - WSQS_current_weather_checkbox=true
-      - WSQS_latest_observations_checkbox=true
-      - WSQS_hourly_checkbox=false
-      - WSQS_hourly_graph_checkbox=true
-      - WSQS_travel_checkbox=true
-      - WSQS_regional_forecast_checkbox=true
-      - WSQS_local_forecast_checkbox=true
-      - WSQS_extended_forecast_checkbox=true
-      - WSQS_almanac_checkbox=true
-      - WSQS_spc_outlook_checkbox=true
-      - WSQS_radar_checkbox=true
-      - WSQS_settings_kiosk_checkbox=true
-      - WSQS_settings_units_select=us
-      - WSQS_latLonQuery="90210 Beverly Hills CA USA"
-      # There are more possibilities, check the permalink for a complete list
+    environment: 
+      # Each argument in the permalink URL can become an environment variable on the Docker host by adding WSQS_
+      # Following the "Sharing a Permalink" example below, here are a few environment variables defined. Visit that section for a
+      # more complete list of configuration options.
+      - WSQS_latLonQuery="Orlando International Airport Orlando FL USA"
+      - WSQS_hazards-checkbox=false
+      - WSQS_current-weather-checkbox=true
     ports:
       - 8080:8080 # change the first 8080 to meet your local network needs
     restart: unless-stopped
