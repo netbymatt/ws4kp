@@ -40,6 +40,34 @@ docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
 ```
 Open your web browser: http://localhost:8080/ 
 
+To run via Docker Compose:
+```
+---
+services:
+  ws4kp:
+    image: ghcr.io/netbymatt/ws4kp
+    container_name: ws4kp
+    environment:
+      - WSQS_hazards_checkbox=true
+      - WSQS_current_weather_checkbox=true
+      - WSQS_latest_observations_checkbox=true
+      - WSQS_hourly_checkbox=false
+      - WSQS_hourly_graph_checkbox=true
+      - WSQS_travel_checkbox=true
+      - WSQS_regional_forecast_checkbox=true
+      - WSQS_local_forecast_checkbox=true
+      - WSQS_extended_forecast_checkbox=true
+      - WSQS_almanac_checkbox=true
+      - WSQS_spc_outlook_checkbox=true
+      - WSQS_radar_checkbox=true
+      - WSQS_settings_kiosk_checkbox=true
+      - WSQS_settings_units_select=us
+      - WSQS_latLonQuery="90210 Beverly Hills CA USA"
+      # There are more possibilities, check the permalink for a complete list
+
+    restart: unless-stopped
+```
+
 ## Updates in 5.0
 The change to 5.0 changes from drawing the weather graphics on canvas elements and instead uses HTML and CSS to style all of the weather graphics. A lot of other changes and fixes were implemented at the same time.
 
