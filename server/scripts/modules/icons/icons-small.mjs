@@ -44,6 +44,7 @@ const smallIcon = (link, _isNightTime) => {
 		case 'sct-n':
 		case 'nsct':
 		case 'nsct-n':
+		case 'haze-n':
 			return addPath('Partly-Cloudy-Night.gif');
 
 		case 'ovc':
