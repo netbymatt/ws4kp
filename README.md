@@ -52,8 +52,8 @@ services:
       # Following the "Sharing a Permalink" example below, here are a few environment variables defined. Visit that section for a
       # more complete list of configuration options.
       - WSQS_latLonQuery="Orlando International Airport Orlando FL USA"
-      - WSQS_hazards-checkbox=false
-      - WSQS_current-weather-checkbox=true
+      - WSQS_hazards_checkbox=false
+      - WSQS_current_weather_checkbox=true
     ports:
       - 8080:8080 # change the first 8080 to meet your local network needs
     restart: unless-stopped
