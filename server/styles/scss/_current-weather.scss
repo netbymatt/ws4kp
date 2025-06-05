@@ -9,6 +9,7 @@
 			width: 255px;
 			display: inline-block;
 			margin-top: 10px;
+			padding-top: 10px;
 			position: absolute;
 
 			@include u.text-shadow();
@@ -92,7 +93,9 @@
 			color: c.$title-color;
 			max-height: 32px;
 			margin-bottom: 10px;
+			padding-top: 4px;
 			overflow: hidden;
+			text-wrap: nowrap;
 		}
 	}
 }
