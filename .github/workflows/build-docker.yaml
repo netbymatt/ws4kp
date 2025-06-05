@@ -3,7 +3,7 @@ name: build-docker
 on:
   push:
     branches:
-      - main
+      - '**'
     tags:
       - 'v*.*.*'
       - 'v*.*'
@@ -50,7 +50,7 @@ jobs:
           context: .
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
