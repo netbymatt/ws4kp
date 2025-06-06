@@ -77,9 +77,9 @@ const removeDopplerRadarImageNoise = (RadarContext) => {
 
 		// is this pixel the old rgb?
 		if ((R === 0 && G === 0 && B === 0)
-					|| (R === 0 && G === 236 && B === 236)
-					|| (R === 1 && G === 160 && B === 246)
-					|| (R === 0 && G === 0 && B === 246)) {
+			|| (R === 0 && G === 236 && B === 236)
+			|| (R === 1 && G === 160 && B === 246)
+			|| (R === 0 && G === 0 && B === 246)) {
 			// change to your new rgb
 
 			// Transparent
@@ -124,14 +124,14 @@ const removeDopplerRadarImageNoise = (RadarContext) => {
 			B = 19;
 			A = 255;
 		} else if ((R === 214 && G === 0 && B === 0)
-					|| (R === 255 && G === 0 && B === 0)) {
+			|| (R === 255 && G === 0 && B === 0)) {
 			// Red
 			R = 171;
 			G = 14;
 			B = 14;
 			A = 255;
 		} else if ((R === 192 && G === 0 && B === 0)
-					|| (R === 255 && G === 0 && B === 255)) {
+			|| (R === 255 && G === 0 && B === 255)) {
 			// Brown
 			R = 115;
 			G = 31;
@@ -177,9 +177,44 @@ const mergeDopplerRadarImage = (mapContext, radarContext) => {
 	mapContext.drawImage(radarContext.canvas, 0, 0);
 };
 
+const tileSize = { x: 510, y: 320 };
+const radarFullSize = { width: 2550, height: 1600 };
+const radarFinalSize = { width: 640, height: 367 };
+const radarSourceSize = { width: 480, height: 276 };
+const scaling = {
+	width: radarFinalSize.width / radarSourceSize.width,
+	height: radarFinalSize.height / radarSourceSize.height,
+};
+
+// convert a pixel location to a file/tile combination
+const pixelToFile = (xPixel, yPixel) => {
+	const xTile = Math.floor(xPixel / tileSize.x);
+	const yTile = Math.floor(yPixel / tileSize.y);
+	if (xTile < 0 || xTile > 9 || yTile < 0 || yTile > 9) return false;
+	return `${xTile.toFixed(0).padStart(2, '0')}-${yTile.toFixed(0).padStart(2, '0')}`;
+};
+
+// convert a pixel location in the overall map to a pixel location on the tile
+const modTile = (xPixel, yPixel) => {
+	const x = Math.round(xPixel) % tileSize.x;
+	const y = Math.round(yPixel) % tileSize.y;
+	return { x, y };
+};
+
+const mapSizeToFinalSize = (x, y) => ({
+	x: Math.round(x * scaling.height),
+	y: Math.round(y * scaling.width),
+});
+
 export {
 	getXYFromLatitudeLongitudeDoppler,
 	getXYFromLatitudeLongitudeMap,
 	removeDopplerRadarImageNoise,
 	mergeDopplerRadarImage,
+	pixelToFile,
+	modTile,
+	mapSizeToFinalSize,
+	tileSize,
+	radarFinalSize,
+	radarFullSize,
 };
