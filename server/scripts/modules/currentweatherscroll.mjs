@@ -14,13 +14,18 @@ let interval;
 let screenIndex = 0;
 let sinceLastUpdate = 0;
 let nextUpdate = DEFAULT_UPDATE;
-let hazardData;
+let resetFlag;
 
 // start drawing conditions
 // reset starts from the first item in the text scroll list
 const start = () => {
-	// if already started, nothing to do
-	if (interval) return;
+	// if already started, draw the screen on a reset flag and return
+	if (interval) {
+		if (resetFlag) drawScreen();
+		resetFlag = false;
+		return;
+	}
+	resetFlag = false;
 	// set up the interval if needed
 	if (!interval) {
 		interval = setInterval(incrementInterval, 500);
@@ -31,7 +36,10 @@ const start = () => {
 };
 
 const stop = (reset) => {
-	if (reset) screenIndex = 0;
+	if (reset) {
+		screenIndex = 0;
+		resetFlag = true;
+	}
 };
 
 // increment interval, roll over
@@ -53,8 +61,7 @@ const incrementInterval = (force) => {
 		return;
 	}
 	screenIndex = (screenIndex + 1) % (lastScreen);
-	// only show hazards when present
-	if (hazardData?.length > 0) screenIndex = 0;
+
 	// draw new text
 	drawScreen();
 };
@@ -62,11 +69,11 @@ const incrementInterval = (force) => {
 const drawScreen = async () => {
 	// get the conditions
 	const data = await getCurrentWeather();
-	const hazards = await getHazards(() => this.stillWaiting());
 
-	// combine data
-	data.hazards = hazards;
-	hazardData = hazards;
+	// add the hazards if on screen 0
+	if (screenIndex === 0) {
+		data.hazards = await getHazards(() => this.stillWaiting());
+	}
 
 	// nothing to do if there's no data yet
 	if (!data) return;
