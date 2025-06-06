@@ -139,6 +139,11 @@ Ws4kp is muted by default, but if it was unmuted on the last visit it is coded t
 
 Chrome seems to be more lenient on auto play and will eventually let a site auto-play music if you're visited it enough recently and manually clicked to start playing music on each visit. It also has a flag you can add to the command line when launching Chrome: `chrome.exe --autoplay-policy=no-user-gesture-required`. This is the best solution when using Kiosk-style setup.
 
+If you're unable to pre-set the play state before entering kiosk mode (such as with a home dashboard implemenation) you can add the query string value below to the url. The browser will still follow the auto play rules outlined above.
+```
+?settings-mediaPlaying-boolean=true
+```
+
 ## Community Notes
 
 Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!
