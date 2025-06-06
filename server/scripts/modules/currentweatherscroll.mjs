@@ -99,6 +99,12 @@ const drawScreen = async () => {
 				break;
 			default: drawCondition(thisScreen);
 		}
+		// add the header if available
+		if (thisScreen.header) {
+			setHeader(thisScreen.header);
+		} else {
+			setHeader('');
+		}
 	} else {
 		// can't identify screen, get another one
 		incrementInterval(true);
@@ -115,6 +121,7 @@ const hazards = (data) => {
 		text: hazard,
 		type: 'scroll',
 		classes: ['hazard'],
+		header: data.hazards[0].properties.event,
 	};
 };
 
@@ -166,6 +173,13 @@ const drawCondition = (text) => {
 	// update all html scroll elements
 	elemForEach('.weather-display .scroll .fixed', (elem) => {
 		elem.innerHTML = text;
+	});
+	setHeader('');
+};
+
+const setHeader = (text) => {
+	elemForEach('.weather-display .scroll .scroll-header', (elem) => {
+		elem.innerHTML = text ?? '';
 	});
 };
 

@@ -117,18 +117,28 @@
 		height: 70px;
 		overflow: hidden;
 		margin-top: 3px;
-		padding-top: 7px;
 
 		&.hazard {
 			background-color: rgb(112, 35, 35);
 		}
 
-		.fixed {
-			font-family: 'Star4000';
-			font-size: 24pt;
+		.fixed,
+		.scroll-header {
 			margin-left: 55px;
 			margin-right: 55px;
 			overflow: hidden;
+		}
+
+		.scroll-header {
+			height: 26px;
+			font-family: "Star4000 Small";
+			font-size: 20pt;
+			margin-top: -10px;
+		}
+
+		.fixed {
+			font-family: 'Star4000';
+			font-size: 24pt;
 
 			.scroll-area {
 				text-wrap: nowrap;
