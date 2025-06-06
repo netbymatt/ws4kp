@@ -67,6 +67,9 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// update the main process for display purposes
 	populateWeatherParameters(weatherParameters);
 
+	// reset the scroll
+	postMessage({ type: 'current-weather-scroll', method: 'reload' });
+
 	// draw the progress canvas and hide others
 	hideAllCanvases();
 	document.querySelector('#loading').style.display = 'none';

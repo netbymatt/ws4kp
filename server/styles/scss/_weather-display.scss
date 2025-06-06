@@ -113,15 +113,21 @@
 
 	.scroll {
 		@include u.text-shadow(3px, 1.5px);
-		width: calc(640px - 2 * 30px);
+		width: 640px;
 		height: 70px;
 		overflow: hidden;
-		margin-top: 10px;
+		margin-top: 3px;
+		padding-top: 7px;
+
+		&.hazard {
+			background-color: rgb(112, 35, 35);
+		}
 
 		.fixed {
 			font-family: 'Star4000';
 			font-size: 24pt;
 			margin-left: 55px;
+			margin-right: 55px;
 			overflow: hidden;
 
 			.scroll-area {
@@ -132,5 +138,6 @@
 				// left: calc((elem width) - 640px);
 			}
 		}
+
 	}
 }

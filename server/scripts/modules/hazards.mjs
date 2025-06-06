@@ -21,9 +21,17 @@ class Hazards extends WeatherDisplay {
 		// special height and width for scrolling
 		super(navId, elemId, 'Hazards', defaultActive);
 		this.showOnProgress = false;
+		this.okToDrawCurrentConditions = false;
+
+		// force a 1-minute refresh time for the most up-to-date hazards
+		this.refreshTime = 60_000;
 
 		// 0 screens skips this during "play"
 		this.timing.totalScreens = 0;
+
+		// take note of the already-shown alert ids
+		this.viewedAlerts = new Set();
+		this.viewedGetCount = 0;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -32,8 +40,17 @@ class Hazards extends WeatherDisplay {
 		// hazards performs a silent refresh, but does not fall back to a previous fetch if no data is available
 		// this is intentional to ensure the latest alerts only are displayed.
 
+		// auto reload must be set up specifically for hazards in case it is disabled via checkbox (for the bottom line scroll)
+		if (this.autoRefreshHandle === null) this.setAutoReload();
+
 		const alert = this.checkbox.querySelector('.alert');
 		alert.classList.remove('show');
+
+		// if not a refresh (new site), all alerts are new
+		if (!refresh) {
+			this.viewedGetCount = 0;
+			this.viewedAlerts.clear();
+		}
 
 		try {
 			// get the forecast
@@ -47,8 +64,23 @@ class Hazards extends WeatherDisplay {
 			const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown' && (!hasImmediate || (hazard.properties.urgency === 'Immediate')));
 			this.data = filteredAlerts;
 
+			// every 10 times through the get process (10 minutes), reset the viewed messages
+			if (this.viewedGetCount >= 10) {
+				this.viewedGetCount = 0;
+				this.viewedAlerts.clear();
+			}
+			this.viewedGetCount += 1;
+
+			// count up un-viewed alerts
+			const unViewed = this.data.reduce((count, hazard) => {
+				if (!this.viewedAlerts.has(hazard.id)) return count + 1;
+				return count;
+			}, 0);
+
 			// show alert indicator
-			if (this.data.length > 0) alert.classList.add('show');
+			if (unViewed > 0) alert.classList.add('show');
+			// draw the canvas to calculate the new timings and activate hazards in the slide deck again
+			this.drawLongCanvas();
 		} catch (error) {
 			console.error('Get hazards failed');
 			console.error(error.status, error.responseJSON);
@@ -72,7 +104,10 @@ class Hazards extends WeatherDisplay {
 		const list = this.elem.querySelector('.hazard-lines');
 		list.innerHTML = '';
 
-		const lines = this.data.map((data) => {
+		// filter viewed alerts
+		const unViewed = this.data.filter((data) => !this.viewedAlerts.has(data.id));
+
+		const lines = unViewed.map((data) => {
 			const fillValues = {};
 			// text
 			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${data.properties.description.replaceAll('\n\n', '<br/><br/>').replaceAll('\n', ' ')}`;
@@ -91,18 +126,22 @@ class Hazards extends WeatherDisplay {
 		}
 
 		// update timing
+		this.setTiming(list);
+		this.setStatus(STATUS.loaded);
+	}
+
+	setTiming(list) {
 		// set up the timing
 		this.timing.baseDelay = 20;
 		// 24 hours = 6 pages
-		const pages = Math.max(Math.ceil(list.scrollHeight / 400) - 3, 1);
-		const timingStep = 400;
+		const pages = Math.max(Math.ceil(list.scrollHeight / 480) - 4);
+		const timingStep = 480;
 		this.timing.delay = [150 + timingStep];
 		// add additional pages
 		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
 		// add the final 3 second delay
 		this.timing.delay.push(250);
 		this.calcNavTiming();
-		this.setStatus(STATUS.loaded);
 	}
 
 	drawCanvas() {
@@ -151,9 +190,22 @@ class Hazards extends WeatherDisplay {
 		if (superValue === false) {
 			// set total screens to zero to take this out of the rotation
 			this.timing.totalScreens = 0;
+			// note the ids shown
+			this?.data?.forEach((alert) => this.viewedAlerts.add(alert.id));
 		}
 		// return the value as expected
 		return superValue;
+	}
+
+	// make data available outside this class
+	// promise allows for data to be requested before it is available
+	async getHazards(stillWaiting) {
+		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
+		return new Promise((resolve) => {
+			if (this.data) resolve(this.data);
+			// data not available, put it into the data callback queue
+			this.getDataCallbacks.push(() => resolve(this.data));
+		});
 	}
 }
 
@@ -165,4 +217,7 @@ const calcSeverity = (severity, event) => {
 };
 
 // register display
-registerDisplay(new Hazards(0, 'hazards', true));
+const display = new Hazards(0, 'hazards', true);
+registerDisplay(display);
+
+export default display.getHazards.bind(display);

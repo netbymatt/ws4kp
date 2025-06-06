@@ -170,6 +170,7 @@ class WeatherDisplay {
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
 		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
+		if (this.okToDrawCurrentConditions) postMessage({ type: 'current-weather-scroll', method: 'start' });
 	}
 
 	finishDraw() {
@@ -443,7 +444,9 @@ class WeatherDisplay {
 	}
 
 	setAutoReload() {
-		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(false, true), settings.refreshTime.value);
+		// refresh time can be forced by the user (for hazards)
+		const refreshTime = this.refreshTime ?? settings.refreshTime.value;
+		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(false, true), refreshTime);
 	}
 }
 

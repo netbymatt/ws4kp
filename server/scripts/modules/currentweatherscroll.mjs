@@ -2,6 +2,7 @@ import { locationCleanup } from './utils/string.mjs';
 import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
+import getHazards from './hazards.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
@@ -13,12 +14,18 @@ let interval;
 let screenIndex = 0;
 let sinceLastUpdate = 0;
 let nextUpdate = DEFAULT_UPDATE;
+let resetFlag;
 
 // start drawing conditions
 // reset starts from the first item in the text scroll list
 const start = () => {
-	// store see if the context is new
-
+	// if already started, draw the screen on a reset flag and return
+	if (interval) {
+		if (resetFlag) drawScreen();
+		resetFlag = false;
+		return;
+	}
+	resetFlag = false;
 	// set up the interval if needed
 	if (!interval) {
 		interval = setInterval(incrementInterval, 500);
@@ -29,7 +36,10 @@ const start = () => {
 };
 
 const stop = (reset) => {
-	if (reset) screenIndex = 0;
+	if (reset) {
+		screenIndex = 0;
+		resetFlag = true;
+	}
 };
 
 // increment interval, roll over
@@ -51,6 +61,7 @@ const incrementInterval = (force) => {
 		return;
 	}
 	screenIndex = (screenIndex + 1) % (lastScreen);
+
 	// draw new text
 	drawScreen();
 };
@@ -59,10 +70,24 @@ const drawScreen = async () => {
 	// get the conditions
 	const data = await getCurrentWeather();
 
+	// add the hazards if on screen 0
+	if (screenIndex === 0) {
+		data.hazards = await getHazards(() => this.stillWaiting());
+	}
+
 	// nothing to do if there's no data yet
 	if (!data) return;
 
 	const thisScreen = screens[screenIndex](data);
+
+	// update classes on the scroll area
+	elemForEach('.weather-display .scroll', (elem) => {
+		elem.classList.forEach((cls) => { if (cls !== 'scroll') elem.classList.remove(cls); });
+		// no scroll on progress
+		if (elem.parentElement.id === 'progress-html') return;
+		thisScreen?.classes?.forEach((cls) => elem.classList.add(cls));
+	});
+
 	if (typeof thisScreen === 'string') {
 		// only a string
 		drawCondition(thisScreen);
@@ -80,8 +105,23 @@ const drawScreen = async () => {
 	}
 };
 
+const hazards = (data) => {
+	// test for data
+	if (!data.hazards || data.hazards.length === 0) return false;
+
+	const hazard = `${data.hazards[0].properties.event} ${data.hazards[0].properties.description}`;
+
+	return {
+		text: hazard,
+		type: 'scroll',
+		classes: ['hazard'],
+	};
+};
+
 // the "screens" are stored in an array for easy addition and removal
 const screens = [
+	// hazards
+	hazards,
 	// station name
 	(data) => `Conditions at ${locationCleanup(data.station.properties.name).substr(0, 20)}`,
 
@@ -128,9 +168,6 @@ const drawCondition = (text) => {
 		elem.innerHTML = text;
 	});
 };
-document.addEventListener('DOMContentLoaded', () => {
-	start();
-});
 
 // store the original number of screens
 const originalScreens = screens.length;
@@ -180,7 +217,24 @@ const drawScrollCondition = (screen) => {
 	}, 1000);
 };
 
+const parseMessage = (event) => {
+	if (event?.data?.type === 'current-weather-scroll') {
+		if (event.data?.method === 'start') start();
+		if (event.data?.method === 'reload') stop(true);
+	}
+};
+
+// add event listener for start message
+window.addEventListener('message', parseMessage);
+
 window.CurrentWeatherScroll = {
 	addScreen,
 	reset,
+	start,
+};
+
+export {
+	addScreen,
+	reset,
+	start,
 };
