@@ -38,6 +38,9 @@ class Setting {
 		if (this.type === 'checkbox' && urlValue !== undefined) {
 			urlState = urlValue === 'true';
 		}
+		if (this.type === 'boolean' && urlValue !== undefined) {
+			urlState = urlValue === 'true';
+		}
 		if (this.type === 'select' && urlValue !== undefined) {
 			urlState = parseFloat(urlValue);
 		}
