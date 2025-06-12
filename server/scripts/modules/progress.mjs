@@ -14,7 +14,7 @@ class Progress extends WeatherDisplay {
 
 		// setup event listener for dom-required initialization
 		document.addEventListener('DOMContentLoaded', () => {
-			this.version = document.querySelector('#version').innerHTML;
+			this.version = document.querySelector('#version').innerHTML.replace(/\s/g, '');
 			this.elem.querySelector('.container').addEventListener('click', this.lineClick.bind(this));
 		});
 
@@ -91,3 +91,10 @@ class Progress extends WeatherDisplay {
 // register our own display
 const progress = new Progress(-1, 'progress');
 registerProgress(progress);
+
+const version = () => progress.version;
+
+export default progress;
+export {
+	version,
+};

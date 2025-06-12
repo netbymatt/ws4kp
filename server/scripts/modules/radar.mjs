@@ -5,6 +5,7 @@ import { text } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
+import { version } from './progress.mjs';
 
 // TEMPORARY fix to disable radar on ios safari. The same engine (webkit) is
 // used for all ios browers (chrome, brave, firefox, etc) so it's safe to skip
@@ -196,7 +197,7 @@ class Radar extends WeatherDisplay {
 // create a radar worker with helper functions
 const radarWorker = () => {
 	// create the worker
-	const worker = new Worker(new URL('./radar-worker.mjs', import.meta.url), { type: 'module' });
+	const worker = new Worker(`/resources/radar-worker.mjs?_=${version()}`, { type: 'module' });
 
 	const processRadar = (url) => new Promise((resolve, reject) => {
 		// prepare for done message

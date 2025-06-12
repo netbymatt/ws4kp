@@ -71,11 +71,15 @@ const geoip = (req, res) => {
 
 // debugging
 if (process.env?.DIST === '1') {
+	// distribution
+	app.use('/scripts', express.static('./server/scripts'));
+	app.use('/geoip', geoip);
 	app.use('/', express.static('./dist'));
 } else {
 	// debugging
 	app.get('/index.html', index);
 	app.use('/geoip', geoip);
+	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
 	app.get('*name', express.static('./server'));
 	// cors pass-thru to api.weather.gov
