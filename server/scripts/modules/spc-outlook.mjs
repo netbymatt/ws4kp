@@ -18,6 +18,8 @@ const testAllPoints = (point, data) => {
 	data.forEach((day, index) => {
 		// initialize the result
 		result[index] = false;
+		// if there's no data (file didn't load), exit early
+		if (day === undefined) return;
 		// loop through each category
 		day.features.forEach((feature) => {
 			if (!feature.geometry.coordinates) return;
