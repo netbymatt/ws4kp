@@ -188,8 +188,11 @@ const playerEnded = () => {
 };
 
 const setTrackName = (fileName) => {
-	const trackName = fileName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '');
-	document.getElementById('musicTrack').innerHTML = trackName;
+        const baseName = fileName.split('/').pop();
+        const trackName = decodeURIComponent(
+                baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '')
+        );
+        document.getElementById('musicTrack').innerHTML = trackName;
 };
 
 export {
