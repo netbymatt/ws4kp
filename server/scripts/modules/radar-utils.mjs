@@ -206,6 +206,11 @@ const mapSizeToFinalSize = (x, y) => ({
 	y: Math.round(y * scaling.width),
 });
 
+const fetchAsBlob = async (url) => {
+	const response = await fetch(url);
+	return response.blob();
+};
+
 export {
 	getXYFromLatitudeLongitudeDoppler,
 	getXYFromLatitudeLongitudeMap,
@@ -217,4 +222,5 @@ export {
 	tileSize,
 	radarFinalSize,
 	radarFullSize,
+	fetchAsBlob,
 };

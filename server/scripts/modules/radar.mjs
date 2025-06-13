@@ -6,6 +6,7 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 import { version } from './progress.mjs';
+import { elemForEach } from './utils/elem.mjs';
 
 // TEMPORARY fix to disable radar on ios safari. The same engine (webkit) is
 // used for all ios browers (chrome, brave, firefox, etc) so it's safe to skip
@@ -73,6 +74,10 @@ class Radar extends WeatherDisplay {
 			// get some web workers started
 			this.workers = (new Array(this.dopplerRadarImageMax)).fill(null).map(() => radarWorker());
 		}
+		if (!this.fixedWorker) {
+			// get the fixed background, overlay worker started
+			this.fixedWorker = fixedRadarWorker();
+		}
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
 		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
@@ -126,6 +131,12 @@ class Radar extends WeatherDisplay {
 		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters, offsetX, offsetY);
 		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters, offsetX, offsetY);
 
+		const baseAndOverlayPromise = this.fixedWorker.processAssets({
+			sourceXY,
+			offsetX,
+			offsetY,
+		});
+
 		// Load the most recent doppler radar images.
 		const radarInfo = await Promise.all(urls.map(async (url, index) => {
 			const processedRadar = await this.workers[index].processRadar({
@@ -164,6 +175,32 @@ class Radar extends WeatherDisplay {
 				elem,
 			};
 		}));
+		// wait for the base and overlay
+		const baseAndOverlay = await baseAndOverlayPromise;
+
+		// calculate final tile size
+		const finalTileSize = utils.mapSizeToFinalSize(utils.tileSize.x, utils.tileSize.y);
+		// fill the tiles with the overlay
+		elemForEach('.map-tiles img', (elem, index) => {
+			// get the base image
+			const base = baseAndOverlay[`t${index}Base`];
+			// put it on a canvas
+			const canvas = document.createElement('canvas');
+			const context = canvas.getContext('bitmaprenderer');
+			context.transferFromImageBitmap(base);
+			// if it's not there, return (tile not needed)
+			if (!base) return;
+			// assign the bitmap to the image
+			elem.width = finalTileSize.x;
+			elem.height = finalTileSize.y;
+			elem.src = canvas.toDataURL();
+		});
+		// shift the map tile container
+		const tileShift = utils.modTile(sourceXY.x, sourceXY.y);
+		const tileShiftStretched = utils.mapSizeToFinalSize(tileShift.x, tileShift.y);
+		const mapTileContainer = this.elem.querySelector('.map-tiles');
+		mapTileContainer.style.top = `${-tileShiftStretched.x}px`;
+		mapTileContainer.style.left = `${-tileShiftStretched.y}px`;
 
 		// put the elements in the container
 		const scrollArea = this.elem.querySelector('.scroll-area');
@@ -199,7 +236,7 @@ const radarWorker = () => {
 	// create the worker
 	const worker = new Worker(`/resources/radar-worker.mjs?_=${version()}`, { type: 'module' });
 
-	const processRadar = (url) => new Promise((resolve, reject) => {
+	const processRadar = (data) => new Promise((resolve, reject) => {
 		// prepare for done message
 		worker.onmessage = (e) => {
 			if (e?.data instanceof Error) {
@@ -210,12 +247,37 @@ const radarWorker = () => {
 		};
 
 		// start up the worker
-		worker.postMessage(url);
+		worker.postMessage(data);
 	});
 
 	// return the object
 	return {
 		processRadar,
+	};
+};
+
+// create a radar worker for the fixed background images
+const fixedRadarWorker = () => {
+	// create the worker
+	const worker = new Worker(`/resources/radar-worker-bg-fg.mjs?_=${version()}`, { type: 'module' });
+
+	const processAssets = (data) => new Promise((resolve, reject) => {
+		// prepare for done message
+		worker.onmessage = (e) => {
+			if (e?.data instanceof Error) {
+				reject(e.data);
+			} else if (e?.data?.t0Base instanceof ImageBitmap) {
+				resolve(e.data);
+			}
+		};
+
+		// start up the worker
+		worker.postMessage(data);
+	});
+
+	// return the object
+	return {
+		processAssets,
 	};
 };
 

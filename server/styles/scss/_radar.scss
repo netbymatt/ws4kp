@@ -107,6 +107,15 @@
 
 	.container {
 
+		.map-tiles {
+			position: absolute;
+			width: 1400px;
+
+			img {
+				border: 0px;
+			}
+		}
+
 		.scroll-area {
 			position: relative;
 		}

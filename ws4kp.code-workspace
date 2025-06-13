@@ -43,7 +43,8 @@
 			"Malek",
 			"mwood",
 			"unmuted",
-			"dumpio"
+			"dumpio",
+			"mesonet"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",
