@@ -80,6 +80,13 @@ npm run buildDist
 ```
 The resulting files will be in the /dist folder in the root of the project. These can then be uploaded to a web server for hosting, no server-side scripting is required.
 
+When using the provided Docker image, the browser will generate `playlist.json`
+on the fly by scanning the `/music` directory served by nginx. The image
+intentionally omits this file so the page falls back to scanning the directory.
+Simply bind mount your music folder and the playlist will be created
+automatically. If no files are found in `/music`, the built in tracks located in
+`/music/default/` will be used instead.
+
 ## What's different
 
 I've made several changes to this Weather Star 4000 simulation compared to the original hardware unit and the code that this was forked from.
@@ -129,9 +136,12 @@ If you're looking for the original music that played during forecasts [TWCClassi
 ### Customizing the music
 Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. Subdirectories will not be scanned. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
 
-If using docker, you must pass a local accessible folder to the container in the `/app/server/music` directory. 
+If using docker, you can bind mount a local folder containing your music files.
+Mount the folder at `/usr/share/nginx/html/music` so the browser can read the
+directory listing and build the playlist automatically. If there are no `.mp3`
+files in `/music`, the built in tracks from `/music/default/` are used.
 ```
-docker run -p 8080:8080 -v /path/to/local/music:/app/server/music ghcr.io/netbymatt/ws4kp
+docker run -p 8080:8080 -v /path/to/local/music:/usr/share/nginx/html/music ghcr.io/netbymatt/ws4kp
 ```
 
 ### Music doesn't auto play
