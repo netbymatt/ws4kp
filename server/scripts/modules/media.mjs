@@ -47,6 +47,9 @@ const enableMediaPlayer = () => {
 		if (mediaPlaying.value === true) {
 			startMedia();
 		}
+		// add the volume control to the page
+		const settingsSection = document.querySelector('#settings');
+		settingsSection.append(mediaVolume.generate());
 	}
 };
 
@@ -123,6 +126,25 @@ const randomizePlaylist = () => {
 	playlist.availableFiles = randomPlaylist;
 };
 
+const setVolume = (newVolume) => {
+	if (player) {
+		player.volume = newVolume;
+	}
+};
+
+const mediaVolume = new Setting('mediaVolume', {
+	name: 'Volume',
+	type: 'select',
+	defaultValue: 0.75,
+	values: [
+		[1, '100%'],
+		[0.75, '75%'],
+		[0.50, '50%'],
+		[0.25, '25%'],
+	],
+	changeAction: setVolume,
+});
+
 const initializePlayer = () => {
 	// basic sanity checks
 	if (!playlist.availableFiles || playlist?.availableFiles.length === 0) {
@@ -145,6 +167,7 @@ const initializePlayer = () => {
 	player.src = `music/${playlist.availableFiles[currentTrack]}`;
 	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
+	setVolume(mediaVolume.value);
 };
 
 const playerCanPlay = async () => {
