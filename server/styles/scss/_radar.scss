@@ -107,12 +107,12 @@
 
 	.container {
 
-		.map-tiles {
+		.tiles {
 			position: absolute;
 			width: 1400px;
 
 			img {
-				border: 0px;
+				vertical-align: middle;
 			}
 		}
 

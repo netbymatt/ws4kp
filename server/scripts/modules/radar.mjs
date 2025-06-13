@@ -145,8 +145,6 @@ class Radar extends WeatherDisplay {
 				OVERRIDES,
 				sourceXY,
 				radarSourceXY,
-				offsetX,
-				offsetY,
 			});
 
 			// store the time
@@ -180,7 +178,7 @@ class Radar extends WeatherDisplay {
 
 		// calculate final tile size
 		const finalTileSize = utils.mapSizeToFinalSize(utils.tileSize.x, utils.tileSize.y);
-		// fill the tiles with the overlay
+		// fill the tiles with the map
 		elemForEach('.map-tiles img', (elem, index) => {
 			// get the base image
 			const base = baseAndOverlay[`t${index}Base`];
@@ -195,12 +193,30 @@ class Radar extends WeatherDisplay {
 			elem.height = finalTileSize.y;
 			elem.src = canvas.toDataURL();
 		});
-		// shift the map tile container
+		elemForEach('.overlay-tiles img', (elem, index) => {
+			// get the base image
+			const base = baseAndOverlay[`t${index}Overlay`];
+			// put it on a canvas
+			const canvas = document.createElement('canvas');
+			const context = canvas.getContext('bitmaprenderer');
+			context.transferFromImageBitmap(base);
+			// if it's not there, return (tile not needed)
+			if (!base) return;
+			// assign the bitmap to the image
+			elem.width = finalTileSize.x;
+			elem.height = finalTileSize.y;
+			elem.src = canvas.toDataURL();
+		});
+		// fill the tiles with the overlay
+		// shift the map tile containers
 		const tileShift = utils.modTile(sourceXY.x, sourceXY.y);
 		const tileShiftStretched = utils.mapSizeToFinalSize(tileShift.x, tileShift.y);
 		const mapTileContainer = this.elem.querySelector('.map-tiles');
-		mapTileContainer.style.top = `${-tileShiftStretched.x}px`;
-		mapTileContainer.style.left = `${-tileShiftStretched.y}px`;
+		mapTileContainer.style.top = `${-tileShiftStretched.y}px`;
+		mapTileContainer.style.left = `${-tileShiftStretched.x}px`;
+		const overlayTileContainer = this.elem.querySelector('.overlay-tiles');
+		overlayTileContainer.style.top = `${-tileShiftStretched.y}px`;
+		overlayTileContainer.style.left = `${-tileShiftStretched.x}px`;
 
 		// put the elements in the container
 		const scrollArea = this.elem.querySelector('.scroll-area');
