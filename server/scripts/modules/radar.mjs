@@ -197,7 +197,7 @@ class Radar extends WeatherDisplay {
 // create a radar worker with helper functions
 const radarWorker = () => {
 	// create the worker
-	const worker = new Worker(`/resources/radar-worker.mjs?_=${version()}`, { type: 'module' });
+        const worker = new Worker(`/resources/radar-worker.js?_=${version()}`, { type: 'module' });
 
 	const processRadar = (url) => new Promise((resolve, reject) => {
 		// prepare for done message

@@ -97,12 +97,12 @@ const buildJs = () => src(mjsSources)
 	.pipe(dest(RESOURCES_PATH));
 
 const workerSources = [
-	'server/scripts/modules/radar-worker.mjs',
+        'server/scripts/modules/radar-worker.mjs',
 ];
 
 const buildWorkers = () => {
 	// update the file name in the webpack options
-	const output = { filename: 'radar-worker.mjs' };
+        const output = { filename: 'radar-worker.js' };
 	const workerWebpackOptions = { ...webpackOptions, output };
 	return src(workerSources)
 		.pipe(webpack(workerWebpackOptions))

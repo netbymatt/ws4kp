@@ -4,7 +4,7 @@ A live version of this project is available at https://weatherstar.netbymatt.com
 
 ## About
 
-This project aims to bring back the feel of the 90's with a weather forecast that has the look and feel of The Weather Channel at that time but available in a modern way. This is by no means intended to be a perfect emulation of the WeatherStar 4000, the hardware that produced those wonderful blue and orange graphics you saw during the local forecast on The Weather Channel. If you would like a much more accurate project please see the [WS4000 Simulator](http://www.taiganet.com/). Instead, this project intends to create a simple to use interface with minimal configuration fuss. Some changes have been made to the screens available because either more or less forecast information is available today than was in the 90's. Most of these changes are captured in sections below.
+This project aims to bring back the feel of the 90s with a weather forecast that has the look and feel of The Weather Channel at that time but available in a modern way. This is by no means intended to be a perfect emulation of the WeatherStar 4000, the hardware that produced those wonderful blue and orange graphics you saw during the local forecast on The Weather Channel. If you would like a much more accurate project please see the [WS4000 Simulator](http://www.taiganet.com/). Instead, this project intends to create a simple to use interface with minimal configuration fuss. Some changes have been made to the screens available because either more or less forecast information is available today than was in the 90s. Most of these changes are captured in sections below.
 
 ## What's your motivation
 
@@ -76,7 +76,7 @@ services:
 ### Serving static files
 The app can be served as a static set of files on any web server. Run the provided gulp task to create a set of static distribution files:
 ```
-npm run buildDist
+npm run build
 ```
 The resulting files will be in the /dist folder in the root of the project. These can then be uploaded to a web server for hosting, no server-side scripting is required.
 
@@ -95,13 +95,13 @@ I've made several changes to this Weather Star 4000 simulation compared to the o
 * A new hour-by-hour graph of the temperature, cloud cover and precipitation chances for the next 24 hours.
 * A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast. (off by default because it duplicates the hourly graph)
 * The SPC Outlook is shown in the style of the old air quality screen. This shows the probability of severe weather over the next 3 days at your location.
-* The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90's.
+* The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90s.
 * The original music has been replaced. More info in [Music](#music).
 * Marine forecast (tides) is not available as it is not reliably part of the new API.
 * "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and a checkboxes can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
 
 ## Sharing a permalink (bookmarking)
-Selected displays, the forecast city and widescreen setting are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it, click the "Copy Permalink" (or get "Get Parmalink") near the bottom of the page. A URL will be copied to your clipboard with all of you selected displays and location (or copy it from the page if your browser doesn't support clipboard transfers directly). You can then share this link or add it to your bookmarks.
+Selected displays, the forecast city and widescreen setting are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it, click the "Copy Permalink" (or get "Get Permalink") near the bottom of the page. A URL will be copied to your clipboard with all of you selected displays and location (or copy it from the page if your browser doesn't support clipboard transfers directly). You can then share this link or add it to your bookmarks.
 
 Your permalink will be very long. Here is an example for the Orlando International Airport:
 ```
@@ -119,24 +119,24 @@ Kiosk mode can be activated by a checkbox on the page. Note that there is no way
 
 It's also possible to enter kiosk mode using a permalink. First generate a [Permalink](#sharing-a-permalink-bookmarking), then to the end of it add `&kiosk=true`. Opening this link will load all of the selected displays included in the Permalink, enter kiosk mode immediately upon loading and start playing the forecast.
 
-### Default query string paramaters (environment variables)
-When serving this via the built-in Express server, it's possible to define environment variables that direct the user to a default set of paramaters (like the  [Permalink](#sharing-a-permalink-bookmarking) above). If a user requests the root page at `http://localhost:8080/` the query string provided by environment variables will be appended to the url thus providing a default configuration.
+### Default query string parameters (environment variables)
+When serving this via the built-in Express server, it's possible to define environment variables that direct the user to a default set of parameters (like the  [Permalink](#sharing-a-permalink-bookmarking) above). If a user requests the root page at `http://localhost:8080/` the query string provided by environment variables will be appended to the url thus providing a default configuration.
 
 Environment variables can be added to the command line as usual, or via a .env file which is parsed with [dotenv](https://github.com/motdotla/dotenv). Both methods have the same effect.
 
-Environment variables that are to be added to the default query string are prefixed with `WSQS_` and then use the same key/value pairs generated by the [Permalink](#sharing-a-permalink-bookmarking) above, with the `- (dash)` character replaced by an `_ (underscore)`. For example, if you wanted to turn the travel forecast on, you would find `travel-checkbox=true` in the permalink, it's matching environment variable becomes `WSQS_travel_checkbox=true`.
+Environment variables that are to be added to the default query string are prefixed with `WSQS_` and then use the same key/value pairs generated by the [Permalink](#sharing-a-permalink-bookmarking) above, with the `- (dash)` character replaced by an `_ (underscore)`. For example, if you wanted to turn the travel forecast on, you would find `travel-checkbox=true` in the permalink, its matching environment variable becomes `WSQS_travel_checkbox=true`.
 
 ## Music
 The WeatherStar had wonderful background music from the smooth jazz and new age genres by artists of the time. Lists of the music that played are available by searching online, but it's all copyrighted music and would be difficult to provide as part of this repository.
 
-I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. Too keep the size down, I've only included 4 tracks. Additional tracks are in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
+I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. To keep the size down, I've only included 4 tracks. Additional tracks are in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
 
-If you're looking for the original music that played during forecasts [TWCClassics](https://twcclassics.com/audio/) has thurough documentation of playlists.
+If you're looking for the original music that played during forecasts [TWCClassics](https://twcclassics.com/audio/) has thorough documentation of playlists.
 
 ### Customizing the music
 Placing .mp3 files in the `/server/music` folder will override the default music included in the repo. Subdirectories will not be scanned. When weatherstar loads in the browser it will load a list if available files and randomize the order when it starts playing. On each loop through the available tracks the order will again be shuffled. If you're using the static files method to host your WeatherStar music is located in `/music`.
 
-If using docker, you can bind mount a local folder containing your music files.
+If using Docker, you can bind mount a local folder containing your music files.
 Mount the folder at `/usr/share/nginx/html/music` so the browser can read the
 directory listing and build the playlist automatically. If there are no `.mp3`
 files in `/music`, the built in tracks from `/music/default/` are used.
@@ -149,7 +149,7 @@ Ws4kp is muted by default, but if it was unmuted on the last visit it is coded t
 
 Chrome seems to be more lenient on auto play and will eventually let a site auto-play music if you're visited it enough recently and manually clicked to start playing music on each visit. It also has a flag you can add to the command line when launching Chrome: `chrome.exe --autoplay-policy=no-user-gesture-required`. This is the best solution when using Kiosk-style setup.
 
-If you're unable to pre-set the play state before entering kiosk mode (such as with a home dashboard implemenation) you can add the query string value below to the url. The browser will still follow the auto play rules outlined above.
+If you're unable to pre-set the play state before entering kiosk mode (such as with a home dashboard implementation) you can add the query string value below to the url. The browser will still follow the auto play rules outlined above.
 ```
 ?settings-mediaPlaying-boolean=true
 ```
@@ -163,7 +163,7 @@ Thanks to the WeatherStar community for providing these discussions to further e
 * [ws4channels](https://github.com/rice9797/ws4channels) A Dockerized Node.js application to stream WeatherStar 4000 data into Channels DVR using Puppeteer and FFmpeg.
 
 ## Customization
-A hook is provided as `/server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. An sample file is provided at `/server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.
+A hook is provided as `/server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. A sample file is provided at `/server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.
 
 ## Issue reporting and feature requests
 
@@ -197,4 +197,3 @@ This project is based on the work of [Mike Battaglia](https://github.com/vbguyny
 This web site should NOT be used in life threatening weather situations, or be relied on to inform the public of such situations. The Internet is an unreliable network subject to server and network outages and by nature is not suitable for such mission critical use. If you require such access to NWS data, please consider one of their subscription services. The authors of this web site shall not be held liable in the event of injury, death or property damage that occur as a result of disregarding this warning.
 
 The WeatherSTAR 4000 unit and technology is owned by The Weather Channel. This web site is a free, non-profit work by fans. All of the back ground graphics of this web site were created from scratch.  The icons were created by Charles Abel and Nick Smith (http://twcclassics.com/downloads/icons.html) as well as by Malek Masoud.  The fonts were originally created by Nick Smith (http://twcclassics.com/downloads/fonts.html).
-
