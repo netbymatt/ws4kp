@@ -1,0 +1,1 @@
+import './radar-worker.mjs';
