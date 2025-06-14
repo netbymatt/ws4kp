@@ -1,10 +1,10 @@
 import {
-	radarFinalSize, radarFullSize, modTile, tileSize, removeDopplerRadarImageNoise, mapSizeToFinalSize,
+	radarFinalSize, radarFullSize, removeDopplerRadarImageNoise,
 } from './radar-utils.mjs';
 
 onmessage = async (e) => {
 	const {
-		url, RADAR_HOST, OVERRIDES, radarSourceXY, sourceXY,
+		url, RADAR_HOST, OVERRIDES, radarSourceXY,
 	} = e.data;
 
 	// get the image

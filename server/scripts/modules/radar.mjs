@@ -143,7 +143,6 @@ class Radar extends WeatherDisplay {
 				url,
 				RADAR_HOST,
 				OVERRIDES,
-				sourceXY,
 				radarSourceXY,
 			});
 

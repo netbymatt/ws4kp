@@ -29,7 +29,7 @@ const baseMapImages = (tile) => new Promise((resolve) => {
 
 			resolve({
 				base: imageBitmap,
-				overlay: canvas,
+				overlay: canvas.transferToImageBitmap(),
 			});
 		});
 	});
@@ -117,18 +117,18 @@ onmessage = async (e) => {
 
 	// build the response
 	const t0Base = baseMaps[0].base;
-	const t0Overlay = baseMaps[0].overlay.transferToImageBitmap();
+	const t0Overlay = baseMaps[0].overlay;
 	let t1Base; let t1Overlay; let t2Base; let t2Overlay; let t3Base; let t3Overlay;
 	if (mapCoordinates[1].dx < radarFinalSize.width && baseMaps[1]) {
 		t1Base = baseMaps[1].base;
-		t1Overlay = baseMaps[1].overlay.transferToImageBitmap();
+		t1Overlay = baseMaps[1].overlay;
 	}
 	if (mapCoordinates[2].dy < radarFinalSize.height && baseMaps[2]) {
 		t2Base = baseMaps[2].base;
-		t2Overlay = baseMaps[2].overlay.transferToImageBitmap();
+		t2Overlay = baseMaps[2].overlay;
 		if (mapCoordinates[1].dx < radarFinalSize.width && baseMaps[3]) {
 			t3Base = baseMaps[3].base;
-			t3Overlay = baseMaps[3].overlay.transferToImageBitmap();
+			t3Overlay = baseMaps[3].overlay;
 		}
 	}
 	// baseContext.drawImage(baseMaps.fullMap, sourceXY.x, sourceXY.y, offsetX * 2, offsetY * 2, 0, 0, radarFinalSize.width, radarFinalSize.height);
