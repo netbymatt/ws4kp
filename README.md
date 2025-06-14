@@ -87,6 +87,13 @@ Simply bind mount your music folder and the playlist will be created
 automatically. If no files are found in `/music`, the built in tracks located in
 `/music/default/` will be used instead.
 
+The nginx configuration also sets the `X-Weatherstar: true` header on all
+responses. This uses `add_header ... always` so the header is sent even for
+404 responses. When `playlist.json` returns a 404 with this header present, the
+browser falls back to scanning the `/music` directory. If you host the static
+files elsewhere, be sure to include this header so the playlist can be generated
+automatically.
+
 ## What's different
 
 I've made several changes to this Weather Star 4000 simulation compared to the original hardware unit and the code that this was forked from.

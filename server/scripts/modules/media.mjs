@@ -1,4 +1,4 @@
-import { json, text } from './utils/fetch.mjs';
+import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 
 let playlist;
@@ -42,9 +42,17 @@ const scanMusicDirectory = async () => {
 
 const getMedia = async () => {
         try {
-                // fetch the playlist
-                const rawPlaylist = await json('playlist.json');
-                playlist = rawPlaylist;
+                const response = await fetch('playlist.json');
+                if (response.ok) {
+                        playlist = await response.json();
+                } else if (response.status === 404
+                        && response.headers.get('X-Weatherstar') === 'true') {
+                        console.warn("Couldn't get playlist.json, falling back to directory scan");
+                        playlist = await scanMusicDirectory();
+                } else {
+                        console.warn(`Couldn't get playlist.json: ${response.status} ${response.statusText}`);
+                        playlist = { availableFiles: [] };
+                }
         } catch (e) {
                 console.warn("Couldn't get playlist.json, falling back to directory scan");
                 playlist = await scanMusicDirectory();
