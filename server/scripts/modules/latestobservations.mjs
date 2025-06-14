@@ -139,7 +139,7 @@ const getStations = async (stations) => {
 				StationId: station.id,
 				city: station.city,
 			};
-		} catch (error) {
+		} catch {
 			console.log(`Unable to get latest observations for ${station.id}`);
 			return false;
 		}
