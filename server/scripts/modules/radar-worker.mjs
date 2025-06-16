@@ -1,6 +1,5 @@
-import {
-	radarFinalSize, radarFullSize, removeDopplerRadarImageNoise,
-} from './radar-utils.mjs';
+import { removeDopplerRadarImageNoise } from './radar-utils.mjs';
+import { RADAR_FULL_SIZE, RADAR_FINAL_SIZE } from './radar-constants.mjs';
 
 onmessage = async (e) => {
 	const {
@@ -20,7 +19,7 @@ onmessage = async (e) => {
 	};
 
 	// create radar context for manipulation
-	const radarCanvas = new OffscreenCanvas(radarFullSize.width, radarFullSize.height);
+	const radarCanvas = new OffscreenCanvas(RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
 	const radarContext = radarCanvas.getContext('2d');
 	radarContext.imageSmoothingEnabled = false;
 
@@ -34,8 +33,8 @@ onmessage = async (e) => {
 	// assign to an html image element
 	const radarImgElement = await createImageBitmap(radarImgBlob);
 	// draw the entire image
-	radarContext.clearRect(0, 0, radarFullSize.width, radarFullSize.height);
-	radarContext.drawImage(radarImgElement, 0, 0, radarFullSize.width, radarFullSize.height);
+	radarContext.clearRect(0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
+	radarContext.drawImage(radarImgElement, 0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
 
 	// crop the radar image without scaling
 	const croppedRadarCanvas = new OffscreenCanvas(radarSource.width, radarSource.height);
@@ -47,10 +46,10 @@ onmessage = async (e) => {
 	removeDopplerRadarImageNoise(croppedRadarContext);
 
 	// stretch the radar image
-	const stretchCanvas = new OffscreenCanvas(radarFinalSize.width, radarFinalSize.height);
+	const stretchCanvas = new OffscreenCanvas(RADAR_FINAL_SIZE.width, RADAR_FINAL_SIZE.height);
 	const stretchContext = stretchCanvas.getContext('2d', { willReadFrequently: true });
 	stretchContext.imageSmoothingEnabled = false;
-	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, radarFinalSize.width, radarFinalSize.height);
+	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, RADAR_FINAL_SIZE.width, RADAR_FINAL_SIZE.height);
 
 	const stretchedRadar = stretchCanvas.transferToImageBitmap();
 

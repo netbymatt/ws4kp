@@ -1,0 +1,1 @@
+convert radar-stretched.webp -define webp:losless=true -crop 10x11+0+0@ +repage +adjoin -set filename:row "%[fx:floor(t/10)]" -set filename:col "%[fx:t%10]" radar/map-%[filename:row]-%[filename:col].webp
