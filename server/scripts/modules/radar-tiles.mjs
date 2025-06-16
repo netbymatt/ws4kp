@@ -1,14 +1,25 @@
-import {
-	pixelToFile, modTile,
-} from './radar-utils.mjs';
-import { RADAR_FINAL_SIZE, TILE_SIZE } from './radar-constants.mjs';
+import { RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT } from './radar-constants.mjs';
 import { elemForEach } from './utils/elem.mjs';
+
+// convert a pixel location to a file/tile combination
+const pixelToFile = (xPixel, yPixel) => {
+	const xTile = Math.floor(xPixel / TILE_SIZE.x);
+	const yTile = Math.floor(yPixel / TILE_SIZE.y);
+	if (xTile < 0 || xTile > TILE_COUNT.x || yTile < 0 || yTile > TILE_COUNT.y) return false;
+	return `${yTile}-${xTile}`;
+};
+
+// convert a pixel location in the overall map to a pixel location on the tile
+const modTile = (xPixel, yPixel) => {
+	const x = Math.round(xPixel) % TILE_SIZE.x;
+	const y = Math.round(yPixel) % TILE_SIZE.y;
+	return { x, y };
+};
 
 // creates the radar background map image and overlay transparency
 // which remain fixed on the page as the radar image changes in layered divs
 // it returns 4 ImageBitmaps that represent the base map, and 4 ImageBitmaps that are the overlay
 // the main thread pushes these ImageBitmaps into the image placeholders on the page
-
 const setTiles = (data) => {
 	const {
 		sourceXY,
@@ -115,6 +126,7 @@ const setTiles = (data) => {
 	const mapTileContainer = document.querySelector(`#${elemIdFull} .map-tiles`);
 	mapTileContainer.style.top = `${-tileShift.y}px`;
 	mapTileContainer.style.left = `${-tileShift.x}px`;
+	// and the same for the overlay
 	const overlayTileContainer = document.querySelector(`#${elemIdFull} .overlay-tiles`);
 	overlayTileContainer.style.top = `${-tileShift.y}px`;
 	overlayTileContainer.style.left = `${-tileShift.x}px`;

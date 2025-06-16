@@ -1,6 +1,4 @@
-import {
-	removeDopplerRadarImageNoise,
-} from './radar-utils.mjs';
+import { removeDopplerRadarImageNoise } from './radar-utils.mjs';
 import { RADAR_FULL_SIZE, RADAR_FINAL_SIZE } from './radar-constants.mjs';
 
 onmessage = async (e) => {
