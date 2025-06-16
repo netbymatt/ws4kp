@@ -6,7 +6,7 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
 import { version } from './progress.mjs';
-import { elemForEach } from './utils/elem.mjs';
+import setTiles from './radar-tiles.mjs';
 
 // TEMPORARY fix to disable radar on ios safari. The same engine (webkit) is
 // used for all ios browers (chrome, brave, firefox, etc) so it's safe to skip
@@ -74,10 +74,6 @@ class Radar extends WeatherDisplay {
 			// get some web workers started
 			this.workers = (new Array(this.dopplerRadarImageMax)).fill(null).map(() => radarWorker());
 		}
-		if (!this.fixedWorker) {
-			// get the fixed background, overlay worker started
-			this.fixedWorker = fixedRadarWorker();
-		}
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
 		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
@@ -128,13 +124,13 @@ class Radar extends WeatherDisplay {
 		// calculate offsets and sizes
 		const offsetX = 120 * 2;
 		const offsetY = 69 * 2;
-		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters, offsetX, offsetY);
+		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters);
 		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters, offsetX, offsetY);
 
-		const baseAndOverlayPromise = this.fixedWorker.processAssets({
+		// set up the base map and overlay tiles
+		setTiles({
 			sourceXY,
-			offsetX,
-			offsetY,
+			elemId: this.elemId,
 		});
 
 		// Load the most recent doppler radar images.
@@ -172,50 +168,6 @@ class Radar extends WeatherDisplay {
 				elem,
 			};
 		}));
-		// wait for the base and overlay
-		const baseAndOverlay = await baseAndOverlayPromise;
-
-		// calculate final tile size
-		const finalTileSize = utils.mapSizeToFinalSize(utils.tileSize.x, utils.tileSize.y);
-		// fill the tiles with the map
-		elemForEach('.map-tiles img', (elem, index) => {
-			// get the base image
-			const base = baseAndOverlay[`t${index}Base`];
-			// put it on a canvas
-			const canvas = document.createElement('canvas');
-			const context = canvas.getContext('bitmaprenderer');
-			context.transferFromImageBitmap(base);
-			// if it's not there, return (tile not needed)
-			if (!base) return;
-			// assign the bitmap to the image
-			elem.width = finalTileSize.x;
-			elem.height = finalTileSize.y;
-			elem.src = canvas.toDataURL();
-		});
-		elemForEach('.overlay-tiles img', (elem, index) => {
-			// get the base image
-			const base = baseAndOverlay[`t${index}Overlay`];
-			// put it on a canvas
-			const canvas = document.createElement('canvas');
-			const context = canvas.getContext('bitmaprenderer');
-			context.transferFromImageBitmap(base);
-			// if it's not there, return (tile not needed)
-			if (!base) return;
-			// assign the bitmap to the image
-			elem.width = finalTileSize.x;
-			elem.height = finalTileSize.y;
-			elem.src = canvas.toDataURL();
-		});
-		// fill the tiles with the overlay
-		// shift the map tile containers
-		const tileShift = utils.modTile(sourceXY.x, sourceXY.y);
-		const tileShiftStretched = utils.mapSizeToFinalSize(tileShift.x, tileShift.y);
-		const mapTileContainer = this.elem.querySelector('.map-tiles');
-		mapTileContainer.style.top = `${-tileShiftStretched.y}px`;
-		mapTileContainer.style.left = `${-tileShiftStretched.x}px`;
-		const overlayTileContainer = this.elem.querySelector('.overlay-tiles');
-		overlayTileContainer.style.top = `${-tileShiftStretched.y}px`;
-		overlayTileContainer.style.left = `${-tileShiftStretched.x}px`;
 
 		// put the elements in the container
 		const scrollArea = this.elem.querySelector('.scroll-area');
@@ -268,31 +220,6 @@ const radarWorker = () => {
 	// return the object
 	return {
 		processRadar,
-	};
-};
-
-// create a radar worker for the fixed background images
-const fixedRadarWorker = () => {
-	// create the worker
-	const worker = new Worker(`/resources/radar-worker-bg-fg.mjs?_=${version()}`, { type: 'module' });
-
-	const processAssets = (data) => new Promise((resolve, reject) => {
-		// prepare for done message
-		worker.onmessage = (e) => {
-			if (e?.data instanceof Error) {
-				reject(e.data);
-			} else if (e?.data?.t0Base instanceof ImageBitmap) {
-				resolve(e.data);
-			}
-		};
-
-		// start up the worker
-		worker.postMessage(data);
-	});
-
-	// return the object
-	return {
-		processAssets,
 	};
 };
 

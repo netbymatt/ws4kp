@@ -1,32 +1,23 @@
-const getXYFromLatitudeLongitudeMap = (pos, offsetX, offsetY) => {
-	let y = 0;
-	let x = 0;
-	const imgHeight = 3200;
-	const imgWidth = 5100;
+import {
+	RADAR_FINAL_SIZE, RADAR_SOURCE_SIZE, TILE_SIZE, TILE_COUNT, TILE_FULL_SIZE,
+} from './radar-constants.mjs';
 
-	y = (51.75 - pos.latitude) * 55.2;
-	// center map
-	y -= offsetY;
+// limit a value to within a range
+const coerce = (low, value, high) => Math.max(Math.min(value, high), low);
 
-	// Do not allow the map to exceed the max/min coordinates.
-	if (y > (imgHeight - (offsetY * 2))) {
-		y = imgHeight - (offsetY * 2);
-	} else if (y < 0) {
-		y = 0;
-	}
+const getXYFromLatitudeLongitudeMap = (pos) => {
+	// source values for conversion
+	// px		py		lon						lat
+	// 589	466		-122.3615246	47.63177832
+	// 5288	3638	-80.18297384	25.77018996
 
-	x = ((-130.37 - pos.longitude) * 41.775) * -1;
-	// center map
-	x -= offsetX;
+	// map position is calculated as a regresion from the above values (=/- a manual adjustment factor)
+	// then shifted by half of the tile size (to center the map)
+	// then they are limited to values between 0 and the width or height of the map
+	const y = coerce(0, (-145.095 * pos.latitude + 7377.117) - 27 - (TILE_SIZE.y / 2), TILE_FULL_SIZE.y - (TILE_SIZE.y));
+	const x = coerce(0, (111.407 * pos.longitude + 14220.972) + 4 - (TILE_SIZE.x / 2), TILE_FULL_SIZE.x - (TILE_SIZE.x));
 
-	// Do not allow the map to exceed the max/min coordinates.
-	if (x > (imgWidth - (offsetX * 2))) {
-		x = imgWidth - (offsetX * 2);
-	} else if (x < 0) {
-		x = 0;
-	}
-
-	return { x: x * 2, y: y * 2 };
+	return { x, y };
 };
 
 const getXYFromLatitudeLongitudeDoppler = (pos, offsetX, offsetY) => {
@@ -177,27 +168,23 @@ const mergeDopplerRadarImage = (mapContext, radarContext) => {
 	mapContext.drawImage(radarContext.canvas, 0, 0);
 };
 
-const tileSize = { x: 510, y: 320 };
-const radarFullSize = { width: 2550, height: 1600 };
-const radarFinalSize = { width: 640, height: 367 };
-const radarSourceSize = { width: 480, height: 276 };
 const scaling = {
-	width: radarFinalSize.width / radarSourceSize.width,
-	height: radarFinalSize.height / radarSourceSize.height,
+	width: RADAR_FINAL_SIZE.width / RADAR_SOURCE_SIZE.width,
+	height: RADAR_FINAL_SIZE.height / RADAR_SOURCE_SIZE.height,
 };
 
 // convert a pixel location to a file/tile combination
 const pixelToFile = (xPixel, yPixel) => {
-	const xTile = Math.floor(xPixel / tileSize.x);
-	const yTile = Math.floor(yPixel / tileSize.y);
-	if (xTile < 0 || xTile > 9 || yTile < 0 || yTile > 9) return false;
-	return `${xTile.toFixed(0).padStart(2, '0')}-${yTile.toFixed(0).padStart(2, '0')}`;
+	const xTile = Math.floor(xPixel / TILE_SIZE.x);
+	const yTile = Math.floor(yPixel / TILE_SIZE.y);
+	if (xTile < 0 || xTile > TILE_COUNT.x || yTile < 0 || yTile > TILE_COUNT.y) return false;
+	return `${yTile}-${xTile}`;
 };
 
 // convert a pixel location in the overall map to a pixel location on the tile
 const modTile = (xPixel, yPixel) => {
-	const x = Math.round(xPixel) % tileSize.x;
-	const y = Math.round(yPixel) % tileSize.y;
+	const x = Math.round(xPixel) % TILE_SIZE.x;
+	const y = Math.round(yPixel) % TILE_SIZE.y;
 	return { x, y };
 };
 
@@ -219,8 +206,5 @@ export {
 	pixelToFile,
 	modTile,
 	mapSizeToFinalSize,
-	tileSize,
-	radarFinalSize,
-	radarFullSize,
 	fetchAsBlob,
 };
