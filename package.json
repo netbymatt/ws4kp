@@ -23,16 +23,18 @@
 	"homepage": "https://github.com/netbymatt/ws4kp#readme",
 	"devDependencies": {
 		"@aws-sdk/client-cloudfront": "^3.609.0",
+		"@eslint/eslintrc": "^3.3.1",
+		"ajv": "^8.17.1",
 		"del": "^8.0.0",
 		"eslint": "^9.0.0",
 		"eslint-config-airbnb-base": "15.0.0",
 		"eslint-plugin-import": "^2.10.0",
-		"@eslint/eslintrc": "^3.3.1",
 		"gulp": "^5.0.0",
 		"gulp-awspublish": "^8.0.0",
 		"gulp-concat": "^2.6.1",
 		"gulp-ejs": "^5.1.0",
 		"gulp-file": "^0.4.0",
+		"gulp-html-minifier-terser": "^7.1.0",
 		"gulp-rename": "^2.0.0",
 		"gulp-s3-uploader": "^1.0.6",
 		"gulp-sass": "^6.0.0",
@@ -43,8 +45,8 @@
 		"suncalc": "^1.8.0",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
-		"webpack-stream": "^7.0.0",
-		"gulp-html-minifier-terser": "^7.1.0"
+		"webpack": "^5.99.9",
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"dotenv": "^16.5.0",

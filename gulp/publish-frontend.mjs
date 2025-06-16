@@ -98,7 +98,6 @@ const buildJs = () => src(mjsSources)
 
 const workerSources = [
 	'./server/scripts/modules/radar-worker.mjs',
-	'./server/scripts/modules/radar-worker-bg-fg.mjs',
 ];
 
 const buildWorkers = () => {
@@ -113,7 +112,6 @@ const buildWorkers = () => {
 		output,
 		entry: {
 			'radar-worker': workerSources[0],
-			'radar-worker-bg-fg': workerSources[1],
 		},
 	};
 	return src(workerSources)
