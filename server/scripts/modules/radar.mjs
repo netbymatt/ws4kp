@@ -162,7 +162,9 @@ class Radar extends WeatherDisplay {
 			const onscreenContext = onscreenCanvas.getContext('bitmaprenderer');
 			onscreenContext.transferFromImageBitmap(processedRadar);
 
-			const elem = this.fillTemplate('frame', { map: { type: 'canvas', canvas: onscreenCanvas } });
+			const dataUrl = onscreenCanvas.toDataURL();
+
+			const elem = this.fillTemplate('frame', { map: { type: 'img', src: dataUrl } });
 			return {
 				time,
 				elem,
