@@ -2,6 +2,8 @@
 import settings from '../settings.mjs';
 // *********************************** unit conversions ***********************
 
+// certain conversions return a "-" when provided with an undefined value
+
 // round 2 provided for lat/lon formatting
 const round2 = (value, decimals) => Math.trunc(value * 10 ** decimals) / 10 ** decimals;
 
@@ -15,12 +17,24 @@ const pascalToInHg = (Pascal) => round2(Pascal * 0.000_295_3, 2);
 // each module/page/slide creates it's own unit converter as needed by providing the base units available
 // the factory function then returns an appropriate converter or pass-thru function for use on the page
 
+// passthru is used for the default conditoin
+const passthru = (divisor = 1) => (value) => {
+	if ((value ?? null) === null) return '-';
+	return Math.round(value / divisor);
+};
+
+// factory function to add undefined detection to unit converters
+const convert = (fxn) => (value) => {
+	if ((value ?? null) === null) return '-';
+	return fxn(value);
+};
+
 const windSpeed = (defaultUnit = 'si') => {
 	// default to passthru
-	let converter = (passthru) => Math.round(passthru);
+	let converter = passthru();
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
-		converter = kphToMph;
+		converter = convert(kphToMph);
 	}
 	// append units
 	if (settings.units.value === 'si') {
@@ -33,13 +47,13 @@ const windSpeed = (defaultUnit = 'si') => {
 
 const temperature = (defaultUnit = 'si') => {
 	// default to passthru
-	let converter = (passthru) => Math.round(passthru);
+	let converter = passthru();
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
 		if (defaultUnit === 'us') {
-			converter = fahrenheitToCelsius;
+			converter = convert(fahrenheitToCelsius);
 		} else {
-			converter = celsiusToFahrenheit;
+			converter = convert(celsiusToFahrenheit);
 		}
 	}
 	// append units
@@ -53,11 +67,11 @@ const temperature = (defaultUnit = 'si') => {
 
 const distanceMeters = (defaultUnit = 'si') => {
 	// default to passthru
-	let converter = (passthru) => Math.round(passthru);
+	let converter = passthru();
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
 		// rounded to the nearest 100 (ceiling)
-		converter = (value) => Math.round(metersToFeet(value) / 100) * 100;
+		converter = convert((value) => Math.round(metersToFeet(value) / 100) * 100);
 	}
 	// append units
 	if (settings.units.value === 'si') {
@@ -70,10 +84,10 @@ const distanceMeters = (defaultUnit = 'si') => {
 
 const distanceKilometers = (defaultUnit = 'si') => {
 	// default to passthru
-	let converter = (passthru) => Math.round(passthru / 1000);
+	let converter = passthru(1000);
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
-		converter = (value) => Math.round(kilometersToMiles(value) / 1000);
+		converter = convert((value) => Math.round(kilometersToMiles(value) / 1000));
 	}
 	// append units
 	if (settings.units.value === 'si') {
@@ -86,10 +100,10 @@ const distanceKilometers = (defaultUnit = 'si') => {
 
 const pressure = (defaultUnit = 'si') => {
 	// default to passthru (millibar)
-	let converter = (passthru) => Math.round(passthru / 100);
+	let converter = passthru(100);
 	// change the converter if there is a mismatch
 	if (defaultUnit !== settings.units.value) {
-		converter = (value) => pascalToInHg(value).toFixed(2);
+		converter = convert((value) => pascalToInHg(value).toFixed(2));
 	}
 	// append units
 	if (settings.units.value === 'si') {
