@@ -1,4 +1,4 @@
-import { json } from './utils/fetch.mjs';
+import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 
 let playlist;
@@ -19,18 +19,46 @@ document.addEventListener('DOMContentLoaded', () => {
 	getMedia();
 });
 
+const scanMusicDirectory = async () => {
+        const parseDirectory = async (path, prefix = "") => {
+                const listing = await text(path);
+                const matches = [...listing.matchAll(/href="([^\"]+\.mp3)"/gi)];
+                return matches.map((m) => `${prefix}${m[1]}`);
+        };
+
+        try {
+                let files = await parseDirectory("music/");
+                if (files.length === 0) {
+                        files = await parseDirectory("music/default/", "default/");
+                }
+                return { availableFiles: files };
+        } catch (e) {
+                console.error("Unable to scan music directory");
+                console.error(e);
+                return { availableFiles: [] };
+        }
+};
+
+
 const getMedia = async () => {
-	try {
-		// fetch the playlist
-		const rawPlaylist = await json('playlist.json');
-		// store the playlist
-		playlist = rawPlaylist;
-		// enable the media player
-		enableMediaPlayer();
-	} catch (e) {
-		console.error("Couldn't get playlist");
-		console.error(e);
-	}
+        try {
+                const response = await fetch('playlist.json');
+                if (response.ok) {
+                        playlist = await response.json();
+                } else if (response.status === 404
+                        && response.headers.get('X-Weatherstar') === 'true') {
+                        console.warn("Couldn't get playlist.json, falling back to directory scan");
+                        playlist = await scanMusicDirectory();
+                } else {
+                        console.warn(`Couldn't get playlist.json: ${response.status} ${response.statusText}`);
+                        playlist = { availableFiles: [] };
+                }
+        } catch (e) {
+                console.warn("Couldn't get playlist.json, falling back to directory scan");
+                playlist = await scanMusicDirectory();
+        }
+
+        enableMediaPlayer();
 };
 
 const enableMediaPlayer = () => {
@@ -191,8 +219,11 @@ const playerEnded = () => {
 };
 
 const setTrackName = (fileName) => {
-	const trackName = fileName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '');
-	document.getElementById('musicTrack').innerHTML = trackName;
+        const baseName = fileName.split('/').pop();
+        const trackName = decodeURIComponent(
+                baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '')
+        );
+        document.getElementById('musicTrack').innerHTML = trackName;
 };
 
 export {
