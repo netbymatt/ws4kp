@@ -42,3 +42,11 @@ export const mesonetProxy = async (req, res) => {
 		encoding: isBinary ? 'binary' : 'utf8', // Use binary encoding for images
 	});
 };
+
+// Legacy forecast.weather.gov API proxy
+export const forecastProxy = async (req, res) => {
+	await cache.handleRequest(req, res, 'https://forecast.weather.gov', {
+		serviceName: 'Forecast.weather.gov',
+		skipParams: ['u'],
+	});
+};

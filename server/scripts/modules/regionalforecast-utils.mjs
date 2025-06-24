@@ -4,6 +4,7 @@ import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 
 const buildForecast = (forecast, city, cityXY) => {
 	// get a unit converter
@@ -26,25 +27,51 @@ const getRegionalObservation = async (point, city) => {
 
 		if (!stations || !stations.features || stations.features.length === 0) {
 			if (debugFlag('verbose-failures')) {
-				console.warn(`Unable to get regional stations for ${city.Name ?? city.city}`);
+				console.warn(`Unable to get regional stations for ${city.city}`);
 			}
 			return false;
 		}
 
 		// get the first station
 		const station = stations.features[0].id;
+		const stationId = stations.features[0].properties.stationIdentifier;
 		// get the observation data using centralized safe handling
 		const observation = await safeJson(`${station}/observations/latest`);
 
 		if (!observation) {
 			if (debugFlag('verbose-failures')) {
-				console.warn(`Unable to get regional observations for ${city.Name ?? city.city}`);
+				console.warn(`Unable to get regional observations for station ${stationId}`);
 			}
 			return false;
 		}
 
 		// Enhance observation data with METAR parsing for missing fields
-		const augmentedObservation = augmentObservationWithMetar(observation.properties);
+		let augmentedObservation = augmentObservationWithMetar(observation.properties);
+
+		// Define required fields for regional observations (more lenient than current weather)
+		const requiredFields = [
+			{ name: 'temperature', check: (props) => props.temperature?.value === null },
+			{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
+			{ name: 'icon', check: (props) => props.icon === null },
+		];
+
+		// Use enhanced observation with MapClick fallback
+		const enhancedResult = await enhanceObservationWithMapClick(augmentedObservation, {
+			requiredFields,
+			stationId,
+			debugContext: 'regionalforecast',
+		});
+
+		augmentedObservation = enhancedResult.data;
+		const { missingFields } = enhancedResult;
+
+		// Check final data quality
+		if (missingFields.length > 0) {
+			if (debugFlag('regionalforecast')) {
+				console.log(`Regional Observations for station ${stationId} is missing fields: ${missingFields.join(', ')} (skipping)`);
+			}
+			return false;
+		}
 
 		// preload the image
 		if (!augmentedObservation.icon) return false;
@@ -54,7 +81,7 @@ const getRegionalObservation = async (point, city) => {
 		// return the observation
 		return augmentedObservation;
 	} catch (error) {
-		console.error(`Unexpected error getting Regional Observation for ${city.Name ?? city.city}: ${error.message}`);
+		console.error(`Unexpected error getting Regional Observation for ${city.city}: ${error.message}`);
 		return false;
 	}
 };

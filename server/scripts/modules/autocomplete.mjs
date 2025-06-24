@@ -297,6 +297,9 @@ class AutoComplete {
 	// if a click is detected on the page, generally we hide the suggestions, unless the click was within the autocomplete elements
 	checkOutsideClick(e) {
 		if (e.target.id === 'txtLocation') return;
+		// Fix autocomplete crash on outside click detection
+		// Add optional chaining to prevent TypeError when checking classList.contains()
+		// on elements that may not have a classList property.
 		if (e.target?.parentNode?.classList?.contains(this.options.containerClass)) return;
 		this.hideSuggestions();
 	}

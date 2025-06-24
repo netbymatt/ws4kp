@@ -250,8 +250,11 @@ const loadDisplay = (direction) => {
 		// convert form simple 0-10 to start at current display index +/-1 and wrap
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
 		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) {
-			foundSuitableDisplay = true;
-			break;
+			// Prevent infinite recursion by ensuring we don't select the same display
+			if (idx !== curIdx) {
+				foundSuitableDisplay = true;
+				break;
+			}
 		}
 	}
 

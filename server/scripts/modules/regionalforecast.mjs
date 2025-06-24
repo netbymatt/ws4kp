@@ -7,12 +7,13 @@ import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
-import { DateTime, Interval } from '../vendor/auto/luxon.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import filterExpiredPeriods from './utils/forecast-utils.mjs';
 
 // map offset
 const mapOffsetXY = {
@@ -78,9 +79,6 @@ class RegionalForecast extends WeatherDisplay {
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
 
-		// get now as DateTime for calculations below
-		const now = DateTime.now();
-
 		// get regional forecasts and observations using centralized safe Promise handling
 		const regionalDataAll = await safePromiseAll(regionalCities.map(async (city) => {
 			try {
@@ -124,25 +122,20 @@ class RegionalForecast extends WeatherDisplay {
 				// preload the icon
 				preloadImg(getSmallIcon(regionalObservation.icon, !regionalObservation.daytime));
 
-				// return a pared-down forecast
-				// 0th object should contain the current conditions, but when WFOs go offline or otherwise don't post
-				// an updated forecast it's possible that the 0th object is in the past.
-				// so we go on a search for the current time in the start/end times provided in the forecast periods
-				const { periods } = forecast.properties;
-				const currentPeriod = periods.reduce((prev, period, index) => {
-					const start = DateTime.fromISO(period.startTime);
-					const end = DateTime.fromISO(period.endTime);
-					const interval = Interval.fromDateTimes(start, end);
-					if (interval.contains(now)) {
-						return index;
-					}
-					return prev;
-				}, 0);
+				// filter out expired periods first, then use the next two periods for forecast
+				const activePeriods = filterExpiredPeriods(forecast.properties.periods);
+
+				// ensure we have enough periods for forecast
+				if (activePeriods.length < 3) {
+					console.warn(`Insufficient active periods for ${city.Name ?? city.city}: only ${activePeriods.length} periods available`);
+					return false;
+				}
+
 				// group together the current observation and next two periods
 				return [
 					regionalObservation,
-					utils.buildForecast(forecast.properties.periods[currentPeriod + 1], city, cityXY),
-					utils.buildForecast(forecast.properties.periods[currentPeriod + 2], city, cityXY),
+					utils.buildForecast(activePeriods[1], city, cityXY),
+					utils.buildForecast(activePeriods[2], city, cityXY),
 				];
 			} catch (error) {
 				console.error(`Unexpected error getting Regional Forecast data for '${city.name ?? city.city}': ${error.message}`);

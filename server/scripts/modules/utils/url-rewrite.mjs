@@ -26,6 +26,10 @@ const rewriteUrl = (_url) => {
 		url.protocol = window.location.protocol;
 		url.host = window.location.host;
 		url.pathname = `/api${url.pathname}`;
+	} else if (url.origin === 'https://forecast.weather.gov') {
+		url.protocol = window.location.protocol;
+		url.host = window.location.host;
+		url.pathname = `/forecast${url.pathname}`;
 	} else if (url.origin === 'https://www.spc.noaa.gov') {
 		url.protocol = window.location.protocol;
 		url.host = window.location.host;

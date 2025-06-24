@@ -9,6 +9,7 @@ import { registerDisplay } from './navigation.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
 import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -80,14 +81,6 @@ class LatestObservations extends WeatherDisplay {
 					return false;
 				}
 
-				// Check if the observation data is old
-				const observationTime = new Date(data.properties.timestamp);
-				const ageInMinutes = (new Date() - observationTime) / (1000 * 60);
-
-				if (ageInMinutes > 180 && debugFlag('latestobservations')) {
-					console.warn(`Latest Observations for station ${station.id} are ${ageInMinutes.toFixed(0)} minutes old (from ${observationTime.toISOString()})`);
-				}
-
 				// Enhance observation data with METAR parsing for missing fields
 				const originalData = { ...data.properties };
 				data.properties = augmentObservationWithMetar(data.properties);
@@ -109,11 +102,22 @@ class LatestObservations extends WeatherDisplay {
 					{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
 					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
 				];
-				const missingFields = requiredFields.filter((field) => field.check(augmentedData)).map((field) => field.name);
 
+				// Use enhanced observation with MapClick fallback
+				const enhancedResult = await enhanceObservationWithMapClick(data.properties, {
+					requiredFields,
+					stationId: station.id,
+					stillWaiting: () => this.stillWaiting(),
+					debugContext: 'latestobservations',
+				});
+
+				data.properties = enhancedResult.data;
+				const { missingFields } = enhancedResult;
+
+				// Check final data quality
 				if (missingFields.length > 0) {
 					if (debugFlag('latestobservations')) {
-						console.log(`Latest Observations for station ${station.id} are missing required fields: ${missingFields.join(', ')}`);
+						console.log(`Latest Observations for station ${station.id} is missing fields: ${missingFields.join(', ')}`);
 					}
 					return false;
 				}
