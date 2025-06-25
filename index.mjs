@@ -1,8 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
 import fs from 'fs';
+import {
+	weatherProxy, radarProxy, outlookProxy, mesonetProxy,
+} from './proxy/handlers.mjs';
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
+import cache from './proxy/cache.mjs';
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
@@ -69,20 +73,57 @@ const geoip = (req, res) => {
 	res.json({});
 };
 
-// debugging
+// Configure static asset caching with proper ETags and cache validation
+const staticOptions = {
+	etag: true, // Enable ETag generation
+	lastModified: true, // Enable Last-Modified headers
+	setHeaders: (res, path, stat) => {
+		// Generate ETag based on file modification time and size for better cache validation
+		const etag = `"${stat.mtime.getTime().toString(16)}-${stat.size.toString(16)}"`;
+		res.setHeader('ETag', etag);
+
+		if (path.match(/\.(png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot)$/i)) {
+			// Images and fonts - cache for 1 year (immutable content)
+			res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+		} else if (path.match(/\.(css|js|mjs)$/i)) {
+			// Scripts and styles - use cache validation instead of no-cache
+			// This allows browsers to use cached version if ETag matches (304 response)
+			res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+		} else {
+			// Other files - cache for 1 hour with validation
+			res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+		}
+	},
+};
+
+// Weather.gov API proxy (catch-all for any Weather.gov API endpoint)
+app.use('/api/', weatherProxy);
+
+// Cache management DELETE endpoint to allow "uncaching" specific URLs
+app.delete(/^\/cache\/.*/, (req, res) => {
+	const path = req.url.replace('/cache', '');
+	const cleared = cache.clearEntry(path);
+	res.json({ cleared, path });
+});
+
+// specific proxies for other services
+app.use('/radar/', radarProxy);
+app.use('/spc/', outlookProxy);
+app.use('/mesonet/', mesonetProxy);
+
 if (process.env?.DIST === '1') {
-	// distribution
-	app.use('/scripts', express.static('./server/scripts'));
+	// Production ("distribution") mode uses pre-baked files in the dist directory
+	// 'npm run build' and then 'DIST=1 npm start'
+	app.use('/scripts', express.static('./server/scripts', staticOptions));
 	app.use('/geoip', geoip);
-	app.use('/', express.static('./dist'));
+	app.use('/', express.static('./dist', staticOptions));
 } else {
-	// debugging
+	// Development mode serves files from the server directory: 'npm start'
 	app.get('/index.html', index);
 	app.use('/geoip', geoip);
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
-	app.get('*name', express.static('./server'));
-	// cors pass-thru to api.weather.gov
+	app.get('*name', express.static('./server', staticOptions));
 	app.get('/playlist.json', playlist);
 }
 
@@ -94,6 +135,7 @@ const server = app.listen(port, () => {
 const gracefulShutdown = () => {
 	server.close(() => {
 		console.log('Server closed');
+		process.exit(0);
 	});
 };
 
