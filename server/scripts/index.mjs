@@ -89,6 +89,7 @@ const init = () => {
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
+
 	if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
@@ -171,16 +172,29 @@ const btnFullScreenClick = () => {
 	return false;
 };
 
-const enterFullScreen = () => {
+// This is async because modern browsers return a Promise from requestFullscreen
+const enterFullScreen = async () => {
 	const element = document.querySelector('#divTwc');
 
 	// Supports most browsers and their versions.
-	const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
-		|| element.mozRequestFullScreen || element.msRequestFullscreen;
+	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen
+		|| element.mozRequestFullscreen || element.msRequestFullscreen;
 
 	if (requestMethod) {
-		// Native full screen.
-		requestMethod.call(element, { navigationUI: 'hide' });
+		try {
+			// Native full screen with options for optimal display
+			await requestMethod.call(element, {
+				navigationUI: 'hide',
+				allowsInlineMediaPlayback: true,
+			});
+
+			// Allow a moment for fullscreen to engage, then optimize
+			setTimeout(() => {
+				resize();
+			}, 100);
+		} catch (error) {
+			console.error('❌ Fullscreen request failed:', error);
+		}
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
@@ -202,8 +216,8 @@ const exitFullscreen = () => {
 		document.exitFullscreen();
 	} else if (document.webkitExitFullscreen) {
 		document.webkitExitFullscreen();
-	} else if (document.mozCancelFullScreen) {
-		document.mozCancelFullScreen();
+	} else if (document.mozCancelFullscreen) {
+		document.mozCancelFullscreen();
 	} else if (document.msExitFullscreen) {
 		document.msExitFullscreen();
 	}
