@@ -126,6 +126,7 @@ const init = () => {
 };
 
 const autocompleteOnSelect = async (suggestion) => {
+	// Note: it's fine that this uses json instead of safeJson since it's infrequent and user-initiated
 	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 		data: {
 			text: suggestion.value,
