@@ -58,6 +58,15 @@ const jsVendorSources = [
 	'server/scripts/vendor/auto/suncalc.js',
 ];
 
+// Copy metar-taf-parser separately since it's an ES module with locale dependencies
+const metarVendorSources = [
+	'server/scripts/vendor/auto/metar-taf-parser.mjs',
+	'server/scripts/vendor/auto/locale/en.js',
+];
+
+const copyMetarVendor = () => src(metarVendorSources, { base: 'server/scripts/vendor/auto' })
+	.pipe(dest(`${RESOURCES_PATH}/vendor/auto`));
+
 const compressJsVendor = () => src(jsVendorSources)
 	.pipe(concat('vendor.min.js'))
 	.pipe(terser())
@@ -212,7 +221,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
