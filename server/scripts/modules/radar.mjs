@@ -1,10 +1,12 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { text } from './utils/fetch.mjs';
+import { safeText } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
+import { rewriteUrl } from './utils/url-rewrite.mjs';
+import { debugFlag } from './utils/debug.mjs';
 import { version } from './progress.mjs';
 import setTiles from './radar-tiles.mjs';
 
@@ -25,7 +27,8 @@ const isIos = /iP(ad|od|hone)/i.test(window.navigator.userAgent);
 // context.
 const isBot = /twitterbot|Facebot/i.test(window.navigator.userAgent);
 
-const RADAR_HOST = 'mesonet.agron.iastate.edu';
+// Use OVERRIDE_RADAR_HOST if provided, otherwise default to mesonet
+const RADAR_HOST = (typeof OVERRIDES !== 'undefined' ? OVERRIDES?.RADAR_HOST : undefined) || 'mesonet.agron.iastate.edu';
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Radar', !isIos && !isBot);
@@ -76,35 +79,60 @@ class Radar extends WeatherDisplay {
 		}
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
-		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
-		const baseUrls = [];
-		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
+		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png'; // This URL returns an index of .png files for the given date
 
-		// make urls for yesterday and today
-		while (date <= DateTime.utc().startOf('day')) {
-			baseUrls.push(`${baseUrl}${date.toFormat('yyyy/LL/dd')}${baseUrlEnd}`);
-			date = date.plus({ days: 1 });
+		// Always get today's data
+		const today = DateTime.utc().startOf('day');
+		const todayStr = today.toFormat('yyyy/LL/dd');
+		const yesterday = today.minus({ days: 1 });
+		const yesterdayStr = yesterday.toFormat('yyyy/LL/dd');
+		const todayUrl = `${baseUrl}${todayStr}${baseUrlEnd}`;
+
+		// Get today's data, then we'll see if we need yesterday's
+		const todayList = await safeText(todayUrl);
+
+		// Count available images from today
+		let todayImageCount = 0;
+		if (todayList) {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(todayList, 'text/html');
+			const anchors = xmlDoc.querySelectorAll('a');
+			todayImageCount = Array.from(anchors).filter((elem) => elem.innerHTML?.match(/n0r_\d{12}\.png/)).length;
 		}
 
-		const lists = (await Promise.all(baseUrls.map(async (url) => {
-			try {
-				// get a list of available radars
-				return text(url);
-			} catch (error) {
-				console.log('Unable to get list of radars');
-				console.error(error);
-				this.setStatus(STATUS.failed);
-				return false;
-			}
-		}))).filter((d) => d);
+		// Only fetch yesterday's data if we don't have enough images from today
+		// or if it's very early in the day when recent images might still be from yesterday
+		const currentTimeUTC = DateTime.utc();
+		const minutesSinceMidnight = currentTimeUTC.hour * 60 + currentTimeUTC.minute;
+		const requiredTimeWindow = this.dopplerRadarImageMax * 5; // 5 minutes per image
+		const needYesterday = todayImageCount < this.dopplerRadarImageMax || minutesSinceMidnight < requiredTimeWindow;
 
-		// convert to an array of gif urls
+		// Build the final lists array
+		const lists = [];
+		if (needYesterday) {
+			const yesterdayUrl = `${baseUrl}${yesterdayStr}${baseUrlEnd}`;
+			const yesterdayList = await safeText(yesterdayUrl);
+			if (yesterdayList) {
+				lists.push(yesterdayList); // Add yesterday's data first
+			}
+		}
+		if (todayList) {
+			lists.push(todayList); // Add today's data
+		}
+
+		// convert to an array of png urls
 		const pngs = lists.flatMap((html, htmlIdx) => {
 			const parser = new DOMParser();
 			const xmlDoc = parser.parseFromString(html, 'text/html');
-			// add the base url
+			// add the base url - reconstruct the URL for each list
 			const base = xmlDoc.createElement('base');
-			base.href = baseUrls[htmlIdx];
+			if (htmlIdx === 0 && needYesterday) {
+				// First item is yesterday's data when we fetched it
+				base.href = `${baseUrl}${yesterdayStr}${baseUrlEnd}`;
+			} else {
+				// This is today's data (or the only data if yesterday wasn't fetched)
+				base.href = `${baseUrl}${todayStr}${baseUrlEnd}`;
+			}
 			xmlDoc.head.append(base);
 			const anchors = xmlDoc.querySelectorAll('a');
 			const urls = [];
@@ -134,53 +162,58 @@ class Radar extends WeatherDisplay {
 		});
 
 		// Load the most recent doppler radar images.
-		const radarInfo = await Promise.all(urls.map(async (url, index) => {
-			const processedRadar = await this.workers[index].processRadar({
-				url,
-				RADAR_HOST,
-				OVERRIDES,
-				radarSourceXY,
-			});
+		try {
+			const radarInfo = await Promise.all(urls.map(async (url, index) => {
+				const processedRadar = await this.workers[index].processRadar({
+					url: rewriteUrl(url).toString(), // Apply URL rewriting for caching; convert to string for worker
+					radarSourceXY,
+					debug: debugFlag('radar'),
+				});
 
-			// store the time
-			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
+				// store the time
+				const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
 
-			const [, year, month, day, hour, minute] = timeMatch;
-			const time = DateTime.fromObject({
-				year,
-				month,
-				day,
-				hour,
-				minute,
-			}, {
-				zone: 'UTC',
-			}).setZone(timeZone());
+				const [, year, month, day, hour, minute] = timeMatch;
+				const time = DateTime.fromObject({
+					year,
+					month,
+					day,
+					hour,
+					minute,
+				}, {
+					zone: 'UTC',
+				}).setZone(timeZone());
 
-			const onscreenCanvas = document.createElement('canvas');
-			onscreenCanvas.width = processedRadar.width;
-			onscreenCanvas.height = processedRadar.height;
-			const onscreenContext = onscreenCanvas.getContext('bitmaprenderer');
-			onscreenContext.transferFromImageBitmap(processedRadar);
+				const onscreenCanvas = document.createElement('canvas');
+				onscreenCanvas.width = processedRadar.width;
+				onscreenCanvas.height = processedRadar.height;
+				const onscreenContext = onscreenCanvas.getContext('bitmaprenderer');
+				onscreenContext.transferFromImageBitmap(processedRadar);
 
-			const dataUrl = onscreenCanvas.toDataURL();
+				const dataUrl = onscreenCanvas.toDataURL();
 
-			const elem = this.fillTemplate('frame', { map: { type: 'img', src: dataUrl } });
-			return {
-				time,
-				elem,
-			};
-		}));
+				const elem = this.fillTemplate('frame', { map: { type: 'img', src: dataUrl } });
+				return {
+					time,
+					elem,
+				};
+			}));
 
-		// put the elements in the container
-		const scrollArea = this.elem.querySelector('.scroll-area');
-		scrollArea.innerHTML = '';
-		scrollArea.append(...radarInfo.map((r) => r.elem));
+			// put the elements in the container
+			const scrollArea = this.elem.querySelector('.scroll-area');
+			scrollArea.innerHTML = '';
+			scrollArea.append(...radarInfo.map((r) => r.elem));
 
-		// set max length
-		this.timing.totalScreens = radarInfo.length;
+			// set max length
+			this.timing.totalScreens = radarInfo.length;
 
-		this.times = radarInfo.map((radar) => radar.time);
-		this.setStatus(STATUS.loaded);
+			this.times = radarInfo.map((radar) => radar.time);
+			this.setStatus(STATUS.loaded);
+		} catch (_error) {
+			// Radar fetch failed - skip this display in animation by setting totalScreens = 0
+			this.timing.totalScreens = 0;
+			if (this.isEnabled) this.setStatus(STATUS.failed);
+		}
 	}
 
 	async drawCanvas() {
@@ -206,17 +239,34 @@ const radarWorker = () => {
 	const worker = new Worker(`/resources/radar-worker.mjs?_=${version()}`, { type: 'module' });
 
 	const processRadar = (data) => new Promise((resolve, reject) => {
+		if (debugFlag('radar')) {
+			console.log('[RADAR-MAIN] Posting to worker at:', new Date().toISOString(), 'File:', data.url.split('/').pop());
+		}
 		// prepare for done message
 		worker.onmessage = (e) => {
-			if (e?.data instanceof Error) {
+			if (debugFlag('radar')) {
+				console.log('[RADAR-MAIN] Received from worker at:', new Date().toISOString(), 'Data type:', e?.data?.constructor?.name);
+			}
+			if (e?.data?.error) {
+				console.warn('[RADAR-MAIN] Worker error:', e.data.message);
+				// Worker encountered an error
+				reject(new Error(e.data.message));
+			} else if (e?.data instanceof Error) {
+				console.warn('[RADAR-MAIN] Worker exception:', e.data);
 				reject(e.data);
 			} else if (e?.data instanceof ImageBitmap) {
+				if (debugFlag('radar')) {
+					console.log('[RADAR-MAIN] Successfully received ImageBitmap, size:', e.data.width, 'x', e.data.height);
+				}
 				resolve(e.data);
 			}
 		};
 
 		// start up the worker
-		worker.postMessage(data);
+		worker.postMessage({
+			...data,
+			debug: debugFlag('radar'),
+		});
 	});
 
 	// return the object
