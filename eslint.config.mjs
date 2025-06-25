@@ -90,6 +90,14 @@ export default [{
 				allowSamePrecedence: true,
 			},
 		],
+		'no-unused-vars': [
+			'error',
+			{
+				argsIgnorePattern: '^_',
+				varsIgnorePattern: '^_',
+				caughtErrorsIgnorePattern: '^_',
+			},
+		],
 		'import/extensions': [
 			'error',
 			{
