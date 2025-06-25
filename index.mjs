@@ -1,12 +1,17 @@
 import 'dotenv/config';
 import express from 'express';
 import fs from 'fs';
+import { readFile } from 'fs/promises';
 import {
 	weatherProxy, radarProxy, outlookProxy, mesonetProxy,
 } from './proxy/handlers.mjs';
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 import cache from './proxy/cache.mjs';
+
+const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
+const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
+const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.json'));
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
@@ -55,6 +60,9 @@ const index = (req, res) => {
 		version,
 		OVERRIDES,
 		query: req.query,
+		travelCities,
+		regionalCities,
+		stationInfo,
 	});
 };
 

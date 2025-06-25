@@ -26,11 +26,7 @@ const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
 const RESOURCES_PATH = './dist/resources';
 
-const jsSourcesData = [
-	'server/scripts/data/travelcities.js',
-	'server/scripts/data/regionalcities.js',
-	'server/scripts/data/stations.js',
-];
+// Data is now injected server-side, no need to bundle separate data files
 
 const webpackOptions = {
 	mode: 'production',
@@ -55,11 +51,6 @@ const webpackOptions = {
 		],
 	},
 };
-
-const compressJsData = () => src(jsSourcesData)
-	.pipe(concat('data.min.js'))
-	.pipe(terser())
-	.pipe(dest(RESOURCES_PATH));
 
 const jsVendorSources = [
 	'server/scripts/vendor/auto/nosleep.js',
@@ -133,12 +124,20 @@ const compressHtml = async () => {
 	const packageJson = await readFile('package.json');
 	const { version } = JSON.parse(packageJson);
 
+	// Load the same data that the main server uses
+	const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
+	const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
+	const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.json'));
+
 	return src(htmlSources)
 		.pipe(ejs({
 			production: version,
 			version,
 			OVERRIDES,
 			query: {},
+			travelCities,
+			regionalCities,
+			stationInfo,
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))
