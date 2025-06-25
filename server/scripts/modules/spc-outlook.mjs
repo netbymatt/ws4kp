@@ -1,11 +1,12 @@
 // display spc outlook in a bar graph
 
 import STATUS from './status.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import testPolygon from './utils/polygon.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 // list of interesting files ordered [0] = today, [1] = tomorrow...
 const urlPattern = (day) => `https://www.spc.noaa.gov/products/outlook/day${day}otlk_cat.nolyr.geojson`;
@@ -18,8 +19,10 @@ const testAllPoints = (point, data) => {
 	data.forEach((day, index) => {
 		// initialize the result
 		result[index] = false;
-		// if there's no data (file didn't load), exit early
-		if (day === undefined) return;
+		// ensure day exists and has features array
+		if (!day || !day.features || !Array.isArray(day.features)) {
+			return;
+		}
 		// loop through each category
 		day.features.forEach((feature) => {
 			if (!feature.geometry.coordinates) return;
@@ -46,7 +49,7 @@ class SpcOutlook extends WeatherDisplay {
 		// don't display on progress/navigation screen
 		this.showOnProgress = false;
 
-		// calculate file names
+		// calculate file names, one for each day
 		this.files = [null, null, null].map((v, i) => urlPattern(i + 1));
 
 		// set timings
@@ -56,27 +59,43 @@ class SpcOutlook extends WeatherDisplay {
 	async getData(weatherParameters, refresh) {
 		if (!super.getData(weatherParameters, refresh)) return;
 
-		// initial data does not need to be reloaded on a location change, only during silent refresh
-		if (!this.initialData || refresh) {
+		// SPC outlook data does not need to be reloaded on a location change, only during silent refresh
+		if (!this.rawOutlookData || refresh) {
 			try {
-				// get the three categorical files to get started
-				const filePromises = await Promise.allSettled(this.files.map((file) => json(file)));
-				// store the data, promise will always be fulfilled
-				this.initialData = filePromises.map((outlookDay) => outlookDay.value);
-			} catch (error) {
-				console.error('Unable to get spc outlook');
-				console.error(error.status, error.responseJSON);
-				// if there's no previous data, fail
-				if (!this.initialData) {
-					this.setStatus(STATUS.failed);
+				// get the data for today, tomorrow, and the day after
+				const filePromises = this.files.map((file) => safeJson(file, {
+					retryCount: 1, // Retry one time
+					timeout: 10000, // 10 second timeout for SPC outlook data
+				}));
+				// wait for all the data to be fetched; always returns an array of (potentially null) results
+				this.rawOutlookData = await safePromiseAll(filePromises);
+
+				// Filter out null results (like failed requests) and ensure the response has GeoJSON-looking data
+				this.rawOutlookData = this.rawOutlookData.filter((value) => value && value.features);
+
+				if (this.rawOutlookData.length === 0) {
+					if (debugFlag('verbose-failures')) {
+						console.warn('SPC Outlook has zero days of data');
+					}
+					if (this.isEnabled) this.setStatus(STATUS.failed);
 					return;
 				}
+
+				if (this.rawOutlookData.length < this.files.length) {
+					if (debugFlag('verbose-failures')) {
+						console.warn(`SPC Outlook only loaded ${this.rawOutlookData.length} of ${this.files.length} days successfully`);
+					}
+				}
+			} catch (error) {
+				console.error(`Unexpected error getting SPC Outlook data: ${error.message}`);
+				if (this.isEnabled) this.setStatus(STATUS.failed);
+				return;
 			}
 		}
-		// do the initial parsing of the data
-		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], this.initialData);
+		// parse the data
+		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], this.rawOutlookData);
 
-		// if all the data returns false the there's nothing to do, skip this screen
+		// check if there's a "risk" for any of the three days, otherwise skip the SPC Outlook screen
 		if (this.data.reduce((prev, cur) => prev || !!cur, false)) {
 			this.timing.totalScreens = 1;
 		} else {
