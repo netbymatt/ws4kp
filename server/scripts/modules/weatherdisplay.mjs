@@ -8,6 +8,7 @@ import {
 import { parseQueryString } from './share.mjs';
 import settings from './settings.mjs';
 import { elemForEach } from './utils/elem.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
@@ -28,7 +29,7 @@ class WeatherDisplay {
 		// default navigation timing
 		this.timing = {
 			totalScreens: 1,
-			baseDelay: 9000, // 5 seconds
+			baseDelay: 9000, // 9 seconds
 			delay: 1, // 1*1second = 1 second total display time
 		};
 		this.navBaseCount = 0;
@@ -249,6 +250,23 @@ class WeatherDisplay {
 		// increment the base count
 		this.navBaseCount += 1;
 
+		if (debugFlag('weatherdisplay')) {
+			const now = Date.now();
+			if (!this.timingDebug) {
+				this.timingDebug = { startTime: now, lastTransition: now, baseCountLog: [] };
+				if (this.navBaseCount !== 1) {
+					console.log(`⏱️ [${this.constructor.name}] Starting at baseCount ${this.navBaseCount}`);
+				}
+			}
+			const elapsed = now - this.timingDebug.lastTransition;
+			this.timingDebug.baseCountLog.push({
+				baseCount: this.navBaseCount,
+				timestamp: now,
+				elapsedMs: elapsed,
+				screenIndex: this.screenIndex,
+			});
+		}
+
 		// call base count change if available for this function
 		if (this.baseCountChange) this.baseCountChange(this.navBaseCount);
 
@@ -269,6 +287,30 @@ class WeatherDisplay {
 
 		// test for no change and exit early
 		if (nextScreenIndex === this.screenIndex) return;
+
+		if (debugFlag('weatherdisplay') && this.timingDebug) {
+			const now = Date.now();
+			const elapsed = now - this.timingDebug.lastTransition;
+			this.timingDebug.lastTransition = now;
+			console.log(`⏱️ [${this.constructor.name}] Screen Transition: ${this.screenIndex} → ${nextScreenIndex === -1 ? 0 : nextScreenIndex}, baseCount=${this.navBaseCount}, duration=${elapsed}ms`);
+			if (this.screenIndex !== -1 && this.timing && this.timing.delay !== undefined) { // Skip expected duration calculation for the first transition (screenIndex -1 → 0)
+				let expectedMs;
+				if (Array.isArray(this.timing.delay)) { // Array-based timing (different delay per screen/period)
+					// Find the timing index for the screen we just LEFT (the one that just finished displaying)
+					// For transition "X → Y", we want the timing for screen X (which is this.screenIndex before it gets updated)
+					const timingIndex = this.screenIndex;
+					if (timingIndex >= 0 && timingIndex < this.timing.delay.length) { // Handle both simple number delays and object delays with time property (radar)
+						const delayValue = typeof this.timing.delay[timingIndex] === 'object' ? this.timing.delay[timingIndex].time : this.timing.delay[timingIndex];
+						expectedMs = this.timing.baseDelay * delayValue * (settings?.speed?.value || 1);
+					}
+				} else if (typeof this.timing.delay === 'number') { // Simple number-based timing (same delay for all screens)
+					expectedMs = this.timing.baseDelay * this.timing.delay * (settings?.speed?.value || 1);
+				}
+				if (expectedMs !== undefined) {
+					console.log(`⏱️ [${this.constructor.name}] Expected duration: ${expectedMs}ms, Actual: ${elapsed}ms, Diff: ${elapsed - expectedMs}ms`);
+				}
+			}
+		}
 
 		// test for -1 (no screen displayed yet)
 		this.screenIndex = nextScreenIndex === -1 ? 0 : nextScreenIndex;
@@ -369,10 +411,29 @@ class WeatherDisplay {
 
 	// start and stop base counter
 	startNavCount() {
-		if (!this.navInterval) this.navInterval = setInterval(() => this.navBaseTime(), this.timing.baseDelay * settings.speed.value);
+		if (!this.navInterval) {
+			if (debugFlag('weatherdisplay')) {
+				console.log(`⏱️ [${this.constructor.name}] Starting navigation:`, {
+					baseDelay: this.timing.baseDelay,
+					intervalMs: this.timing.baseDelay * (settings?.speed?.value || 1),
+					totalScreens: this.timing.totalScreens,
+					delayArray: this.timing.delay,
+					fullDelayArray: this.timing.fullDelay,
+					screenIndexes: this.timing.screenIndexes,
+				});
+			}
+			this.navInterval = setInterval(() => this.navBaseTime(), this.timing.baseDelay * settings.speed.value);
+		}
 	}
 
 	resetNavBaseCount() {
+		if (debugFlag('weatherdisplay') && this.timingDebug && this.timingDebug.baseCountLog.length > 1) {
+			const totalDuration = this.timingDebug.baseCountLog[this.timingDebug.baseCountLog.length - 1].timestamp - this.timingDebug.baseCountLog[0].timestamp;
+			const avgInterval = totalDuration / (this.timingDebug.baseCountLog.length - 1);
+			console.log(`⏱️ [${this.constructor.name}] Total duration: ${totalDuration}ms, Avg base interval: ${avgInterval.toFixed(1)}ms, Base count range: ${this.timingDebug.baseCountLog[0].baseCount}-${this.timingDebug.baseCountLog[this.timingDebug.baseCountLog.length - 1].baseCount}`);
+			this.timingDebug = null;
+		}
+
 		this.navBaseCount = 0;
 		this.screenIndex = -1;
 		// reset the timing so we don't short-change the first screen
@@ -446,7 +507,7 @@ class WeatherDisplay {
 	setAutoReload() {
 		// refresh time can be forced by the user (for hazards)
 		const refreshTime = this.refreshTime ?? settings.refreshTime.value;
-		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(false, true), refreshTime);
+		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(this.weatherParameters, true), refreshTime);
 	}
 }
 
