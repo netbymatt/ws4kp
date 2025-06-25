@@ -31,8 +31,8 @@ class HourlyGraph extends WeatherDisplay {
 		if (!super.getData(undefined, refresh)) return;
 
 		const data = await getHourlyData(() => this.stillWaiting());
-		if (data === undefined) {
-			this.setStatus(STATUS.failed);
+		if (!data) {
+			if (this.isEnabled) this.setStatus(STATUS.failed);
 			return;
 		}
 
