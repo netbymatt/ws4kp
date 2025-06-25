@@ -5,11 +5,15 @@
 	"main": "index.mjs",
 	"type": "module",
 	"scripts": {
+		"start": "node index.mjs",
+		"stop": "pkill -f 'node index.mjs' || echo 'No process found'",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
 		"build": "gulp buildDist",
-		"lint": "eslint ./server/scripts/**/*.mjs",
-		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs"
+		"lint": "eslint ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs",
+		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs",
+		"lintall": "eslint ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs ./datagenerators/**/*.mjs ./gulp/**/*.mjs ./tests/**/*.mjs",
+		"lintall:fix": "eslint --fix ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs ./datagenerators/**/*.mjs ./gulp/**/*.mjs ./tests/**/*.mjs"
 	},
 	"repository": {
 		"type": "git",
