@@ -2,7 +2,7 @@
 import noSleep from './utils/nosleep.mjs';
 import STATUS from './status.mjs';
 import { wrap } from './utils/calc.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson } from './utils/fetch.mjs';
 import { getPoint } from './utils/weather.mjs';
 import settings from './settings.mjs';
 
@@ -34,11 +34,27 @@ const getWeather = async (latLon, haveDataCallback) => {
 	// get initial weather data
 	const point = await getPoint(latLon.lat, latLon.lon);
 
+	// check if point data was successfully retrieved
+	if (!point) {
+		return;
+	}
+
 	if (typeof haveDataCallback === 'function') haveDataCallback(point);
 
 	try {
-	// get stations
-	const stations = await json(point.properties.observationStations);
+		// get stations using centralized safe handling
+		const stations = await safeJson(point.properties.observationStations);
+
+		if (!stations) {
+			console.warn('Failed to get Observation Stations');
+			return;
+		}
+
+		// check if stations data is valid
+		if (!stations || !stations.features || stations.features.length === 0) {
+			console.warn('No Observation Stations found for this location');
+			return;
+		}
 
 		const StationId = stations.features[0].properties.stationIdentifier;
 
@@ -193,11 +209,26 @@ const loadDisplay = (direction) => {
 	const totalDisplays = displays.length;
 	const curIdx = currentDisplayIndex();
 	let idx;
+	let foundSuitableDisplay = false;
+
 	for (let i = 0; i < totalDisplays; i += 1) {
 		// convert form simple 0-10 to start at current display index +/-1 and wrap
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
-		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
+		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) {
+			// Prevent infinite recursion by ensuring we don't select the same display
+			if (idx !== curIdx) {
+				foundSuitableDisplay = true;
+				break;
 			}
+		}
+	}
+
+	// if no suitable display was found, do NOT proceed to avoid infinite recursion
+	if (!foundSuitableDisplay) {
+		console.warn('No suitable display found for navigation');
+		return;
+	}
+
 	const newDisplay = displays[idx];
 	// hide all displays
 	hideAllCanvases();
