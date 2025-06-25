@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display {
 	width: 640px;
@@ -127,6 +127,12 @@
 			margin-left: 55px;
 			margin-right: 55px;
 			overflow: hidden;
+		}
+
+		// Remove margins for hazard scrolls to maximize text space
+		&.hazard .fixed {
+			margin-left: 0;
+			margin-right: 0;
 		}
 
 		.scroll-header {

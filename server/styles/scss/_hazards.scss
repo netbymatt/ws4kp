@@ -1,16 +1,15 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display .main.hazards {
 	&.main {
 		overflow-y: hidden;
 		height: 480px;
+		background-color: rgb(112, 35, 35);
 
 		.hazard-lines {
 			min-height: 400px;
 			padding-top: 10px;
-
-			background-color: rgb(112, 35, 35);
 
 			.hazard {
 				font-family: 'Star4000';
