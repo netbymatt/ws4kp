@@ -36,57 +36,66 @@ const getWeather = async (latLon, haveDataCallback) => {
 
 	if (typeof haveDataCallback === 'function') haveDataCallback(point);
 
+	try {
 	// get stations
 	const stations = await json(point.properties.observationStations);
 
-	const StationId = stations.features[0].properties.stationIdentifier;
+		const StationId = stations.features[0].properties.stationIdentifier;
 
-	let { city } = point.properties.relativeLocation.properties;
-	const { state } = point.properties.relativeLocation.properties;
+		let { city } = point.properties.relativeLocation.properties;
+		const { state } = point.properties.relativeLocation.properties;
 
-	if (StationId in StationInfo) {
-		city = StationInfo[StationId].city;
-		[city] = city.split('/');
-		city = city.replace(/\s+$/, '');
+		if (StationId in StationInfo) {
+			city = StationInfo[StationId].city;
+			[city] = city.split('/');
+			city = city.replace(/\s+$/, '');
+		}
+
+		// populate the weather parameters
+		weatherParameters.latitude = latLon.lat;
+		weatherParameters.longitude = latLon.lon;
+		weatherParameters.zoneId = point.properties.forecastZone.substr(-6);
+		weatherParameters.radarId = point.properties.radarStation.substr(-3);
+		weatherParameters.stationId = StationId;
+		weatherParameters.weatherOffice = point.properties.cwa;
+		weatherParameters.city = city;
+		weatherParameters.state = state;
+		weatherParameters.timeZone = point.properties.timeZone;
+		weatherParameters.forecast = point.properties.forecast;
+		weatherParameters.forecastGridData = point.properties.forecastGridData;
+		weatherParameters.stations = stations.features;
+
+		// update the main process for display purposes
+		populateWeatherParameters(weatherParameters);
+
+		// reset the scroll
+		postMessage({ type: 'current-weather-scroll', method: 'reload' });
+
+		// draw the progress canvas and hide others
+		hideAllCanvases();
+		if (!settings?.kiosk?.value) {
+			// In normal mode, hide loading screen and show progress
+			// (In kiosk mode, keep the loading screen visible until autoplay starts)
+			document.querySelector('#loading').style.display = 'none';
+			if (progress) {
+				await progress.drawCanvas();
+				progress.showCanvas();
+			}
+		}
+
+		// call for new data on each display
+		displays.forEach((display) => display.getData(weatherParameters));
+	} catch (error) {
+		console.error(`Failed to get weather data: ${error.message}`);
 	}
-
-	// populate the weather parameters
-	weatherParameters.latitude = latLon.lat;
-	weatherParameters.longitude = latLon.lon;
-	weatherParameters.zoneId = point.properties.forecastZone.substr(-6);
-	weatherParameters.radarId = point.properties.radarStation.substr(-3);
-	weatherParameters.stationId = StationId;
-	weatherParameters.weatherOffice = point.properties.cwa;
-	weatherParameters.city = city;
-	weatherParameters.state = state;
-	weatherParameters.timeZone = point.properties.timeZone;
-	weatherParameters.forecast = point.properties.forecast;
-	weatherParameters.forecastGridData = point.properties.forecastGridData;
-	weatherParameters.stations = stations.features;
-
-	// update the main process for display purposes
-	populateWeatherParameters(weatherParameters);
-
-	// reset the scroll
-	postMessage({ type: 'current-weather-scroll', method: 'reload' });
-
-	// draw the progress canvas and hide others
-	hideAllCanvases();
-	document.querySelector('#loading').style.display = 'none';
-	if (progress) {
-		await progress.drawCanvas();
-		progress.showCanvas();
-	}
-
-	// call for new data on each display
-	displays.forEach((display) => display.getData(weatherParameters));
 };
 
 // receive a status update from a module {id, value}
 const updateStatus = (value) => {
 	if (value.id < 0) return;
-	if (!progress) return;
-	progress.drawCanvas(displays, countLoadedDisplays());
+	if (!progress && !settings?.kiosk?.value) return;
+
+	if (progress) progress.drawCanvas(displays, countLoadedDisplays());
 
 	// first display is hazards and it must load before evaluating the first display
 	if (displays[0].status === STATUS.loading) return;
@@ -153,7 +162,7 @@ const displayNavMessage = (myMessage) => {
 const navTo = (direction) => {
 	// test for a current display
 	const current = currentDisplay();
-	progress.hideCanvas();
+	if (progress) progress.hideCanvas();
 	if (!current) {
 		// special case for no active displays (typically on progress screen)
 		// find the first ready display
@@ -165,6 +174,11 @@ const navTo = (direction) => {
 		} while (!firstDisplay && displayCount < displays.length);
 
 		if (!firstDisplay) return;
+
+		// In kiosk mode, hide the loading screen when we start showing the first display
+		if (settings?.kiosk?.value) {
+			document.querySelector('#loading').style.display = 'none';
+		}
 
 		firstDisplay.navNext(msg.command.firstFrame);
 		firstDisplay.showCanvas();
@@ -183,7 +197,7 @@ const loadDisplay = (direction) => {
 		// convert form simple 0-10 to start at current display index +/-1 and wrap
 		idx = wrap(curIdx + (i + 1) * direction, totalDisplays);
 		if (displays[idx].status === STATUS.loaded && displays[idx].timing.totalScreens > 0) break;
-	}
+			}
 	const newDisplay = displays[idx];
 	// hide all displays
 	hideAllCanvases();
@@ -210,9 +224,12 @@ const setPlaying = (newValue) => {
 		playButton.title = 'Play';
 		playButton.src = 'images/nav/ic_play_arrow_white_24dp_2x.png';
 	}
-	// if we're playing and on the progress screen jump to the next screen
-	if (!progress) return;
-	if (playing && !currentDisplay()) navTo(msg.command.firstFrame);
+	// if we're playing and on the progress screen (or in kiosk mode), jump to the next screen
+	if (playing && !currentDisplay()) {
+		if (progress || settings?.kiosk?.value) {
+			navTo(msg.command.firstFrame);
+		}
+	}
 };
 
 // handle all navigation buttons
@@ -237,7 +254,12 @@ const handleNavButton = (button) => {
 			break;
 		case 'menu':
 			setPlaying(false);
-			progress.showCanvas();
+			if (progress) {
+				progress.showCanvas();
+			} else if (settings?.kiosk?.value) {
+				// In kiosk mode without progress, show the loading screen
+				document.querySelector('#loading').style.display = 'flex';
+			}
 			hideAllCanvases();
 			break;
 		default:

@@ -54,6 +54,7 @@ const index = (req, res) => {
 		production: false,
 		version,
 		OVERRIDES,
+		query: req.query,
 	});
 };
 

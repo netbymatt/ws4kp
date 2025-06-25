@@ -138,6 +138,7 @@ const compressHtml = async () => {
 			production: version,
 			version,
 			OVERRIDES,
+			query: {},
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))

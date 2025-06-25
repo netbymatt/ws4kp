@@ -1,5 +1,5 @@
-@use 'shared/_utils'as u;
-@use 'shared/_colors'as c;
+@use 'shared/_utils' as u;
+@use 'shared/_colors' as c;
 
 @font-face {
 	font-family: "Star4000";
@@ -768,15 +768,15 @@ body {
 	display: none;
 }
 
+// Hide instructions in kiosk mode (higher specificity than the show rule)
+body.kiosk #loading .instructions {
+	display: none !important;
+}
+
 .kiosk {
 
-	#divQuery,
-	>.info,
-	>.related-links,
-	>.heading,
-	#enabledDisplays,
-	#settings,
-	#divInfo {
-		display: none;
+	// In kiosk mode, hide everything except the main weather display
+	>*:not(#divTwc) {
+		display: none !important;
 	}
 }
