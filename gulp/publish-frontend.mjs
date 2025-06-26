@@ -141,6 +141,7 @@ const compressHtml = async () => {
 	return src(htmlSources)
 		.pipe(ejs({
 			production: version,
+			serverAvailable: false,
 			version,
 			OVERRIDES,
 			query: {},

@@ -22,6 +22,9 @@
 	<link rel="prefetch" href="fonts/Star4000 Extended.woff" as="font" type="font/woff" crossorigin>
 	<link rel="prefetch" href="fonts/Star4000 Large.woff" as="font" type="font/woff" crossorigin>
 	<link rel="prefetch" href="fonts/Star4000 Small.woff" as="font" type="font/woff" crossorigin>
+	<% if (typeof serverAvailable !== 'undefined' && serverAvailable) { %>
+	<script>window.WS4KP_SERVER_AVAILABLE=true;</script>
+	<% } %>
 
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />

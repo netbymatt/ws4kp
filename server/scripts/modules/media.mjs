@@ -40,21 +40,32 @@ const scanMusicDirectory = async () => {
 };
 
 const getMedia = async () => {
+	let playlistSource = '';
+
 	try {
 		const response = await fetch('playlist.json');
 		if (response.ok) {
 			playlist = await response.json();
-		} else if (response.status === 404
-			&& response.headers.get('X-Weatherstar') === 'true') {
-			console.warn("Couldn't get playlist.json, falling back to directory scan");
+			playlistSource = 'from server';
+		} else if (response.status === 404 && response.headers.get('X-Weatherstar') === 'true') {
+			// Expected behavior in static deployment mode
 			playlist = await scanMusicDirectory();
+			playlistSource = 'via directory scan (static deployment)';
 		} else {
-			console.warn(`Couldn't get playlist.json: ${response.status} ${response.statusText}`);
 			playlist = { availableFiles: [] };
+			playlistSource = `failed (${response.status} ${response.statusText})`;
 		}
-	} catch (e) {
-		console.warn("Couldn't get playlist.json, falling back to directory scan");
+	} catch (_e) {
+		// Network error or other fetch failure - fall back to directory scanning
 		playlist = await scanMusicDirectory();
+		playlistSource = 'via directory scan (after fetch failed)';
+	}
+
+	const fileCount = playlist?.availableFiles?.length || 0;
+	if (fileCount > 0) {
+		console.log(`Loaded playlist ${playlistSource} - found ${fileCount} music file${fileCount === 1 ? '' : 's'}`);
+	} else {
+		console.log(`No music files found ${playlistSource}`);
 	}
 
 	enableMediaPlayer();

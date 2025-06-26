@@ -8,6 +8,10 @@ const rewriteUrl = (_url) => {
 	// Handle both string URLs and URL objects
 	const url = typeof _url === 'string' ? new URL(_url) : new URL(_url.toString());
 
+	if (!window.WS4KP_SERVER_AVAILABLE) {
+		return url;
+	}
+
 	// Rewrite the origin to use local proxy server
 	if (url.origin === 'https://api.weather.gov') {
 		url.protocol = window.location.protocol;

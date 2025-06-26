@@ -16,6 +16,12 @@ const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
 
+// Set X-Weatherstar header globally for playlist fallback detection
+app.use((req, res, next) => {
+	res.setHeader('X-Weatherstar', 'true');
+	next();
+});
+
 // template engine
 app.set('view engine', 'ejs');
 
@@ -45,6 +51,19 @@ const hasQsVars = Object.entries(qsVars).length > 0;
 // turn the environment query string into search params
 const defaultSearchParams = (new URLSearchParams(qsVars)).toString();
 
+const renderIndex = (req, res, production = false) => {
+	res.render('index', {
+		production,
+		serverAvailable: !process.env?.STATIC, // Disable caching proxy server in static mode
+		version,
+		OVERRIDES,
+		query: req.query,
+		travelCities,
+		regionalCities,
+		stationInfo,
+	});
+};
+
 const index = (req, res) => {
 	// test for no query string in request and if environment query string values were provided
 	if (hasQsVars && Object.keys(req.query).length === 0) {
@@ -54,16 +73,8 @@ const index = (req, res) => {
 		res.redirect(307, url.toString());
 		return;
 	}
-	// return the standard page
-	res.render('index', {
-		production: false,
-		version,
-		OVERRIDES,
-		query: req.query,
-		travelCities,
-		regionalCities,
-		stationInfo,
-	});
+	// return the EJS template page in development mode (serve files from server directory directly)
+	renderIndex(req, res, false);
 };
 
 const geoip = (req, res) => {
@@ -106,25 +117,35 @@ const staticOptions = {
 };
 
 // Weather.gov API proxy (catch-all for any Weather.gov API endpoint)
-app.use('/api/', weatherProxy);
+// Skip setting up routes for the caching proxy server in static mode
+if (!process.env?.STATIC) {
+	app.use('/api/', weatherProxy);
 
-// Cache management DELETE endpoint to allow "uncaching" specific URLs
-app.delete(/^\/cache\/.*/, (req, res) => {
-	const path = req.url.replace('/cache', '');
-	const cleared = cache.clearEntry(path);
-	res.json({ cleared, path });
-});
+	// Cache management DELETE endpoint to allow "uncaching" specific URLs
+	app.delete(/^\/cache\/.*/, (req, res) => {
+		const path = req.url.replace('/cache', '');
+		const cleared = cache.clearEntry(path);
+		res.json({ cleared, path });
+	});
 
-// specific proxies for other services
-app.use('/radar/', radarProxy);
-app.use('/spc/', outlookProxy);
-app.use('/mesonet/', mesonetProxy);
+	// specific proxies for other services
+	app.use('/radar/', radarProxy);
+	app.use('/spc/', outlookProxy);
+	app.use('/mesonet/', mesonetProxy);
+
+	// Playlist route is available in server mode (not in static mode)
+	app.get('/playlist.json', playlist);
+}
 
 if (process.env?.DIST === '1') {
 	// Production ("distribution") mode uses pre-baked files in the dist directory
 	// 'npm run build' and then 'DIST=1 npm start'
 	app.use('/scripts', express.static('./server/scripts', staticOptions));
 	app.use('/geoip', geoip);
+
+	// render the EJS template in production mode (serve compressed files from dist directory)
+	app.get('/', (req, res) => { renderIndex(req, res, true); });
+
 	app.use('/', express.static('./dist', staticOptions));
 } else {
 	// Development mode serves files from the server directory: 'npm start'
@@ -133,7 +154,6 @@ if (process.env?.DIST === '1') {
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
 	app.get('*name', express.static('./server', staticOptions));
-	app.get('/playlist.json', playlist);
 }
 
 const server = app.listen(port, () => {

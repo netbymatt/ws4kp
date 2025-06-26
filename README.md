@@ -48,11 +48,20 @@ npm i
 node index.mjs
 ```
 
-To run via Docker: 
-```
+To run via Docker using a "static deployment" where everything happens in the browser (no server component):
+
+```bash
 docker run -p 8080:8080 ghcr.io/netbymatt/ws4kp
 ```
-Open your web browser: http://localhost:8080/ 
+
+To run via Docker using a "server deployment" with a caching proxy server for multi-client performance and enhanced observability (the same as `npm start`):
+
+```bash
+docker build -f Dockerfile.server -t ws4kp-server .
+docker run -p 8080:8080 ws4kp-server
+```
+
+Open your web browser: http://localhost:8080/
 
 To run via Docker Compose (docker-compose.yaml):
 ```
