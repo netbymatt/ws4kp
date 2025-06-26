@@ -7,6 +7,7 @@ import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
+import { loadAllData } from './modules/utils/data-loader.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -28,7 +29,23 @@ const TXT_ADDRESS_SELECTOR = '#txtAddress';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BNT_GET_GPS_SELECTOR = '#btnGetGps';
 
-const init = () => {
+const init = async () => {
+	// Load core data first - app cannot function without it
+	try {
+		await loadAllData(typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '');
+	} catch (error) {
+		console.error('Failed to load core application data:', error);
+		// Show error message to user and halt initialization
+		document.body.innerHTML = `
+			<div>
+				<h2>Unable to load Weather Data</h2>
+				<p>The application cannot start because core data failed to load.</p>
+				<p>Please check your connection and try refreshing.</p>
+			</div>
+		`;
+		return; // Stop initialization
+	}
+
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});

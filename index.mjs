@@ -58,9 +58,6 @@ const renderIndex = (req, res, production = false) => {
 		version,
 		OVERRIDES,
 		query: req.query,
-		travelCities,
-		regionalCities,
-		stationInfo,
 	});
 };
 
@@ -136,6 +133,23 @@ if (!process.env?.STATIC) {
 	// Playlist route is available in server mode (not in static mode)
 	app.get('/playlist.json', playlist);
 }
+
+// Data endpoints - serve JSON data with long-term caching
+const dataEndpoints = {
+	travelcities: travelCities,
+	regionalcities: regionalCities,
+	stations: stationInfo,
+};
+
+Object.entries(dataEndpoints).forEach(([name, data]) => {
+	app.get(`/data/${name}.json`, (req, res) => {
+		res.set({
+			'Cache-Control': 'public, max-age=31536000, immutable',
+			'Content-Type': 'application/json',
+		});
+		res.json(data);
+	});
+});
 
 if (process.env?.DIST === '1') {
 	// Production ("distribution") mode uses pre-baked files in the dist directory

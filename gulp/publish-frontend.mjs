@@ -133,11 +133,6 @@ const compressHtml = async () => {
 	const packageJson = await readFile('package.json');
 	const { version } = JSON.parse(packageJson);
 
-	// Load the same data that the main server uses
-	const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
-	const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
-	const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.json'));
-
 	return src(htmlSources)
 		.pipe(ejs({
 			production: version,
@@ -145,9 +140,6 @@ const compressHtml = async () => {
 			version,
 			OVERRIDES,
 			query: {},
-			travelCities,
-			regionalCities,
-			stationInfo,
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))
@@ -161,6 +153,13 @@ const otherFiles = [
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
+
+// Copy JSON data files for static hosting
+const copyDataFiles = () => src([
+	'datagenerators/output/travelcities.json',
+	'datagenerators/output/regionalcities.json',
+	'datagenerators/output/stations.json',
+]).pipe(dest('./dist/data'));
 
 const s3 = s3Upload({
 	useIAM: true,
@@ -222,7 +221,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing

@@ -28,12 +28,6 @@
 
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-  <!-- data must be loaded before main script -->
-  <script>
-    window.TravelCities = <%- JSON.stringify(travelCities) %>;
-    window.RegionalCities = <%- JSON.stringify(regionalCities) %>;
-    window.StationInfo = <%- JSON.stringify(stationInfo) %>;
-  </script>
   <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
   <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>
 	<script type="text/javascript">const OVERRIDES=<%-JSON.stringify(OVERRIDES)%>;</script>
@@ -63,12 +57,6 @@
   <script type="module" src="scripts/modules/settings.mjs"></script>
 	<script type="module" src="scripts/modules/media.mjs"></script>
 	<script type="module" src="scripts/index.mjs"></script>
-  <!-- data -->
-  <script>
-    window.TravelCities = <%- JSON.stringify(travelCities) %>;
-    window.RegionalCities = <%- JSON.stringify(regionalCities) %>;
-    window.StationInfo = <%- JSON.stringify(stationInfo) %>;
-  </script>
   <% } %>
 
 </head>
