@@ -153,10 +153,12 @@ class CurrentWeather extends WeatherDisplay {
 			condition = shortConditions(condition);
 		}
 
+		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : '-';
+
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),
 			condition,
-			wind: this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' '),
+			wind,
 			location: locationCleanup(this.data.station.properties.name).substr(0, 20),
 			humidity: `${this.data.Humidity}%`,
 			dewpoint: this.data.DewPoint + String.fromCharCode(176),
@@ -243,7 +245,6 @@ const parseData = (data) => {
 	data.WindSpeed = windConverter(observations.windSpeed.value);
 	data.WindDirection = directionToNSEW(observations.windDirection.value);
 	data.WindGust = windConverter(observations.windGust.value);
-	data.WindSpeed = windConverter(data.WindSpeed);
 	data.WindUnit = windConverter.units;
 	data.Humidity = Math.round(observations.relativeHumidity.value);
 	data.Icon = getLargeIcon(observations.icon);
