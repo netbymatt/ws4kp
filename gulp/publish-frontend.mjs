@@ -27,7 +27,19 @@ const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
 const RESOURCES_PATH = './dist/resources';
 
-// Data is now injected server-side, no need to bundle separate data files
+// change between default destinations and preview destinations
+let bucket = process.env.BUCKET;
+let distributionId = process.env.DISTRIBUTION_ID;
+const packageJson = await readFile('package.json');
+let { version } = JSON.parse(packageJson);
+
+const setPreview = (cb) => {
+	bucket = process.env.BUCKET_PREVIEW;
+	distributionId = process.env.DISTRIBUTION_ID_PREVIEW;
+	// simple "random" value for cache busting on preview, 7 digits of seconds since epoch
+	version = Math.floor(((new Date()).getTime() / 1000) % 10000000);
+	cb();
+};
 
 const webpackOptions = {
 	mode: 'production',
@@ -107,22 +119,18 @@ const copyCss = () => src(cssSources)
 const htmlSources = [
 	'views/*.ejs',
 ];
-const compressHtml = async () => {
-	const packageJson = await readFile('package.json');
-	const { version } = JSON.parse(packageJson);
 
-	return src(htmlSources)
-		.pipe(ejs({
-			production: version,
-			serverAvailable: false,
-			version,
-			OVERRIDES,
-			query: {},
-		}))
-		.pipe(rename({ extname: '.html' }))
-		.pipe(htmlmin({ collapseWhitespace: true }))
-		.pipe(dest('./dist'));
-};
+const compressHtml = async () => src(htmlSources)
+	.pipe(ejs({
+		production: version,
+		serverAvailable: false,
+		version,
+		OVERRIDES,
+		query: {},
+	}))
+	.pipe(rename({ extname: '.html' }))
+	.pipe(htmlmin({ collapseWhitespace: true }))
+	.pipe(dest('./dist'));
 
 const otherFiles = [
 	'server/robots.txt',
@@ -151,7 +159,7 @@ const uploadSources = [
 	'!dist/fonts/**/*',
 ];
 
-const uploadCreator = (bucket) => () => src(uploadSources, { base: './dist', encoding: false })
+const upload = () => src(uploadSources, { base: './dist', encoding: false })
 	.pipe(s3({
 		Bucket: bucket,
 		StorageClass: 'STANDARD',
@@ -170,10 +178,7 @@ const imageSources = [
 	'!server/images/gimp/**',
 ];
 
-const upload = uploadCreator(process.env.BUCKET);
-const uploadPreview = uploadCreator(process.env.BUCKET_PREVIEW);
-
-const uploadImagesCreator = (bucket) => () => src(imageSources, { base: './server', encoding: false })
+const uploadImages = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(
 		s3({
 			Bucket: bucket,
@@ -184,13 +189,10 @@ const uploadImagesCreator = (bucket) => () => src(imageSources, { base: './serve
 		}),
 	);
 
-const uploadImages = uploadImagesCreator(process.env.BUCKET);
-const uploadImagesPreview = uploadImagesCreator(process.env.BUCKET_PREVIEW);
-
 const copyImageSources = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(dest('./dist'));
 
-const invalidateCreator = (distributionId) => () => cloudfront.send(new CreateInvalidationCommand({
+const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
 	DistributionId: distributionId,
 	InvalidationBatch: {
 		CallerReference: (new Date()).toLocaleString(),
@@ -200,9 +202,6 @@ const invalidateCreator = (distributionId) => () => cloudfront.send(new CreateIn
 		},
 	},
 }));
-
-const invalidate = invalidateCreator(process.env.DISTRIBUTION_ID);
-const invalidatePreview = invalidateCreator(process.env.DISTRIBUTION_ID_PREVIEW);
 
 const buildPlaylist = async () => {
 	const availableFiles = await reader();
@@ -215,7 +214,7 @@ const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyMetarVen
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
 const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
-const stageFrontend = series(buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
+const stageFrontend = series(setPreview, publishFrontend);
 
 export default publishFrontend;
 
