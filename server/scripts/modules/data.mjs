@@ -2,11 +2,17 @@
 import { safeJson } from './utils/fetch.mjs';
 
 // get version directly from the page to work around dependency cycle with progress.mjs
-const version = document.querySelector('#version').innerHTML.replace(/\s/g, '');
+// as soon as the dom is loaded
+const versionPromise = new Promise((resolve) => {
+	document.addEventListener('DOMContentLoaded', () => {
+		resolve(document.querySelector('#version').innerHTML.replace(/\s/g, ''));
+	});
+});
 
 // Load data with version-based cache busting
 const loadData = async (dataType) => {
 	try {
+		const version = await versionPromise;
 		const url = `/data/${dataType}.json${version ? `?_=${version}` : ''}`;
 		const response = await safeJson(url);
 
