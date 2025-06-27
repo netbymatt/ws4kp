@@ -96,29 +96,6 @@ const buildJs = () => src(mjsSources)
 	.pipe(webpack(webpackOptions))
 	.pipe(dest(RESOURCES_PATH));
 
-const workerSources = [
-	'./server/scripts/modules/radar-worker.mjs',
-];
-
-const buildWorkers = () => {
-	// update the file name in the webpack options
-	const output = {
-		chunkFilename: '[id].mjs',
-		chunkFormat: 'module',
-		filename: '[name].mjs',
-	};
-	const workerWebpackOptions = {
-		...webpackOptions,
-		output,
-		entry: {
-			'radar-worker': workerSources[0],
-		},
-	};
-	return src(workerSources)
-		.pipe(webpack(workerWebpackOptions))
-		.pipe(dest(RESOURCES_PATH));
-};
-
 const cssSources = [
 	'server/styles/main.css',
 ];
@@ -223,7 +200,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
