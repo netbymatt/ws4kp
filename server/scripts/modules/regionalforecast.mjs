@@ -13,6 +13,7 @@ import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { StationInfo, RegionalCities } from './data.mjs';
 
 // map offset
 const mapOffsetXY = {
@@ -54,10 +55,19 @@ class RegionalForecast extends WeatherDisplay {
 		if (this.weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
-		const stationInfoArray = Object.values(StationInfo).map((station) => ({ ...station, targetDistance }));
+		const stationInfo = await StationInfo;
+		if (!stationInfo) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+		const stationInfoArray = Object.values(stationInfo).map((station) => ({ ...station, targetDistance }));
 		// combine regional cities with station info for additional stations
 		// stations are intentionally after cities to allow cities priority when drawing the map
-		const combinedCities = [...RegionalCities, ...stationInfoArray];
+		const regionalCitiesArray = await RegionalCities;
+		if (!regionalCitiesArray) {
+			this.setStatus(STATUS.noData);
+		}
+		const combinedCities = [...regionalCitiesArray, ...stationInfoArray];
 
 		// Determine which cities are within the max/min latitude/longitude.
 		const regionalCities = [];

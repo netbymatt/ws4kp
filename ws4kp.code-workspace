@@ -72,7 +72,10 @@
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
-		}
+		},
+		"cSpell.words": [
+			"Metar"
+		]
 	},
 	"extensions": {
 		"recommendations": [

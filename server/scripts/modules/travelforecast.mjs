@@ -8,6 +8,7 @@ import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';
 import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { TravelCities } from './data.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -40,7 +41,14 @@ class TravelForecast extends WeatherDisplay {
 			this.previousData = [];
 		}
 
-		const forecastPromises = TravelCities.map(async (city, index) => {
+		// get the travel cities
+		const travelCities = await TravelCities;
+		if (!travelCities) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+		// get the travel city data
+		const forecastPromises = travelCities.map(async (city, index) => {
 			try {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');

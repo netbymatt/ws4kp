@@ -5,6 +5,7 @@ import { wrap } from './utils/calc.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { getPoint } from './utils/weather.mjs';
 import settings from './settings.mjs';
+import { StationInfo } from './data.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -61,8 +62,9 @@ const getWeather = async (latLon, haveDataCallback) => {
 		let { city } = point.properties.relativeLocation.properties;
 		const { state } = point.properties.relativeLocation.properties;
 
-		if (StationId in StationInfo) {
-			city = StationInfo[StationId].city;
+		const stationInfo = await StationInfo;
+		if (StationId in stationInfo) {
+			city = stationInfo[StationId].city;
 			[city] = city.split('/');
 			city = city.replace(/\s+$/, '');
 		}

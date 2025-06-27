@@ -9,6 +9,7 @@ import { registerDisplay } from './navigation.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
 import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { StationInfo } from './data.mjs';
 
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -24,7 +25,12 @@ class LatestObservations extends WeatherDisplay {
 		// this is intentional because up to 30 stations are available to pull data from
 
 		// calculate distance to each station
-		const stationsByDistance = Object.values(StationInfo).map((station) => {
+		const stationInfo = await StationInfo;
+		if (!stationInfo) {
+			this.setStatus(STATUS.noData);
+			return;
+		}
+		const stationsByDistance = Object.values(stationInfo).map((station) => {
 			const distance = calcDistance(station.lat, station.lon, this.weatherParameters.latitude, this.weatherParameters.longitude);
 			return { ...station, distance };
 		});

@@ -15,6 +15,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
 import file from 'gulp-file';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import jsonminify from 'gulp-jsonminify';
 import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
@@ -131,12 +132,12 @@ const otherFiles = [
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
 
-// Copy JSON data files for static hosting
+// Copy and compress JSON data files for static hosting
 const copyDataFiles = () => src([
 	'datagenerators/output/travelcities.json',
 	'datagenerators/output/regionalcities.json',
 	'datagenerators/output/stations.json',
-]).pipe(dest('./dist/data'));
+]).pipe(jsonminify()).pipe(dest('./dist/data'));
 
 const s3 = s3Upload({
 	useIAM: true,
@@ -209,7 +210,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing

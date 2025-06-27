@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { FlatCompat } from '@eslint/eslintrc';
 
 const compat = new FlatCompat({
@@ -20,9 +21,6 @@ export default [{
 		'airbnb-base',
 	],
 	globals: {
-		TravelCities: 'readonly',
-		RegionalCities: 'readonly',
-		StationInfo: 'readonly',
 		SunCalc: 'readonly',
 		NoSleep: 'readonly',
 		OVERRIDES: 'readonly',
