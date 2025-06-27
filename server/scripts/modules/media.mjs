@@ -1,5 +1,6 @@
 import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 let playlist;
 let currentTrack = 0;
@@ -61,11 +62,13 @@ const getMedia = async () => {
 		playlistSource = 'via directory scan (after fetch failed)';
 	}
 
-	const fileCount = playlist?.availableFiles?.length || 0;
-	if (fileCount > 0) {
-		console.log(`Loaded playlist ${playlistSource} - found ${fileCount} music file${fileCount === 1 ? '' : 's'}`);
-	} else {
-		console.log(`No music files found ${playlistSource}`);
+	if (debugFlag('media')) {
+		const fileCount = playlist?.availableFiles?.length || 0;
+		if (fileCount > 0) {
+			console.log(`[Media] Loaded playlist ${playlistSource} - found ${fileCount} music file${fileCount === 1 ? '' : 's'}`);
+		} else {
+			console.log(`[Media] No music files found ${playlistSource}`);
+		}
 	}
 
 	enableMediaPlayer();
