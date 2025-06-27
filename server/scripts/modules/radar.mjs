@@ -8,6 +8,10 @@ import * as utils from './radar-utils.mjs';
 import setTiles from './radar-tiles.mjs';
 import processRadar from './radar-processor.mjs';
 
+// store processed radar as dataURLs to avoid re-processing frames as they slide backwards in time
+// this is cleared upon changing the location displayed
+let processedRadars = [];
+
 const RADAR_HOST = 'mesonet.agron.iastate.edu';
 class Radar extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -110,19 +114,44 @@ class Radar extends WeatherDisplay {
 			elemId: this.elemId,
 		});
 
+		const radarKey = `${radarSourceXY.x.toFixed(0)}-${radarSourceXY.y.toFixed(0)}`;
+
+		// reset the "used" flag on pre-processed radars
+		// items that were not used during this process are deleted (either expired via time or change of location)
+		processedRadars.forEach((radar) => { radar.used = false; });
+		// remove any radars that aren't
+
 		// Load the most recent doppler radar images.
 		const radarInfo = await Promise.all(urls.map(async (url) => {
-			const processedRadar = await processRadar({
+			// store the time
+			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
+			const [, year, month, day, hour, minute] = timeMatch;
+
+			const radarKeyedTimestamp = `${radarKey}:${year}${month}${day}${hour}${minute}`;
+
+			// check for a pre-processed radar
+			const preProcessed = processedRadars.find((radar) => radar.key === radarKeyedTimestamp);
+
+			// use the pre-processed radar, or get a new one
+			const processedRadar = preProcessed?.dataURL ?? await processRadar({
 				url,
 				RADAR_HOST,
 				OVERRIDES,
 				radarSourceXY,
 			});
 
-			// store the time
-			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
+			// store the radar
+			if (!preProcessed) {
+				processedRadars.push({
+					key: radarKeyedTimestamp,
+					dataURL: processedRadar,
+					used: true,
+				});
+			} else {
+				// set used flag
+				preProcessed.used = true;
+			}
 
-			const [, year, month, day, hour, minute] = timeMatch;
 			const time = DateTime.fromObject({
 				year,
 				month,
@@ -150,12 +179,15 @@ class Radar extends WeatherDisplay {
 
 		this.times = radarInfo.map((radar) => radar.time);
 		this.setStatus(STATUS.loaded);
+
+		// clean up any unused stored radars
+		processedRadars = processedRadars.filter((radar) => radar.used);
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
 		const time = this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE);
-		const timePadded = time.length >= 8 ? time : `&nbsp;${time}`;
+		const timePadded = time.length >= 8 ? time : `&nbsp;${time} `;
 		this.elem.querySelector('.header .right .time').innerHTML = timePadded;
 
 		// get image offset calculation
@@ -163,7 +195,7 @@ class Radar extends WeatherDisplay {
 		const actualFrameHeight = this.elem.querySelector('.frame').scrollHeight;
 
 		// scroll to image
-		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight}px`;
+		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight} px`;
 
 		this.finishDraw();
 	}
