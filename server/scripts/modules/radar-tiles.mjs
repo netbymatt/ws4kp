@@ -39,80 +39,35 @@ const setTiles = (data) => {
 	// the tiles are arranged as follows, with the horizontal axis as x, and correlating with the second set of digits in the image file number
 	// T[0] T[1]
 	// T[2] T[3]
-	// tile 0 gets special treatment, it's placement is the basis for all downstream calculations
-	const t0Source = modTile(sourceXY.x, sourceXY.y);
-	const t0Width = TILE_SIZE.x - t0Source.x;
-	const t0Height = TILE_SIZE.y - t0Source.y;
-	const t0FinalSize = { x: t0Width, y: t0Height };
 
-	// these will all be used again for the overlay, calculate them once here
-	const mapCoordinates = [];
-	// t[0]
-	mapCoordinates.push({
-		sx: t0Source.x,
-		sw: t0Width,
-		dx: 0,
-		dw: t0FinalSize.x,
-
-		sy: t0Source.y,
-		sh: t0Height,
-		dy: 0,
-		dh: t0FinalSize.y,
-	});
-	// t[1]
-	mapCoordinates.push({
-		sx: 0,
-		sw: TILE_SIZE.x - t0Width,
-		dx: t0FinalSize.x,
-		dw: TILE_SIZE.x - t0Width,
-
-		sy: t0Source.y,
-		sh: t0Height,
-		dy: 0,
-		dh: t0FinalSize.y,
-	});
-	// t[2]
-	mapCoordinates.push({
-		sx: t0Source.x,
-		sw: t0Width,
-		dx: 0,
-		dw: t0FinalSize.x,
-
-		sy: 0,
-		sh: TILE_SIZE.y - t0Height,
-		dy: t0FinalSize.y,
-		dh: TILE_SIZE.y - t0Height,
-	});
-	// t[3]
-	mapCoordinates.push({
-		sx: 0,
-		sw: TILE_SIZE.x - t0Width,
-		dx: t0FinalSize.x,
-		dw: TILE_SIZE.x - t0Width,
-
-		sy: 0,
-		sh: TILE_SIZE.y - t0Height,
-		dy: t0FinalSize.y,
-		dh: TILE_SIZE.y - t0Height,
-	});
+	// calculate the shift of tile 0 (upper left)
+	const tileShift = modTile(sourceXY.x, sourceXY.y);
 
 	// determine which tiles are used
 	const usedTiles = [
 		true,
-		mapCoordinates[1].dx < RADAR_FINAL_SIZE.width,
-		mapCoordinates[2].dy < RADAR_FINAL_SIZE.height,
-		mapCoordinates[2].dy < RADAR_FINAL_SIZE.height && mapCoordinates[1].dx < RADAR_FINAL_SIZE.width,
+		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE.width,
+		TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE.width,
 	];
+	// if we need t[1] and t[2] then we also need t[3]
+	usedTiles.push(usedTiles[1] && usedTiles[2]);
 
 	// helper function for populating tiles
 	const populateTile = (tileName) => (elem, index) => {
-		// check if the tile is used
-		if (!usedTiles[index]) return;
-
-		// set the image source and size
-		elem.src = `/images/maps/radar/${tileName}-${baseMapTiles[index]}.webp`;
+		// always set the size to flow the images correctly
 		elem.width = TILE_SIZE.x;
 		elem.height = TILE_SIZE.y;
+
+		// check if the tile is used
+		if (!usedTiles[index]) {
+			elem.src = '';
+			return;
+		}
+
+		// set the image source and size
+		const newSource = `/images/maps/radar/${tileName}-${baseMapTiles[index]}.webp`;
+		if (elem.src === newSource) return;
+		elem.src = newSource;
 	};
 
 	// populate the map and overlay tiles
@@ -122,7 +77,6 @@ const setTiles = (data) => {
 
 	// fill the tiles with the overlay
 	// shift the map tile containers
-	const tileShift = modTile(sourceXY.x, sourceXY.y);
 	const mapTileContainer = document.querySelector(`#${elemIdFull} .map-tiles`);
 	mapTileContainer.style.top = `${-tileShift.y}px`;
 	mapTileContainer.style.left = `${-tileShift.x}px`;
@@ -130,12 +84,6 @@ const setTiles = (data) => {
 	const overlayTileContainer = document.querySelector(`#${elemIdFull} .overlay-tiles`);
 	overlayTileContainer.style.top = `${-tileShift.y}px`;
 	overlayTileContainer.style.left = `${-tileShift.x}px`;
-
-	// return some useful data
-	return {
-		usedTiles,
-		baseMapTiles,
-	};
 };
 
 export default setTiles;
