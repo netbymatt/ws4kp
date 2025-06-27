@@ -96,29 +96,6 @@ const buildJs = () => src(mjsSources)
 	.pipe(webpack(webpackOptions))
 	.pipe(dest(RESOURCES_PATH));
 
-const workerSources = [
-	'./server/scripts/modules/radar-worker.mjs',
-];
-
-const buildWorkers = () => {
-	// update the file name in the webpack options
-	const output = {
-		chunkFilename: '[id].mjs',
-		chunkFormat: 'module',
-		filename: '[name].mjs',
-	};
-	const workerWebpackOptions = {
-		...webpackOptions,
-		output,
-		entry: {
-			'radar-worker': workerSources[0],
-		},
-	};
-	return src(workerSources)
-		.pipe(webpack(workerWebpackOptions))
-		.pipe(dest(RESOURCES_PATH));
-};
-
 const cssSources = [
 	'server/styles/main.css',
 ];
@@ -172,9 +149,10 @@ const uploadSources = [
 	'!dist/images/**/*',
 	'!dist/fonts/**/*',
 ];
-const upload = () => src(uploadSources, { base: './dist', encoding: false })
+
+const uploadCreator = (bucket) => () => src(uploadSources, { base: './dist', encoding: false })
 	.pipe(s3({
-		Bucket: process.env.BUCKET,
+		Bucket: bucket,
 		StorageClass: 'STANDARD',
 		maps: {
 			CacheControl: (keyname) => {
@@ -190,10 +168,14 @@ const imageSources = [
 	'server/images/**',
 	'!server/images/gimp/**',
 ];
-const uploadImages = () => src(imageSources, { base: './server', encoding: false })
+
+const upload = uploadCreator(process.env.BUCKET);
+const uploadPreview = uploadCreator(process.env.BUCKET_PREVIEW);
+
+const uploadImagesCreator = (bucket) => () => src(imageSources, { base: './server', encoding: false })
 	.pipe(
 		s3({
-			Bucket: process.env.BUCKET,
+			Bucket: bucket,
 			StorageClass: 'STANDARD',
 			maps: {
 				CacheControl: () => 'max-age=31536000',
@@ -201,11 +183,14 @@ const uploadImages = () => src(imageSources, { base: './server', encoding: false
 		}),
 	);
 
+const uploadImages = uploadImagesCreator(process.env.BUCKET);
+const uploadImagesPreview = uploadImagesCreator(process.env.BUCKET_PREVIEW);
+
 const copyImageSources = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(dest('./dist'));
 
-const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
-	DistributionId: process.env.DISTRIBUTION_ID,
+const invalidateCreator = (distributionId) => () => cloudfront.send(new CreateInvalidationCommand({
+	DistributionId: distributionId,
 	InvalidationBatch: {
 		CallerReference: (new Date()).toLocaleString(),
 		Paths: {
@@ -214,6 +199,9 @@ const invalidate = () => cloudfront.send(new CreateInvalidationCommand({
 		},
 	},
 }));
+
+const invalidate = invalidateCreator(process.env.DISTRIBUTION_ID);
+const invalidatePreview = invalidateCreator(process.env.DISTRIBUTION_ID_PREVIEW);
 
 const buildPlaylist = async () => {
 	const availableFiles = await reader();
@@ -226,10 +214,12 @@ const buildDist = series(clean, parallel(buildJs, buildWorkers, compressJsVendor
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
 const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
+const stageFrontend = series(buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
 
 export default publishFrontend;
 
 export {
 	buildDist,
 	invalidate,
+	stageFrontend,
 };
