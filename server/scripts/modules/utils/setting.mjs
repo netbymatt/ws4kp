@@ -11,6 +11,7 @@ const DEFAULTS = {
 	sticky: true,
 	values: [],
 	visible: true,
+	placeholder: '',
 };
 
 class Setting {
@@ -31,6 +32,7 @@ class Setting {
 		this.values = options.values;
 		this.visible = options.visible;
 		this.changeAction = options.changeAction;
+		this.placeholder = options.placeholder;
 
 		// get value from url
 		const urlValue = parseQueryString()?.[`settings-${shortName}-${this.type}`];
@@ -141,6 +143,7 @@ class Setting {
 		textInput.value = this.myValue;
 		textInput.id = `settings-${this.shortName}-string`;
 		textInput.name = `settings-${this.shortName}-string`;
+		textInput.placeholder = this.placeholder;
 		// set button
 		const setButton = document.createElement('input');
 		setButton.type = 'button';

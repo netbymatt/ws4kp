@@ -11,7 +11,7 @@ const changeEnable = (newValue) => {
 	let newDisplay;
 	if (newValue) {
 		// add the feed to the scroll
-		getFeed(customFeed.value);
+		parseFeed(customFeed.value);
 		// show the string box
 		newDisplay = 'block';
 	} else {
@@ -26,14 +26,37 @@ const changeEnable = (newValue) => {
 	}
 };
 
-// get the rss feed and then swap out the current weather scroll
-const getFeed = async (url) => {
+// parse the feed/text provided
+const parseFeed = (textInput) => {
 	// skip getting the feed on first run
 	if (firstRun) return;
 
 	// test validity
-	if (url === undefined || url === '') return;
+	if (textInput === undefined || textInput === '') {
+		resetScroll();
+	}
 
+	// test for url
+	if (textInput.match(/https?:\/\//)) {
+		getFeed(textInput);
+		return;
+	}
+
+	// add single text scroll
+	resetScroll();
+	addScroll(
+		() => (
+			{
+				type: 'scroll',
+				text: textInput,
+			}),
+		// keep the existing scroll
+		true,
+	);
+};
+
+// get the rss feed and then swap out the current weather scroll
+const getFeed = async (url) => {
 	// get the text as a string
 	// it needs to be proxied, use a free service
 	const rssResponse = await json(`https://api.allorigins.win/get?url=${url}`);
@@ -76,7 +99,7 @@ const changeFeed = (newValue) => {
 	if (firstRun) return;
 
 	if (customFeedEnable.value) {
-		getFeed(newValue);
+		parseFeed(newValue);
 	}
 };
 
@@ -85,10 +108,11 @@ const customFeed = new Setting('customFeed', {
 	defaultValue: '',
 	type: 'string',
 	changeAction: changeFeed,
+	placeholder: 'Text or URL',
 });
 
 const customFeedEnable = new Setting('customFeedEnable', {
-	name: 'Enable Custom RSS Feed',
+	name: 'Enable RSS Feed/Text',
 	defaultValue: false,
 	changeAction: changeEnable,
 });
