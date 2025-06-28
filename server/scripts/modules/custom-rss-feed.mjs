@@ -1,5 +1,5 @@
 import Setting from './utils/setting.mjs';
-import { reset as resetScroll } from './currentweatherscroll.mjs';
+import { reset as resetScroll, addScreen as addScroll } from './currentweatherscroll.mjs';
 import { json } from './utils/fetch.mjs';
 
 let firstRun = true;
@@ -40,19 +40,34 @@ const getFeed = async (url) => {
 
 	// this returns a data url
 	// a few sanity checks
-	if (rssResponse.status.content_type.indexOf('application/rss+xml') < 0) return;
+	if (rssResponse.status.content_type.indexOf('xml') < 0) return;
 	if (rssResponse.contents.indexOf('base64') > 100) return;
 	// base 64 decode everything after the comma
-	const rss = atob(rssResponse.contents.split(',')[1]);
+	const rss = atob(rssResponse.contents.split('base64,')[1]);
 
 	// parse the rss
 	const doc = parser.parseFromString(rss, 'text/xml');
 
 	// get the title
-	const title = doc.querySelector('channel title').innerHTML;
+	const rssTitle = doc.querySelector('channel title').textContent;
 
 	// get each item
-	const titles = [...doc.querySelectorAll('item title')].map((t) => t.innerHTML);
+	const titles = [...doc.querySelectorAll('item title')].map((t) => t.textContent);
+
+	// reset the scroll, then add the screens
+	resetScroll();
+	titles.forEach((title) => {
+		// data is provided to the screen handler, so we return a function
+		addScroll(
+			() => ({
+				header: rssTitle,
+				type: 'scroll',
+				text: title,
+			}),
+			// false parameter does not include the default weather scrolls
+			false,
+		);
+	});
 };
 
 // change the feed source and re-load if necessary

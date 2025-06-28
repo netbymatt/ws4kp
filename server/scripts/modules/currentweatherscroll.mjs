@@ -15,6 +15,7 @@ let screenIndex = 0;
 let sinceLastUpdate = 0;
 let nextUpdate = DEFAULT_UPDATE;
 let resetFlag;
+let defaultScreensLoaded = true;
 
 // start drawing conditions
 // reset starts from the first item in the text scroll list
@@ -192,10 +193,12 @@ const setHeader = (text) => {
 const reset = () => {
 	workingScreens = [...baseScreens];
 	additionalScreens = [];
+	defaultScreensLoaded = true;
 };
 
 // add screen, keepBase keeps the regular weather crawl
 const addScreen = (screen, keepBase = true) => {
+	defaultScreensLoaded = false;
 	additionalScreens.push(screen);
 	workingScreens = [...(keepBase ? baseScreens : []), ...additionalScreens];
 };
@@ -240,6 +243,9 @@ const parseMessage = (event) => {
 	}
 };
 
+const screenCount = () => workingScreens.length;
+const atDefault = () => defaultScreensLoaded;
+
 // add event listener for start message
 window.addEventListener('message', parseMessage);
 
@@ -247,10 +253,14 @@ window.CurrentWeatherScroll = {
 	addScreen,
 	reset,
 	start,
+	screenCount,
+	atDefault,
 };
 
 export {
 	addScreen,
 	reset,
 	start,
+	screenCount,
+	atDefault,
 };
