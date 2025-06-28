@@ -56,17 +56,29 @@
 			"**/vendor/auto/**",
 		],
 		"editor.tabSize": 2,
+		"editor.insertSpaces": false, // .eslintrc wants tabs instead of spaces
 		"emmet.includeLanguages": {
 			"ejs": "html",
 		},
 		"[html]": {
-			"editor.defaultFormatter": "j69.ejs-beautify"
+			// Use built-in VS Code HTML formatter instead of third-party EJS extension
+			"editor.defaultFormatter": "vscode.html-language-features"
 		},
 		"files.exclude": {},
 		"files.eol": "\n",
+		"files.associations": {
+			"*.ejs": "ejs"
+		},
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
-		},
+		}
 	},
+	"extensions": {
+		"recommendations": [
+			"digitalbrainstem.javascript-ejs-support", // EJS (Embedded JavaScript) template language support
+			"dbaeumer.vscode-eslint", // ESLint JavaScript linting integration
+			"streetsidesoftware.code-spell-checker",
+		]
+	}
 }

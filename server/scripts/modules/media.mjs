@@ -20,45 +20,55 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const scanMusicDirectory = async () => {
-        const parseDirectory = async (path, prefix = "") => {
-                const listing = await text(path);
-                const matches = [...listing.matchAll(/href="([^\"]+\.mp3)"/gi)];
-                return matches.map((m) => `${prefix}${m[1]}`);
-        };
+	const parseDirectory = async (path, prefix = '') => {
+		const listing = await text(path);
+		const matches = [...listing.matchAll(/href="([^"]+\.mp3)"/gi)];
+		return matches.map((m) => `${prefix}${m[1]}`);
+	};
 
-        try {
-                let files = await parseDirectory("music/");
-                if (files.length === 0) {
-                        files = await parseDirectory("music/default/", "default/");
-                }
-                return { availableFiles: files };
-        } catch (e) {
-                console.error("Unable to scan music directory");
-                console.error(e);
-                return { availableFiles: [] };
-        }
+	try {
+		let files = await parseDirectory('music/');
+		if (files.length === 0) {
+			files = await parseDirectory('music/default/', 'default/');
+		}
+		return { availableFiles: files };
+	} catch (e) {
+		console.error('Unable to scan music directory');
+		console.error(e);
+		return { availableFiles: [] };
+	}
 };
 
-
 const getMedia = async () => {
-        try {
-                const response = await fetch('playlist.json');
-                if (response.ok) {
-                        playlist = await response.json();
-                } else if (response.status === 404
-                        && response.headers.get('X-Weatherstar') === 'true') {
-                        console.warn("Couldn't get playlist.json, falling back to directory scan");
-                        playlist = await scanMusicDirectory();
-                } else {
-                        console.warn(`Couldn't get playlist.json: ${response.status} ${response.statusText}`);
-                        playlist = { availableFiles: [] };
-                }
-        } catch (e) {
-                console.warn("Couldn't get playlist.json, falling back to directory scan");
-                playlist = await scanMusicDirectory();
-        }
+	let playlistSource = '';
 
-        enableMediaPlayer();
+	try {
+		const response = await fetch('playlist.json');
+		if (response.ok) {
+			playlist = await response.json();
+			playlistSource = 'from server';
+		} else if (response.status === 404 && response.headers.get('X-Weatherstar') === 'true') {
+			// Expected behavior in static deployment mode
+			playlist = await scanMusicDirectory();
+			playlistSource = 'via directory scan (static deployment)';
+		} else {
+			playlist = { availableFiles: [] };
+			playlistSource = `failed (${response.status} ${response.statusText})`;
+		}
+	} catch (_e) {
+		// Network error or other fetch failure - fall back to directory scanning
+		playlist = await scanMusicDirectory();
+		playlistSource = 'via directory scan (after fetch failed)';
+	}
+
+	const fileCount = playlist?.availableFiles?.length || 0;
+	if (fileCount > 0) {
+		console.log(`Loaded playlist ${playlistSource} - found ${fileCount} music file${fileCount === 1 ? '' : 's'}`);
+	} else {
+		console.log(`No music files found ${playlistSource}`);
+	}
+
+	enableMediaPlayer();
 };
 
 const enableMediaPlayer = () => {
@@ -219,11 +229,11 @@ const playerEnded = () => {
 };
 
 const setTrackName = (fileName) => {
-        const baseName = fileName.split('/').pop();
-        const trackName = decodeURIComponent(
-                baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, '')
-        );
-        document.getElementById('musicTrack').innerHTML = trackName;
+	const baseName = fileName.split('/').pop();
+	const trackName = decodeURIComponent(
+		baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
+	);
+	document.getElementById('musicTrack').innerHTML = trackName;
 };
 
 export {

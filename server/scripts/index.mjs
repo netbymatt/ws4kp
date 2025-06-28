@@ -7,6 +7,7 @@ import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
+import { loadAllData } from './modules/utils/data-loader.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -28,7 +29,23 @@ const TXT_ADDRESS_SELECTOR = '#txtAddress';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BNT_GET_GPS_SELECTOR = '#btnGetGps';
 
-const init = () => {
+const init = async () => {
+	// Load core data first - app cannot function without it
+	try {
+		await loadAllData(typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '');
+	} catch (error) {
+		console.error('Failed to load core application data:', error);
+		// Show error message to user and halt initialization
+		document.body.innerHTML = `
+			<div>
+				<h2>Unable to load Weather Data</h2>
+				<p>The application cannot start because core data failed to load.</p>
+				<p>Please check your connection and try refreshing.</p>
+			</div>
+		`;
+		return; // Stop initialization
+	}
+
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
@@ -89,6 +106,7 @@ const init = () => {
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
+
 	if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
@@ -125,6 +143,7 @@ const init = () => {
 };
 
 const autocompleteOnSelect = async (suggestion) => {
+	// Note: it's fine that this uses json instead of safeJson since it's infrequent and user-initiated
 	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 		data: {
 			text: suggestion.value,
@@ -171,16 +190,29 @@ const btnFullScreenClick = () => {
 	return false;
 };
 
-const enterFullScreen = () => {
+// This is async because modern browsers return a Promise from requestFullscreen
+const enterFullScreen = async () => {
 	const element = document.querySelector('#divTwc');
 
 	// Supports most browsers and their versions.
-	const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
-		|| element.mozRequestFullScreen || element.msRequestFullscreen;
+	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen
+		|| element.mozRequestFullscreen || element.msRequestFullscreen;
 
 	if (requestMethod) {
-		// Native full screen.
-		requestMethod.call(element, { navigationUI: 'hide' });
+		try {
+			// Native full screen with options for optimal display
+			await requestMethod.call(element, {
+				navigationUI: 'hide',
+				allowsInlineMediaPlayback: true,
+			});
+
+			// Allow a moment for fullscreen to engage, then optimize
+			setTimeout(() => {
+				resize();
+			}, 100);
+		} catch (error) {
+			console.error('❌ Fullscreen request failed:', error);
+		}
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
@@ -202,8 +234,8 @@ const exitFullscreen = () => {
 		document.exitFullscreen();
 	} else if (document.webkitExitFullscreen) {
 		document.webkitExitFullscreen();
-	} else if (document.mozCancelFullScreen) {
-		document.mozCancelFullScreen();
+	} else if (document.mozCancelFullscreen) {
+		document.mozCancelFullscreen();
 	} else if (document.msExitFullscreen) {
 		document.msExitFullscreen();
 	}
