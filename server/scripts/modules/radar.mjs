@@ -195,7 +195,7 @@ class Radar extends WeatherDisplay {
 		const actualFrameHeight = this.elem.querySelector('.frame').scrollHeight;
 
 		// scroll to image
-		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight} px`;
+		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight}px`;
 
 		this.finishDraw();
 	}
