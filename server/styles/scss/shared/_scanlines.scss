@@ -83,10 +83,12 @@ $scan-opacity: .75;
 		bottom: 0;
 		left: 0;
 		z-index: $scan-z-index;
-		background: linear-gradient(to bottom,
-				transparent 50%,
-				$scan-color 51%);
-		background-size: 100% $scan-width*2;
+		// repeating-linear-gradient is more efficient than linear-gradient+background-size because it doesn't require the browser to calculate tiling
+		background: repeating-linear-gradient(to bottom,
+				transparent 0,
+				transparent $scan-width,
+				$scan-color $scan-width,
+				$scan-color calc($scan-width * 2));
 		@include scan-crt($scan-crt);
 
 		// Prevent sub-pixel aliasing on scaled displays
@@ -94,51 +96,21 @@ $scan-opacity: .75;
 		image-rendering: pixelated;
 	}
 
-	// Responsive scanlines for different display scenarios
-
-	// High DPI displays - use original sizing
-	@media (-webkit-min-device-pixel-ratio: 2),
-	(min-resolution: 192dpi) {
-		&:before {
-			height: $scan-width;
-		}
-
-		&:after {
-			background-size: 100% calc($scan-width * 2);
-		}
+	// Scanlines use dynamic thickness calculated by JavaScript
+	// JavaScript calculates optimal thickness to prevent banding at any scale factor
+	// The --scanline-thickness custom property is set by applyScanlineScaling()
+	// The modes (hairline, thin, medium, thick) force the base thickness selection
+	// Some modes may appear the same (e.g. hairline and thin) depending on the display
+	&:before {
+		height: var(--scanline-thickness, $scan-width);
 	}
 
-	// Medium resolution displays (1024x768 and similar)
-	@media (max-width: 1200px) and (max-height: 900px) and (-webkit-max-device-pixel-ratio: 1.5) {
-		&:before {
-			height: calc($scan-width * 1.5);
-		}
-
-		&:after {
-			background-size: 100% calc($scan-width * 3);
-		}
-	}
-
-	// Low resolution displays - increase thickness to prevent banding
-	@media (max-width: 1024px) and (max-height: 768px) {
-		&:before {
-			height: calc($scan-width * 2);
-		}
-
-		&:after {
-			background-size: 100% calc($scan-width * 4);
-		}
-	}
-
-	// Very low resolution displays
-	@media (max-width: 800px) and (max-height: 600px) {
-		&:before {
-			height: calc($scan-width * 3);
-		}
-
-		&:after {
-			background-size: 100% calc($scan-width * 6);
-		}
+	&:after {
+		background: repeating-linear-gradient(to bottom,
+				transparent 0,
+				transparent var(--scanline-thickness, $scan-width),
+				$scan-color var(--scanline-thickness, $scan-width),
+				$scan-color calc(var(--scanline-thickness, $scan-width) * 2));
 	}
 }
 

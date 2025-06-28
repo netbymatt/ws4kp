@@ -113,17 +113,28 @@ class Almanac extends WeatherDisplay {
 	async drawCanvas() {
 		super.drawCanvas();
 		const info = this.data;
+
+		// Generate sun data grid in reading order (left-to-right, top-to-bottom)
+
+		// Set day names
 		const Today = DateTime.local();
 		const Tomorrow = Today.plus({ days: 1 });
+		this.elem.querySelector('.day-1').textContent = Today.toLocaleString({ weekday: 'long' });
+		this.elem.querySelector('.day-2').textContent = Tomorrow.toLocaleString({ weekday: 'long' });
 
-		// sun and moon data
-		this.elem.querySelector('.day-1').innerHTML = Today.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.day-2').innerHTML = Tomorrow.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.rise-1').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[0].sunrise));
-		this.elem.querySelector('.rise-2').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[1].sunrise));
-		this.elem.querySelector('.set-1').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[0].sunset));
-		this.elem.querySelector('.set-2').innerHTML = timeFormat(DateTime.fromJSDate(info.sun[1].sunset));
+		const todaySunrise = DateTime.fromJSDate(info.sun[0].sunrise);
+		const todaySunset = DateTime.fromJSDate(info.sun[0].sunset);
+		const [todaySunriseFormatted, todaySunsetFormatted] = formatTimesForColumn([todaySunrise, todaySunset]);
+		this.elem.querySelector('.rise-1').textContent = todaySunriseFormatted;
+		this.elem.querySelector('.set-1').textContent = todaySunsetFormatted;
 
+		const tomorrowSunrise = DateTime.fromJSDate(info.sun[1].sunrise);
+		const tomorrowSunset = DateTime.fromJSDate(info.sun[1].sunset);
+		const [tomorrowSunriseFormatted, tomorrowSunsetformatted] = formatTimesForColumn([tomorrowSunrise, tomorrowSunset]);
+		this.elem.querySelector('.rise-2').textContent = tomorrowSunriseFormatted;
+		this.elem.querySelector('.set-2').textContent = tomorrowSunsetformatted;
+
+		// Moon data
 		const days = info.moon.map((MoonPhase) => {
 			const fill = {};
 
@@ -168,7 +179,20 @@ const imageName = (type) => {
 	}
 };
 
-const timeFormat = (dt) => dt.setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE).toLowerCase();
+const formatTimesForColumn = (times) => {
+	const formatted = times.map((dt) => dt.setZone(timeZone()).toFormat('h:mm a').toUpperCase());
+
+	// Check if any time has a 2-digit hour (starts with '1')
+	const hasTwoDigitHour = formatted.some((time) => time.startsWith('1'));
+
+	// If mixed digit lengths, pad single-digit hours with non-breaking space
+	if (hasTwoDigitHour) {
+		return formatted.map((time) => (time.startsWith('1') ? time : `\u00A0${time}`));
+	}
+
+	// Otherwise, no padding needed
+	return formatted;
+};
 
 // register display
 const display = new Almanac(9, 'almanac');

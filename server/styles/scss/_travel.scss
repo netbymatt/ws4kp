@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display .main.travel {
 	&.main {
@@ -8,14 +8,11 @@
 		.column-headers {
 			background-color: c.$column-header;
 			height: 20px;
-			position: absolute;
-			width: 100%;
-		}
-
-		.column-headers {
 			position: sticky;
 			top: 0px;
+			width: 100%;
 			z-index: 5;
+			overflow: hidden; // prevent thin gaps between header and content
 
 			div {
 				display: inline-block;

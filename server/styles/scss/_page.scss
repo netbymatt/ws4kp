@@ -9,6 +9,7 @@
 
 body {
 	font-family: "Star4000";
+	margin: 0;
 
 	@media (prefers-color-scheme: dark) {
 		background-color: #000000;
@@ -23,13 +24,17 @@ body {
 
 	&.kiosk {
 		margin: 0px;
+		padding: 0px;
 		overflow: hidden;
 		width: 100vw;
+		// Always use black background in kiosk mode, regardless of light/dark preference
+		background-color: #000000 !important;
 	}
 }
 
 #divQuery {
 	max-width: 640px;
+	padding: 8px;
 
 	.buttons {
 		display: inline-block;
@@ -137,9 +142,23 @@ body {
 	color: #ffffff;
 	width: 100%;
 	max-width: 640px;
+	margin: 0; // Ensure edge-to-edge display
 
 	&.wide {
 		max-width: 854px;
+	}
+}
+
+.content-wrapper {
+	padding: 8px;
+}
+
+#divTwcMain {
+	width: 640px;
+	height: 480px;
+
+	.wide & {
+		width: 854px;
 	}
 }
 
@@ -184,7 +203,11 @@ body {
 	background-color: #000000;
 
 	color: #ffffff;
-	width: 100%;
+	width: 640px;
+
+	.wide & {
+		width: 854px;
+	}
 
 	@media (prefers-color-scheme: dark) {
 		background-color: rgb(48, 48, 48);
@@ -196,25 +219,26 @@ body {
 	padding-left: 6px;
 	padding-right: 6px;
 
-	// scale down the buttons on narrower screens
+	// Use font-size scaling instead of zoom/transform to avoid layout gaps and preserve icon tap targets.
+	// While not semantically ideal, it works well for our fixed-layout design.
 	@media (max-width: 550px) {
-		zoom: 0.90;
+		font-size: 0.90em;
 	}
 
 	@media (max-width: 500px) {
-		zoom: 0.80;
+		font-size: 0.80em;
 	}
 
 	@media (max-width: 450px) {
-		zoom: 0.70;
+		font-size: 0.70em;
 	}
 
 	@media (max-width: 400px) {
-		zoom: 0.60;
+		font-size: 0.60em;
 	}
 
 	@media (max-width: 350px) {
-		zoom: 0.50;
+		font-size: 0.50em;
 	}
 }
 
@@ -325,7 +349,6 @@ body {
 	// background-image: none;
 	width: unset;
 	height: unset;
-	transform-origin: unset;
 }
 
 #loading {
@@ -399,7 +422,8 @@ body {
 
 	label {
 		display: block;
-		max-width: 300px;
+		max-width: fit-content;
+		cursor: pointer;
 
 		.alert {
 			display: none;
@@ -414,6 +438,13 @@ body {
 
 #divTwcBottom img {
 	transform: scale(0.75);
+
+	// Make icons larger in widescreen mode on mobile
+	@media (max-width: 550px) {
+		.wide & {
+			transform: scale(1.0); // Larger icons in widescreen
+		}
+	}
 }
 
 #divTwc:fullscreen,
@@ -446,9 +477,7 @@ body {
 
 .kiosk {
 	#divTwc #divTwcBottom {
-		>div {
-			display: none;
-		}
+		display: none;
 	}
 }
 

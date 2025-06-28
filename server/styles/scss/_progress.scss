@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display .progress {
 	@include u.text-shadow();
@@ -13,6 +13,7 @@
 		box-sizing: border-box;
 		height: 310px;
 		overflow: hidden;
+		line-height: 28px;
 
 		.item {
 			position: relative;

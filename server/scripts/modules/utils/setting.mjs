@@ -171,8 +171,9 @@ class Setting {
 					}
 				}
 			}
-		} catch {
-			return null;
+		} catch (error) {
+			console.warn(`Failed to parse settings from localStorage: ${error} - allSettings=${allSettings}`);
+			localStorage?.removeItem(SETTINGS_KEY);
 		}
 		return null;
 	}

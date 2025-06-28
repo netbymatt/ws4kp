@@ -1,13 +1,14 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived,
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, isIOS,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
 import { loadAllData } from './modules/utils/data-loader.mjs';
+import { debugFlag } from './modules/utils/debug.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -56,7 +57,15 @@ const init = async () => {
 	document.querySelector('#NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
 	document.querySelector('#NavigatePlay').addEventListener('click', btnNavigatePlayClick);
 	document.querySelector('#ToggleScanlines').addEventListener('click', btnNavigateToggleScanlines);
-	document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR).addEventListener('click', btnFullScreenClick);
+
+	// Hide fullscreen button on iOS since it doesn't support true fullscreen
+	const fullscreenButton = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
+	if (isIOS()) {
+		fullscreenButton.style.display = 'none';
+	} else {
+		fullscreenButton.addEventListener('click', btnFullScreenClick);
+	}
+
 	const btnGetGps = document.querySelector(BNT_GET_GPS_SELECTOR);
 	btnGetGps.addEventListener('click', btnGetGpsClick);
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
@@ -64,9 +73,6 @@ const init = async () => {
 	document.querySelector('#divTwc').addEventListener('mousemove', () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
-	// local change detection when exiting full screen via ESC key (or other non button click methods)
-	window.addEventListener('resize', fullScreenResizeCheck);
-	fullScreenResizeCheck.wasFull = false;
 
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
@@ -116,9 +122,21 @@ const init = async () => {
 		btnGetGpsClick();
 	}
 
-	// if kiosk mode was set via the query string, also play immediately
-	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
-	const play = parsedParameters['settings-kiosk-checkbox'] ?? localStorage.getItem('play');
+	// Handle kiosk mode initialization
+	const urlKioskCheckbox = parsedParameters['settings-kiosk-checkbox'];
+
+	// If kiosk=false is specified, disable kiosk mode and clear any stored value
+	if (urlKioskCheckbox === 'false') {
+		settings.kiosk.value = false;
+		// Clear stored value by using conditional storage with false
+		settings.kiosk.conditionalStoreToLocalStorage(false, false);
+	} else if (urlKioskCheckbox === 'true') {
+		// if kiosk mode was set via the query string, enable it
+		settings.kiosk.value = true;
+	}
+
+	// Auto-play logic: also play immediately if kiosk mode is enabled
+	const play = urlKioskCheckbox ?? localStorage.getItem('play');
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
@@ -195,8 +213,7 @@ const enterFullScreen = async () => {
 	const element = document.querySelector('#divTwc');
 
 	// Supports most browsers and their versions.
-	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen
-		|| element.mozRequestFullscreen || element.msRequestFullscreen;
+	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen || element.mozRequestFullscreen || element.msRequestFullscreen;
 
 	if (requestMethod) {
 		try {
@@ -206,24 +223,27 @@ const enterFullScreen = async () => {
 				allowsInlineMediaPlayback: true,
 			});
 
-			// Allow a moment for fullscreen to engage, then optimize
-			setTimeout(() => {
-				resize();
-			}, 100);
+			if (debugFlag('fullscreen')) {
+				setTimeout(() => {
+					console.log(`🖥️ Fullscreen engaged. window=${window.innerWidth}x${window.innerHeight} fullscreenElement=${!!document.fullscreenElement}`);
+				}, 150);
+			}
 		} catch (error) {
 			console.error('❌ Fullscreen request failed:', error);
 		}
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
+		resize(true); // Force resize for iOS
 	}
-	resize();
 	updateFullScreenNavigate();
 
 	// change hover text and image
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
-	img.title = 'Exit fullscreen';
+	if (img && img.style.display !== 'none') {
+		img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
+		img.title = 'Exit fullscreen';
+	}
 };
 
 const exitFullscreen = () => {
@@ -239,15 +259,17 @@ const exitFullscreen = () => {
 	} else if (document.msExitFullscreen) {
 		document.msExitFullscreen();
 	}
-	resize();
+	// Note: resize will be called by fullscreenchange event listener
 	exitFullScreenVisibilityChanges();
 };
 
 const exitFullScreenVisibilityChanges = () => {
 	// change hover text and image
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
-	img.title = 'Enter fullscreen';
+	if (img && img.style.display !== 'none') {
+		img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
+		img.title = 'Enter fullscreen';
+	}
 	document.querySelector('#divTwc').classList.remove('no-cursor');
 	const divTwcBottom = document.querySelector('#divTwcBottom');
 	divTwcBottom.classList.remove('hidden');
@@ -427,21 +449,6 @@ const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {
 		localStorage.setItem('latLonFromGPS', fromGps);
 		txtAddress.value = `${location.city}, ${location.state}`;
 	});
-};
-
-// check for change in full screen triggered by browser and run local functions
-const fullScreenResizeCheck = () => {
-	if (fullScreenResizeCheck.wasFull && !document.fullscreenElement) {
-		// leaving full screen
-		exitFullScreenVisibilityChanges();
-	}
-	if (!fullScreenResizeCheck.wasFull && document.fullscreenElement) {
-		// entering full screen
-		// can't do much here because a UI interaction is required to change the full screen div element
-	}
-
-	// store state of fullscreen element for next change detection
-	fullScreenResizeCheck.wasFull = !!document.fullscreenElement;
 };
 
 const getCustomCode = async () => {
