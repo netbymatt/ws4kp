@@ -153,7 +153,7 @@ class CurrentWeather extends WeatherDisplay {
 			condition = shortConditions(condition);
 		}
 
-		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : '-';
+		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : this.data.WindSpeed;
 
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),
@@ -250,6 +250,9 @@ const parseData = (data) => {
 	data.Icon = getLargeIcon(observations.icon);
 	data.PressureDirection = '';
 	data.TextConditions = observations.textDescription;
+
+	// set wind speed of 0 as calm
+	if (data.WindSpeed === 0) data.WindSpeed = 'Calm';
 
 	// difference since last measurement (pascals, looking for difference of more than 150)
 	const pressureDiff = (observations.barometricPressure.value - data.features[1].properties.barometricPressure.value);
