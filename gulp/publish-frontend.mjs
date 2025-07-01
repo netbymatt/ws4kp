@@ -89,6 +89,7 @@ const mjsSources = [
 	'server/scripts/modules/travelforecast.mjs',
 	'server/scripts/modules/progress.mjs',
 	'server/scripts/modules/media.mjs',
+	'server/scripts/modules/custom-rss-feed.mjs',
 	'server/scripts/index.mjs',
 ];
 
