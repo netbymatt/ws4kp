@@ -176,6 +176,9 @@ A hook is provided as `/server/scripts/custom.js` to allow customizations to you
 
 When using Docker, mount your `custom.js` file to `/usr/share/nginx/html/scripts/custom.js` to customize the static build.
 
+### RSS feeds and custom scroll
+If you would like your Weatherstar to have custom scrolling text in the bottom blue bar, or show headlines from an rss feed turn on the setting for `Enable RSS Feed/Text` and then enter a URL or text in the resulting text box. Then press set.
+
 ## Issue reporting and feature requests
 
 Please do not report issues with api.weather.gov being down. It's a new service and not considered fully operational yet. I've also observed that the API can go down on a regional basis (based on NWS office locations). This means that you may have problems getting data for, say, Chicago right now, but Dallas and others are working just fine.
