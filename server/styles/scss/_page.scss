@@ -94,17 +94,22 @@ body {
 		font-family: "Star4000";
 	}
 
-	#txtAddress {
+	#txtLocation {
 		width: calc(100% - 170px);
 		max-width: 490px;
 		font-size: 16pt;
 		min-width: 200px;
 		display: inline-block;
 
+		// Ensure consistent styling across light and dark modes
+		background-color: white;
+		color: black;
+		border: 2px inset #808080;
+
 		@media (prefers-color-scheme: dark) {
 			background-color: #000000;
 			color: white;
-			border: 1px solid darkgray;
+			border: 2px inset #808080;
 		}
 	}
 

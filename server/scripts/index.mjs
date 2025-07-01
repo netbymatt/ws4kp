@@ -26,7 +26,7 @@ const categories = [
 	'Postal', 'Populated Place',
 ];
 const category = categories.join(',');
-const TXT_ADDRESS_SELECTOR = '#txtAddress';
+const TXT_ADDRESS_SELECTOR = '#txtLocation';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BNT_GET_GPS_SELECTOR = '#btnGetGps';
 
