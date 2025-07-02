@@ -208,7 +208,39 @@ Environment variables that are to be added to the default query string are prefi
 
 When using the Docker container, these environment variables are read on container start-up to generate the static redirect HTML.
 
+## Settings
+
+**Speed:** Controls the playback speed multiplier of the displays, from "Very Fast" (1.5x) to "Very Slow" (0.5x) with "Normal" being 1x
+
+**Widescreen:** Stretches the background to 16:9 to avoid "pillarboxing" on modern displays
+
+**Kiosk:** Immediately activates kiosk mode, which hides all settings. Exit by refreshing the page or using `Ctrl-K`. (Kiosk mode is similar to clicking the "Fullscreen" icon, but scales to the current browser viewport instead of activating the browser's actual "Fullscreen" mode.)
+
+**Sticky Kiosk:** When enabled, stores the kiosk mode preference in local storage so the page automatically enters kiosk mode on subsequent visits. This is particularly useful for iPhone and iPad users who want to create a Home Screen app experience:
+
+1. Tap the _Share_ icon and choose **Add to Home Screen**
+2. Adjust the name as desired and tap **Add**
+3. Launch the newly-created Home Screen shortcut
+4. Configure all settings
+5. Tap to enable **Sticky Kiosk**
+6. _Make sure everything is configured exactly like you want it!_
+6. Tap **Kiosk**
+
+Note:
+
+- After creating a Home Screen app on iOS or iPadOS and activating Kiosk mode, the only way to change settings is to delete the Home Screen shortcut and recreate it
+- In situations where you have access to the URL, you can forcibly remove a "sticky" kiosk setting by adding `&kiosk=false` to the URL (or simply press `Ctrl-K` to exit kiosk mode if a keyboard is available)
+
+**Scan Lines:** Enables a retro-style scan line effect
+
+**Scan Lines Style:** Override the "auto" setting in case you prefer a different scale factor than what the automatic heuristics select for your browser and display
+
+**Units:** Switches between US and metric units. (Note that some text-based products from the National Weather Service APIs contain embedded units that are not converted.)
+
+**Volume:** Controls the audio level when music is enabled
+
 ## Music
+
 The WeatherStar had wonderful background music from the smooth jazz and new age genres by artists of the time. Lists of the music that played are available by searching online, but it's all copyrighted music and would be difficult to provide as part of this repository.
 
 I've used AI tools to create WeatherStar-inspired music tracks that are unencumbered by copyright and are included in this repo. To keep the size down, I've only included 4 tracks. Additional tracks are in a companion repository [ws4kp-music](https://github.com/netbymatt/ws4kp-music).
