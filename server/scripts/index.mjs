@@ -349,9 +349,19 @@ const updateFullScreenNavigate = () => {
 };
 
 const documentKeydown = (e) => {
-	// don't trigger on ctrl/alt/shift modified key
-	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 	const { key } = e;
+
+	// Handle Ctrl+K to exit kiosk mode (even when other modifiers would normally be ignored)
+	if (e.ctrlKey && (key === 'k' || key === 'K')) {
+		e.preventDefault();
+		if (settings.kiosk?.value) {
+			settings.kiosk.value = false;
+		}
+		return false;
+	}
+
+	// don't trigger on ctrl/alt/shift modified key for other shortcuts
+	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {

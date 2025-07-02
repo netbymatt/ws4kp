@@ -9,6 +9,7 @@ const DEFAULTS = {
 	defaultValue: undefined,
 	changeAction: () => { },
 	sticky: true,
+	stickyRead: false,
 	values: [],
 	visible: true,
 };
@@ -28,6 +29,7 @@ class Setting {
 		this.myValue = this.defaultValue;
 		this.type = options?.type;
 		this.sticky = options.sticky;
+		this.stickyRead = options.stickyRead;
 		this.values = options.values;
 		this.visible = options.visible;
 		this.changeAction = options.changeAction;
@@ -51,7 +53,7 @@ class Setting {
 
 		// get existing value if present
 		const storedValue = urlState ?? this.getFromLocalStorage();
-		if ((this.sticky || urlValue !== undefined) && storedValue !== null) {
+		if ((this.sticky || this.stickyRead || urlValue !== undefined) && storedValue !== null) {
 			this.myValue = storedValue;
 		}
 
@@ -151,6 +153,20 @@ class Setting {
 		const allSettingsString = localStorage?.getItem(SETTINGS_KEY) ?? '{}';
 		const allSettings = JSON.parse(allSettingsString);
 		allSettings[this.shortName] = value;
+		localStorage?.setItem(SETTINGS_KEY, JSON.stringify(allSettings));
+	}
+
+	// Conditional storage method for stickyRead settings
+	conditionalStoreToLocalStorage(value, shouldStore) {
+		if (!this.stickyRead) return;
+		const allSettingsString = localStorage?.getItem(SETTINGS_KEY) ?? '{}';
+		const allSettings = JSON.parse(allSettingsString);
+
+		if (shouldStore) {
+			allSettings[this.shortName] = value;
+		} else {
+			delete allSettings[this.shortName];
+		}
 		localStorage?.setItem(SETTINGS_KEY, JSON.stringify(allSettings));
 	}
 

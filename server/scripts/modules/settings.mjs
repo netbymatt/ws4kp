@@ -26,6 +26,13 @@ const kioskChange = (value) => {
 		window.dispatchEvent(new Event('resize'));
 	} else {
 		body.classList.remove('kiosk');
+		window.dispatchEvent(new Event('resize'));
+	}
+
+	// Conditionally store the kiosk setting based on the "Sticky Kiosk" setting
+	// (Need to check if the method exists to handle initialization race condition)
+	if (settings.kiosk?.conditionalStoreToLocalStorage) {
+		settings.kiosk.conditionalStoreToLocalStorage(value, settings.stickyKiosk?.value);
 	}
 };
 
@@ -95,6 +102,12 @@ const init = () => {
 		defaultValue: false,
 		changeAction: kioskChange,
 		sticky: false,
+		stickyRead: true,
+	});
+	settings.stickyKiosk = new Setting('stickyKiosk', {
+		name: 'Sticky Kiosk',
+		defaultValue: false,
+		sticky: true,
 	});
 	settings.speed = new Setting('speed', {
 		name: 'Speed',
