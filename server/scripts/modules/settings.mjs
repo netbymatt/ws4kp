@@ -135,7 +135,7 @@ const init = () => {
 		sticky: true,
 		values: [
 			['auto', 'Auto (Adaptive)'],
-			['thin', 'Thin (1p)'],
+			['thin', 'Thin (1x)'],
 			['medium', 'Medium (2x)'],
 			['thick', 'Thick (3x)'],
 		],
