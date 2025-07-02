@@ -12,6 +12,7 @@ const DEFAULTS = {
 	stickyRead: false,
 	values: [],
 	visible: true,
+	placeholder: '',
 };
 
 class Setting {
@@ -33,6 +34,7 @@ class Setting {
 		this.values = options.values;
 		this.visible = options.visible;
 		this.changeAction = options.changeAction;
+		this.placeholder = options.placeholder;
 
 		// get value from url
 		const urlValue = parseQueryString()?.[`settings-${shortName}-${this.type}`];
@@ -50,6 +52,9 @@ class Setting {
 			// couldn't parse as a float, store as a string
 			urlState = urlValue;
 		}
+		if (this.type === 'string' && urlValue !== undefined) {
+			urlState = urlValue;
+		}
 
 		// get existing value if present
 		const storedValue = urlState ?? this.getFromLocalStorage();
@@ -61,6 +66,9 @@ class Setting {
 		switch (this.type) {
 			case 'select':
 				this.selectChange({ target: { value: this.myValue } });
+				break;
+			case 'string':
+				this.stringChange({ target: { value: this.myValue } });
 				break;
 			case 'checkbox':
 			default:
@@ -126,6 +134,34 @@ class Setting {
 		return label;
 	}
 
+	generateString() {
+		// create a string input and accompanying set button
+		const label = document.createElement('label');
+		label.for = `settings-${this.shortName}-string`;
+		label.id = `settings-${this.shortName}-label`;
+		// text input box
+		const textInput = document.createElement('input');
+		textInput.type = 'text';
+		textInput.value = this.myValue;
+		textInput.id = `settings-${this.shortName}-string`;
+		textInput.name = `settings-${this.shortName}-string`;
+		textInput.placeholder = this.placeholder;
+		// set button
+		const setButton = document.createElement('input');
+		setButton.type = 'button';
+		setButton.value = 'Set';
+		setButton.id = `settings-${this.shortName}-button`;
+		setButton.name = `settings-${this.shortName}-button`;
+		setButton.addEventListener('click', () => {
+			this.stringChange({ target: { value: textInput.value } });
+		});
+		// assemble
+		label.append(textInput, setButton);
+
+		this.element = label;
+		return label;
+	}
+
 	checkboxChange(e) {
 		// update the state
 		this.myValue = e.target.checked;
@@ -142,6 +178,15 @@ class Setting {
 			// was a string, store as such
 			this.myValue = e.target.value;
 		}
+		this.storeToLocalStorage(this.myValue);
+
+		// call the change action
+		this.changeAction(this.myValue);
+	}
+
+	stringChange(e) {
+		// update the value
+		this.myValue = e.target.value;
 		this.storeToLocalStorage(this.myValue);
 
 		// call the change action
@@ -179,8 +224,8 @@ class Setting {
 					switch (this.type) {
 						case 'boolean':
 						case 'checkbox':
-							return storedValue;
 						case 'select':
+						case 'string':
 							return storedValue;
 						default:
 							return null;
@@ -231,6 +276,8 @@ class Setting {
 		switch (this.type) {
 			case 'select':
 				return this.generateSelect();
+			case 'string':
+				return this.generateString();
 			case 'checkbox':
 			default:
 				return this.generateCheckbox();
