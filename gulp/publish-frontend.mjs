@@ -26,11 +26,7 @@ const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
 const RESOURCES_PATH = './dist/resources';
 
-const jsSourcesData = [
-	'server/scripts/data/travelcities.js',
-	'server/scripts/data/regionalcities.js',
-	'server/scripts/data/stations.js',
-];
+// Data is now served as JSON files to avoid redundancy
 
 const webpackOptions = {
 	mode: 'production',
@@ -56,16 +52,20 @@ const webpackOptions = {
 	},
 };
 
-const compressJsData = () => src(jsSourcesData)
-	.pipe(concat('data.min.js'))
-	.pipe(terser())
-	.pipe(dest(RESOURCES_PATH));
-
 const jsVendorSources = [
 	'server/scripts/vendor/auto/nosleep.js',
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/vendor/auto/suncalc.js',
 ];
+
+// Copy metar-taf-parser separately since it's an ES module with locale dependencies
+const metarVendorSources = [
+	'server/scripts/vendor/auto/metar-taf-parser.mjs',
+	'server/scripts/vendor/auto/locale/en.js',
+];
+
+const copyMetarVendor = () => src(metarVendorSources, { base: 'server/scripts/vendor/auto' })
+	.pipe(dest(`${RESOURCES_PATH}/vendor/auto`));
 
 const compressJsVendor = () => src(jsVendorSources)
 	.pipe(concat('vendor.min.js'))
@@ -114,8 +114,10 @@ const compressHtml = async () => {
 	return src(htmlSources)
 		.pipe(ejs({
 			production: version,
+			serverAvailable: false,
 			version,
 			OVERRIDES,
+			query: {},
 		}))
 		.pipe(rename({ extname: '.html' }))
 		.pipe(htmlmin({ collapseWhitespace: true }))
@@ -129,6 +131,13 @@ const otherFiles = [
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));
+
+// Copy JSON data files for static hosting
+const copyDataFiles = () => src([
+	'datagenerators/output/travelcities.json',
+	'datagenerators/output/regionalcities.json',
+	'datagenerators/output/stations.json',
+]).pipe(dest('./dist/data'));
 
 const s3 = s3Upload({
 	useIAM: true,
@@ -201,7 +210,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsData, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing

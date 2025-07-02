@@ -1,7 +1,9 @@
 import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
+import augmentObservationWithMetar from './utils/metar.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 const buildForecast = (forecast, city, cityXY) => {
 	// get a unit converter
@@ -19,23 +21,40 @@ const buildForecast = (forecast, city, cityXY) => {
 
 const getRegionalObservation = async (point, city) => {
 	try {
-		// get stations
-		const stations = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=1`);
+		// get stations using centralized safe handling
+		const stations = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=1`);
+
+		if (!stations || !stations.features || stations.features.length === 0) {
+			if (debugFlag('verbose-failures')) {
+				console.warn(`Unable to get regional stations for ${city.Name ?? city.city}`);
+			}
+			return false;
+		}
 
 		// get the first station
 		const station = stations.features[0].id;
-		// get the observation data
-		const observation = await json(`${station}/observations/latest`);
+		// get the observation data using centralized safe handling
+		const observation = await safeJson(`${station}/observations/latest`);
+
+		if (!observation) {
+			if (debugFlag('verbose-failures')) {
+				console.warn(`Unable to get regional observations for ${city.Name ?? city.city}`);
+			}
+			return false;
+		}
+
+		// Enhance observation data with METAR parsing for missing fields
+		const augmentedObservation = augmentObservationWithMetar(observation.properties);
+
 		// preload the image
-		if (!observation.properties.icon) return false;
-		const icon = getSmallIcon(observation.properties.icon, !observation.properties.daytime);
+		if (!augmentedObservation.icon) return false;
+		const icon = getSmallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
 		if (!icon) return false;
 		preloadImg(icon);
 		// return the observation
-		return observation.properties;
+		return augmentedObservation;
 	} catch (error) {
-		console.log(`Unable to get regional observations for ${city.Name ?? city.city}`);
-		console.error(error.status, error.responseJSON);
+		console.error(`Unexpected error getting Regional Observation for ${city.Name ?? city.city}: ${error.message}`);
 		return false;
 	}
 };

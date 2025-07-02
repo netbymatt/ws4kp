@@ -3,7 +3,7 @@
 
 import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
@@ -12,6 +12,7 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 // map offset
 const mapOffsetXY = {
@@ -80,16 +81,27 @@ class RegionalForecast extends WeatherDisplay {
 		// get now as DateTime for calculations below
 		const now = DateTime.now();
 
-		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
-		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
+		// get regional forecasts and observations using centralized safe Promise handling
+		const regionalDataAll = await safePromiseAll(regionalCities.map(async (city) => {
 			try {
 				const point = city?.point ?? (await getAndFormatPoint(city.lat, city.lon));
-				if (!point) throw new Error('No pre-loaded point');
+				if (!point) {
+					if (debugFlag('verbose-failures')) {
+						console.warn(`Unable to get Points for '${city.Name ?? city.city}'`);
+					}
+					return false;
+				}
 
 				// start off the observation task
 				const observationPromise = utils.getRegionalObservation(point, city);
 
-				const forecast = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
+				const forecast = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
+				if (!forecast) {
+					if (debugFlag('verbose-failures')) {
+						console.warn(`Regional Forecast request for ${city.Name ?? city.city} failed`);
+					}
+					return false;
+				}
 
 				// get XY on map for city
 				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state);
@@ -133,8 +145,7 @@ class RegionalForecast extends WeatherDisplay {
 					utils.buildForecast(forecast.properties.periods[currentPeriod + 2], city, cityXY),
 				];
 			} catch (error) {
-				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
-				console.log(error);
+				console.error(`Unexpected error getting Regional Forecast data for '${city.name ?? city.city}': ${error.message}`);
 				return false;
 			}
 		}));
@@ -215,12 +226,19 @@ class RegionalForecast extends WeatherDisplay {
 }
 
 const getAndFormatPoint = async (lat, lon) => {
-	const point = await getPoint(lat, lon);
-	return {
-		x: point.properties.gridX,
-		y: point.properties.gridY,
-		wfo: point.properties.gridId,
-	};
+	try {
+		const point = await getPoint(lat, lon);
+		if (!point) {
+			return null;
+		}
+		return {
+			x: point.properties.gridX,
+			y: point.properties.gridY,
+			wfo: point.properties.gridId,
+		};
+	} catch (error) {
+		throw new Error(`Unexpected error getting point for ${lat},${lon}: ${error.message}`);
+	}
 };
 
 // register display

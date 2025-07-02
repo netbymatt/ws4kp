@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display .main.current-weather {
 	&.main {
@@ -58,27 +58,19 @@
 			font-size: 24pt;
 		}
 
-		.condition {}
-
 		.icon {
-			height: 100px;
-
 			img {
-				max-width: 126px;
+				margin: 0 auto;
+				display: block;
 			}
 		}
 
 		.wind-container {
-			margin-bottom: 10px;
+			margin-left: 10px;
+			display: flex;
 
 			&>div {
-				width: 45%;
-				display: inline-block;
-				margin: 0px;
-			}
-
-			.wind-label {
-				margin-left: 5px;
+				width: 50%;
 			}
 
 			.wind {
@@ -87,7 +79,8 @@
 		}
 
 		.wind-gusts {
-			margin-left: 5px;
+			text-align: right;
+			font-size: 28px;
 		}
 
 		.location {

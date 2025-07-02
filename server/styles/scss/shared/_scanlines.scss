@@ -1,7 +1,8 @@
 /* REGULAR SCANLINES SETTINGS */
 
-// width of 1 scanline (min.: 1px)
+// width of 1 scanline (responsive units to prevent banding)
 $scan-width: 1px;
+$scan-width-scaled: 0.15vh; // viewport-relative unit for better scaling
 
 // emulates a damage-your-eyes bad pre-2000 CRT screen ♥ (true, false)
 $scan-crt: false;
@@ -75,18 +76,41 @@ $scan-opacity: .75;
 		@include scan-moving($scan-moving-line);
 	}
 
-	// the scanlines, so!
+	// the scanlines, so! - with responsive scaling for low-res displays
 	&:after {
 		top: 0;
 		right: 0;
 		bottom: 0;
 		left: 0;
 		z-index: $scan-z-index;
-		background: linear-gradient(to bottom,
-				transparent 50%,
-				$scan-color 51%);
-		background-size: 100% $scan-width*2;
+		// repeating-linear-gradient is more efficient than linear-gradient+background-size because it doesn't require the browser to calculate tiling
+		background: repeating-linear-gradient(to bottom,
+				transparent 0,
+				transparent $scan-width,
+				$scan-color $scan-width,
+				$scan-color calc($scan-width * 2));
 		@include scan-crt($scan-crt);
+
+		// Prevent sub-pixel aliasing on scaled displays
+		image-rendering: crisp-edges;
+		image-rendering: pixelated;
+	}
+
+	// Scanlines use dynamic thickness calculated by JavaScript
+	// JavaScript calculates optimal thickness to prevent banding at any scale factor
+	// The --scanline-thickness custom property is set by applyScanlineScaling()
+	// The modes (hairline, thin, medium, thick) force the base thickness selection
+	// Some modes may appear the same (e.g. hairline and thin) depending on the display
+	&:before {
+		height: var(--scanline-thickness, $scan-width);
+	}
+
+	&:after {
+		background: repeating-linear-gradient(to bottom,
+				transparent 0,
+				transparent var(--scanline-thickness, $scan-width),
+				$scan-color var(--scanline-thickness, $scan-width),
+				$scan-color calc(var(--scanline-thickness, $scan-width) * 2));
 	}
 }
 
