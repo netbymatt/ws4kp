@@ -1,5 +1,7 @@
 import { rewriteUrl } from './url-rewrite.mjs';
 
+const DEFAULT_REQUEST_TIMEOUT = 15000; // For example, with 3 retries: 15s+1s+15s+2s+15s+5s+15s = 68s
+
 // Centralized utilities for handling errors in Promise contexts
 const safeJson = async (url, params) => {
 	try {
@@ -96,13 +98,11 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 		method: 'GET',
 		mode: 'cors',
 		type: 'GET',
-		retryCount: 0,
-		timeout: 30000,
+		retryCount: 3, // Default to 3 retries for any failed requests (timeout or 5xx server errors)
+		timeout: DEFAULT_REQUEST_TIMEOUT,
 		..._params,
 		headers,
 	};
-	// store original number of retries
-	params.originalRetries = params.retryCount;
 
 	// rewrite URLs for various services to use the backend proxy server for proper caching (and request logging)
 	const url = rewriteUrl(_url);
@@ -152,10 +152,13 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	} catch (error) {
 		// Enhanced error handling for different error types
 		if (error.name === 'AbortError') {
-			// AbortError is always handled gracefully (background tab throttling)
+			// AbortError always happens in the browser, regardless of server vs static mode
+			// Most likely causes include background tab throttling, user navigation, or client timeout
 			console.log(`🛑 Fetch aborted for ${_url} (background tab throttling?)`);
 			return null; // Always return null for AbortError instead of throwing
-		} if (error.message.includes('502')) {
+		} if (error.name === 'TimeoutError') {
+			console.warn(`⏱️  Request timeout for ${_url} (${error.message})`);
+		} else if (error.message.includes('502')) {
 			console.warn(`🚪 Bad Gateway error for ${_url}`);
 		} else if (error.message.includes('503')) {
 			console.warn(`⌛ Temporarily unavailable for ${_url}`);
@@ -179,8 +182,12 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 
 // fetch with retry and back-off
 const doFetch = (url, params) => new Promise((resolve, reject) => {
+	// Store the original retry count for logging purposes
+	const originalRetryCount = params.retryCount;
+
 	// Create AbortController for timeout
 	const controller = new AbortController();
+	const startTime = Date.now();
 	const timeoutId = setTimeout(() => {
 		controller.abort();
 	}, params.timeout);
@@ -194,19 +201,19 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 	// Shared retry logic to avoid duplication
 	const attemptRetry = (reason) => {
 		// Safety check for params
-		if (!params || typeof params.retryCount !== 'number' || typeof params.originalRetries !== 'number') {
+		if (!params || typeof params.retryCount !== 'number') {
 			console.error(`❌ Invalid params for retry: ${url}`);
 			return reject(new Error('Invalid retry parameters'));
 		}
 
-		const retryAttempt = params.originalRetries - params.retryCount + 1;
+		const retryAttempt = originalRetryCount - params.retryCount + 1;
 		const remainingRetries = params.retryCount - 1;
 		const delayMs = retryDelay(retryAttempt);
 
-		console.warn(`🔄 Retry ${retryAttempt}/${params.originalRetries} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remainingRetries} retries left)`);
+		console.warn(`🔄 Retry ${retryAttempt}/${originalRetryCount} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remainingRetries} retr${remainingRetries === 1 ? 'y' : 'ies'} left)`);
 
 		// call the "still waiting" function on first retry
-		if (params && params.stillWaiting && typeof params.stillWaiting === 'function' && params.retryCount === params.originalRetries) {
+		if (params && params.stillWaiting && typeof params.stillWaiting === 'function' && retryAttempt === 1) {
 			try {
 				params.stillWaiting();
 			} catch (callbackError) {
@@ -251,7 +258,26 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 	}).catch((error) => {
 		clearTimeout(timeoutId); // Clear timeout on error
 
-		// Retry network errors if we have retries left (but not AbortError)
+		// Enhance AbortError detection by checking if we're near the timeout duration
+		if (error.name === 'AbortError') {
+			const duration = Date.now() - startTime;
+			const isLikelyTimeout = duration >= (params.timeout - 1000); // Within 1 second of timeout
+
+			// Convert likely timeouts to TimeoutError for better error reporting
+			if (isLikelyTimeout) {
+				const reason = `Request timeout after ${Math.round(duration / 1000)}s`;
+				if (params && params.retryCount > 0) {
+					return attemptRetry(reason);
+				}
+				// Convert to a timeout error for better error reporting
+				const timeoutError = new Error(`Request timeout after ${Math.round(duration / 1000)}s`);
+				timeoutError.name = 'TimeoutError';
+				reject(timeoutError);
+				return undefined;
+			}
+		}
+
+		// Retry network errors if we have retries left
 		if (params && params.retryCount > 0 && error.name !== 'AbortError') {
 			const reason = error.name === 'TimeoutError' ? 'Request timeout' : `Network error: ${error.message}`;
 			return attemptRetry(reason);

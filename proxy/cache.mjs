@@ -20,6 +20,9 @@
 
 import https from 'https';
 
+// Default timeout for upstream requests (matches client-side default)
+const DEFAULT_REQUEST_TIMEOUT = 15000;
+
 class HttpCache {
 	constructor() {
 		this.cache = new Map();
@@ -49,7 +52,7 @@ class HttpCache {
 	// Helper method to set filtered headers and our cache policy
 	static setFilteredHeaders(res, headers) {
 		// Strip cache-related headers and pass through others
-		Object.entries(headers).forEach(([key, value]) => {
+		Object.entries(headers || {}).forEach(([key, value]) => {
 			const lowerKey = key.toLowerCase();
 			// Skip cache-related headers that should be controlled by our proxy
 			if (!['cache-control', 'expires', 'etag', 'last-modified'].includes(lowerKey)) {
@@ -63,8 +66,11 @@ class HttpCache {
 
 	// Generate cache key from request
 	static generateKey(req) {
+		const path = req.path || req.url || '/';
+		const url = req.url || req.path || '/';
+
 		// Since this cache is intended only by the frontend, we can use a simple URL-based key
-		return `${req.path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+		return `${path}${url.includes('?') ? url.substring(url.indexOf('?')) : ''}`;
 	}
 
 	// High-level method to handle caching for HTTP proxies
@@ -84,9 +90,18 @@ class HttpCache {
 		// Generate cache key for in-flight tracking
 		const cacheKey = HttpCache.generateKey(req);
 
+		// Build the full URL
+		const queryParams = Object.keys(req.query || {}).reduce((acc, key) => {
+			if (options.skipParams && options.skipParams.includes(key)) return acc;
+			acc[key] = req.query[key];
+			return acc;
+		}, {});
+		const queryString = new URLSearchParams(queryParams).toString();
+		const fullUrl = `${upstreamUrl}${req.path}${queryString ? `?${queryString}` : ''}`;
+
 		// Check if there's already a request in flight for this resource
 		if (this.inFlight.has(cacheKey)) {
-			console.log(`⏳ Wait    | ${upstreamUrl}${req.path} (request already in flight)`);
+			console.log(`🛫 Wait     | ${fullUrl} (request already in flight)`);
 
 			// Track when we start waiting for latency measurement
 			const waitStartTime = Date.now();
@@ -95,7 +110,7 @@ class HttpCache {
 			try {
 				await this.inFlight.get(cacheKey);
 
-				// After waiting, try cache again (should be populated now)
+				// After waiting, try cache again (should be populated now if the request was successful)
 				const key = HttpCache.generateKey(req);
 				const cached = this.cache.get(key);
 
@@ -105,7 +120,8 @@ class HttpCache {
 					// Log cache hit with wait latency
 					const age = Math.round((Date.now() - cached.timestamp) / 1000);
 					const remainingTTL = Math.round((cached.expiry - Date.now()) / 1000);
-					console.log(`🟢 Hit     | ${cached.url} (age: ${age}s, remaining: ${remainingTTL}s, waited: ${waitLatency}ms)`);
+					const url = cached.url || `${upstreamUrl}${req.path}`;
+					console.log(`🛬 Continue | ${url} (age: ${age}s, remaining: ${remainingTTL}s, waited: ${waitLatency}ms)`);
 
 					res.status(cached.statusCode);
 					HttpCache.setFilteredHeaders(res, cached.headers);
@@ -114,15 +130,15 @@ class HttpCache {
 				}
 
 				// Fallthrough to make request if cache miss (shouldn't happen but safety net)
-				console.warn(`⚠️ Redo    | Cache miss after waiting for in-flight request: ${upstreamUrl}${req.path}`);
+				console.warn(`⚠️ Redo     | Cache miss after waiting for in-flight request: ${fullUrl}`);
 			} catch (_error) {
 				// If the in-flight request failed, we'll make our own request
-				console.warn(`⚠️ Redo    | In-flight request failed, making new request: ${upstreamUrl}${req.path}`);
+				console.warn(`⚠️ Redo     | In-flight request failed, making new request: ${fullUrl}`);
 			}
 		}
 
 		// Create promise for this request
-		const requestPromise = this.makeUpstreamRequest(req, res, upstreamUrl, options, cacheResult);
+		const requestPromise = this.makeUpstreamRequest(req, res, fullUrl, options, cacheResult);
 
 		// Store a wrapped promise that doesn't reject for waiters - they just need to know when it's done
 
@@ -134,50 +150,36 @@ class HttpCache {
 			const result = await requestPromise;
 			return result;
 		} catch (error) {
-			// Handle errors from the upstream request
-			if (error.message === 'Timeout') {
-				// Timeout errors are already logged and handled by makeUpstreamRequest
-				return false;
-			}
-			// Re-throw other errors
-			throw error;
+			// All errors are handled directly by makeUpstreamRequest so this is a safety net
+			console.error(`💥 Error    | Unhandled error in handleRequest: ${error.message}`);
+			return false;
 		} finally {
 			// Always clean up the in-flight tracking
 			this.inFlight.delete(cacheKey);
 		}
 	}
 
-	// Make the actual upstream request, handling caching and conditional requests
-	async makeUpstreamRequest(req, res, upstreamUrl, options = {}, cacheResult = null) {
-		return new Promise((resolve, reject) => {
+	// Make the upstream request, handling caching and conditional requests
+	async makeUpstreamRequest(req, res, fullUrl, options = {}, cacheResult = null) {
+		return new Promise((resolve) => {
 			const headers = {
 				'user-agent': options.userAgent || '(WeatherStar 4000+, ws4000@netbymatt.com)',
-				accept: req.headers.accept,
+				accept: req.headers?.accept || '*/*',
 				...options.headers,
 			};
-
-			// Handle query parameters
-			const queryParams = Object.keys(req.query).reduce((acc, key) => {
-				if (options.skipParams && options.skipParams.includes(key)) return acc;
-				acc[key] = req.query[key];
-				return acc;
-			}, {});
-
-			const queryString = new URLSearchParams(queryParams).toString();
-			const fullUrl = `${upstreamUrl}${req.path}${queryString ? `?${queryString}` : ''}`;
 
 			// Use the cache result passed from handleRequest (no additional cache call)
 			let staleCache = null;
 
-			if (cacheResult && cacheResult.status === 'stale' && cacheResult.data.originalHeaders) {
+			if (cacheResult && cacheResult.status === 'stale' && cacheResult.data?.originalHeaders) {
 				staleCache = cacheResult.data;
 				// Add conditional headers based on cached etag or last-modified header
 				if (staleCache.originalHeaders.etag) {
 					headers['if-none-match'] = staleCache.originalHeaders.etag;
-					// console.log(`🏷️ Added If-None-Match: ${staleCache.originalHeaders.etag} for ${fullUrl}`);
+					// console.log(`🏷️ Added   | If-None-Match: ${staleCache.originalHeaders.etag} for ${fullUrl}`);
 				} else if (staleCache.originalHeaders['last-modified']) {
 					headers['if-modified-since'] = staleCache.originalHeaders['last-modified'];
-					// console.log(`📅 Added If-Modified-Since: ${staleCache.originalHeaders['last-modified']} for ${fullUrl}`);
+					// console.log(`📅 Added   | If-Modified-Since: ${staleCache.originalHeaders['last-modified']} for ${fullUrl}`);
 				}
 			}
 
@@ -197,21 +199,21 @@ class HttpCache {
 						if (newMaxAge > 0) {
 							staleCache.expiry = Date.now() + (newMaxAge * 1000);
 							staleCache.timestamp = Date.now(); // Reset age counter for 304 refresh
-							console.log(`🔄 Unchg   | ${fullUrl} (got 304 Not Modified; refreshing cache expiry by ${newMaxAge}s)`);
+							console.log(`〰️ NoChange | ${fullUrl} (got 304 Not Modified; refreshing cache expiry by ${newMaxAge}s)`);
 						} else {
-							console.log(`📉 NoCache | ${fullUrl} (no valid cache directives in 304, not updating expiry)`);
+							console.log(`📉 NoCache  | ${fullUrl} (no valid cache directives in 304, not updating expiry)`);
 						}
 
 						res.status(staleCache.statusCode);
 						HttpCache.setFilteredHeaders(res, staleCache.headers);
 						res.send(staleCache.data);
-						resolve(false); // Cache hit after 304
+						resolve(true); // Cache hit after 304 validation
 						return;
 					}
 					// No stale entry for 304 response (this shouldn't happen!)
-					console.warn(`⚠️ 304 response but no stale cache entry for ${fullUrl}`);
+					console.error(`💥 Error    | 304 response but no stale cache entry for ${fullUrl}`);
 					res.status(500).json({ error: 'Cache inconsistency error' });
-					reject(new Error('304 response without stale cache entry'));
+					resolve(false); // Error handled, response sent
 					return;
 				}
 
@@ -222,12 +224,12 @@ class HttpCache {
 
 					// Log HTTP error status codes
 					if (statusCode >= 400) {
-						console.error(`🚫 ${statusCode}     | ${fullUrl}`);
+						console.error(`🚫 ${statusCode}      | ${fullUrl}`);
 					}
 
 					// Filter out cache headers before storing - we don't need them in our cache
 					const filteredHeaders = {};
-					Object.entries(getRes.headers).forEach(([key, value]) => {
+					Object.entries(getRes.headers || {}).forEach(([key, value]) => {
 						const lowerKey = key.toLowerCase();
 						if (!['cache-control', 'expires', 'etag', 'last-modified'].includes(lowerKey)) {
 							filteredHeaders[key] = value;
@@ -240,6 +242,25 @@ class HttpCache {
 						data,
 					};
 
+					// Check if this is a server error (5xx) or client error that shouldn't be cached
+					if (statusCode >= 500 && statusCode <= 599) {
+						// For 5xx errors, send response (don't cache, but don't reject since response is sent)
+						res.status(statusCode);
+						HttpCache.setFilteredHeaders(res, getRes.headers);
+						res.send(response.data);
+						resolve(false); // Error response sent successfully
+						return;
+					}
+
+					// For 4xx errors, don't cache but send the response
+					if (statusCode >= 400 && statusCode <= 499) {
+						res.status(statusCode);
+						HttpCache.setFilteredHeaders(res, getRes.headers);
+						res.send(response.data);
+						resolve(true); // Successful HTTP transaction (client error, but valid response; don't retry)
+						return;
+					}
+
 					// Store in cache (pass original headers for cache logic, but store filtered headers)
 					this.storeCachedResponse(req, response, fullUrl, getRes.headers);
 
@@ -250,7 +271,7 @@ class HttpCache {
 					HttpCache.setFilteredHeaders(res, getRes.headers);
 
 					res.send(response.data);
-					resolve(false); // Indicates cache miss, but successful
+					resolve(true); // Indicates successful response from upstream
 				};
 
 				if (options.encoding === 'binary') {
@@ -258,6 +279,13 @@ class HttpCache {
 					const chunks = [];
 					getRes.on('data', (chunk) => chunks.push(chunk));
 					getRes.on('end', () => handleResponse(Buffer.concat(chunks)));
+					getRes.on('error', (err) => {
+						if (responseHandled) return;
+						responseHandled = true;
+						console.error(`💥 Error    | with stream ${fullUrl}: ${err.message}`);
+						res.status(500).json({ error: `Stream error: ${err.message}` });
+						resolve(false); // Error handled, response sent
+					});
 				} else {
 					// For text data, use string encoding
 					let data = '';
@@ -266,32 +294,42 @@ class HttpCache {
 						data += chunk;
 					});
 					getRes.on('end', () => handleResponse(data));
+					getRes.on('error', (err) => {
+						if (responseHandled) return;
+						responseHandled = true;
+						console.error(`💥 Error    | with stream ${fullUrl}: ${err.message}`);
+						res.status(500).json({ error: `Stream error: ${err.message}` });
+						resolve(false); // Error handled, response sent
+					});
 				}
 			});
 
-			upstreamReq.on('error', (e) => {
+			upstreamReq.on('error', (err) => {
 				if (responseHandled) return; // Prevent double response
 				responseHandled = true;
-
-				console.error(`💥 Err     | ${fullUrl}: ${e.message}`);
+				console.error(`💥 Error    | ${fullUrl}: ${err.message}`);
 				res.status(500).json({ error: `Failed to fetch data from ${options.serviceName || 'upstream API'}` });
-
-				// For known/expected network errors, resolve with false instead of rejecting to avoid extra logging
-				if (e.code === 'ENOTFOUND' || e.code === 'ECONNREFUSED' || e.code === 'ETIMEDOUT') {
-					resolve(false);
-				} else {
-					reject(e);
-				}
+				resolve(false); // Error handled, response sent
 			});
 
-			upstreamReq.setTimeout(options.timeout || 30000, () => {
+			upstreamReq.setTimeout(options.timeout || DEFAULT_REQUEST_TIMEOUT, () => {
 				if (responseHandled) return; // Prevent double response
 				responseHandled = true;
 
-				upstreamReq.destroy();
-				console.error(`⏰ Timeout | ${fullUrl} (after ${options.timeout || 30000}ms)`);
+				console.error(`⏲️ Timeout  | ${fullUrl} (after ${options.timeout || DEFAULT_REQUEST_TIMEOUT}ms)`);
+
+				// Send timeout response to client
 				res.status(504).json({ error: 'Gateway timeout' });
-				reject(new Error('Timeout'));
+
+				// Don't destroy the request immediately - let the response be sent first
+				// Then destroy to clean up the upstream connection
+				setImmediate(() => {
+					if (!upstreamReq.destroyed) {
+						upstreamReq.destroy();
+					}
+				});
+
+				resolve(false); // Timeout handled, response sent
 			});
 		});
 	}
@@ -310,26 +348,26 @@ class HttpCache {
 		if (!isExpired) {
 			const age = Math.round((Date.now() - cached.timestamp) / 1000);
 			const remainingTTL = Math.round((cached.expiry - Date.now()) / 1000);
-			console.log(`🎯 Hit     | ${cached.url} (age: ${age}s, remaining: ${remainingTTL}s)`);
+			console.log(`🎯 Hit      | ${cached.url} (age: ${age}s, remaining: ${remainingTTL}s)`);
 			return { status: 'fresh', data: cached };
 		}
 
 		// If stale, return for potential conditional request
 		// const staleAge = Math.round((Date.now() - cached.expiry) / 1000);
-		// console.log(`🕐 Stale   | ${cached.url} (expired ${staleAge}s ago, will check upstream)`);
+		// console.log(`🕐 Stale    | ${cached.url} (expired ${staleAge}s ago, will check upstream)`);
 		return { status: 'stale', data: cached };
 	}
 
 	storeCachedResponse(req, response, url, originalHeaders) {
 		const key = HttpCache.generateKey(req);
 
-		const cacheControl = originalHeaders['cache-control'];
+		const cacheControl = (originalHeaders || {})['cache-control'];
 		let maxAge = HttpCache.parseCacheControl(cacheControl);
 		let cacheType = '';
 
 		// If no explicit cache directives, try heuristic caching for Last-Modified
 		if (maxAge <= 0) {
-			const lastModified = originalHeaders['last-modified'];
+			const lastModified = (originalHeaders || {})['last-modified'];
 			if (lastModified) {
 				maxAge = HttpCache.calculateHeuristicMaxAge(lastModified);
 				cacheType = 'heuristic';
@@ -340,26 +378,26 @@ class HttpCache {
 
 		// Don't cache if still no valid max-age
 		if (maxAge <= 0) {
-			console.log(`📤 Sent    | ${url} (no cache directives; not cached)`);
+			console.log(`📤 Sent     | ${url} (no cache directives; not cached)`);
 			return;
 		}
 
 		const cached = {
 			statusCode: response.statusCode,
-			headers: { ...response.headers },
+			headers: { ...(response.headers || {}) },
 			data: response.data,
 			expiry: Date.now() + (maxAge * 1000),
 			timestamp: Date.now(),
 			url, // Store the URL for logging
 			originalHeaders: { // Store original headers for conditional requests
-				etag: originalHeaders.etag,
-				'last-modified': originalHeaders['last-modified'],
+				etag: (originalHeaders || {}).etag,
+				'last-modified': (originalHeaders || {})['last-modified'],
 			},
 		};
 
 		this.cache.set(key, cached);
 
-		console.log(`🌐 Add     | ${url} (${cacheType} ${maxAge}s TTL, expires: ${new Date(cached.expiry).toISOString()})`);
+		console.log(`🌐 Add      | ${url} (${cacheType} ${maxAge}s TTL, expires: ${new Date(cached.expiry).toISOString()})`);
 	}
 
 	// Calculate heuristic max-age based on Last-Modified header
@@ -403,7 +441,7 @@ class HttpCache {
 			});
 
 			if (removedCount > 0) {
-				console.log(`🧹 Clean   | Removed ${removedCount} stale entries (${this.cache.size} remaining)`);
+				console.log(`🧹 Clean    | Removed ${removedCount} stale entries (${this.cache.size} remaining)`);
 			}
 		}, 5 * 60 * 1000); // Cleanup every 5 minutes
 	}
@@ -433,7 +471,7 @@ class HttpCache {
 	// Clear all cache entries
 	clear() {
 		this.cache.clear();
-		console.log('🗑️ Clear   | Cache cleared');
+		console.log('🗑️ Clear    | Cache cleared');
 	}
 
 	// Clear a specific cache entry by path
@@ -441,7 +479,7 @@ class HttpCache {
 		const key = path;
 		const deleted = this.cache.delete(key);
 		if (deleted) {
-			console.log(`🗑️ Clear   | ${path} removed from cache`);
+			console.log(`🗑️ Clear    | ${path} removed from cache`);
 			return true;
 		}
 		return false;
