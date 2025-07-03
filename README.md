@@ -216,7 +216,9 @@ When using the Docker container, these environment variables are read on contain
 
 **Kiosk:** Immediately activates kiosk mode, which hides all settings. Exit by refreshing the page or using `Ctrl-K`. (Kiosk mode is similar to clicking the "Fullscreen" icon, but scales to the current browser viewport instead of activating the browser's actual "Fullscreen" mode.)
 
-**Sticky Kiosk:** When enabled, stores the kiosk mode preference in local storage so the page automatically enters kiosk mode on subsequent visits. This is particularly useful for iPhone and iPad users who want to create a Home Screen app experience:
+**Sticky Kiosk:** When enabled, stores the kiosk mode preference in local storage so the page automatically enters kiosk mode (maximizing the size of the main weather display without any settings) on subsequent visits. This feature is designed primarily for **iPhone and iPad users** who want to create a Home Screen app experience, since Mobile Safari doesn't support PWA installation via manifest.json or the Fullscreen API:
+
+**For iOS/iPadOS (Mobile Safari):**
 
 1. Tap the _Share_ icon and choose **Add to Home Screen**
 2. Adjust the name as desired and tap **Add**
@@ -224,12 +226,23 @@ When using the Docker container, these environment variables are read on contain
 4. Configure all settings
 5. Tap to enable **Sticky Kiosk**
 6. _Make sure everything is configured exactly like you want it!_
-6. Tap **Kiosk**
+7. Tap **Kiosk**
 
-Note:
+**For Android and Desktop browsers:** The included `manifest.json` file enables PWA (Progressive Web App) installation. To get the best app-like experience:
 
-- After creating a Home Screen app on iOS or iPadOS and activating Kiosk mode, the only way to change settings is to delete the Home Screen shortcut and recreate it
-- In situations where you have access to the URL, you can forcibly remove a "sticky" kiosk setting by adding `&kiosk=false` to the URL (or simply press `Ctrl-K` to exit kiosk mode if a keyboard is available)
+1. Configure all your settings first (ignore the "Kiosk" and "Sticky Kiosk" settings)
+2. Create a permalink using the "Copy Permalink" feature and manually add `&kiosk=true` to the end
+3. Open the edited permalink URL in your browser
+4. Look for browser prompts to "Install" or "Add to Home Screen" from the kiosk-enabled URL
+5. The PWA will launch directly into kiosk mode (without forcing kiosk mode when accessed from the browser)
+
+For temporary fullscreen during regular browsing, use the fullscreen button in the toolbar.
+
+**Important Notes:**
+
+* **iOS/iPadOS limitations**: Mobile Safari strips all URL parameters when adding to Home Screen and runs shortcuts in an isolated environment with separate storage from the main Safari app
+* After creating a Home Screen app on iOS or iPadOS and activating Kiosk mode, the only way to change settings is to delete the Home Screen shortcut and recreate it
+* In situations where you _can_ edit a shortcut's URL, you can forcibly remove a "sticky" kiosk setting by adding `&kiosk=false` to the URL (or simply press `Ctrl-K` to exit kiosk mode if a keyboard is available)
 
 **Scan Lines:** Enables a retro-style scan line effect
 
