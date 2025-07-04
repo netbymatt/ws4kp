@@ -4,22 +4,27 @@ set -eu
 ROOT="/usr/share/nginx/html"
 QS=""
 
+# URL encode a string
+url_encode() {
+    local string="$1"
+    printf '%s' "$string" | sed 's/ /%20/g; s/"/%22/g; s/</%3C/g; s/>/%3E/g; s/&/%26/g; s/#/%23/g; s/+/%2B/g'
+}
+
 # build query string from WSQS_ env vars
-for var in $(env); do
-    case "$var" in
-        WSQS_*=*)
-            key="${var%%=*}"
-            val="${var#*=}"
-            key="${key#WSQS_}"
-            key="${key//_/-}"
-            if [ -n "$QS" ]; then
-                QS="$QS&${key}=${val}"
-            else
-                QS="${key}=${val}"
-            fi
-            ;;
-    esac
-done
+while IFS='=' read -r key val; do
+    # Remove WSQS_ prefix and convert underscores to hyphens
+    key="${key#WSQS_}"
+    key="${key//_/-}"
+    # URL encode the value
+    encoded_val=$(url_encode "$val")
+    if [ -n "$QS" ]; then
+        QS="$QS&${key}=${encoded_val}"
+    else
+        QS="${key}=${encoded_val}"
+    fi
+done << EOF
+$(env | grep '^WSQS_')
+EOF
 
 
 if [ -n "$QS" ]; then
