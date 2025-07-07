@@ -105,6 +105,21 @@ export default [{
 				json: 'always',
 			},
 		],
+		'import/no-extraneous-dependencies': [
+			'error',
+			{
+				devDependencies: [
+					'eslint.config.*',
+					'**/*.config.*',
+					'**/*.test.*',
+					'**/*.spec.*',
+					'gulpfile.*',
+					'tests/**/*',
+					'gulp/**/*',
+					'datagenerators/**/*',
+				],
+			},
+		],
 	},
 	ignorePatterns: [
 		'*.min.js',
