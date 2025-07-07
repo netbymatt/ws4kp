@@ -1,27 +1,23 @@
 /* spell-checker: disable */
-// internal function to add path to returned icon
+import parseIconUrl from './icons-parse.mjs';
+
 const addPath = (icon) => `images/icons/current-conditions/${icon}`;
 
 const largeIcon = (link, _isNightTime) => {
-	if (!link) return false;
+	let conditionIcon;
+	let probability;
+	let isNightTime;
 
-	// extract day or night if not provided
-	const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
-
-	// grab everything after the last slash ending at any of these: ?&,
-	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
-	let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
-	// using probability as a crude heavy/light indication where possible
-	const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
-
-	// if a 'DualImage' is captured, adjust to just the j parameter
-	if (conditionName === 'dualimage') {
-		const match = link.match(/&j=(.*)&/);
-		[, conditionName] = match;
+	try {
+		({ conditionIcon, probability, isNightTime } = parseIconUrl(link, _isNightTime));
+	} catch (error) {
+		console.warn(`largeIcon: ${error.message}`);
+		// Return a fallback icon to prevent downstream errors
+		return addPath(_isNightTime ? 'Clear.gif' : 'Sunny.gif');
 	}
 
 	// find the icon
-	switch (conditionName + (isNightTime ? '-n' : '')) {
+	switch (conditionIcon + (isNightTime ? '-n' : '')) {
 		case 'skc':
 		case 'hot':
 		case 'haze':
@@ -81,7 +77,7 @@ const largeIcon = (link, _isNightTime) => {
 
 		case 'snow':
 		case 'snow-n':
-			if (value > 50) return addPath('Heavy-Snow.gif');
+			if (probability > 50) return addPath('Heavy-Snow.gif');
 			return addPath('Light-Snow.gif');
 
 		case 'rain_snow':
@@ -132,9 +128,11 @@ const largeIcon = (link, _isNightTime) => {
 		case 'blizzard-n':
 			return addPath('Blowing-Snow.gif');
 
-		default:
-			console.log(`Unable to locate icon for ${conditionName} ${link} ${isNightTime}`);
-			return false;
+		default: {
+			console.warn(`Unknown weather condition '${conditionIcon}' from ${link}; using fallback icon`);
+			// Return a reasonable fallback instead of false to prevent downstream errors
+			return addPath(isNightTime ? 'Clear-Night.gif' : 'Sunny.gif');
+		}
 	}
 };
 
