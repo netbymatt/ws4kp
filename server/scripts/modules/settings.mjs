@@ -3,10 +3,19 @@ import Setting from './utils/setting.mjs';
 // Initialize settings immediately so other modules can access them
 const settings = { speed: { value: 1.0 } };
 
+// Track settings that need DOM changes after early initialization
+const deferredDomSettings = new Set();
+
 // Declare change functions first, before they're referenced in init() to avoid the Temporal Dead Zone (TDZ)
 const wideScreenChange = (value) => {
 	const container = document.querySelector('#divTwc');
-	if (!container) return; // DOM not ready
+	if (!container) {
+		// DOM not ready; defer enabling if set
+		if (value) {
+			deferredDomSettings.add('wide');
+		}
+		return;
+	}
 
 	if (value) {
 		container.classList.add('wide');
@@ -19,7 +28,13 @@ const wideScreenChange = (value) => {
 
 const kioskChange = (value) => {
 	const body = document.querySelector('body');
-	if (!body) return; // DOM not ready
+	if (!body) {
+		// DOM not ready; defer enabling if set
+		if (value) {
+			deferredDomSettings.add('kiosk');
+		}
+		return;
+	}
 
 	if (value) {
 		body.classList.add('kiosk');
@@ -40,7 +55,13 @@ const scanLineChange = (value) => {
 	const container = document.getElementById('container');
 	const navIcons = document.getElementById('ToggleScanlines');
 
-	if (!container || !navIcons) return; // DOM elements not ready
+	if (!container || !navIcons) {
+		// DOM not ready; defer enabling if set
+		if (value) {
+			deferredDomSettings.add('scanLines');
+		}
+		return;
+	}
 
 	if (value) {
 		container.classList.add('scanlines');
@@ -169,6 +190,22 @@ init();
 
 // generate html objects
 document.addEventListener('DOMContentLoaded', () => {
+	// Apply any settings that were deferred due to the DOM not being ready when setting were read
+	if (deferredDomSettings.size > 0) {
+		console.log('Applying deferred DOM settings:', Array.from(deferredDomSettings));
+
+		// Re-apply each pending setting by calling its changeAction with current value
+		deferredDomSettings.forEach((settingName) => {
+			const setting = settings[settingName];
+			if (setting && setting.changeAction && typeof setting.changeAction === 'function') {
+				setting.changeAction(setting.value);
+			}
+		});
+
+		deferredDomSettings.clear();
+	}
+
+	// Then generate the settings UI
 	const settingHtml = Object.values(settings).map((d) => d.generate());
 	const settingsSection = document.querySelector('#settings');
 	settingsSection.innerHTML = '';
