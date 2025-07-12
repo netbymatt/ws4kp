@@ -181,9 +181,9 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 };
 
 // fetch with retry and back-off
-const doFetch = (url, params) => new Promise((resolve, reject) => {
-	// Store the original retry count for logging purposes
-	const originalRetryCount = params.retryCount;
+const doFetch = (url, params, originalRetryCount = null) => new Promise((resolve, reject) => {
+	// On the first call, store the retry count for later logging
+	const initialRetryCount = originalRetryCount ?? params.retryCount;
 
 	// Create AbortController for timeout
 	const controller = new AbortController();
@@ -206,11 +206,11 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 			return reject(new Error('Invalid retry parameters'));
 		}
 
-		const retryAttempt = originalRetryCount - params.retryCount + 1;
+		const retryAttempt = initialRetryCount - params.retryCount + 1;
 		const remainingRetries = params.retryCount - 1;
 		const delayMs = retryDelay(retryAttempt);
 
-		console.warn(`🔄 Retry ${retryAttempt}/${originalRetryCount} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remainingRetries} retr${remainingRetries === 1 ? 'y' : 'ies'} left)`);
+		console.warn(`🔄 Retry ${retryAttempt}/${initialRetryCount} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remainingRetries} retr${remainingRetries === 1 ? 'y' : 'ies'} left)`);
 
 		// call the "still waiting" function on first retry
 		if (params && params.stillWaiting && typeof params.stillWaiting === 'function' && retryAttempt === 1) {
@@ -227,7 +227,7 @@ const doFetch = (url, params) => new Promise((resolve, reject) => {
 		};
 		// Use setTimeout directly instead of the delay wrapper to avoid Promise resolution issues
 		setTimeout(() => {
-			doFetch(url, newParams).then(resolve).catch(reject);
+			doFetch(url, newParams, initialRetryCount).then(resolve).catch(reject);
 		}, delayMs);
 		return undefined; // Explicit return for linter
 	};
