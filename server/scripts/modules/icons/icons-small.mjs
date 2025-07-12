@@ -1,24 +1,22 @@
-// internal function to add path to returned icon
+import parseIconUrl from './icons-parse.mjs';
+
 const addPath = (icon) => `images/icons/regional-maps/${icon}`;
 
 const smallIcon = (link, _isNightTime) => {
-	// extract day or night if not provided
-	const isNightTime = _isNightTime ?? link.indexOf('/night/') >= 0;
+	let conditionIcon;
+	let probability;
+	let isNightTime;
 
-	// grab everything after the last slash ending at any of these: ?&,
-	const afterLastSlash = link.toLowerCase().match(/[^/]+$/)[0];
-	let conditionName = afterLastSlash.match(/(.*?)[&,.?]/)[1];
-	// using probability as a crude heavy/light indication where possible
-	const value = +(link.match(/,(\d{2,3})/) ?? [0, 100])[1];
-
-	// if a 'DualImage' is captured, adjust to just the j parameter
-	if (conditionName === 'dualimage') {
-		const match = link.match(/&j=(.*)&/);
-		[, conditionName] = match;
+	try {
+		({ conditionIcon, probability, isNightTime } = parseIconUrl(link, _isNightTime));
+	} catch (error) {
+		console.warn(`smallIcon: ${error.message}`);
+		// Return a fallback icon to prevent downstream errors
+		return addPath(_isNightTime ? 'Clear-1992.gif' : 'Sunny.gif');
 	}
 
 	// find the icon
-	switch (conditionName + (isNightTime ? '-n' : '')) {
+	switch (conditionIcon + (isNightTime ? '-n' : '')) {
 		case 'skc':
 			return addPath('Sunny.gif');
 
@@ -72,7 +70,7 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'snow':
 		case 'snow-n':
-			if (value > 50) return addPath('Heavy-Snow-1994.gif');
+			if (probability > 50) return addPath('Heavy-Snow-1994.gif');
 			return addPath('Light-Snow.gif');
 
 		case 'rain_snow':
@@ -153,8 +151,9 @@ const smallIcon = (link, _isNightTime) => {
 			return addPath('Haze.gif');
 
 		default:
-			console.log(`Unable to locate regional icon for ${conditionName} ${link} ${isNightTime}`);
-			return false;
+			console.warn(`Unknown weather condition '${conditionIcon}' from ${link}; using fallback icon`);
+			// Return a reasonable fallback instead of false to prevent downstream errors
+			return addPath(isNightTime ? 'Clear-1992.gif' : 'Sunny.gif');
 	}
 };
 

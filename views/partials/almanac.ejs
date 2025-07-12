@@ -1,21 +1,15 @@
 <%- include('header.ejs', {title:'Almanac', hasTime: true}) %>
 <div class="main has-scroll almanac">
   <div class="sun">
-    <div class="days">
-      <div class="day"></div>
-      <div class="day day-1">Monday</div>
-      <div class="day day-2">Tuesday</div>
-    </div>
-    <div class="times times-1">
-      <div class="name">Sunrise:</div>
-      <div class="sun-time rise-1">6:24 am</div>
-      <div class="sun-time rise-2">6:25 am</div>
-    </div>
-    <div class="times times-2">
-      <div class="name">Sunset:</div>
-      <div class="sun-time set-1">6:24 am</div>
-      <div class="sun-time set-2">6:25 am</div>
-    </div>
+    <div class="grid-item empty"></div>
+    <div class="grid-item header day-1"></div>
+    <div class="grid-item header day-2"></div>
+    <div class="grid-item row-label">Sunrise:</div>
+    <div class="grid-item time rise-1"></div>
+    <div class="grid-item time rise-2"></div>
+    <div class="grid-item row-label">Sunset:</div>
+    <div class="grid-item time set-1"></div>
+    <div class="grid-item time set-2"></div>
   </div>
   <div class="moon">
     <div class="title">Moon Data:</div>

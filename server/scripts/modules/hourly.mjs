@@ -2,60 +2,70 @@
 
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit, distanceKilometers } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import getSun from './almanac.mjs';
+import calculateScrollTiming from './utils/scroll-timing.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
 		super(navId, elemId, 'Hourly Forecast', defaultActive);
 
-		// set up the timing
-		this.timing.baseDelay = 20;
-		// 24 hours = 6 pages
-		const pages = 4; // first page is already displayed, last page doesn't happen
-		const timingStep = 75 * 4;
-		this.timing.delay = [150 + timingStep];
-		// add additional pages
-		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
-		// add the final 3 second delay
-		this.timing.delay.push(150);
+		// cache for scroll calculations
+		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
+		// during scrolling. Without caching, we'd perform hundreds of expensive DOM layout queries during
+		// the full scroll cycle. The cache reduces this to one calculation when content changes, then
+		// reuses cached values to try and get smoother scrolling.
+		this.scrollCache = {
+			displayHeight: 0,
+			contentHeight: 0,
+			maxOffset: 0,
+			hourlyLines: null,
+		};
 	}
 
 	async getData(weatherParameters, refresh) {
 		// super checks for enabled
 		const superResponse = super.getData(weatherParameters, refresh);
-		let forecast;
+
 		try {
-			// get the forecast
-			forecast = await json(this.weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
-			// parse the forecast
-			this.data = await parseForecast(forecast.properties);
-		} catch (error) {
-			console.error('Get hourly forecast failed');
-			console.error(error.status, error.responseJSON);
-			// use old data if available
-			if (this.data) {
-				console.log('Using previous hourly forecast');
-				// don't return, this.data is usable from the previous update
-			} else {
+			const forecast = await safeJson(this.weatherParameters.forecastGridData, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
+
+			if (forecast) {
+				try {
+					// parse the forecast
+					this.data = await parseForecast(forecast.properties);
+				} catch (error) {
+					console.error(`Hourly forecast parsing failed: ${error.message}`);
+				}
+			} else if (debugFlag('verbose-failures')) {
+				console.warn(`Using previous hourly forecast for ${this.weatherParameters.forecastGridData}`);
+			}
+
+			// use old data if available, fail if no data at all
+			if (!this.data) {
 				if (this.isEnabled) this.setStatus(STATUS.failed);
 				// return undefined to other subscribers
 				this.getDataCallback(undefined);
 				return;
 			}
+
+			this.getDataCallback();
+			if (!superResponse) return;
+
+			this.setStatus(STATUS.loaded);
+			this.drawLongCanvas();
+		} catch (error) {
+			console.error(`Unexpected error getting hourly forecast: ${error.message}`);
+			if (this.isEnabled) this.setStatus(STATUS.failed);
+			this.getDataCallback(undefined);
 		}
-
-		this.getDataCallback();
-		if (!superResponse) return;
-
-		this.setStatus(STATUS.loaded);
-		this.drawLongCanvas();
 	}
 
 	async drawLongCanvas() {
@@ -102,6 +112,9 @@ class Hourly extends WeatherDisplay {
 		});
 
 		list.append(...lines);
+
+		// update timing based on actual content
+		this.setTiming(list);
 	}
 
 	drawCanvas() {
@@ -122,19 +135,35 @@ class Hourly extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
+		// get the hourly lines element and cache measurements if needed
+		const hourlyLines = this.elem.querySelector('.hourly-lines');
+		if (!hourlyLines) return;
+
+		// update cache if needed (when content changes or first run)
+		if (this.scrollCache.hourlyLines !== hourlyLines || this.scrollCache.displayHeight === 0) {
+			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
+			this.scrollCache.contentHeight = hourlyLines.offsetHeight;
+			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
+			this.scrollCache.hourlyLines = hourlyLines;
+
+			// Set up hardware acceleration on the hourly lines element
+			hourlyLines.style.willChange = 'transform';
+			hourlyLines.style.backfaceVisibility = 'hidden';
+		}
+
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.hourly-lines').offsetHeight - 289, (count - 150));
+		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
 
-		// copy the scrolled portion of the canvas
-		this.elem.querySelector('.main').scrollTo(0, offsetY);
+		// use transform instead of scrollTo for hardware acceleration
+		hourlyLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
 	}
 
 	// make data available outside this class
 	// promise allows for data to be requested before it is available
-	async getCurrentData(stillWaiting) {
+	async getHourlyData(stillWaiting) {
 		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
 		// an external caller has requested data, set up auto reload
 		this.setAutoReload();
@@ -143,6 +172,18 @@ class Hourly extends WeatherDisplay {
 			// data not available, put it into the data callback queue
 			this.getDataCallbacks.push(() => resolve(this.data));
 		});
+	}
+
+	setTiming(list) {
+		const container = this.elem.querySelector('.main');
+		const timingConfig = calculateScrollTiming(list, container);
+
+		// Apply the calculated timing
+		this.timing.baseDelay = timingConfig.baseDelay;
+		this.timing.delay = timingConfig.delay;
+		this.scrollTiming = timingConfig.scrollTiming;
+
+		this.calcNavTiming();
 	}
 }
 
@@ -192,7 +233,7 @@ const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPr
 };
 
 // expand a set of values with durations to an hour-by-hour array
-const expand = (data) => {
+const expand = (data, maxHours = 24) => {
 	const startOfHour = DateTime.utc().startOf('hour').toMillis();
 	const result = []; // resulting expanded values
 	data.forEach((item) => {
@@ -202,12 +243,12 @@ const expand = (data) => {
 		// loop through duration at one hour intervals
 		do {
 			// test for timestamp greater than now
-			if (startTime >= startOfHour && result.length < 24) {
+			if (startTime >= startOfHour && result.length < maxHours) {
 				result.push(item.value); // push data array
 			} // timestamp is after now
 			// increment start time by 1 hour
 			startTime += 3_600_000;
-		} while (startTime < endTime && result.length < 24);
+		} while (startTime < endTime && result.length < maxHours);
 	}); // for each value
 
 	return result;
@@ -217,4 +258,4 @@ const expand = (data) => {
 const display = new Hourly(3, 'hourly', false);
 registerDisplay(display);
 
-export default display.getCurrentData.bind(display);
+export default display.getHourlyData.bind(display);

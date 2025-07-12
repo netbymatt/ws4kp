@@ -1,26 +1,21 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { preloadImg } from './utils/image.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import { getLargeIcon } from './icons.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import augmentObservationWithMetar from './utils/metar.mjs';
 import {
 	temperature, windSpeed, pressure, distanceMeters, distanceKilometers,
 } from './utils/units.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 // some stations prefixed do not provide all the necessary data
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
 
-const REQUIRED_VALUES = [
-	'windSpeed',
-	'dewpoint',
-	'barometricPressure',
-	'visibility',
-	'relativeHumidity',
-];
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
@@ -45,47 +40,93 @@ class CurrentWeather extends WeatherDisplay {
 			// get the station
 			station = filteredStations[stationNum];
 			stationNum += 1;
+
+			let candidateObservation;
 			try {
-				// station observations
 				// eslint-disable-next-line no-await-in-loop
-				observations = await json(`${station.id}/observations`, {
+				candidateObservation = await safeJson(`${station.id}/observations`, {
 					data: {
-						limit: 2,
+						limit: 2, // we need the two most recent observations to calculate pressure direction
 					},
 					retryCount: 3,
 					stillWaiting: () => this.stillWaiting(),
 				});
-
-				if (observations.features.length === 0) throw new Error(`No features returned for station: ${station.properties.stationIdentifier}, trying next station`);
-
-				// one weather value in the right side column is allowed to be missing. Count them up.
-				// eslint-disable-next-line no-loop-func
-				const valuesCount = REQUIRED_VALUES.reduce((prev, cur) => {
-					const value = observations.features[0].properties?.[cur]?.value;
-					if (value !== null && value !== undefined) return prev + 1;
-					// ceiling is a special case :,-(
-					const ceiling = observations.features[0].properties?.cloudLayers[0]?.base?.value;
-					if (cur === 'ceiling' && ceiling !== null && ceiling !== undefined) return prev + 1;
-					return prev;
-				}, 0);
-
-				// test data quality
-				if (observations.features[0].properties.temperature.value === null
-					|| observations.features[0].properties.textDescription === null
-					|| observations.features[0].properties.textDescription === ''
-					|| observations.features[0].properties.icon === null
-					|| valuesCount < REQUIRED_VALUES.length - 1) {
-					observations = undefined;
-					throw new Error(`Incomplete data set for: ${station.properties.stationIdentifier}, trying next station`);
-				}
 			} catch (error) {
-				console.error(error);
-				observations = undefined;
+				console.error(`Unexpected error getting Current Conditions for station ${station.properties.stationIdentifier}: ${error.message} (trying next station)`);
+				candidateObservation = undefined;
+			}
+
+			// Check if request was successful and has data
+			if (candidateObservation && candidateObservation.features?.length > 0) {
+				// Check if the observation data is old
+				const observationTime = new Date(candidateObservation.features[0].properties.timestamp);
+				const ageInMinutes = (new Date() - observationTime) / (1000 * 60);
+
+				if (ageInMinutes > 180 && debugFlag('currentweather')) {
+					console.warn(`Current Observations for station ${station.properties.stationIdentifier} are ${ageInMinutes.toFixed(0)} minutes old (from ${observationTime.toISOString()}), trying next station`);
+				}
+
+				// Attempt making observation data usable with METAR data
+				const originalData = { ...candidateObservation.features[0].properties };
+				candidateObservation.features[0].properties = augmentObservationWithMetar(candidateObservation.features[0].properties);
+				const metarFields = [
+					{ name: 'temperature', check: (orig, metar) => orig.temperature?.value === null && metar.temperature?.value !== null },
+					{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed?.value === null && metar.windSpeed?.value !== null },
+					{ name: 'windDirection', check: (orig, metar) => orig.windDirection?.value === null && metar.windDirection?.value !== null },
+					{ name: 'windGust', check: (orig, metar) => orig.windGust?.value === null && metar.windGust?.value !== null },
+					{ name: 'dewpoint', check: (orig, metar) => orig.dewpoint?.value === null && metar.dewpoint?.value !== null },
+					{ name: 'barometricPressure', check: (orig, metar) => orig.barometricPressure?.value === null && metar.barometricPressure?.value !== null },
+					{ name: 'relativeHumidity', check: (orig, metar) => orig.relativeHumidity?.value === null && metar.relativeHumidity?.value !== null },
+					{ name: 'visibility', check: (orig, metar) => orig.visibility?.value === null && metar.visibility?.value !== null },
+					{ name: 'ceiling', check: (orig, metar) => orig.cloudLayers?.[0]?.base?.value === null && metar.cloudLayers?.[0]?.base?.value !== null },
+				];
+				const augmentedData = candidateObservation.features[0].properties;
+				const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
+				if (debugFlag('currentweather') && metarReplacements.length > 0) {
+					console.log(`Current Conditions for station ${station.properties.stationIdentifier} were augmented with METAR data for ${metarReplacements.join(', ')}`);
+				}
+
+				// test data quality - check required fields and allow one optional field to be missing
+				const requiredFields = [
+					{ name: 'temperature', check: (props) => props.temperature?.value === null, required: true },
+					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '', required: true },
+					{ name: 'icon', check: (props) => props.icon === null, required: true },
+					{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null, required: false },
+					{ name: 'dewpoint', check: (props) => props.dewpoint?.value === null, required: false },
+					{ name: 'barometricPressure', check: (props) => props.barometricPressure?.value === null, required: false },
+					{ name: 'visibility', check: (props) => props.visibility?.value === null, required: false },
+					{ name: 'relativeHumidity', check: (props) => props.relativeHumidity?.value === null, required: false },
+					{ name: 'ceiling', check: (props) => props.cloudLayers?.[0]?.base?.value === null, required: false },
+				];
+
+				const missingRequired = requiredFields.filter((field) => field.required && field.check(augmentedData)).map((field) => field.name);
+				const missingOptional = requiredFields.filter((field) => !field.required && field.check(augmentedData)).map((field) => field.name);
+				const missingOptionalCount = missingOptional.length;
+
+				// Allow one optional field to be missing
+				if (missingRequired.length === 0 && missingOptionalCount <= 1) {
+					// Station data is good, use it
+					observations = candidateObservation;
+					if (debugFlag('currentweather') && missingOptional.length > 0) {
+						console.log(`Data for station ${station.properties.stationIdentifier} is missing optional fields: ${missingOptional.join(', ')} (acceptable)`);
+					}
+				} else {
+					const allMissing = [...missingRequired, ...missingOptional];
+					if (debugFlag('currentweather')) {
+						console.log(`Data for station ${station.properties.stationIdentifier} is missing fields: ${allMissing.join(', ')} (${missingRequired.length} required, ${missingOptionalCount} optional) (trying next station)`);
+					}
+				}
+			} else if (debugFlag('verbose-failures')) {
+				if (!candidateObservation) {
+					console.log(`Current Observations for station ${station.properties.stationIdentifier} failed, trying next station`);
+				} else {
+					console.log(`No features returned for station ${station.properties.stationIdentifier}, trying next station`);
+				}
 			}
 		}
 		// test for data received
 		if (!observations) {
-			console.error('All current weather stations exhausted');
+			console.error('Current Conditions failure: all nearby weather stations exhausted!');
 			if (this.isEnabled) this.setStatus(STATUS.failed);
 			// send failed to subscribers
 			this.getDataCallback(undefined);
