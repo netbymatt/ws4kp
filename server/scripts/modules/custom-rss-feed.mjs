@@ -64,9 +64,11 @@ const getFeed = async (url) => {
 	// this returns a data url
 	// a few sanity checks
 	if (rssResponse.status.content_type.indexOf('xml') < 0) return;
-	if (rssResponse.contents.indexOf('base64') > 100) return;
+	// determine return type
+	const isBase64 = rssResponse.status.content_type.substring(0, 8) !== 'text/xml';
+
 	// base 64 decode everything after the comma
-	const rss = atob(rssResponse.contents.split('base64,')[1]);
+	const rss = isBase64 ? atob(rssResponse.contents.split('base64,')[1]) : rssResponse.contents;
 
 	// parse the rss
 	const doc = parser.parseFromString(rss, 'text/xml');
