@@ -15,35 +15,31 @@ const smallIcon = (link, _isNightTime) => {
 		return addPath(_isNightTime ? 'Clear-1992.gif' : 'Sunny.gif');
 	}
 
-	// find the icon
+	// handle official weather.gov API condition icons
 	switch (conditionIcon + (isNightTime ? '-n' : '')) {
 		case 'skc':
 			return addPath('Sunny.gif');
 
 		case 'skc-n':
-		case 'nskc':
-		case 'nskc-n':
-		case 'cold-n':
 			return addPath('Clear-1992.gif');
+
+		case 'few':
+			return addPath('Partly-Cloudy.gif');
+
+		case 'few-n':
+			return addPath('Partly-Clear-1994.gif');
+
+		case 'sct':
+			return addPath('Partly-Cloudy.gif');
+
+		case 'sct-n':
+			return addPath('Partly-Cloudy-Night.gif');
 
 		case 'bkn':
 			return addPath('Mostly-Cloudy-1994.gif');
 
 		case 'bkn-n':
-		case 'few-n':
-		case 'nfew-n':
-		case 'nfew':
 			return addPath('Partly-Clear-1994.gif');
-
-		case 'sct':
-		case 'few':
-			return addPath('Partly-Cloudy.gif');
-
-		case 'sct-n':
-		case 'nsct':
-		case 'nsct-n':
-		case 'haze-n':
-			return addPath('Partly-Cloudy-Night.gif');
 
 		case 'ovc':
 		case 'ovc-n':
@@ -53,20 +49,21 @@ const smallIcon = (link, _isNightTime) => {
 		case 'fog-n':
 			return addPath('Fog.gif');
 
-		case 'rain_sleet':
-			return addPath('Rain-Sleet.gif');
-
-		case 'rain_showers':
-		case 'rain_showers_high':
-			return addPath('Scattered-Showers-1994.gif');
-
-		case 'rain_showers-n':
-		case 'rain_showers_high-n':
-			return addPath('Scattered-Showers-Night-1994.gif');
-
 		case 'rain':
 		case 'rain-n':
 			return addPath('Rain-1992.gif');
+
+		case 'rain_showers':
+			return addPath('Scattered-Showers-1994.gif');
+
+		case 'rain_showers-n':
+			return addPath('Scattered-Showers-Night-1994.gif');
+
+		case 'rain_showers_hi':
+			return addPath('Scattered-Showers-1994.gif');
+
+		case 'rain_showers_hi-n':
+			return addPath('Scattered-Showers-Night-1994.gif');
 
 		case 'snow':
 		case 'snow-n':
@@ -77,15 +74,8 @@ const smallIcon = (link, _isNightTime) => {
 		case 'rain_snow-n':
 			return addPath('Rain-Snow-1992.gif');
 
-		case 'snow_fzra':
-		case 'snow_fzra-n':
-			return addPath('Freezing-Rain-Snow-1994.gif');
-
-		case 'fzra':
-		case 'fzra-n':
-		case 'rain_fzra':
-		case 'rain_fzra-n':
-			return addPath('Freezing-Rain-1992.gif');
+		case 'rain_sleet':
+			return addPath('Rain-Sleet.gif');
 
 		case 'snow_sleet':
 		case 'snow_sleet-n':
@@ -95,60 +85,92 @@ const smallIcon = (link, _isNightTime) => {
 		case 'sleet-n':
 			return addPath('Sleet.gif');
 
-		case 'tsra_sct':
+		case 'fzra':
+		case 'fzra-n':
+			return addPath('Freezing-Rain-1992.gif');
+
+		case 'rain_fzra':
+		case 'rain_fzra-n':
+			return addPath('Freezing-Rain-1992.gif');
+
+		case 'snow_fzra':
+		case 'snow_fzra-n':
+			return addPath('Freezing-Rain-Snow-1994.gif');
+
 		case 'tsra':
 			return addPath('Scattered-Tstorms-1994.gif');
 
-		case 'tsra_sct-n':
 		case 'tsra-n':
+			return addPath('Scattered-Tstorms-Night-1994.gif');
+
+		case 'tsra_sct':
+			return addPath('Scattered-Tstorms-1994.gif');
+
+		case 'tsra_sct-n':
 			return addPath('Scattered-Tstorms-Night-1994.gif');
 
 		case 'tsra_hi':
 		case 'tsra_hi-n':
-		case 'hurricane':
-		case 'tropical_storm':
-		case 'hurricane-n':
-		case 'tropical_storm-n':
 			return addPath('Thunderstorm.gif');
 
-		case 'wind':
-		case 'wind_':
-		case 'wind_few':
-		case 'wind_sct':
-		case 'wind-n':
-		case 'wind_-n':
-		case 'wind_few-n':
-			return addPath('Wind.gif');
+		case 'tornado':
+		case 'tornado-n':
+			return addPath('Thunderstorm.gif');
 
-		case 'wind_bkn':
-		case 'wind_ovc':
-		case 'wind_bkn-n':
-		case 'wind_ovc-n':
-			return addPath('Cloudy-Wind.gif');
+		case 'hurricane':
+		case 'hurricane-n':
+			return addPath('Thunderstorm.gif');
+
+		case 'tropical_storm':
+		case 'tropical_storm-n':
+			return addPath('Thunderstorm.gif');
 
 		case 'wind_skc':
 			return addPath('Sunny-Wind-1994.gif');
 
 		case 'wind_skc-n':
+			return addPath('Clear-Wind-1994.gif');
+
+		case 'wind_few':
+		case 'wind_few-n':
+			return addPath('Wind.gif');
+
+		case 'wind_sct':
+			return addPath('Wind.gif');
+
 		case 'wind_sct-n':
 			return addPath('Clear-Wind-1994.gif');
 
-		case 'blizzard':
-		case 'blizzard-n':
-			return addPath('Blowing Snow.gif');
+		case 'wind_bkn':
+		case 'wind_bkn-n':
+			return addPath('Cloudy-Wind.gif');
 
-		case 'cold':
-			return addPath('Cold.gif');
+		case 'wind_ovc':
+		case 'wind_ovc-n':
+			return addPath('Cloudy-Wind.gif');
+
+		case 'dust':
+		case 'dust-n':
+			return addPath('Smoke.gif');
 
 		case 'smoke':
 		case 'smoke-n':
 			return addPath('Smoke.gif');
 
+		case 'haze':
+		case 'haze-n':
+			return addPath('Haze.gif');
+
 		case 'hot':
 			return addPath('Hot.gif');
 
-		case 'haze':
-			return addPath('Haze.gif');
+		case 'cold':
+		case 'cold-n':
+			return addPath('Cold.gif');
+
+		case 'blizzard':
+		case 'blizzard-n':
+			return addPath('Blowing Snow.gif');
 
 		default:
 			console.warn(`Unknown weather condition '${conditionIcon}' from ${link}; using fallback icon`);
