@@ -1,12 +1,14 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived,
+	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, isIOS,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { parseQueryString } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
+import { loadAllData } from './modules/utils/data-loader.mjs';
+import { debugFlag } from './modules/utils/debug.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -24,11 +26,27 @@ const categories = [
 	'Postal', 'Populated Place',
 ];
 const category = categories.join(',');
-const TXT_ADDRESS_SELECTOR = '#txtAddress';
+const TXT_ADDRESS_SELECTOR = '#txtLocation';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BNT_GET_GPS_SELECTOR = '#btnGetGps';
 
-const init = () => {
+const init = async () => {
+	// Load core data first - app cannot function without it
+	try {
+		await loadAllData(typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '');
+	} catch (error) {
+		console.error('Failed to load core application data:', error);
+		// Show error message to user and halt initialization
+		document.body.innerHTML = `
+			<div>
+				<h2>Unable to load Weather Data</h2>
+				<p>The application cannot start because core data failed to load.</p>
+				<p>Please check your connection and try refreshing.</p>
+			</div>
+		`;
+		return; // Stop initialization
+	}
+
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
@@ -39,7 +57,15 @@ const init = () => {
 	document.querySelector('#NavigatePrevious').addEventListener('click', btnNavigatePreviousClick);
 	document.querySelector('#NavigatePlay').addEventListener('click', btnNavigatePlayClick);
 	document.querySelector('#ToggleScanlines').addEventListener('click', btnNavigateToggleScanlines);
-	document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR).addEventListener('click', btnFullScreenClick);
+
+	// Hide fullscreen button on iOS since it doesn't support true fullscreen
+	const fullscreenButton = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
+	if (isIOS()) {
+		fullscreenButton.style.display = 'none';
+	} else {
+		fullscreenButton.addEventListener('click', btnFullScreenClick);
+	}
+
 	const btnGetGps = document.querySelector(BNT_GET_GPS_SELECTOR);
 	btnGetGps.addEventListener('click', btnGetGpsClick);
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
@@ -47,9 +73,6 @@ const init = () => {
 	document.querySelector('#divTwc').addEventListener('mousemove', () => {
 		if (document.fullscreenElement) updateFullScreenNavigate();
 	});
-	// local change detection when exiting full screen via ESC key (or other non button click methods)
-	window.addEventListener('resize', fullScreenResizeCheck);
-	fullScreenResizeCheck.wasFull = false;
 
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
@@ -89,6 +112,7 @@ const init = () => {
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
+
 	if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
@@ -98,9 +122,21 @@ const init = () => {
 		btnGetGpsClick();
 	}
 
-	// if kiosk mode was set via the query string, also play immediately
-	settings.kiosk.value = parsedParameters['settings-kiosk-checkbox'] === 'true';
-	const play = parsedParameters['settings-kiosk-checkbox'] ?? localStorage.getItem('play');
+	// Handle kiosk mode initialization
+	const urlKioskCheckbox = parsedParameters['settings-kiosk-checkbox'];
+
+	// If kiosk=false is specified, disable kiosk mode and clear any stored value
+	if (urlKioskCheckbox === 'false') {
+		settings.kiosk.value = false;
+		// Clear stored value by using conditional storage with false
+		settings.kiosk.conditionalStoreToLocalStorage(false, false);
+	} else if (urlKioskCheckbox === 'true') {
+		// if kiosk mode was set via the query string, enable it
+		settings.kiosk.value = true;
+	}
+
+	// Auto-play logic: also play immediately if kiosk mode is enabled
+	const play = settings.kiosk.value || urlKioskCheckbox === 'true' ? 'true' : localStorage.getItem('play');
 	if (play === null || play === 'true') postMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
@@ -125,6 +161,7 @@ const init = () => {
 };
 
 const autocompleteOnSelect = async (suggestion) => {
+	// Note: it's fine that this uses json instead of safeJson since it's infrequent and user-initiated
 	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 		data: {
 			text: suggestion.value,
@@ -171,27 +208,42 @@ const btnFullScreenClick = () => {
 	return false;
 };
 
-const enterFullScreen = () => {
+// This is async because modern browsers return a Promise from requestFullscreen
+const enterFullScreen = async () => {
 	const element = document.querySelector('#divTwc');
 
 	// Supports most browsers and their versions.
-	const requestMethod = element.requestFullScreen || element.webkitRequestFullScreen
-		|| element.mozRequestFullScreen || element.msRequestFullscreen;
+	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen || element.mozRequestFullscreen || element.msRequestFullscreen;
 
 	if (requestMethod) {
-		// Native full screen.
-		requestMethod.call(element, { navigationUI: 'hide' });
+		try {
+			// Native full screen with options for optimal display
+			await requestMethod.call(element, {
+				navigationUI: 'hide',
+				allowsInlineMediaPlayback: true,
+			});
+
+			if (debugFlag('fullscreen')) {
+				setTimeout(() => {
+					console.log(`🖥️ Fullscreen engaged. window=${window.innerWidth}x${window.innerHeight} fullscreenElement=${!!document.fullscreenElement}`);
+				}, 150);
+			}
+		} catch (error) {
+			console.error('❌ Fullscreen request failed:', error);
+		}
 	} else {
 		// iOS doesn't support FullScreen API.
 		window.scrollTo(0, 0);
+		resize(true); // Force resize for iOS
 	}
-	resize();
 	updateFullScreenNavigate();
 
 	// change hover text and image
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
-	img.title = 'Exit fullscreen';
+	if (img && img.style.display !== 'none') {
+		img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
+		img.title = 'Exit fullscreen';
+	}
 };
 
 const exitFullscreen = () => {
@@ -202,20 +254,22 @@ const exitFullscreen = () => {
 		document.exitFullscreen();
 	} else if (document.webkitExitFullscreen) {
 		document.webkitExitFullscreen();
-	} else if (document.mozCancelFullScreen) {
-		document.mozCancelFullScreen();
+	} else if (document.mozCancelFullscreen) {
+		document.mozCancelFullscreen();
 	} else if (document.msExitFullscreen) {
 		document.msExitFullscreen();
 	}
-	resize();
+	// Note: resize will be called by fullscreenchange event listener
 	exitFullScreenVisibilityChanges();
 };
 
 const exitFullScreenVisibilityChanges = () => {
 	// change hover text and image
 	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
-	img.title = 'Enter fullscreen';
+	if (img && img.style.display !== 'none') {
+		img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
+		img.title = 'Enter fullscreen';
+	}
 	document.querySelector('#divTwc').classList.remove('no-cursor');
 	const divTwcBottom = document.querySelector('#divTwcBottom');
 	divTwcBottom.classList.remove('hidden');
@@ -295,9 +349,19 @@ const updateFullScreenNavigate = () => {
 };
 
 const documentKeydown = (e) => {
-	// don't trigger on ctrl/alt/shift modified key
-	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 	const { key } = e;
+
+	// Handle Ctrl+K to exit kiosk mode (even when other modifiers would normally be ignored)
+	if (e.ctrlKey && (key === 'k' || key === 'K')) {
+		e.preventDefault();
+		if (settings.kiosk?.value) {
+			settings.kiosk.value = false;
+		}
+		return false;
+	}
+
+	// don't trigger on ctrl/alt/shift modified key for other shortcuts
+	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {
@@ -395,21 +459,6 @@ const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {
 		localStorage.setItem('latLonFromGPS', fromGps);
 		txtAddress.value = `${location.city}, ${location.state}`;
 	});
-};
-
-// check for change in full screen triggered by browser and run local functions
-const fullScreenResizeCheck = () => {
-	if (fullScreenResizeCheck.wasFull && !document.fullscreenElement) {
-		// leaving full screen
-		exitFullScreenVisibilityChanges();
-	}
-	if (!fullScreenResizeCheck.wasFull && document.fullscreenElement) {
-		// entering full screen
-		// can't do much here because a UI interaction is required to change the full screen div element
-	}
-
-	// store state of fullscreen element for next change detection
-	fullScreenResizeCheck.wasFull = !!document.fullscreenElement;
 };
 
 const getCustomCode = async () => {
