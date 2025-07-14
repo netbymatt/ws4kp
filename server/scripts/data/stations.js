@@ -13415,7 +13415,7 @@ const StationInfo = {
 	},
 	KBJC: {
 		id: 'KBJC',
-		city: 'Broomfield / Jeffco',
+		city: 'Broomfield / Rocky Mtn Metro',
 		state: 'CO',
 		lat: 39.90085,
 		lon: -105.10417,
