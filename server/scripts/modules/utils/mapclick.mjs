@@ -339,15 +339,14 @@ export const convertMapClickForecastToApiFormat = (mapClickData) => {
 	return {
 		type: 'Feature',
 		geometry: {
-			type: 'Polygon',
-			coordinates: [[[mapClickData.location?.longitude, mapClickData.location?.latitude]]], // Approximate
+			type: 'Point',
+			coordinates: [mapClickData.location?.longitude, mapClickData.location?.latitude],
 		},
 		properties: {
-			updated: mapClickData.creationDate || new Date().toISOString(),
 			units: 'us',
 			forecastGenerator: 'MapClick',
 			generatedAt: new Date().toISOString(),
-			updateTime: mapClickData.creationDate || new Date().toISOString(),
+			updateTime: parseMapClickDate(mapClickData.creationDateLocal)?.toISOString() || new Date().toISOString(),
 			validTimes: `${time.startValidTime[0]}/${time.startValidTime[time.startValidTime.length - 1]}`,
 			elevation: {
 				unitCode: 'wmoUnit:m',
@@ -619,6 +618,7 @@ export const enhanceObservationWithMapClick = async (observationData, options = 
 	// Build improvements list for logging
 	const improvements = [];
 	if (isFresher) {
+		// NOTE: for the forecast version, we'd want to use the `updateTime` property instead of `timestamp`
 		const mapClickAgeInMinutes = Math.round((Date.now() - mapClickTimestamp) / (1000 * 60));
 		improvements.push(`${mapClickAgeInMinutes} minutes old vs. ${ageInMinutes.toFixed(0)} minutes old`);
 	}
