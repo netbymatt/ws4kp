@@ -54,7 +54,7 @@ for (let i = 0; i < chunkStates.length; i += 1) {
 				next = stations?.pagination?.next;
 				round += 1;
 				// write the output
-				writeFileSync('./datagenerators/output/stations.json', JSON.stringify(output, null, 2));
+				writeFileSync('./datagenerators/output/stations-raw.json', JSON.stringify(output, null, 2));
 			}
 			while (next && stations.features.length > 0);
 			console.log(`Complete: ${state}`);
