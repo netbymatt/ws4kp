@@ -13350,19 +13350,19 @@ const StationInfo = {
 		lat: 38.7578,
 		lon: -104.3013,
 	},
+	KAEJ: {
+		id: 'KAEJ',
+		city: 'Central Colorado Regional Airport',
+		state: 'CO',
+		lat: 38.81416,
+		lon: -106.12069,
+	},
 	KAFF: {
 		id: 'KAFF',
 		city: 'Air Force Academy',
 		state: 'CO',
 		lat: 38.96667,
 		lon: -104.81667,
-	},
-	KAIB: {
-		id: 'KAIB',
-		city: 'Nucla Hopkins Field Airport',
-		state: 'CO',
-		lat: 38.23875,
-		lon: -108.563277,
 	},
 	KAJZ: {
 		id: 'KAJZ',
@@ -13415,7 +13415,7 @@ const StationInfo = {
 	},
 	KBJC: {
 		id: 'KBJC',
-		city: 'Broomfield / Jeffco',
+		city: 'Rocky Mountain Metro',
 		state: 'CO',
 		lat: 39.90085,
 		lon: -105.10417,

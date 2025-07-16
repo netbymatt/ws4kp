@@ -5,6 +5,7 @@ import { writeFileSync } from 'fs';
 import https from './https.mjs';
 import states from './stations-states.mjs';
 import chunk from './chunk.mjs';
+import overrides from './stations-overrides.mjs';
 
 // skip stations starting with these letters
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
@@ -43,12 +44,16 @@ for (let i = 0; i < chunkStates.length; i += 1) {
 						console.log(`Duplicate station: ${state}-${id}`);
 						return;
 					}
+					// get any overrides if available
+					const override = overrides[id] ?? {};
 					output[id] = {
 						id,
 						city: station.properties.name,
 						state,
 						lat: station.geometry.coordinates[1],
 						lon: station.geometry.coordinates[0],
+						// finally add the overrides
+						...override,
 					};
 				});
 				next = stations?.pagination?.next;
@@ -59,7 +64,7 @@ for (let i = 0; i < chunkStates.length; i += 1) {
 			while (next && stations.features.length > 0);
 			console.log(`Complete: ${state}`);
 			return true;
-		} catch (e) {
+		} catch {
 			console.error(`Unable to get state: ${state}`);
 			return false;
 		}

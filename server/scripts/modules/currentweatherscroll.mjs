@@ -133,7 +133,10 @@ const baseScreens = [
 	// hazards
 	hazards,
 	// station name
-	(data) => `Conditions at ${locationCleanup(data.station.properties.name).substr(0, 20)}`,
+	(data) => {
+		const location = (StationInfo[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substr(0, 20);
+		return `Conditions at ${location}`;
+	},
 
 	// temperature
 	(data) => {

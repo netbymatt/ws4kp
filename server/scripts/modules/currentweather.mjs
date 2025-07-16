@@ -114,11 +114,14 @@ class CurrentWeather extends WeatherDisplay {
 
 		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : this.data.WindSpeed;
 
+		// get location (city name) from StationInfo if available (allows for overrides)
+		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substr(0, 20);
+
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),
 			condition,
 			wind,
-			location: locationCleanup(this.data.station.properties.name).substr(0, 20),
+			location,
 			humidity: `${this.data.Humidity}%`,
 			dewpoint: this.data.DewPoint + String.fromCharCode(176),
 			ceiling: (this.data.Ceiling === 0 ? 'Unlimited' : this.data.Ceiling + this.data.CeilingUnit),
