@@ -34,9 +34,16 @@ const createLink = async (e) => {
 	// get all select boxes
 	elemForEach('select', (elem) => {
 		if (elem?.id) {
-			queryStringElements[elem.id] = elem?.value ?? 0;
+			queryStringElements[elem.id] = encodeURIComponent(elem?.value ?? '');
 		}
 	});
+
+	// get all text boxes
+	elemForEach('input[type=text]', ((elem) => {
+		if (elem?.id) {
+			queryStringElements[elem.id] = elem?.value ?? 0;
+		}
+	}));
 
 	// add the location string
 	queryStringElements.latLonQuery = localStorage.getItem('latLonQuery');
