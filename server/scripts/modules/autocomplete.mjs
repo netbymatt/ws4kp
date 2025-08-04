@@ -192,7 +192,7 @@ class AutoComplete {
 
 		let result = this.cachedResponses[search];
 		if (!result) {
-			// make the request
+			// make the request; using json here instead of safeJson is fine because it's infrequent and user-initiated
 			const resultRaw = await json(url);
 
 			// use the provided parser
@@ -296,8 +296,11 @@ class AutoComplete {
 
 	// if a click is detected on the page, generally we hide the suggestions, unless the click was within the autocomplete elements
 	checkOutsideClick(e) {
-		if (e.target.id === 'txtAddress') return;
-		if (e.target?.parentNode?.classList.contains(this.options.containerClass)) return;
+		if (e.target.id === 'txtLocation') return;
+		// Fix autocomplete crash on outside click detection
+		// Add optional chaining to prevent TypeError when checking classList.contains()
+		// on elements that may not have a classList property.
+		if (e.target?.parentNode?.classList?.contains(this.options.containerClass)) return;
 		this.hideSuggestions();
 	}
 }

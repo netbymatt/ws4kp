@@ -1,7 +1,7 @@
 // current weather conditions display
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { text } from './utils/fetch.mjs';
+import { safeText } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import * as utils from './radar-utils.mjs';
@@ -57,35 +57,60 @@ class Radar extends WeatherDisplay {
 		}
 
 		const baseUrl = `https://${RADAR_HOST}/archive/data/`;
-		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png';
-		const baseUrls = [];
-		let date = DateTime.utc().minus({ days: 1 }).startOf('day');
+		const baseUrlEnd = '/GIS/uscomp/?F=0&P=n0r*.png'; // This URL returns an index of .png files for the given date
 
-		// make urls for yesterday and today
-		while (date <= DateTime.utc().startOf('day')) {
-			baseUrls.push(`${baseUrl}${date.toFormat('yyyy/LL/dd')}${baseUrlEnd}`);
-			date = date.plus({ days: 1 });
+		// Always get today's data
+		const today = DateTime.utc().startOf('day');
+		const todayStr = today.toFormat('yyyy/LL/dd');
+		const yesterday = today.minus({ days: 1 });
+		const yesterdayStr = yesterday.toFormat('yyyy/LL/dd');
+		const todayUrl = `${baseUrl}${todayStr}${baseUrlEnd}`;
+
+		// Get today's data, then we'll see if we need yesterday's
+		const todayList = await safeText(todayUrl);
+
+		// Count available images from today
+		let todayImageCount = 0;
+		if (todayList) {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(todayList, 'text/html');
+			const anchors = xmlDoc.querySelectorAll('a');
+			todayImageCount = Array.from(anchors).filter((elem) => elem.innerHTML?.match(/n0r_\d{12}\.png/)).length;
 		}
 
-		const lists = (await Promise.all(baseUrls.map(async (url) => {
-			try {
-				// get a list of available radars
-				return text(url);
-			} catch (error) {
-				console.log('Unable to get list of radars');
-				console.error(error);
-				this.setStatus(STATUS.failed);
-				return false;
-			}
-		}))).filter((d) => d);
+		// Only fetch yesterday's data if we don't have enough images from today
+		// or if it's very early in the day when recent images might still be from yesterday
+		const currentTimeUTC = DateTime.utc();
+		const minutesSinceMidnight = currentTimeUTC.hour * 60 + currentTimeUTC.minute;
+		const requiredTimeWindow = this.dopplerRadarImageMax * 5; // 5 minutes per image
+		const needYesterday = todayImageCount < this.dopplerRadarImageMax || minutesSinceMidnight < requiredTimeWindow;
 
-		// convert to an array of gif urls
+		// Build the final lists array
+		const lists = [];
+		if (needYesterday) {
+			const yesterdayUrl = `${baseUrl}${yesterdayStr}${baseUrlEnd}`;
+			const yesterdayList = await safeText(yesterdayUrl);
+			if (yesterdayList) {
+				lists.push(yesterdayList); // Add yesterday's data first
+			}
+		}
+		if (todayList) {
+			lists.push(todayList); // Add today's data
+		}
+
+		// convert to an array of png urls
 		const pngs = lists.flatMap((html, htmlIdx) => {
 			const parser = new DOMParser();
 			const xmlDoc = parser.parseFromString(html, 'text/html');
-			// add the base url
+			// add the base url - reconstruct the URL for each list
 			const base = xmlDoc.createElement('base');
-			base.href = baseUrls[htmlIdx];
+			if (htmlIdx === 0 && needYesterday) {
+				// First item is yesterday's data when we fetched it
+				base.href = `${baseUrl}${yesterdayStr}${baseUrlEnd}`;
+			} else {
+				// This is today's data (or the only data if yesterday wasn't fetched)
+				base.href = `${baseUrl}${todayStr}${baseUrlEnd}`;
+			}
 			xmlDoc.head.append(base);
 			const anchors = xmlDoc.querySelectorAll('a');
 			const urls = [];
@@ -119,69 +144,73 @@ class Radar extends WeatherDisplay {
 		// reset the "used" flag on pre-processed radars
 		// items that were not used during this process are deleted (either expired via time or change of location)
 		processedRadars.forEach((radar) => { radar.used = false; });
-		// remove any radars that aren't
 
-		// Load the most recent doppler radar images.
-		const radarInfo = await Promise.all(urls.map(async (url) => {
-			// store the time
-			const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
-			const [, year, month, day, hour, minute] = timeMatch;
+		try {
+			const radarInfo = await Promise.all(urls.map(async (url) => {
+				// store the time
+				const timeMatch = url.match(/_(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)\./);
+				const [, year, month, day, hour, minute] = timeMatch;
 
-			const radarKeyedTimestamp = `${radarKey}:${year}${month}${day}${hour}${minute}`;
+				const radarKeyedTimestamp = `${radarKey}:${year}${month}${day}${hour}${minute}`;
 
-			// check for a pre-processed radar
-			const preProcessed = processedRadars.find((radar) => radar.key === radarKeyedTimestamp);
+				// check for a pre-processed radar
+				const preProcessed = processedRadars.find((radar) => radar.key === radarKeyedTimestamp);
 
-			// use the pre-processed radar, or get a new one
-			const processedRadar = preProcessed?.dataURL ?? await processRadar({
-				url,
-				RADAR_HOST,
-				OVERRIDES,
-				radarSourceXY,
-			});
-
-			// store the radar
-			if (!preProcessed) {
-				processedRadars.push({
-					key: radarKeyedTimestamp,
-					dataURL: processedRadar,
-					used: true,
+				// use the pre-processed radar, or get a new one
+				const processedRadar = preProcessed?.dataURL ?? await processRadar({
+					url,
+					RADAR_HOST,
+					OVERRIDES,
+					radarSourceXY,
 				});
-			} else {
-				// set used flag
-				preProcessed.used = true;
-			}
 
-			const time = DateTime.fromObject({
-				year,
-				month,
-				day,
-				hour,
-				minute,
-			}, {
-				zone: 'UTC',
-			}).setZone(timeZone());
+				// store the radar
+				if (!preProcessed) {
+					processedRadars.push({
+						key: radarKeyedTimestamp,
+						dataURL: processedRadar,
+						used: true,
+					});
+				} else {
+					// set used flag
+					preProcessed.used = true;
+				}
 
-			const elem = this.fillTemplate('frame', { map: { type: 'img', src: processedRadar } });
-			return {
-				time,
-				elem,
-			};
-		}));
+				const time = DateTime.fromObject({
+					year,
+					month,
+					day,
+					hour,
+					minute,
+				}, {
+					zone: 'UTC',
+				}).setZone(timeZone());
 
-		// put the elements in the container
-		const scrollArea = this.elem.querySelector('.scroll-area');
-		scrollArea.innerHTML = '';
-		scrollArea.append(...radarInfo.map((r) => r.elem));
+				const elem = this.fillTemplate('frame', { map: { type: 'img', src: processedRadar } });
+				return {
+					time,
+					elem,
+				};
+			}));
 
-		// set max length
-		this.timing.totalScreens = radarInfo.length;
+			// put the elements in the container
+			const scrollArea = this.elem.querySelector('.scroll-area');
+			scrollArea.innerHTML = '';
+			scrollArea.append(...radarInfo.map((r) => r.elem));
 
-		this.times = radarInfo.map((radar) => radar.time);
-		this.setStatus(STATUS.loaded);
+			// set max length
+			this.timing.totalScreens = radarInfo.length;
 
-		// clean up any unused stored radars
-		processedRadars = processedRadars.filter((radar) => radar.used);
+			this.times = radarInfo.map((radar) => radar.time);
+			this.setStatus(STATUS.loaded);
+
+			// clean up any unused stored radars
+			processedRadars = processedRadars.filter((radar) => radar.used);
+		} catch (_error) {
+			// Radar fetch failed - skip this display in animation by setting totalScreens = 0
+			this.timing.totalScreens = 0;
+			if (this.isEnabled) this.setStatus(STATUS.failed);
+		}
 	}
 
 	async drawCanvas() {

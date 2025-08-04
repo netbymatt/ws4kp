@@ -21,7 +21,7 @@ page.on('console', messageFormatter);
 
 const tester = async (location, testPage) => {
 	// Set the address
-	await testPage.type('#txtAddress', location);
+	await testPage.type('#txtLocation', location);
 	await setTimeout(500);
 	// get the page
 	await testPage.click('#btnGetLatLng');

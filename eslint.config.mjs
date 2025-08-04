@@ -90,11 +90,34 @@ export default [{
 				allowSamePrecedence: true,
 			},
 		],
+		'no-unused-vars': [
+			'error',
+			{
+				argsIgnorePattern: '^_',
+				varsIgnorePattern: '^_',
+				caughtErrorsIgnorePattern: '^_',
+			},
+		],
 		'import/extensions': [
 			'error',
 			{
 				mjs: 'always',
 				json: 'always',
+			},
+		],
+		'import/no-extraneous-dependencies': [
+			'error',
+			{
+				devDependencies: [
+					'eslint.config.*',
+					'**/*.config.*',
+					'**/*.test.*',
+					'**/*.spec.*',
+					'gulpfile.*',
+					'tests/**/*',
+					'gulp/**/*',
+					'datagenerators/**/*',
+				],
 			},
 		],
 	},

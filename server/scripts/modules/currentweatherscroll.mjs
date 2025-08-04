@@ -3,11 +3,14 @@ import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
 import getHazards from './hazards.mjs';
+import settings from './settings.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
-const SCROLL_SPEED = 75; // pixels/second
-const DEFAULT_UPDATE = 8; // 0.5s ticks
+const SCROLL_SPEED = 100; // pixels/second
+const TICK_INTERVAL_MS = 500; // milliseconds per tick
+const secondsToTicks = (seconds) => Math.ceil((seconds * 1000) / TICK_INTERVAL_MS);
+const DEFAULT_UPDATE = secondsToTicks(4.0); // 4 second default for each current conditions
 
 // local variables
 let interval;
@@ -29,7 +32,7 @@ const start = () => {
 	resetFlag = false;
 	// set up the interval if needed
 	if (!interval) {
-		interval = setInterval(incrementInterval, 500);
+		interval = setInterval(incrementInterval, TICK_INTERVAL_MS);
 	}
 
 	// draw the data
@@ -71,15 +74,21 @@ const drawScreen = async () => {
 	// get the conditions
 	const data = await getCurrentWeather();
 
+	// create a data object (empty if no valid current weather conditions)
+	const scrollData = data || {};
+
 	// add the hazards if on screen 0
 	if (screenIndex === 0) {
-		data.hazards = await getHazards(() => this.stillWaiting());
+		const hazards = await getHazards();
+		if (hazards && hazards.length > 0) {
+			scrollData.hazards = hazards;
+		}
 	}
 
-	// nothing to do if there's no data yet
-	if (!data) return;
+	// if we have no current weather and no hazards, there's nothing to display
+	if (!data && (!scrollData.hazards || scrollData.hazards.length === 0)) return;
 
-	const thisScreen = workingScreens[screenIndex](data);
+	const thisScreen = workingScreens[screenIndex](scrollData);
 
 	// update classes on the scroll area
 	elemForEach('.weather-display .scroll', (elem) => {
@@ -116,7 +125,9 @@ const hazards = (data) => {
 	// test for data
 	if (!data.hazards || data.hazards.length === 0) return false;
 
-	const hazard = `${data.hazards[0].properties.event} ${data.hazards[0].properties.description}`;
+	// since the hazard scroll element has no left/right margins, pad the beginning and end with non-breaking spaces
+	const padding = '&nbsp;'.repeat(4);
+	const hazard = `${padding}${data.hazards[0].properties.event} ${data.hazards[0].properties.description}${padding}`;
 
 	return {
 		text: hazard,
@@ -218,25 +229,35 @@ const drawScrollCondition = (screen) => {
 
 	// calculate the scroll distance and set a minimum scroll
 	const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
-	// calculate the scroll time
-	const scrollTime = scrollDistance / SCROLL_SPEED;
-	// calculate a new minimum on-screen time +1.0s at start and end
-	nextUpdate = Math.round(Math.ceil(scrollTime / 0.5) + 4);
+	// calculate the scroll time (scaled by global speed setting)
+	const scrollTime = scrollDistance / SCROLL_SPEED * settings.speed.value;
+	// add 1 second pause at the end of the scroll animation
+	const endPauseTime = 1.0;
+	const totalAnimationTime = scrollTime + endPauseTime;
+	// calculate total on-screen time: animation time + start delay + end pause
+	const startDelayTime = 1.0; // setTimeout delay below
+	const totalDisplayTime = totalAnimationTime + startDelayTime;
+	nextUpdate = secondsToTicks(totalDisplayTime);
 
-	// update the element transition and set initial left position
-	scrollElement.style.left = '0px';
-	scrollElement.style.transition = `left linear ${scrollTime.toFixed(1)}s`;
+	// update the element with initial position and transition
+	scrollElement.style.transform = 'translateX(0px)';
+	scrollElement.style.transition = `transform ${scrollTime.toFixed(1)}s linear`;
+	scrollElement.style.willChange = 'transform'; // Hint to browser for hardware acceleration
+	scrollElement.style.backfaceVisibility = 'hidden'; // Force hardware acceleration
+	scrollElement.style.perspective = '1000px'; // Enable 3D rendering context
+
 	elemForEach('.weather-display .scroll .fixed', (elem) => {
 		elem.innerHTML = '';
 		elem.append(scrollElement.cloneNode(true));
 	});
-	// start the scroll after a short delay
+
+	// start the scroll after the specified delay
 	setTimeout(() => {
-		// change the left position to trigger the scroll
+		// change the transform to trigger the scroll
 		elemForEach('.weather-display .scroll .fixed .scroll-area', (elem) => {
-			elem.style.left = `-${scrollDistance.toFixed(0)}px`;
+			elem.style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
 		});
-	}, 1000);
+	}, startDelayTime * 1000);
 };
 
 const parseMessage = (event) => {

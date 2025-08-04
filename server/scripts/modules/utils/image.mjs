@@ -5,6 +5,11 @@ import { blob } from './fetch.mjs';
 // a list of cached icons is used to avoid hitting the cache multiple times
 const cachedImages = [];
 const preloadImg = (src) => {
+	if (!src || typeof src !== 'string') {
+		console.warn(`preloadImg expects a URL string, received: '${src}' (${typeof src})`);
+		return false;
+	}
+
 	if (cachedImages.includes(src)) return false;
 	blob(src);
 	cachedImages.push(src);

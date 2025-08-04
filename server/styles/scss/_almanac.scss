@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 #almanac-html.weather-display {
 	background-image: url('../images/backgrounds/3.png');
@@ -11,62 +11,57 @@
 	@include u.text-shadow();
 
 	.sun {
-		display: table;
-		margin-left: 50px;
-		height: 100px;
+		// Use CSS Grid for cross-browser consistency
+		// Grid is populated in reading order (left-to-right, top-to-bottom):
+		display: grid;
+		grid-template-columns: auto auto auto;
+		grid-template-rows: auto auto auto;
+		gap: 0px 90px;
+		margin: 3px auto 5px auto; // align the bottom of the div with the background
+		width: fit-content;
+		line-height: 30px;
 
-
-		&>div {
-			display: table-row;
+		.grid-item {
+			// Reset inherited styles that interfere with grid layout
+			width: auto;
+			height: auto;
+			padding: 0;
+			margin: 0;
 			position: relative;
 
-			&>div {
-				display: table-cell;
-			}
-		}
-
-		.days {
-			color: c.$column-header-text;
-			text-align: right;
-			top: -5px;
-
-			.day {
-				padding-right: 10px;
+			// Column headers (day names)
+			&.header {
+				color: c.$column-header-text;
+				text-align: center;
 			}
 
-		}
-
-		.times {
-			text-align: right;
-
-			.sun-time {
-				width: 200px;
+			// Row labels (Sunrise:, Sunset:)
+			&.row-label {
+				// color: c.$column-header-text; // screenshots show labels were white
+				text-align: right;
 			}
 
-			&.times-1 {
-				top: -10px;
-			}
-
-			&.times-2 {
-				top: -15px;
+			// Time values (sunrise/sunset)
+			&.time {
+				text-align: center;
 			}
 		}
 	}
 
 	.moon {
 		position: relative;
-		top: -10px;
-
-		padding: 0px 60px;
+		padding: 7px 50px;
+		line-height: 36px;
 
 		.title {
 			color: c.$column-header-text;
+			padding-left: 13px;
 		}
 
 		.day {
 			display: inline-block;
 			text-align: center;
-			width: 130px;
+			width: 132px;
 
 			.icon {
 				// shadow in image make it look off center

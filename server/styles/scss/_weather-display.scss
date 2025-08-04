@@ -1,5 +1,5 @@
-@use 'shared/_colors'as c;
-@use 'shared/_utils'as u;
+@use 'shared/_colors' as c;
+@use 'shared/_utils' as u;
 
 .weather-display {
 	width: 640px;
@@ -94,11 +94,13 @@
 
 		&.has-scroll {
 			width: 640px;
+			margin-top: 0;
 			height: 310px;
 			overflow: hidden;
 
 			&.no-header {
 				height: 400px;
+				margin-top: 0; // Reset for no-header case since the gap issue is header-related
 			}
 		}
 
@@ -127,6 +129,12 @@
 			margin-left: 55px;
 			margin-right: 55px;
 			overflow: hidden;
+		}
+
+		// Remove margins for hazard scrolls to maximize text space
+		&.hazard .fixed {
+			margin-left: 0;
+			margin-right: 0;
 		}
 
 		.scroll-header {

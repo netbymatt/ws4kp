@@ -1,12 +1,15 @@
 // current weather conditions display
 import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import { temperature, windSpeed } from './utils/units.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
+import augmentObservationWithMetar from './utils/metar.mjs';
 import settings from './settings.mjs';
+import { debugFlag } from './utils/debug.mjs';
+import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -32,14 +35,17 @@ class LatestObservations extends WeatherDisplay {
 		// try up to 30 regional stations
 		const regionalStations = sortedStations.slice(0, 30);
 
-		// get data for regional stations
-		// get first 7 stations
+		// Fetch stations sequentially in batches to avoid unnecessary API calls.
+		// We start with the 7 closest stations and only fetch more if some fail,
+		// stopping as soon as we have 7 valid stations with data.
 		const actualConditions = [];
 		let lastStation = Math.min(regionalStations.length, 7);
 		let firstStation = 0;
 		while (actualConditions.length < 7 && (lastStation) <= regionalStations.length) {
+			// Sequential fetching is intentional here - we want to try closest stations first
+			// and only fetch additional batches if needed, rather than hitting all 30 stations at once
 			// eslint-disable-next-line no-await-in-loop
-			const someStations = await getStations(regionalStations.slice(firstStation, lastStation));
+			const someStations = await this.getStations(regionalStations.slice(firstStation, lastStation));
 
 			actualConditions.push(...someStations);
 			// update counters
@@ -56,6 +62,79 @@ class LatestObservations extends WeatherDisplay {
 			return;
 		}
 		this.setStatus(STATUS.loaded);
+	}
+
+	// This is a class method because it needs access to the instance's `stillWaiting` method
+	async getStations(stations) {
+		// Use centralized safe Promise handling to avoid unhandled AbortError rejections
+		const stationData = await safePromiseAll(stations.map(async (station) => {
+			try {
+				const data = await safeJson(`https://api.weather.gov/stations/${station.id}/observations/latest`, {
+					retryCount: 1,
+					stillWaiting: () => this.stillWaiting(),
+				});
+
+				if (!data) {
+					if (debugFlag('verbose-failures')) {
+						console.log(`Failed to get Latest Observations for station ${station.id}`);
+					}
+					return false;
+				}
+
+				// Enhance observation data with METAR parsing for missing fields
+				const originalData = { ...data.properties };
+				data.properties = augmentObservationWithMetar(data.properties);
+				const metarFields = [
+					{ name: 'temperature', check: (orig, metar) => orig.temperature.value === null && metar.temperature.value !== null },
+					{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed.value === null && metar.windSpeed.value !== null },
+					{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
+				];
+				const augmentedData = data.properties;
+				const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
+				if (debugFlag('latestobservations') && metarReplacements.length > 0) {
+					console.log(`Latest Observations for station ${station.id} were augmented with METAR data for ${metarReplacements.join(', ')}`);
+				}
+
+				// test data quality
+				const requiredFields = [
+					{ name: 'temperature', check: (props) => props.temperature?.value === null },
+					{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null },
+					{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
+					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
+				];
+
+				// Use enhanced observation with MapClick fallback
+				const enhancedResult = await enhanceObservationWithMapClick(data.properties, {
+					requiredFields,
+					stationId: station.id,
+					stillWaiting: () => this.stillWaiting(),
+					debugContext: 'latestobservations',
+				});
+
+				data.properties = enhancedResult.data;
+				const { missingFields } = enhancedResult;
+
+				// Check final data quality
+				if (missingFields.length > 0) {
+					if (debugFlag('latestobservations')) {
+						console.log(`Latest Observations for station ${station.id} is missing fields: ${missingFields.join(', ')}`);
+					}
+					return false;
+				}
+
+				// format the return values
+				return {
+					...data.properties,
+					StationId: station.id,
+					city: station.city,
+				};
+			} catch (error) {
+				console.error(`Unexpected error getting latest observations for station ${station.id}: ${error.message}`);
+				return false;
+			}
+		}));
+		// filter false (no data or other error)
+		return stationData.filter((d) => d);
 	}
 
 	async drawCanvas() {
@@ -106,6 +185,7 @@ class LatestObservations extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
 const shortenCurrentConditions = (_condition) => {
 	let condition = _condition;
 	condition = condition.replace(/Light/, 'L');
@@ -123,29 +203,6 @@ const shortenCurrentConditions = (_condition) => {
 	condition = condition.replace(/L Snow Fog/, 'L Snw/Fog');
 	condition = condition.replace(/ with /, '/');
 	return condition;
-};
-
-const getStations = async (stations) => {
-	const stationData = await Promise.all(stations.map(async (station) => {
-		try {
-			const data = await json(`https://api.weather.gov/stations/${station.id}/observations/latest`, { retryCount: 1, stillWaiting: () => this.stillWaiting() });
-			// test for temperature, weather and wind values present
-			if (data.properties.temperature.value === null
-				|| data.properties.textDescription === ''
-				|| data.properties.windSpeed.value === null) return false;
-			// format the return values
-			return {
-				...data.properties,
-				StationId: station.id,
-				city: station.city,
-			};
-		} catch {
-			console.log(`Unable to get latest observations for ${station.id}`);
-			return false;
-		}
-	}));
-	// filter false (no data or other error)
-	return stationData.filter((d) => d);
 };
 // register display
 registerDisplay(new LatestObservations(2, 'latest-observations'));

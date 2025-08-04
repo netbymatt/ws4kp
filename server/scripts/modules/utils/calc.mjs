@@ -1,5 +1,9 @@
 // wind direction
 const directionToNSEW = (Direction) => {
+	// Handle null, undefined, or invalid direction values
+	if (Direction === null || Direction === undefined || typeof Direction !== 'number' || Number.isNaN(Direction)) {
+		return 'VAR'; // Variable (or unknown) direction
+	}
 	const val = Math.floor((Direction / 22.5) + 0.5);
 	const arr = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
 	return arr[(val % 16)];

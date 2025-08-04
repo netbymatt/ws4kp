@@ -3,15 +3,17 @@
 
 import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { preloadImg } from './utils/image.mjs';
-import { DateTime, Interval } from '../vendor/auto/luxon.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
+import { debugFlag } from './utils/debug.mjs';
+import filterExpiredPeriods from './utils/forecast-utils.mjs';
 
 // map offset
 const mapOffsetXY = {
@@ -77,19 +79,27 @@ class RegionalForecast extends WeatherDisplay {
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
 
-		// get now as DateTime for calculations below
-		const now = DateTime.now();
-
-		// get regional forecasts and observations (the two are intertwined due to the design of api.weather.gov)
-		const regionalDataAll = await Promise.all(regionalCities.map(async (city) => {
+		// get regional forecasts and observations using centralized safe Promise handling
+		const regionalDataAll = await safePromiseAll(regionalCities.map(async (city) => {
 			try {
 				const point = city?.point ?? (await getAndFormatPoint(city.lat, city.lon));
-				if (!point) throw new Error('No pre-loaded point');
+				if (!point) {
+					if (debugFlag('verbose-failures')) {
+						console.warn(`Unable to get Points for '${city.Name ?? city.city}'`);
+					}
+					return false;
+				}
 
 				// start off the observation task
 				const observationPromise = utils.getRegionalObservation(point, city);
 
-				const forecast = await json(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
+				const forecast = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
+				if (!forecast) {
+					if (debugFlag('verbose-failures')) {
+						console.warn(`Regional Forecast request for ${city.Name ?? city.city} failed`);
+					}
+					return false;
+				}
 
 				// get XY on map for city
 				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state);
@@ -112,29 +122,23 @@ class RegionalForecast extends WeatherDisplay {
 				// preload the icon
 				preloadImg(getSmallIcon(regionalObservation.icon, !regionalObservation.daytime));
 
-				// return a pared-down forecast
-				// 0th object should contain the current conditions, but when WFOs go offline or otherwise don't post
-				// an updated forecast it's possible that the 0th object is in the past.
-				// so we go on a search for the current time in the start/end times provided in the forecast periods
-				const { periods } = forecast.properties;
-				const currentPeriod = periods.reduce((prev, period, index) => {
-					const start = DateTime.fromISO(period.startTime);
-					const end = DateTime.fromISO(period.endTime);
-					const interval = Interval.fromDateTimes(start, end);
-					if (interval.contains(now)) {
-						return index;
-					}
-					return prev;
-				}, 0);
+				// filter out expired periods first, then use the next two periods for forecast
+				const activePeriods = filterExpiredPeriods(forecast.properties.periods);
+
+				// ensure we have enough periods for forecast
+				if (activePeriods.length < 3) {
+					console.warn(`Insufficient active periods for ${city.Name ?? city.city}: only ${activePeriods.length} periods available`);
+					return false;
+				}
+
 				// group together the current observation and next two periods
 				return [
 					regionalObservation,
-					utils.buildForecast(forecast.properties.periods[currentPeriod + 1], city, cityXY),
-					utils.buildForecast(forecast.properties.periods[currentPeriod + 2], city, cityXY),
+					utils.buildForecast(activePeriods[1], city, cityXY),
+					utils.buildForecast(activePeriods[2], city, cityXY),
 				];
 			} catch (error) {
-				console.log(`No regional forecast data for '${city.name ?? city.city}'`);
-				console.log(error);
+				console.error(`Unexpected error getting Regional Forecast data for '${city.name ?? city.city}': ${error.message}`);
 				return false;
 			}
 		}));
@@ -215,12 +219,19 @@ class RegionalForecast extends WeatherDisplay {
 }
 
 const getAndFormatPoint = async (lat, lon) => {
-	const point = await getPoint(lat, lon);
-	return {
-		x: point.properties.gridX,
-		y: point.properties.gridY,
-		wfo: point.properties.gridId,
-	};
+	try {
+		const point = await getPoint(lat, lon);
+		if (!point) {
+			return null;
+		}
+		return {
+			x: point.properties.gridX,
+			y: point.properties.gridY,
+			wfo: point.properties.gridId,
+		};
+	} catch (error) {
+		throw new Error(`Unexpected error getting point for ${lat},${lon}: ${error.message}`);
+	}
 };
 
 // register display

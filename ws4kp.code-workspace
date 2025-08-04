@@ -56,17 +56,30 @@
 			"**/vendor/auto/**",
 		],
 		"editor.tabSize": 2,
+		"editor.insertSpaces": false, // .eslintrc wants tabs instead of spaces
 		"emmet.includeLanguages": {
 			"ejs": "html",
 		},
-		"[html]": {
+		"[ejs]": {
+			"editor.occurrencesHighlight": "off",
 			"editor.defaultFormatter": "j69.ejs-beautify"
 		},
 		"files.exclude": {},
 		"files.eol": "\n",
+		"files.associations": {
+			"*.ejs": "ejs"
+		},
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
-		},
+		}
 	},
+	"extensions": {
+		"recommendations": [
+			"digitalbrainstem.javascript-ejs-support", // EJS (Embedded JavaScript) template language support
+			"dbaeumer.vscode-eslint", // ESLint JavaScript linting integration
+			"streetsidesoftware.code-spell-checker",
+			"j69.ejs-beautify",
+		]
+	}
 }

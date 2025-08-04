@@ -1,34 +1,34 @@
 // travel forecast display
 import STATUS from './status.mjs';
-import { json } from './utils/fetch.mjs';
+import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';
+import calculateScrollTiming from './utils/scroll-timing.mjs';
+import { debugFlag } from './utils/debug.mjs';
 
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
 		super(navId, elemId, 'Travel Forecast', defaultActive);
 
-		// set up the timing
-		this.timing.baseDelay = 20;
-		// page sizes are 4 cities, calculate the number of pages necessary plus overflow
-		const pagesFloat = TravelCities.length / 4;
-		const pages = Math.floor(pagesFloat) - 2; // first page is already displayed, last page doesn't happen
-		const extra = pages % 1;
-		const timingStep = 75 * 4;
-		this.timing.delay = [150 + timingStep];
-		// add additional pages
-		for (let i = 0; i < pages; i += 1) this.timing.delay.push(timingStep);
-		// add the extra (not exactly 4 pages portion)
-		if (extra !== 0) this.timing.delay.push(Math.round(this.extra * this.cityHeight));
-		// add the final 3 second delay
-		this.timing.delay.push(150);
-
 		// add previous data cache
 		this.previousData = [];
+
+		// cache for scroll calculations
+		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
+		// during scrolling. Travel forecast scroll duration varies based on the number of cities configured.
+		// Without caching, we'd perform hundreds of expensive DOM layout queries during each scroll cycle.
+		// The cache reduces this to one calculation when content changes, then reuses cached values to try
+		// and get smoother scrolling.
+		this.scrollCache = {
+			displayHeight: 0,
+			contentHeight: 0,
+			maxOffset: 0,
+			travelLines: null,
+		};
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -45,22 +45,27 @@ class TravelForecast extends WeatherDisplay {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');
 				let forecast;
-				try {
-					forecast = await json(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
-						data: {
-							units: settings.units.value,
-						},
-					});
+				forecast = await safeJson(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
+					data: {
+						units: settings.units.value,
+					},
+				});
+
+				if (forecast) {
 					// store for the next run
 					this.previousData[index] = forecast;
-				} catch (e) {
+				} else if (this.previousData?.[index]) {
 					// if there's previous data use it
-					if (this.previousData?.[index]) {
-						forecast = this.previousData?.[index];
-					} else {
-						// otherwise re-throw for the standard error handling
-						throw (e);
+					if (debugFlag('travelforecast')) {
+						console.warn(`Using previous forecast data for ${city.Name} travel forecast`);
 					}
+					forecast = this.previousData?.[index];
+				} else {
+					// no current data and no previous data available
+					if (debugFlag('verbose-failures')) {
+						console.warn(`No travel forecast for ${city.Name} available`);
+					}
+					return { name: city.Name, error: true };
 				}
 				// determine today or tomorrow (shift periods by 1 if tomorrow)
 				const todayShift = forecast.properties.periods[0].isDaytime ? 0 : 1;
@@ -73,14 +78,13 @@ class TravelForecast extends WeatherDisplay {
 					icon: getSmallIcon(forecast.properties.periods[todayShift].icon),
 				};
 			} catch (error) {
-				console.error(`GetTravelWeather for ${city.Name} failed`);
-				console.error(error.status, error.responseJSON);
+				console.error(`Unexpected error getting Travel Forecast for ${city.Name}: ${error.message}`);
 				return { name: city.Name, error: true };
 			}
 		});
 
-		// wait for all forecasts
-		const forecasts = await Promise.all(forecastPromises);
+		// wait for all forecasts using centralized safe Promise handling
+		const forecasts = await safePromiseAll(forecastPromises);
 		this.data = forecasts;
 
 		// test for some data available in at least one forecast
@@ -129,6 +133,9 @@ class TravelForecast extends WeatherDisplay {
 			return this.fillTemplate('travel-row', fillValues);
 		}).filter((d) => d);
 		list.append(...lines);
+
+		// update timing based on actual content
+		this.setTiming(list);
 	}
 
 	async drawCanvas() {
@@ -157,19 +164,49 @@ class TravelForecast extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
+		// get the travel lines element and cache measurements if needed
+		const travelLines = this.elem.querySelector('.travel-lines');
+		if (!travelLines) return;
+
+		// update cache if needed (when content changes or first run)
+		if (this.scrollCache.travelLines !== travelLines || this.scrollCache.displayHeight === 0) {
+			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
+			this.scrollCache.contentHeight = travelLines.offsetHeight;
+			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
+			this.scrollCache.travelLines = travelLines;
+
+			// Set up hardware acceleration on the travel lines element
+			travelLines.style.willChange = 'transform';
+			travelLines.style.backfaceVisibility = 'hidden';
+		}
+
 		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.elem.querySelector('.travel-lines').offsetHeight - 289, (count - 150));
+		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
 
 		// don't let offset go negative
 		if (offsetY < 0) offsetY = 0;
 
-		// copy the scrolled portion of the canvas
-		this.elem.querySelector('.main').scrollTo(0, offsetY);
+		// use transform instead of scrollTo for hardware acceleration
+		travelLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
 	}
 
 	// necessary to get the lastest long canvas when scrolling
 	getLongCanvas() {
 		return this.longCanvas;
+	}
+
+	setTiming(list) {
+		const container = this.elem.querySelector('.main');
+		const timingConfig = calculateScrollTiming(list, container, {
+			staticDisplay: 5.0, // special static display time for travel forecast
+		});
+
+		// Apply the calculated timing
+		this.timing.baseDelay = timingConfig.baseDelay;
+		this.timing.delay = timingConfig.delay;
+		this.scrollTiming = timingConfig.scrollTiming;
+
+		this.calcNavTiming();
 	}
 }
 
