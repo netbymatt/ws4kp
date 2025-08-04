@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { src, series, dest } from 'gulp';
 import { deleteAsync } from 'del';
 import rename from 'gulp-rename';

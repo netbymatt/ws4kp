@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import 'dotenv/config';
 import {
 	src, dest, series, parallel,
@@ -57,15 +56,6 @@ const jsVendorSources = [
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/vendor/auto/suncalc.js',
 ];
-
-// Copy metar-taf-parser separately since it's an ES module with locale dependencies
-const metarVendorSources = [
-	'server/scripts/vendor/auto/metar-taf-parser.mjs',
-	'server/scripts/vendor/auto/locale/en.js',
-];
-
-const copyMetarVendor = () => src(metarVendorSources, { base: 'server/scripts/vendor/auto' })
-	.pipe(dest(`${RESOURCES_PATH}/vendor/auto`));
 
 const compressJsVendor = () => src(jsVendorSources)
 	.pipe(concat('vendor.min.js'))
@@ -210,7 +200,7 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyMetarVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing

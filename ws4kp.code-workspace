@@ -44,7 +44,8 @@
 			"mwood",
 			"unmuted",
 			"dumpio",
-			"mesonet"
+			"mesonet",
+			"metar"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",

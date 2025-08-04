@@ -1,5 +1,7 @@
 // METAR parsing utilities using metar-taf-parser library
 import { parseMetar } from '../../vendor/auto/metar-taf-parser.mjs';
+// eslint-disable-next-line import/extensions
+import en from '../../vendor/auto/locale/en.js';
 
 /**
  * Augment observation data by parsing METAR when API fields are missing
@@ -14,7 +16,7 @@ const augmentObservationWithMetar = (observation) => {
 	const metar = { ...observation };
 
 	try {
-		const metarData = parseMetar(observation.rawMessage);
+		const metarData = parseMetar(observation.rawMessage, { locale: en });
 
 		if (observation.windSpeed?.value === null && metarData.wind?.speed !== undefined) {
 			metar.windSpeed = {
