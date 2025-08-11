@@ -32,7 +32,7 @@ const tester = async (location, testPage) => {
 // run all the locations
 for (let i = 0; i < LOCATIONS.length; i += 1) {
 	const location = LOCATIONS[i];
-	console.log(location);
+	console.log(`${i + 1}/${LOCATIONS.length} ${location}`);
 	// eslint-disable-next-line no-await-in-loop
 	await tester(location, page);
 }

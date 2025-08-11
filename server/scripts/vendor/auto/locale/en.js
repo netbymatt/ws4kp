@@ -94,7 +94,7 @@ var en = {
         TS: "thunderstorm",
     },
     Error: {
-        prefix: "An error occured. Error code n°",
+        prefix: "An error occurred. Error code n°",
     },
     ErrorCode: {
         AirportNotFound: "The airport was not found for this message.",
@@ -136,11 +136,13 @@ var en = {
         TS: "thunderstorm",
         UP: "unknown precipitation",
         VA: "volcanic ash",
+        NSW: 'no significant weather'
     },
     Remark: {
         ALQDS: "all quadrants",
         AO1: "automated stations without a precipitation discriminator",
         AO2: "automated station with a precipitation discriminator",
+        AO2A: "automated station with a precipitation discriminator (augmented)",
         BASED: "based",
         Barometer: [
             "Increase, then decrease",
@@ -156,7 +158,7 @@ var en = {
         Ceiling: {
             Height: "ceiling varying between {0} and {1} feet",
             Second: {
-                Location: "ceiling of {0} feet mesured by a second sensor located at {1}",
+                Location: "ceiling of {0} feet measured by a second sensor located at {1}",
             },
         },
         DSNT: "distant",
@@ -192,6 +194,11 @@ var en = {
         LGT: "light",
         LTG: "lightning",
         MOD: "moderate",
+        Next: {
+            Forecast: {
+                By: "next forecast by {0}, {1}:{2}Z"
+            },
+        },
         NXT: "next",
         ON: "on",
         Obscuration: "{0} layer at {1} feet composed of {2}",
@@ -223,7 +230,7 @@ var en = {
         },
         Second: {
             Location: {
-                Visibility: "visibility of {0} SM mesured by a second sensor located at {1}",
+                Visibility: "visibility of {0} SM measured by a second sensor located at {1}",
             },
         },
         Sector: {

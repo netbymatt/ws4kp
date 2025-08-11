@@ -14,12 +14,26 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
+
 
 function __classPrivateFieldGet(receiver, state, kind, f) {
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 }
+
+function __classPrivateFieldSet(receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+}
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 class ParseError extends Error {
     constructor(message) {
@@ -37,6 +51,19 @@ class InvalidWeatherStatementError extends ParseError {
         Object.setPrototypeOf(this, new.target.prototype);
         if (typeof cause !== "string")
             this.cause = cause;
+    }
+}
+/**
+ * Thrown when an input contains data elements that are recognized but
+ * intentionally not supported.
+ */
+class PartialWeatherStatementError extends InvalidWeatherStatementError {
+    constructor(partialMessage, part, total) {
+        super(`Input is partial TAF (${partialMessage}), see: https://github.com/aeharding/metar-taf-parser/issues/68`);
+        this.name = "PartialWeatherStatementError";
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.part = part;
+        this.total = total;
     }
 }
 /**
@@ -183,6 +210,11 @@ class CeilingSecondLocationCommand extends Command {
 }
 _CeilingSecondLocationCommand_regex = new WeakMap();
 
+var MetarType;
+(function (MetarType) {
+    MetarType["METAR"] = "METAR";
+    MetarType["SPECI"] = "SPECI";
+})(MetarType || (MetarType = {}));
 var CloudQuantity;
 (function (CloudQuantity) {
     /**
@@ -305,6 +337,7 @@ var Phenomenon;
     Phenomenon["DUSTSTORM"] = "DS";
     Phenomenon["SANDSTORM"] = "SS";
     Phenomenon["FUNNEL_CLOUD"] = "FC";
+    Phenomenon["NO_SIGNIFICANT_WEATHER"] = "NSW";
 })(Phenomenon || (Phenomenon = {}));
 var TimeIndicator;
 (function (TimeIndicator) {
@@ -383,6 +416,12 @@ var WeatherChangeType;
      *     visibility two in mist and haze between 0000Z and 0600Z.
      */
     WeatherChangeType["TEMPO"] = "TEMPO";
+    /**
+     * For periods up to 30 minutes (`INTER` or intermittent).
+     *
+     * Otherwise, similar to `TEMPO`
+     */
+    WeatherChangeType["INTER"] = "INTER";
     /**
      * Probability Forecast
      *
@@ -466,6 +505,104 @@ var RunwayInfoUnit;
     RunwayInfoUnit["Feet"] = "FT";
     RunwayInfoUnit["Meters"] = "m";
 })(RunwayInfoUnit || (RunwayInfoUnit = {}));
+var IcingIntensity;
+(function (IcingIntensity) {
+    /**
+     * Trace Icing or None.
+     *
+     * Air Force code 0 means a trace of icing.
+     * World Meteorological Organization code 0 means no icing
+     */
+    IcingIntensity["None"] = "0";
+    /** Light Mixed Icing. */
+    IcingIntensity["Light"] = "1";
+    /** Light Rime Icing In Cloud. */
+    IcingIntensity["LightRimeIcingCloud"] = "2";
+    /** Light Clear Icing In Precipitation. */
+    IcingIntensity["LightClearIcingPrecipitation"] = "3";
+    /** Moderate Mixed Icing. */
+    IcingIntensity["ModerateMixedIcing"] = "4";
+    /** Moderate Rime Icing In Cloud. */
+    IcingIntensity["ModerateRimeIcingCloud"] = "5";
+    /** Moderate Clear Icing In Precipitation. */
+    IcingIntensity["ModerateClearIcingPrecipitation"] = "6";
+    /** Severe Mixed Icing. */
+    IcingIntensity["SevereMixedIcing"] = "7";
+    /** Severe Rime Icing In Cloud. */
+    IcingIntensity["SevereRimeIcingCloud"] = "8";
+    /** Severe Clear Icing In Precipitation. */
+    IcingIntensity["SevereClearIcingPrecipitation"] = "9";
+})(IcingIntensity || (IcingIntensity = {}));
+var TurbulenceIntensity;
+(function (TurbulenceIntensity) {
+    /** None. */
+    TurbulenceIntensity["None"] = "0";
+    /** Light turbulence. */
+    TurbulenceIntensity["Light"] = "1";
+    /** Moderate turbulence in clear air, occasional. */
+    TurbulenceIntensity["ModerateClearAirOccasional"] = "2";
+    /** Moderate turbulence in clear air, frequent. */
+    TurbulenceIntensity["ModerateClearAirFrequent"] = "3";
+    /** Moderate turbulence in cloud, occasional. */
+    TurbulenceIntensity["ModerateCloudOccasional"] = "4";
+    /** Moderate turbulence in cloud, frequent. */
+    TurbulenceIntensity["ModerateCloudFrequent"] = "5";
+    /** Severe turbulence in clear air, occasional. */
+    TurbulenceIntensity["SevereClearAirOccasional"] = "6";
+    /** Severe turbulence in clear air, frequent. */
+    TurbulenceIntensity["SevereClearAirFrequent"] = "7";
+    /** Severe turbulence in cloud, occasional. */
+    TurbulenceIntensity["SevereCloudOccasional"] = "8";
+    /** Severe turbulence in cloud, frequent. */
+    TurbulenceIntensity["SevereCloudFrequent"] = "9";
+    /** Extreme turbulence */
+    TurbulenceIntensity["Extreme"] = "X";
+})(TurbulenceIntensity || (TurbulenceIntensity = {}));
+var DepositType;
+(function (DepositType) {
+    /** (runway clearance in progress) */
+    DepositType["NotReported"] = "/";
+    DepositType["ClearDry"] = "0";
+    DepositType["Damp"] = "1";
+    DepositType["WetWaterPatches"] = "2";
+    DepositType["RimeFrostCovered"] = "3";
+    DepositType["DrySnow"] = "4";
+    DepositType["WetSnow"] = "5";
+    DepositType["Slush"] = "6";
+    DepositType["Ice"] = "7";
+    DepositType["CompactedSnow"] = "8";
+    DepositType["FrozenRidges"] = "9";
+})(DepositType || (DepositType = {}));
+var DepositCoverage;
+(function (DepositCoverage) {
+    /**
+     * Only reported by certain countries (e.g. Russia)
+     */
+    DepositCoverage["None"] = "0";
+    /**
+     * Not reported (e.g. due to rwy clearance in progress)
+     */
+    DepositCoverage["NotReported"] = "/";
+    DepositCoverage["Less10"] = "1";
+    DepositCoverage["From11To25"] = "2";
+    DepositCoverage["From26To50"] = "5";
+    DepositCoverage["From51To100"] = "9";
+})(DepositCoverage || (DepositCoverage = {}));
+var AltimeterUnit;
+(function (AltimeterUnit) {
+    /**
+     * Inches of mercury (inHg)
+     *
+     * e.g. A2994 parses as 29.94 inHg
+     */
+    AltimeterUnit["InHg"] = "inHg";
+    /**
+     * Hectopascals (hPa), also known as millibars
+     *
+     * e.g. Q1018 parses as 1018 millibars
+     */
+    AltimeterUnit["HPa"] = "hPa";
+})(AltimeterUnit || (AltimeterUnit = {}));
 
 function degreesToCardinal(input) {
     const degrees = +input;
@@ -546,9 +683,6 @@ function convertTemperature(input) {
     if (input.startsWith("M"))
         return -pySplit(input, "M")[1];
     return +input;
-}
-function convertInchesMercuryToPascal(input) {
-    return 33.8639 * input;
 }
 /**
  * Converts number `.toFixed(1)` before outputting to match python implementation
@@ -1618,6 +1752,36 @@ class PrecipitationEndCommand extends Command {
 }
 _PrecipitationEndCommand_regex = new WeakMap();
 
+var _NextForecastByCommand_regex;
+class NextForecastByCommand extends Command {
+    constructor() {
+        super(...arguments);
+        _NextForecastByCommand_regex.set(this, /^NXT FCST BY (\d{2})(\d{2})(\d{2})Z/);
+    }
+    canParse(code) {
+        return __classPrivateFieldGet(this, _NextForecastByCommand_regex, "f").test(code);
+    }
+    execute(code, remark) {
+        const matches = code.match(__classPrivateFieldGet(this, _NextForecastByCommand_regex, "f"));
+        if (!matches)
+            throw new UnexpectedParseError("Match not found");
+        const day = +matches[1];
+        const hour = matches[2];
+        const minute = matches[3];
+        const description = format(_("Remark.Next.Forecast.By", this.locale), day, hour, minute);
+        remark.push({
+            type: RemarkType.NextForecastBy,
+            description,
+            raw: matches[0],
+            day,
+            hour: +hour,
+            minute: +minute,
+        });
+        return [code.replace(__classPrivateFieldGet(this, _NextForecastByCommand_regex, "f"), "").trim(), remark];
+    }
+}
+_NextForecastByCommand_regex = new WeakMap();
+
 class RemarkCommandSupplier {
     constructor(locale) {
         this.locale = locale;
@@ -1662,6 +1826,7 @@ class RemarkCommandSupplier {
             new SnowDepthCommand(locale),
             new SunshineDurationCommand(locale),
             new WaterEquivalentSnowCommand(locale),
+            new NextForecastByCommand(locale),
         ];
     }
     get(code) {
@@ -1725,6 +1890,8 @@ var RemarkType;
     RemarkType["SnowDepth"] = "SnowDepth";
     RemarkType["SunshineDuration"] = "SunshineDuration";
     RemarkType["WaterEquivalentSnow"] = "WaterEquivalentSnow";
+    // Canada commands below
+    RemarkType["NextForecastBy"] = "NextForecastBy";
 })(RemarkType || (RemarkType = {}));
 
 function isWeatherConditionValid(weather) {
@@ -1734,7 +1901,7 @@ function isWeatherConditionValid(weather) {
             weather.descriptive == Descriptive.SHOWERS));
 }
 
-var _CloudCommand_cloudRegex, _MainVisibilityCommand_regex, _WindCommand_regex, _WindVariationCommand_regex, _WindShearCommand_regex, _VerticalVisibilityCommand_regex, _MinimalVisibilityCommand_regex, _MainVisibilityNauticalMilesCommand_regex, _CommandSupplier_commands$1;
+var _CloudCommand_cloudRegex, _MainVisibilityCommand_regex, _WindCommand_regex, _WindVariationCommand_regex, _WindShearCommand_regex, _VerticalVisibilityCommand_regex, _MinimalVisibilityCommand_regex, _MainVisibilityNauticalMilesCommand_regex, _CommandSupplier_commands$2;
 /**
  * This function creates a wind element.
  * @param wind The wind object
@@ -1754,18 +1921,17 @@ function makeWind(direction, speed, gust, unit) {
 }
 class CloudCommand {
     constructor() {
-        _CloudCommand_cloudRegex.set(this, /^([A-Z]{3})(\d{3})?([A-Z]{2,3})?$/);
+        _CloudCommand_cloudRegex.set(this, /^([A-Z]{3})(?:\/{3}|(\d{3}))?(?:\/{3}|(?:([A-Z]{2,3})(?:\/([A-Z]{2,3}))?))?$/);
     }
     parse(cloudString) {
         const m = cloudString.match(__classPrivateFieldGet(this, _CloudCommand_cloudRegex, "f"));
         if (!m)
             return;
-        const quantity = CloudQuantity[m[1]];
+        const quantity = as(m[1], CloudQuantity);
         const height = 100 * +m[2] || undefined;
-        const type = CloudType[m[3]];
-        if (!quantity)
-            return;
-        return { quantity, height, type };
+        const type = m[3] ? as(m[3], CloudType) : undefined;
+        const secondaryType = m[4] ? as(m[4], CloudType) : undefined;
+        return { quantity, height, type, secondaryType };
     }
     execute(container, cloudString) {
         const cloud = this.parse(cloudString);
@@ -1776,6 +1942,8 @@ class CloudCommand {
         return false;
     }
     canParse(cloudString) {
+        if (cloudString === "NSW")
+            return false;
         return __classPrivateFieldGet(this, _CloudCommand_cloudRegex, "f").test(cloudString);
     }
 }
@@ -1794,7 +1962,6 @@ class MainVisibilityCommand {
         const distance = convertVisibility(matches[1]);
         if (!container.visibility)
             container.visibility = distance;
-        container.visibility = { ...container.visibility, ...distance };
         if (matches[2] === "NDV")
             container.visibility.ndv = true;
         return true;
@@ -1803,7 +1970,7 @@ class MainVisibilityCommand {
 _MainVisibilityCommand_regex = new WeakMap();
 class WindCommand {
     constructor() {
-        _WindCommand_regex.set(this, /^(VRB|\d{3})(\d{2})G?(\d{2})?(KT|MPS|KM\/H)?/);
+        _WindCommand_regex.set(this, /^(VRB|000|[0-3]\d{2})(\d{2})G?(\d{2,3})?(KT|MPS|KM\/H)?/);
     }
     canParse(windString) {
         return __classPrivateFieldGet(this, _WindCommand_regex, "f").test(windString);
@@ -1845,7 +2012,7 @@ class WindVariationCommand {
 _WindVariationCommand_regex = new WeakMap();
 class WindShearCommand {
     constructor() {
-        _WindShearCommand_regex.set(this, /^WS(\d{3})\/(\w{3})(\d{2})G?(\d{2})?(KT|MPS|KM\/H)/);
+        _WindShearCommand_regex.set(this, /^WS(\d{3})\/(\w{3})(\d{2})G?(\d{2,3})?(KT|MPS|KM\/H)/);
     }
     canParse(windString) {
         return __classPrivateFieldGet(this, _WindShearCommand_regex, "f").test(windString);
@@ -1883,7 +2050,7 @@ class VerticalVisibilityCommand {
 _VerticalVisibilityCommand_regex = new WeakMap();
 class MinimalVisibilityCommand {
     constructor() {
-        _MinimalVisibilityCommand_regex.set(this, /^(\d{4}[a-zA-Z]{1,2})$/);
+        _MinimalVisibilityCommand_regex.set(this, /^(\d{4}[NnEeSsWw]{1,2})$/);
     }
     execute(container, visibilityString) {
         const matches = visibilityString.match(__classPrivateFieldGet(this, _MinimalVisibilityCommand_regex, "f"));
@@ -1916,9 +2083,9 @@ class MainVisibilityNauticalMilesCommand {
     }
 }
 _MainVisibilityNauticalMilesCommand_regex = new WeakMap();
-class CommandSupplier$1 {
+let CommandSupplier$2 = class CommandSupplier {
     constructor() {
-        _CommandSupplier_commands$1.set(this, [
+        _CommandSupplier_commands$2.set(this, [
             new WindShearCommand(),
             new WindCommand(),
             new WindVariationCommand(),
@@ -1930,13 +2097,13 @@ class CommandSupplier$1 {
         ]);
     }
     get(input) {
-        for (const command of __classPrivateFieldGet(this, _CommandSupplier_commands$1, "f")) {
+        for (const command of __classPrivateFieldGet(this, _CommandSupplier_commands$2, "f")) {
             if (command.canParse(input))
                 return command;
         }
     }
-}
-_CommandSupplier_commands$1 = new WeakMap();
+};
+_CommandSupplier_commands$2 = new WeakMap();
 
 var _AltimeterCommand_regex;
 class AltimeterCommand {
@@ -1950,7 +2117,10 @@ class AltimeterCommand {
         const matches = input.match(__classPrivateFieldGet(this, _AltimeterCommand_regex, "f"));
         if (!matches)
             throw new UnexpectedParseError("Match not found");
-        metar.altimeter = Math.trunc(+matches[1]);
+        metar.altimeter = {
+            value: +matches[1],
+            unit: AltimeterUnit.HPa,
+        };
     }
 }
 _AltimeterCommand_regex = new WeakMap();
@@ -1968,29 +2138,51 @@ class AltimeterMercuryCommand {
         if (!matches)
             throw new UnexpectedParseError("Match not found");
         const mercury = +matches[1] / 100;
-        metar.altimeter = Math.trunc(convertInchesMercuryToPascal(mercury));
+        metar.altimeter = {
+            value: mercury,
+            unit: AltimeterUnit.InHg,
+        };
     }
 }
 _AltimeterMercuryCommand_regex = new WeakMap();
 
-var _RunwayCommand_genericRegex, _RunwayCommand_runwayMaxRangeRegex, _RunwayCommand_runwayRegex;
+var _RunwayCommand_genericRegex, _RunwayCommand_runwayMaxRangeRegex, _RunwayCommand_runwayRegex, _RunwayCommand_runwayDepositRegex;
 class RunwayCommand {
     constructor() {
         _RunwayCommand_genericRegex.set(this, /^(R\d{2}\w?\/)/);
-        _RunwayCommand_runwayMaxRangeRegex.set(this, /^R(\d{2}\w?)\/(\d{4})V(\d{3,4})([UDN])?(FT)?/);
-        _RunwayCommand_runwayRegex.set(this, /^R(\d{2}\w?)\/([MP])?(\d{4})([UDN])?(FT)?$/);
+        _RunwayCommand_runwayMaxRangeRegex.set(this, /^R(\d{2}\w?)\/(\d{4})V([MP])?(\d{3,4})(?:([UDN])|(FT)(?:\/([UDN]))?)$/);
+        _RunwayCommand_runwayRegex.set(this, /^R(\d{2}\w?)\/([MP])?(\d{4})(?:([UDN])|(FT)(?:\/([UDN]))?)$/);
+        _RunwayCommand_runwayDepositRegex.set(this, /^R(\d{2}\w?)\/([/\d])([/\d])(\/\/|\d{2})(\/\/|\d{2})$/);
     }
     canParse(input) {
         return __classPrivateFieldGet(this, _RunwayCommand_genericRegex, "f").test(input);
     }
     execute(metar, input) {
-        // TODO idk if this matches super well...
-        if (__classPrivateFieldGet(this, _RunwayCommand_runwayRegex, "f").test(input)) {
+        if (__classPrivateFieldGet(this, _RunwayCommand_runwayDepositRegex, "f").test(input)) {
+            const matches = input.match(__classPrivateFieldGet(this, _RunwayCommand_runwayDepositRegex, "f"));
+            if (!matches)
+                throw new UnexpectedParseError("Should be able to parse");
+            const depositType = as(matches[2], DepositType);
+            const coverage = as(matches[3], DepositCoverage);
+            metar.runwaysInfo.push({
+                name: matches[1],
+                depositType,
+                coverage,
+                thickness: matches[4],
+                brakingCapacity: matches[5],
+            });
+        }
+        else if (__classPrivateFieldGet(this, _RunwayCommand_runwayRegex, "f").test(input)) {
             const matches = input.match(__classPrivateFieldGet(this, _RunwayCommand_runwayRegex, "f"));
             if (!matches)
                 throw new UnexpectedParseError("Should be able to parse");
             const indicator = matches[2] ? as(matches[2], ValueIndicator) : undefined;
-            const trend = matches[4] ? as(matches[4], RunwayInfoTrend) : undefined;
+            const trend = (() => {
+                if (matches[6])
+                    return as(matches[6], RunwayInfoTrend);
+                if (matches[4])
+                    return as(matches[4], RunwayInfoTrend);
+            })();
             const unit = matches[5]
                 ? as(matches[5], RunwayInfoUnit)
                 : RunwayInfoUnit.Meters;
@@ -2006,21 +2198,28 @@ class RunwayCommand {
             const matches = input.match(__classPrivateFieldGet(this, _RunwayCommand_runwayMaxRangeRegex, "f"));
             if (!matches)
                 throw new UnexpectedParseError("Should be able to parse");
-            const trend = matches[4] ? as(matches[4], RunwayInfoTrend) : undefined;
-            const unit = matches[5]
-                ? as(matches[5], RunwayInfoUnit)
+            const indicator = matches[3] ? as(matches[3], ValueIndicator) : undefined;
+            const trend = (() => {
+                if (matches[7])
+                    return as(matches[7], RunwayInfoTrend);
+                if (matches[5])
+                    return as(matches[5], RunwayInfoTrend);
+            })();
+            const unit = matches[6]
+                ? as(matches[6], RunwayInfoUnit)
                 : RunwayInfoUnit.Meters;
             metar.runwaysInfo.push({
                 name: matches[1],
+                indicator,
                 minRange: +matches[2],
-                maxRange: +matches[3],
+                maxRange: +matches[4],
                 trend,
                 unit,
             });
         }
     }
 }
-_RunwayCommand_genericRegex = new WeakMap(), _RunwayCommand_runwayMaxRangeRegex = new WeakMap(), _RunwayCommand_runwayRegex = new WeakMap();
+_RunwayCommand_genericRegex = new WeakMap(), _RunwayCommand_runwayMaxRangeRegex = new WeakMap(), _RunwayCommand_runwayRegex = new WeakMap(), _RunwayCommand_runwayDepositRegex = new WeakMap();
 
 var _TemperatureCommand_regex;
 class TemperatureCommand {
@@ -2040,15 +2239,75 @@ class TemperatureCommand {
 }
 _TemperatureCommand_regex = new WeakMap();
 
-var _CommandSupplier_commands;
-class CommandSupplier {
+var _CommandSupplier_commands$1;
+let CommandSupplier$1 = class CommandSupplier {
     constructor() {
-        _CommandSupplier_commands.set(this, [
+        _CommandSupplier_commands$1.set(this, [
             new RunwayCommand(),
             new TemperatureCommand(),
             new AltimeterCommand(),
             new AltimeterMercuryCommand(),
         ]);
+    }
+    get(input) {
+        for (const command of __classPrivateFieldGet(this, _CommandSupplier_commands$1, "f")) {
+            if (command.canParse(input))
+                return command;
+        }
+    }
+};
+_CommandSupplier_commands$1 = new WeakMap();
+
+var _IcingCommand_regex;
+class IcingCommand {
+    constructor() {
+        _IcingCommand_regex.set(this, /^6(\d)(\d{3})(\d)$/);
+    }
+    canParse(input) {
+        return __classPrivateFieldGet(this, _IcingCommand_regex, "f").test(input);
+    }
+    execute(container, input) {
+        const matches = input.match(__classPrivateFieldGet(this, _IcingCommand_regex, "f"));
+        if (!matches)
+            throw new UnexpectedParseError("Match not found");
+        if (!container.icing)
+            container.icing = [];
+        container.icing.push({
+            intensity: as(matches[1], IcingIntensity),
+            baseHeight: +matches[2] * 100,
+            depth: +matches[3] * 1000,
+        });
+    }
+}
+_IcingCommand_regex = new WeakMap();
+
+var _TurbulenceCommand_regex;
+class TurbulenceCommand {
+    constructor() {
+        _TurbulenceCommand_regex.set(this, /^5(\d|X)(\d{3})(\d)$/);
+    }
+    canParse(input) {
+        return __classPrivateFieldGet(this, _TurbulenceCommand_regex, "f").test(input);
+    }
+    execute(container, input) {
+        const matches = input.match(__classPrivateFieldGet(this, _TurbulenceCommand_regex, "f"));
+        if (!matches)
+            throw new UnexpectedParseError("Match not found");
+        if (!container.turbulence)
+            container.turbulence = [];
+        container.turbulence.push({
+            intensity: as(matches[1], TurbulenceIntensity),
+            baseHeight: +matches[2] * 100,
+            depth: +matches[3] * 1000,
+        });
+    }
+}
+_TurbulenceCommand_regex = new WeakMap();
+
+var _CommandSupplier_commands;
+class CommandSupplier {
+    constructor() {
+        _CommandSupplier_commands.set(this, [new TurbulenceCommand(), new IcingCommand()]);
     }
     get(input) {
         for (const command of __classPrivateFieldGet(this, _CommandSupplier_commands, "f")) {
@@ -2059,7 +2318,10 @@ class CommandSupplier {
 }
 _CommandSupplier_commands = new WeakMap();
 
-var _AbstractParser_INTENSITY_REGEX, _AbstractParser_CAVOK, _AbstractParser_commonSupplier, _MetarParser_commandSupplier, _TAFParser_validityPattern, _RemarkParser_supplier;
+var _a, _AbstractParser_TOKENIZE_REGEX, _AbstractParser_INTENSITY_REGEX, _AbstractParser_CAVOK, _AbstractParser_commonSupplier, _MetarParser_commandSupplier, _TAFParser_commandSupplier, _TAFParser_validityPattern, _TAFParser_partialPattern, _RemarkParser_supplier;
+function isStation(stationString) {
+    return stationString.length === 4;
+}
 /**
  * Parses the delivery time of a METAR/TAF
  * @param abstractWeatherCode The TAF or METAR object
@@ -2156,38 +2418,54 @@ class AbstractParser {
         this.locale = locale;
         this.FM = "FM";
         this.TEMPO = "TEMPO";
+        this.INTER = "INTER";
         this.BECMG = "BECMG";
         this.RMK = "RMK";
-        // Safari does not currently support negative lookbehind
-        // #TOKENIZE_REGEX = /\s((?=\d\/\dSM)(?<!\s\d\s)|(?!\d\/\dSM))|=/;
-        _AbstractParser_INTENSITY_REGEX.set(this, /^(-|\+|VC)/);
-        _AbstractParser_CAVOK.set(this, "CAVOK");
-        _AbstractParser_commonSupplier.set(this, new CommandSupplier$1());
     }
     parseWeatherCondition(input) {
         let intensity;
-        if (input.match(__classPrivateFieldGet(this, _AbstractParser_INTENSITY_REGEX, "f"))) {
-            const match = input.match(__classPrivateFieldGet(this, _AbstractParser_INTENSITY_REGEX, "f"))?.[0];
-            if (match)
+        if (input.match(__classPrivateFieldGet(_a, _a, "f", _AbstractParser_INTENSITY_REGEX))) {
+            const match = input.match(__classPrivateFieldGet(_a, _a, "f", _AbstractParser_INTENSITY_REGEX))?.[0];
+            if (match) {
                 intensity = match;
+                input = input.slice(match.length);
+            }
         }
         let descriptive;
-        for (const key of Object.values(Descriptive)) {
-            if (input.includes(key))
+        const descriptives = Object.values(Descriptive);
+        for (let i = 0; i < descriptives.length; i++) {
+            const key = descriptives[i];
+            if (input.startsWith(key)) {
                 descriptive = key;
+                input = input.slice(key.length);
+                break;
+            }
         }
         const weatherCondition = {
             intensity,
             descriptive,
             phenomenons: [],
         };
-        for (const key of Object.values(Phenomenon)) {
+        const phenomenons = Object.values(Phenomenon);
+        for (let i = 0; i < phenomenons.length; i++) {
+            const key = phenomenons[i];
             // Thunderstorm as descriptive should not be added as a phenomenon
             if (descriptive === key)
                 continue;
-            if (input.includes(key))
+            // Phenomenons can be separated with a slash
+            const conditionRegex = new RegExp(`^\/?${key}`);
+            const inputMatch = input.match(conditionRegex)?.[0];
+            if (inputMatch) {
                 weatherCondition.phenomenons.push(key);
+                input = input.slice(inputMatch.length);
+                // Restart the search for an additional phenomenon
+                i = -1;
+                continue;
+            }
         }
+        // If anything is left unparsed, it's not a valid weather condition
+        if (input.replace(/\//g, "").length)
+            return;
         return weatherCondition;
     }
     /**
@@ -2196,22 +2474,7 @@ class AbstractParser {
      * @returns List of tokens
      */
     tokenize(input) {
-        // Missing safari support. If added in the future, put this back
-        // return input.split(this.#TOKENIZE_REGEX).filter((v) => v);
-        // Hack for safari below...
-        const splitRegex = /\s|=/;
-        const smRegex = /^\d\/\dSM$/;
-        const digitRegex = /^(P|M)?\d$/;
-        // return input.split(this.#TOKENIZE_REGEX).filter((v) => v);
-        const splitted = input.split(splitRegex);
-        for (let i = 0; i < splitted.length; i++) {
-            if (digitRegex.test(splitted[i])) {
-                if (splitted[i + 1] && smRegex.test(splitted[i + 1])) {
-                    splitted.splice(i, 2, `${splitted[i]} ${splitted[i + 1]}`);
-                }
-            }
-        }
-        return splitted.filter((t) => t);
+        return input.split(__classPrivateFieldGet(_a, _a, "f", _AbstractParser_TOKENIZE_REGEX)).filter((v) => v);
     }
     /**
      * Common parse method for METAR, TAF and trends object
@@ -2220,7 +2483,7 @@ class AbstractParser {
      * @returns True if the token was parsed false otherwise
      */
     generalParse(abstractWeatherContainer, input) {
-        if (input === __classPrivateFieldGet(this, _AbstractParser_CAVOK, "f")) {
+        if (input === __classPrivateFieldGet(_a, _a, "f", _AbstractParser_CAVOK)) {
             abstractWeatherContainer.cavok = true;
             abstractWeatherContainer.visibility = {
                 indicator: ValueIndicator.GreaterThan,
@@ -2229,25 +2492,36 @@ class AbstractParser {
             };
             return true;
         }
-        const command = __classPrivateFieldGet(this, _AbstractParser_commonSupplier, "f").get(input);
-        if (command) {
-            return command.execute(abstractWeatherContainer, input);
-        }
         const weatherCondition = this.parseWeatherCondition(input);
-        if (isWeatherConditionValid(weatherCondition)) {
+        if (weatherCondition && isWeatherConditionValid(weatherCondition)) {
             abstractWeatherContainer.weatherConditions.push(weatherCondition);
             return true;
+        }
+        const command = __classPrivateFieldGet(_a, _a, "f", _AbstractParser_commonSupplier).get(input);
+        if (command) {
+            try {
+                return command.execute(abstractWeatherContainer, input);
+            }
+            catch (error) {
+                if (error instanceof CommandExecutionError)
+                    return false;
+                throw error;
+            }
         }
         return false;
     }
 }
-_AbstractParser_INTENSITY_REGEX = new WeakMap(), _AbstractParser_CAVOK = new WeakMap(), _AbstractParser_commonSupplier = new WeakMap();
+_a = AbstractParser;
+_AbstractParser_TOKENIZE_REGEX = { value: /\s((?=\d\/\dSM)(?<!\s(P|M)?\d\s)|(?!\d\/\dSM))|=/ };
+_AbstractParser_INTENSITY_REGEX = { value: /^(-|\+|VC)/ };
+_AbstractParser_CAVOK = { value: "CAVOK" };
+_AbstractParser_commonSupplier = { value: new CommandSupplier$2() };
 class MetarParser extends AbstractParser {
     constructor() {
         super(...arguments);
         this.AT = "AT";
         this.TL = "TL";
-        _MetarParser_commandSupplier.set(this, new CommandSupplier());
+        _MetarParser_commandSupplier.set(this, new CommandSupplier$1());
     }
     /**
      * Parses a trend of a metar
@@ -2260,6 +2534,7 @@ class MetarParser extends AbstractParser {
         let i = index + 1;
         while (i < trendParts.length &&
             trendParts[i] !== this.TEMPO &&
+            trendParts[i] !== this.INTER &&
             trendParts[i] !== this.BECMG) {
             if (trendParts[i].startsWith(this.FM) ||
                 trendParts[i].startsWith(this.TL) ||
@@ -2285,9 +2560,21 @@ class MetarParser extends AbstractParser {
      */
     parse(input) {
         const metarTab = this.tokenize(input);
+        let index = 0;
+        const type = this.parseType(metarTab[index]);
+        if (type)
+            index++;
+        // Only parse flag if precedes station identifier
+        if (isStation(metarTab[index + 1])) {
+            var flags = findFlags(metarTab[index]);
+            if (flags)
+                index += 1;
+        }
         const metar = {
-            ...parseDeliveryTime(metarTab[1]),
-            station: metarTab[0],
+            type,
+            station: metarTab[index],
+            ...parseDeliveryTime(metarTab[index + 1]),
+            ...flags,
             message: input,
             remarks: [],
             clouds: [],
@@ -2295,7 +2582,7 @@ class MetarParser extends AbstractParser {
             trends: [],
             runwaysInfo: [],
         };
-        let index = 2;
+        index += 2;
         while (index < metarTab.length) {
             if (!super.generalParse(metar, metarTab[index]) &&
                 !parseFlags(metar, metarTab[index])) {
@@ -2303,16 +2590,19 @@ class MetarParser extends AbstractParser {
                     metar.nosig = true;
                 }
                 else if (metarTab[index] === this.TEMPO ||
+                    metarTab[index] === this.INTER ||
                     metarTab[index] === this.BECMG) {
+                    const startIndex = index;
                     const trend = {
                         type: WeatherChangeType[metarTab[index]],
                         weatherConditions: [],
                         clouds: [],
                         times: [],
                         remarks: [],
-                        raw: input,
+                        raw: "",
                     };
                     index = this.parseTrend(index, trend, metarTab);
+                    trend.raw = metarTab.slice(startIndex, index + 1).join(" ");
                     metar.trends.push(trend);
                 }
                 else if (metarTab[index] === this.RMK) {
@@ -2329,6 +2619,12 @@ class MetarParser extends AbstractParser {
         }
         return metar;
     }
+    parseType(token) {
+        for (const type in MetarType) {
+            if (token === MetarType[type])
+                return type;
+        }
+    }
 }
 _MetarParser_commandSupplier = new WeakMap();
 /**
@@ -2341,8 +2637,46 @@ class TAFParser extends AbstractParser {
         this.PROB = "PROB";
         this.TX = "TX";
         this.TN = "TN";
-        this.NSW = "NSW";
+        _TAFParser_commandSupplier.set(this, new CommandSupplier());
         _TAFParser_validityPattern.set(this, /^\d{4}\/\d{4}$/);
+        _TAFParser_partialPattern.set(this, /^PART (\d) OF (\d) /);
+    }
+    /**
+     * Check a tokenized TAF against patterns that are explicitly not supported,
+     * throwing a descriptive exception to assist anyone who might want to apply
+     * any necessary custom parsing.
+     *
+     * @param input original input.
+     */
+    throwIfPartial(input) {
+        // TAFs in NOAA cycle files beginning `PART x OF y`,
+        // implying they are incomplete
+        const matches = input.match(__classPrivateFieldGet(this, _TAFParser_partialPattern, "f"));
+        if (matches) {
+            const [partialMessage, part, total] = matches;
+            throw new PartialWeatherStatementError(partialMessage.trim(), +part, +total);
+        }
+    }
+    /**
+     * TAF messages can be formatted poorly
+     *
+     * Attempt to handle those situations gracefully
+     */
+    parseMessageStart(input) {
+        let index = 0;
+        if (input[index] === this.TAF)
+            index += 1;
+        if (input[index + 1] === this.TAF)
+            index += 2;
+        const flags1 = findFlags(input[index]);
+        if (flags1)
+            index += 1;
+        if (input[index] === this.TAF)
+            index += 1;
+        const flags2 = findFlags(input[index]);
+        if (flags2)
+            index += 1;
+        return [index, { ...flags1, ...flags2 }];
     }
     /**
      * the message to parse
@@ -2351,16 +2685,9 @@ class TAFParser extends AbstractParser {
      * @throws ParseError if the message is invalid
      */
     parse(input) {
+        this.throwIfPartial(input);
         const lines = this.extractLinesTokens(input);
-        let index = 0;
-        if (lines[0][0] === this.TAF)
-            index = 1;
-        if (lines[0][1] === this.TAF)
-            index = 2;
-        const flags = findFlags(lines[0][index]);
-        if (flags) {
-            index += 1;
-        }
+        let [index, flags] = this.parseMessageStart(lines[0]);
         const station = lines[0][index];
         index += 1;
         const time = parseDeliveryTime(lines[0][index]);
@@ -2381,13 +2708,17 @@ class TAFParser extends AbstractParser {
         };
         for (let i = index + 1; i < lines[0].length; i++) {
             const token = lines[0][i];
+            const tafCommand = __classPrivateFieldGet(this, _TAFParser_commandSupplier, "f").get(token);
             if (token == this.RMK) {
                 parseRemark(taf, lines[0], i, this.locale);
                 break;
             }
+            else if (tafCommand) {
+                tafCommand.execute(taf, token);
+            }
             else {
-                parseFlags(taf, token);
                 this.generalParse(taf, token);
+                parseFlags(taf, token);
             }
         }
         const minMaxTemperatureLines = [
@@ -2424,12 +2755,12 @@ class TAFParser extends AbstractParser {
         const singleLine = tafCode.replace(/\n/g, " ");
         const cleanLine = singleLine.replace(/\s{2,}/g, " ");
         const lines = joinProbIfNeeded(cleanLine
-            .replace(/\s(?=PROB\d{2}\sTEMPO|TEMPO|BECMG|FM|PROB)/g, "\n")
+            .replace(/\s(?=PROB\d{2}\s(?=TEMPO|INTER)|TEMPO|INTER|BECMG|FM(?![A-Z]{2}\s)|PROB)/g, "\n")
             .split(/\n/));
         // TODO cleanup
         function joinProbIfNeeded(ls) {
             for (let i = 0; i < ls.length; i++) {
-                if (/^PROB\d{2}$/.test(ls[i]) && /^TEMPO/.test(ls[i + 1])) {
+                if (/^PROB\d{2}$/.test(ls[i]) && /^TEMPO|INTER/.test(ls[i + 1])) {
                     ls.splice(i, 2, `${ls[i]} ${ls[i + 1]}`);
                 }
             }
@@ -2464,7 +2795,8 @@ class TAFParser extends AbstractParser {
                 validity,
                 raw: lineTokens.join(" "),
             };
-            if (lineTokens.length > 1 && lineTokens[1] === this.TEMPO) {
+            if (lineTokens.length > 1 &&
+                (lineTokens[1] === this.TEMPO || lineTokens[1] === this.INTER)) {
                 trend = {
                     ...this.makeEmptyTAFTrend(),
                     type: WeatherChangeType[lineTokens[1]],
@@ -2511,15 +2843,17 @@ class TAFParser extends AbstractParser {
      */
     parseTrend(index, line, trend) {
         for (let i = index; i < line.length; i++) {
+            const tafCommand = __classPrivateFieldGet(this, _TAFParser_commandSupplier, "f").get(line[i]);
             if (line[i] === this.RMK) {
                 parseRemark(trend, line, i, this.locale);
                 break;
             }
-            else if (line[i] === this.NSW)
-                trend.nsw = true;
             // already parsed
             else if (__classPrivateFieldGet(this, _TAFParser_validityPattern, "f").test(line[i]))
                 continue;
+            else if (tafCommand) {
+                tafCommand.execute(trend, line[i]);
+            }
             else
                 super.generalParse(trend, line[i]);
         }
@@ -2532,11 +2866,12 @@ class TAFParser extends AbstractParser {
         };
     }
 }
-_TAFParser_validityPattern = new WeakMap();
+_TAFParser_commandSupplier = new WeakMap(), _TAFParser_validityPattern = new WeakMap(), _TAFParser_partialPattern = new WeakMap();
 class RemarkParser {
     constructor(locale) {
         this.locale = locale;
-        _RemarkParser_supplier.set(this, new RemarkCommandSupplier(this.locale));
+        _RemarkParser_supplier.set(this, void 0);
+        __classPrivateFieldSet(this, _RemarkParser_supplier, new RemarkCommandSupplier(this.locale), "f");
     }
     parse(code) {
         let rmkStr = code;
@@ -2568,7 +2903,7 @@ _RemarkParser_supplier = new WeakMap();
  * @param minute Minute (from the report)
  * @returns
  */
-function determineReportIssuedDate(date, day, hour, minute) {
+function determineReportDate(date, day, hour, minute = 0) {
     // Some TAF reports do not include a delivery time
     if (day == null || hour == null)
         return date;
@@ -2583,17 +2918,6 @@ function determineReportIssuedDate(date, day, hour, minute) {
         difference: Math.abs(d.getTime() - date.getTime()),
     }))
         .sort((a, b) => a.difference - b.difference)[0].date;
-}
-function getReportDate(issued, day, hour, minute = 0) {
-    let date = new Date(issued);
-    if (day < date.getUTCDate()) {
-        date = addMonthsUTC(date, 1);
-    }
-    date.setUTCDate(day);
-    date.setUTCHours(hour);
-    if (minute != null)
-        date.setUTCMinutes(minute);
-    return date;
 }
 function setDateComponents(date, day, hour, minute) {
     date.setUTCDate(day);
@@ -2617,58 +2941,72 @@ function addMonthsUTC(date, count) {
 function metarDatesHydrator(report, date) {
     return {
         ...report,
-        issued: determineReportIssuedDate(date, report.day, report.hour, report.minute),
+        issued: determineReportDate(date, report.day, report.hour, report.minute),
     };
 }
 
+function remarksDatesHydrator(remarks, date) {
+    return remarks.map((remark) => {
+        if (remark.type === RemarkType.NextForecastBy) {
+            return {
+                ...remark,
+                date: determineReportDate(date, remark.day, remark.hour, remark.minute),
+            };
+        }
+        return remark;
+    });
+}
 function tafDatesHydrator(report, date) {
-    const issued = determineReportIssuedDate(date, report.day, report.hour, report.minute);
+    const issued = determineReportDate(date, report.day, report.hour, report.minute);
     return {
         ...report,
         issued,
         validity: {
             ...report.validity,
-            start: getReportDate(issued, report.validity.startDay, report.validity.startHour),
-            end: getReportDate(issued, report.validity.endDay, report.validity.endHour),
+            start: determineReportDate(issued, report.validity.startDay, report.validity.startHour),
+            end: determineReportDate(issued, report.validity.endDay, report.validity.endHour),
         },
         minTemperature: report.minTemperature
             ? {
                 ...report.minTemperature,
-                date: getReportDate(issued, report.minTemperature.day, report.minTemperature.hour),
+                date: determineReportDate(issued, report.minTemperature.day, report.minTemperature.hour),
             }
             : undefined,
         maxTemperature: report.maxTemperature
             ? {
                 ...report.maxTemperature,
-                date: getReportDate(issued, report.maxTemperature.day, report.maxTemperature.hour),
+                date: determineReportDate(issued, report.maxTemperature.day, report.maxTemperature.hour),
             }
             : undefined,
         trends: report.trends.map((trend) => ({
             ...trend,
+            remarks: remarksDatesHydrator(trend.remarks, issued),
             validity: (() => {
                 switch (trend.type) {
                     case WeatherChangeType.FM:
                         return {
                             ...trend.validity,
-                            start: getReportDate(issued, trend.validity.startDay, trend.validity.startHour, trend.validity.startMinutes),
+                            start: determineReportDate(issued, trend.validity.startDay, trend.validity.startHour, trend.validity.startMinutes),
                         };
                     default:
                         return {
                             ...trend.validity,
-                            start: getReportDate(issued, trend.validity.startDay, trend.validity.startHour),
-                            end: getReportDate(issued, trend.validity.endDay, trend.validity.endHour),
+                            start: determineReportDate(issued, trend.validity.startDay, trend.validity.startHour),
+                            end: determineReportDate(issued, trend.validity.endDay, trend.validity.endHour),
                         };
                 }
             })(),
         })),
+        remarks: remarksDatesHydrator(report.remarks, issued),
     };
 }
 
 function getForecastFromTAF(taf) {
+    const { trends, wind, visibility, verticalVisibility, windShear, cavok, remark, remarks, clouds, weatherConditions, initialRaw, validity, ...tafWithoutBaseProperties } = taf;
     return {
-        ...taf,
-        start: getReportDate(taf.issued, taf.validity.startDay, taf.validity.startHour),
-        end: getReportDate(taf.issued, taf.validity.endDay, taf.validity.endHour),
+        ...tafWithoutBaseProperties,
+        start: determineReportDate(taf.issued, taf.validity.startDay, taf.validity.startHour),
+        end: determineReportDate(taf.issued, taf.validity.endDay, taf.validity.endHour),
         forecast: hydrateEndDates([makeInitialForecast(taf), ...taf.trends], taf.validity),
     };
 }
@@ -2687,6 +3025,8 @@ function makeInitialForecast(taf) {
         clouds: taf.clouds,
         weatherConditions: taf.weatherConditions,
         raw: taf.initialRaw,
+        turbulence: taf.turbulence,
+        icing: taf.icing,
         validity: {
             // End day/hour are for end of the entire TAF
             startDay: taf.validity.startDay,
@@ -2719,8 +3059,9 @@ function hydrateEndDates(trends, reportValidity) {
         const currentTrend = trends[i];
         const nextTrend = findNext(i + 1);
         if (!hasImplicitEnd(currentTrend)) {
+            const { validity, ...trend } = currentTrend;
             forecasts.push({
-                ...currentTrend,
+                ...trend,
                 start: currentTrend.validity.start,
                 // Has a type and not a FM/BECMG/undefined, so always has an end
                 end: currentTrend.validity.end,
@@ -2728,9 +3069,10 @@ function hydrateEndDates(trends, reportValidity) {
             continue;
         }
         let forecast;
+        const { validity, ...trendWithoutValidity } = currentTrend;
         if (nextTrend === undefined) {
             forecast = hydrateWithPreviousContextIfNeeded({
-                ...currentTrend,
+                ...trendWithoutValidity,
                 start: currentTrend.validity.start,
                 end: reportValidity.end,
                 ...byIfNeeded(currentTrend),
@@ -2738,7 +3080,7 @@ function hydrateEndDates(trends, reportValidity) {
         }
         else {
             forecast = hydrateWithPreviousContextIfNeeded({
-                ...currentTrend,
+                ...trendWithoutValidity,
                 start: currentTrend.validity.start,
                 end: new Date(nextTrend.validity.start),
                 ...byIfNeeded(currentTrend),
@@ -2754,22 +3096,31 @@ function hydrateEndDates(trends, reportValidity) {
  * it needs to be populated
  */
 function hydrateWithPreviousContextIfNeeded(forecast, context) {
+    // BECMG is the only forecast type that inherits old conditions
+    // Anything else starts anew
     if (forecast.type !== WeatherChangeType.BECMG || !context)
         return forecast;
     // Remarks should not be carried over
     context = { ...context };
     delete context.remark;
     context.remarks = [];
-    delete context.nsw;
+    // vertical visibility should not be carried over, if clouds exist
+    if (forecast.clouds.length)
+        delete context.verticalVisibility;
+    // CAVOK should not propagate if anything other than wind changes
+    if (forecast.clouds.length ||
+        forecast.verticalVisibility ||
+        forecast.weatherConditions.length ||
+        forecast.visibility)
+        delete context.cavok;
     forecast = {
         ...context,
         ...forecast,
     };
-    if (!forecast.clouds.length)
+    if (!forecast.clouds.length) {
         forecast.clouds = context.clouds;
-    // If NSW = true, previous weather conditions have stopped and should
-    // not be carried over
-    if (!forecast.weatherConditions.length && !forecast.nsw)
+    }
+    if (!forecast.weatherConditions.length)
         forecast.weatherConditions = context.weatherConditions;
     return forecast;
 }
@@ -2782,28 +3133,28 @@ class TimestampOutOfBoundsError extends ParseError {
 }
 function getCompositeForecastForDate(date, forecastContainer) {
     // Validity bounds check
-    if (date.getTime() > forecastContainer.end.getTime() ||
-        date.getTime() < forecastContainer.start.getTime())
+    if (date.getTime() < forecastContainer.start.getTime() ||
+        date.getTime() >= forecastContainer.end.getTime())
         throw new TimestampOutOfBoundsError("Provided timestamp is outside the report validity period");
-    let base;
-    let additional = [];
+    let prevailing;
+    let supplemental = [];
     for (const forecast of forecastContainer.forecast) {
         if (hasImplicitEnd(forecast) &&
             forecast.start.getTime() <= date.getTime()) {
-            // Is FM or initial forecast
-            base = forecast;
+            // Is FM, BECMG or initial forecast
+            prevailing = forecast;
         }
         if (!hasImplicitEnd(forecast) &&
             forecast.end &&
             forecast.end.getTime() - date.getTime() > 0 &&
             forecast.start.getTime() - date.getTime() <= 0) {
-            // Is TEMPO, BECMG etc
-            additional.push(forecast);
+            // Is TEMPO, INTER, PROB etc
+            supplemental.push(forecast);
         }
     }
-    if (!base)
+    if (!prevailing)
         throw new UnexpectedParseError("Unable to find trend for date");
-    return { base, additional };
+    return { prevailing, supplemental };
 }
 function byIfNeeded(forecast) {
     if (forecast.type !== WeatherChangeType.BECMG)
@@ -2825,7 +3176,7 @@ function parse(rawReport, options, parser, datesHydrator) {
     const lang = options?.locale || en;
     try {
         const report = new parser(lang).parse(rawReport);
-        if (options && "issued" in options) {
+        if (options && "issued" in options && options.issued) {
             return datesHydrator(report, options.issued);
         }
         return report;
@@ -2837,4 +3188,4 @@ function parse(rawReport, options, parser, datesHydrator) {
     }
 }
 
-export { CloudQuantity, CloudType, CommandExecutionError, Descriptive, Direction, DistanceUnit, Intensity, InvalidWeatherStatementError, ParseError, Phenomenon, RemarkType, RunwayInfoTrend, RunwayInfoUnit, SpeedUnit, TimeIndicator, TimestampOutOfBoundsError, UnexpectedParseError, ValueIndicator, WeatherChangeType, getCompositeForecastForDate, isWeatherConditionValid, parseMetar, parseTAF, parseTAFAsForecast };
+export { AltimeterUnit, CloudQuantity, CloudType, CommandExecutionError, DepositCoverage, DepositType, Descriptive, Direction, DistanceUnit, IcingIntensity, Intensity, InvalidWeatherStatementError, MetarType, ParseError, PartialWeatherStatementError, Phenomenon, RemarkType, RunwayInfoTrend, RunwayInfoUnit, SpeedUnit, TimeIndicator, TimestampOutOfBoundsError, TurbulenceIntensity, UnexpectedParseError, ValueIndicator, WeatherChangeType, getCompositeForecastForDate, isWeatherConditionValid, parseMetar, parseTAF, parseTAFAsForecast };
