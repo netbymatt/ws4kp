@@ -335,6 +335,10 @@ Before reporting an issue or requesting a feature please consider that this is n
 
 Note: not all units are converted to metric, if selected. Some text-based products such as warnings are simple text strings provided from the national weather service and thus have baked-in units such as "gusts up to 60 mph." These values will not be converted.
 
+## The full moon icon is broken
+
+This is a known problem with the Ws4kp as it ages. It was a problem with the [actual Weatherstar hardware](https://youtu.be/rcUwlZ4pqh0?feature=shared&t=116) as well. 
+
 ## Related Projects
 
 Not retro enough? Try the [Weatherstar 3000+](https://github.com/netbymatt/ws3kp)

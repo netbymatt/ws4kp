@@ -9,11 +9,19 @@ class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Almanac', true);
 
+		// occasional degraded moon icon
+		this.iconPaths = {
+			Full: imageName(Math.random() > 0.995 ? 'Degraded' : 'Full'),
+			Last: imageName('Last'),
+			New: imageName('New'),
+			First: imageName('First'),
+		};
+
 		// preload the moon images
-		preloadImg(imageName('Full'));
-		preloadImg(imageName('Last'));
-		preloadImg(imageName('New'));
-		preloadImg(imageName('First'));
+		preloadImg(this.iconPaths.Full);
+		preloadImg(this.iconPaths.Last);
+		preloadImg(this.iconPaths.New);
+		preloadImg(this.iconPaths.First);
 
 		this.timing.totalScreens = 1;
 	}
@@ -142,7 +150,7 @@ class Almanac extends WeatherDisplay {
 
 			fill.date = date;
 			fill.type = MoonPhase.phase;
-			fill.icon = { type: 'img', src: imageName(MoonPhase.phase) };
+			fill.icon = { type: 'img', src: this.iconPaths[MoonPhase.phase] };
 
 			return this.fillTemplate('day', fill);
 		});
@@ -169,6 +177,8 @@ const imageName = (type) => {
 	switch (type) {
 		case 'Full':
 			return 'images/icons/moon-phases/Full-Moon.gif';
+		case 'Degraded':
+			return 'images/icons/moon-phases/Full-Moon-Degraded.gif';
 		case 'Last':
 			return 'images/icons/moon-phases/Last-Quarter.gif';
 		case 'New':

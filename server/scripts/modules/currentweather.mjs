@@ -85,7 +85,6 @@ class CurrentWeather extends WeatherDisplay {
 				const requiredFields = [
 					{ name: 'temperature', check: (props) => props.temperature?.value === null, required: true },
 					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '', required: true },
-					{ name: 'icon', check: (props) => props.icon === null, required: true },
 					{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null, required: false },
 					{ name: 'dewpoint', check: (props) => props.dewpoint?.value === null, required: false },
 					{ name: 'barometricPressure', check: (props) => props.barometricPressure?.value === null, required: false },
