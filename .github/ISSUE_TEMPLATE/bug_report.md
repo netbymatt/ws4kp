@@ -11,4 +11,4 @@ Please do not report issues with api.weather.gov being down. It's a new service 
 
 Please include:
 * Web browser and OS
-* Location for which you are viewing a forecast
+* Forecast Information text block from the very bottom of the web page

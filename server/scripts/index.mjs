@@ -145,6 +145,8 @@ const init = async () => {
 		document.querySelector('#spanStationId').innerHTML = '';
 		document.querySelector('#spanRadarId').innerHTML = '';
 		document.querySelector('#spanZoneId').innerHTML = '';
+		document.querySelector('#spanOfficeId').innerHTML = '';
+		document.querySelector('#spanGridPoint').innerHTML = '';
 
 		localStorage.removeItem('play');
 		postMessage('navButton', 'play');
