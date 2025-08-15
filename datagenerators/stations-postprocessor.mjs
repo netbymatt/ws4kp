@@ -2,6 +2,8 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 
+import * as url from 'node:url';
+
 // Load station data
 const stationInfo = JSON.parse(readFileSync('./datagenerators/output/stations-raw.json', 'utf8'));
 // const regionalCities = JSON.parse(readFileSync('./datagenerators/output/regionalcities.json', 'utf8'));
@@ -1109,139 +1111,184 @@ or where the fallback to the ICAO airport code occurred:
 	jq -c '.[] | select(.name | test("^[A-Z]{3}$")) | {state, city, simple, name}'
 */
 
-const diffMode = process.argv.includes('--diff');
-const onlyProblems = process.argv.includes('--only-problems');
-const noProblems = process.argv.includes('--no-problems');
-const onlyDuplicates = process.argv.includes('--only-dupes');
-const noPriority = process.argv.includes('--no-priority');
-const noSimple = process.argv.includes('--no-simple');
-const noCoordinates = process.argv.includes('--no-coords');
-const writeFile = process.argv.includes('--write');
+const readArguments = () => ({
+	diffMode: process.argv.includes('--diff'),
+	onlyProblems: process.argv.includes('--only-problems'),
+	noProblems: process.argv.includes('--no-problems'),
+	onlyDuplicates: process.argv.includes('--only-dupes'),
+	noPriority: process.argv.includes('--no-priority'),
+	noSimple: process.argv.includes('--no-simple'),
+	noCoordinates: process.argv.includes('--no-coords'),
+	writeFile: process.argv.includes('--write'),
+});
 
-// Process ALL stations at once to get the display name map
-let displayNameMap = processAllStations(stationInfo);
+const DEFAULT_OPTIONS = {
+	diffMode: false,
+	onlyProblems: false,
+	noProblems: false,
+	onlyDuplicates: false,
+	noPriority: false,
+	noSimple: false,
+	noCoordinates: false,
+	writeFile: false,
+};
 
-// Apply priority-based deduplication
-displayNameMap = resolveDuplicatesByPriority(displayNameMap, stationInfo);
+const postProcessor = (_options) => {
+	// combine default and provided options
+	const options = { ...DEFAULT_OPTIONS, ..._options };
 
-const results = [];
+	// Process ALL stations at once to get the display name map
+	let displayNameMap = processAllStations(stationInfo);
 
-// Now iterate through stations and use the pre-computed display names
-const stations = Object.values(stationInfo);
-stations.forEach((station) => {
-	const originalName = station.city;
-	const processedName = processingUtils.finalCleanup(displayNameMap[station.id]); // Look up by station ID
+	// Apply priority-based deduplication
+	displayNameMap = resolveDuplicatesByPriority(displayNameMap, stationInfo);
 
-	// Get airport type and priority for this station
-	const airportType = getAirportType(originalName, station.id); // Pass station ID for enhanced detection
-	const priority = getAirportPriority(airportType);
+	const results = [];
 
-	const potentialIssues = [];
-	// Check if the processed name contains punctuation (a period at the end is OK)
-	if (/[,;!?/:.]/.test(processedName) && !processedName.endsWith('.')) {
-		potentialIssues.push('punctuation');
-	}
-	if (processedName.length > 12) {
-		potentialIssues.push('long');
-	}
-	if (processedName.length > 20) {
-		potentialIssues.push('reallyLong');
-	}
-	// check if it contains any digits
-	if (/\d/.test(processedName)) {
-		potentialIssues.push('digits');
-	}
+	// Now iterate through stations and use the pre-computed display names
+	const stations = Object.values(stationInfo);
+	stations.forEach((station) => {
+		const originalName = station.city;
+		const processedName = processingUtils.finalCleanup(displayNameMap[station.id]); // Look up by station ID
 
-	results.push({
-		id: station.id,
-		lat: station.lat,
-		lon: station.lon,
-		state: station.state,
-		location: originalName, // original full location name
-		city: processedName, // processed city name for display
-		simple: originalName.match(/[^,/;\\-]*/)[0].substr(0, 12).trim(),
-		type: airportType,
-		priority,
-		potentialIssues,
+		// Get airport type and priority for this station
+		const airportType = getAirportType(originalName, station.id); // Pass station ID for enhanced detection
+		const priority = getAirportPriority(airportType);
+
+		const potentialIssues = [];
+		// Check if the processed name contains punctuation (a period at the end is OK)
+		if (/[,;!?/:.]/.test(processedName) && !processedName.endsWith('.')) {
+			potentialIssues.push('punctuation');
+		}
+		if (processedName.length > 12) {
+			potentialIssues.push('long');
+		}
+		if (processedName.length > 20) {
+			potentialIssues.push('reallyLong');
+		}
+		// check if it contains any digits
+		if (/\d/.test(processedName)) {
+			potentialIssues.push('digits');
+		}
+
+		results.push({
+			id: station.id,
+			lat: station.lat,
+			lon: station.lon,
+			state: station.state,
+			location: originalName, // original full location name
+			city: processedName, // processed city name for display
+			simple: originalName.match(/[^,/;\\-]*/)[0].substr(0, 12).trim(),
+			type: airportType,
+			priority,
+			potentialIssues,
+		});
 	});
-});
 
-// Check for duplicates by state
-const cleanedMapByState = new Map();
+	// Check for duplicates by state
+	const cleanedMapByState = new Map();
 
-results.forEach((result) => {
-	const { state } = result;
-	if (!cleanedMapByState.has(state)) {
-		cleanedMapByState.set(state, new Map());
-	}
-	const stateMap = cleanedMapByState.get(state);
-	if (stateMap.has(result.city)) {
-		stateMap.get(result.city).push(result);
-	} else {
-		stateMap.set(result.city, [result]);
-	}
-});
-
-cleanedMapByState.forEach((stateMap, _state) => {
-	stateMap.forEach((originals, _cleaned) => {
-		if (originals.length > 1) {
-			originals.forEach((original) => {
-				if (!original.potentialIssues.includes('duplicate')) {
-					original.potentialIssues.push('duplicate');
-				}
-			});
+	results.forEach((result) => {
+		const { state } = result;
+		if (!cleanedMapByState.has(state)) {
+			cleanedMapByState.set(state, new Map());
+		}
+		const stateMap = cleanedMapByState.get(state);
+		if (stateMap.has(result.city)) {
+			stateMap.get(result.city).push(result);
+		} else {
+			stateMap.set(result.city, [result]);
 		}
 	});
-});
 
-// Filter results if requested
-let finalResults = results;
-if (onlyProblems) {
-	finalResults = results.filter((r) => r.potentialIssues.length > 0);
-}
-if (onlyDuplicates) {
-	finalResults = finalResults.filter((r) => r.potentialIssues.includes('duplicate'));
-}
+	cleanedMapByState.forEach((stateMap, _state) => {
+		stateMap.forEach((originals, _cleaned) => {
+			if (originals.length > 1) {
+				originals.forEach((original) => {
+					if (!original.potentialIssues.includes('duplicate')) {
+						original.potentialIssues.push('duplicate');
+					}
+				});
+			}
+		});
+	});
 
-const outputResult = finalResults.map((result) => {
-	let outputItem = result;
-
-	// Don't include lat or long in diff mode
-	if (noCoordinates || diffMode) {
-		const {
-			lat: _lat, lon: _lon, ...resultWithoutLocation
-		} = result;
-		outputItem = resultWithoutLocation;
+	// Filter results if requested
+	let finalResults = results;
+	if (options.onlyProblems) {
+		finalResults = results.filter((r) => r.potentialIssues.length > 0);
+	}
+	if (options.onlyDuplicates) {
+		finalResults = finalResults.filter((r) => r.potentialIssues.includes('duplicate'));
 	}
 
-	// Don't include potentialIssues when --no-problems is specified
-	if (noProblems || diffMode) {
-		const { potentialIssues: _potentialIssues, ...resultWithoutIssues } = outputItem;
-		outputItem = resultWithoutIssues;
-	}
+	const outputResult = finalResults.map((result) => {
+		let outputItem = result;
 
-	// Remove type and priority if --no-priority is specified
-	if (noPriority || diffMode) {
-		const { type: _type, priority: _priority, ...resultWithoutPriority } = outputItem;
-		outputItem = resultWithoutPriority;
-	}
+		// Don't include lat or long in diff mode
+		if (options.noCoordinates || options.diffMode) {
+			const {
+				lat: _lat, lon: _lon, ...resultWithoutLocation
+			} = result;
+			outputItem = resultWithoutLocation;
+		}
 
-	// remove simple field if --no-simple is specified
-	if (noSimple || diffMode) {
-		const { simple: _simple, ...resultWithoutSimple } = outputItem;
-		outputItem = resultWithoutSimple;
-	}
+		// Don't include potentialIssues when --no-problems is specified
+		if (options.noProblems || options.diffMode) {
+			const { potentialIssues: _potentialIssues, ...resultWithoutIssues } = outputItem;
+			outputItem = resultWithoutIssues;
+		}
 
-	return outputItem;
-});
+		// Remove type and priority if --no-priority is specified
+		if (options.noPriority || options.diffMode) {
+			const { type: _type, priority: _priority, ...resultWithoutPriority } = outputItem;
+			outputItem = resultWithoutPriority;
+		}
 
-if (writeFile) {
+		// remove simple field if --no-simple is specified
+		if (options.noSimple || options.diffMode) {
+			const { simple: _simple, ...resultWithoutSimple } = outputItem;
+			outputItem = resultWithoutSimple;
+		}
+
+		return outputItem;
+	});
+
 	const fileResults = results.map(({
-		simple: _simple, type: _type, potentialIssues: _potentialIssues, ...rest
+		simple: _simple, type: _type, potentialIssues: _potentialIssues, location: _location, ...rest
 	}) => rest);
 
-	writeFileSync('./datagenerators/output/stations.json', compactStringifyToObject(fileResults));
-	console.log(`Wrote ${fileResults.length} processed stations to datagenerators/output/stations.json`);
-} else {
-	console.log(compactStringifyToArray(outputResult));
+	if (options.writeFile) {
+		writeFileSync('./datagenerators/output/stations.json', compactStringifyToObject(fileResults));
+		console.log(`Wrote ${fileResults.length} processed stations to datagenerators/output/stations.json`);
+	} else {
+		console.log(compactStringifyToArray(outputResult));
+	}
+
+	// array to output object
+	const returnObject = {};
+	fileResults.forEach((item) => {
+		returnObject[item.id] = item;
+	});
+
+	return returnObject;
+};
+
+// determine if running from command line or module
+const commandLine = (() => {
+	if (import.meta.url.startsWith('file:')) { // (A)
+		const modulePath = url.fileURLToPath(import.meta.url);
+		if (process.argv[1] === modulePath) { // (B)
+			return true;
+		}
+	}
+	return false;
 }
+)();
+
+// run post processor if called from command line
+if (commandLine) {
+	postProcessor(readArguments());
+}
+
+export default postProcessor;

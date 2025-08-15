@@ -26,6 +26,18 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
+			"args": [
+				"--use-cache"
+			],
+			"type": "node"
+		},
+		{
+			"name": "Data:stations-api",
+			"program": "${workspaceFolder}/datagenerators/stations.mjs",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
 			"type": "node"
 		},
 		{
