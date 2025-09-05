@@ -97,22 +97,26 @@ const copyCss = () => src(cssSources)
 const htmlSources = [
 	'views/*.ejs',
 ];
-const compressHtml = async () => {
-	const packageJson = await readFile('package.json');
-	const { version } = JSON.parse(packageJson);
-
-	return src(htmlSources)
-		.pipe(ejs({
-			production: version,
-			serverAvailable: false,
-			version,
-			OVERRIDES,
-			query: {},
-		}))
-		.pipe(rename({ extname: '.html' }))
-		.pipe(htmlmin({ collapseWhitespace: true }))
-		.pipe(dest('./dist'));
+const packageJson = await readFile('package.json');
+let { version } = JSON.parse(packageJson);
+const previewVersion = async () => {
+	// generate a relatively unique timestamp for cache invalidation of the preview site
+	const now = new Date();
+	const msNow = now.getTime() % 1_000_000;
+	version = msNow.toString();
 };
+
+const compressHtml = async () => src(htmlSources)
+	.pipe(ejs({
+		production: version,
+		serverAvailable: false,
+		version,
+		OVERRIDES,
+		query: {},
+	}))
+	.pipe(rename({ extname: '.html' }))
+	.pipe(htmlmin({ collapseWhitespace: true }))
+	.pipe(dest('./dist'));
 
 const otherFiles = [
 	'server/robots.txt',
@@ -205,7 +209,7 @@ const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyCss, com
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
 const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
-const stageFrontend = series(buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
+const stageFrontend = series(previewVersion, buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
 
 export default publishFrontend;
 
