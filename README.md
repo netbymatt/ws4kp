@@ -309,12 +309,13 @@ If you're unable to pre-set the play state before entering kiosk mode (such as w
 
 ## Community Notes
 
-Thanks to the WeatherStar community for providing these discussions to further extend your retro forecasts!
+Thanks to the WeatherStar+ community for providing these discussions to further extend your retro forecasts!
 
 * [Stream as FFMPEG](https://github.com/netbymatt/ws4kp/issues/37#issuecomment-2008491948)
 * [Weather like it's 1999](https://blog.scottlabs.io/2024/02/weather-like-its-1999/) Raspberry pi, streaming, music and CRT all combined into a complete solution.
 * [ws4channels](https://github.com/rice9797/ws4channels) A Dockerized Node.js application to stream WeatherStar 4000 data into Channels DVR using Puppeteer and FFmpeg.
 * [SSL Certificates](https://github.com/netbymatt/ws4kp/issues/135) Discussion about how to host with an SSL certificate (enables geolocation).
+* [Changing playlists](https://github.com/netbymatt/ws4kp/issues/138) Possible ways to automatically change the playlist on a schedule.
 
 ## Customization
 
