@@ -455,10 +455,9 @@ const resize = (force = false) => {
 		const bottomBar = document.querySelector('#divTwcBottom');
 		const bottomBarHeight = bottomBar ? bottomBar.offsetHeight : 40; // fallback to ~40px
 		const totalHeight = 480 + bottomBarHeight;
-		const scaledHeight = totalHeight * scale; // Height after scaling
 
 		wrapper.style.setProperty('width', `${wrapperWidth}px`);
-		wrapper.style.setProperty('height', `${scaledHeight}px`); // Use scaled height to eliminate gap
+		wrapper.style.setProperty('height', `${totalHeight}px`);
 		applyScanlineScaling(scale);
 		return;
 	}
