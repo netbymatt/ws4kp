@@ -1,5 +1,5 @@
-@use 'shared/_utils' as u;
-@use 'shared/_colors' as c;
+@use 'shared/_utils'as u;
+@use 'shared/_colors'as c;
 
 @font-face {
 	font-family: "Star4000";
@@ -161,6 +161,7 @@ body {
 #divTwcMain {
 	width: 640px;
 	height: 480px;
+	position: relative;
 
 	.wide & {
 		width: 854px;

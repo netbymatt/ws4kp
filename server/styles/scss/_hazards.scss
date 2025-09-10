@@ -1,11 +1,16 @@
-@use 'shared/_colors' as c;
-@use 'shared/_utils' as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+#hazards-html.weather-display {
+	background-image: url('../images/backgrounds/7.png');
+}
 
 .weather-display .main.hazards {
 	&.main {
 		overflow-y: hidden;
 		height: 480px;
 		background-color: rgb(112, 35, 35);
+
 
 		.hazard-lines {
 			min-height: 400px;
@@ -25,4 +30,8 @@
 			}
 		}
 	}
+}
+
+.wide.hazards #container {
+	background: url(../images/backgrounds/7-wide.png);
 }

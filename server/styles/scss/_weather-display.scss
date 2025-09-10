@@ -1,5 +1,5 @@
-@use 'shared/_colors' as c;
-@use 'shared/_utils' as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
 
 .weather-display {
 	width: 640px;
@@ -116,9 +116,11 @@
 	.scroll {
 		@include u.text-shadow(3px, 1.5px);
 		width: 640px;
-		height: 70px;
+		height: 77px;
 		overflow: hidden;
 		margin-top: 3px;
+		position: relative;
+		z-index: 1;
 
 		&.hazard {
 			background-color: rgb(112, 35, 35);
@@ -158,4 +160,19 @@
 		}
 
 	}
+}
+
+#scroll-bg {
+	position: absolute;
+	bottom: 0px;
+	height: 77px;
+	width: 640px;
+
+	&.hazard {
+		background-color: rgb(112, 35, 35);
+	}
+}
+
+.wide #scroll-bg {
+	width: 854px;
 }

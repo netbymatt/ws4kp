@@ -97,6 +97,12 @@ const drawScreen = async () => {
 		if (elem.parentElement.id === 'progress-html') return;
 		thisScreen?.classes?.forEach((cls) => elem.classList.add(cls));
 	});
+	// special case for red background on hazard scroll
+	const mainScrollBg = document.getElementById('scroll-bg');
+	mainScrollBg.className = '';
+	if (thisScreen?.classes?.includes('hazard')) {
+		mainScrollBg.classList.add('hazard');
+	}
 
 	if (typeof thisScreen === 'string') {
 		// only a string
