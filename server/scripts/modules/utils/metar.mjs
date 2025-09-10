@@ -3,13 +3,32 @@ import { parseMetar } from '../../vendor/auto/metar-taf-parser.mjs';
 // eslint-disable-next-line import/extensions
 import en from '../../vendor/auto/locale/en.js';
 
+// metar-taf-parser requires regex lookbehind
+// this does not work in iOS < 16.4
+// this is a detection algorithm for iOS versions
+const isIos = /iP(ad|od|hone)/i.test(window.navigator.userAgent);
+let iosVersionOk = false;
+if (isIos) {
+	// regex match the version string
+	const iosVersionRaw = /OS (\d+)_(\d+)/.exec(window.navigator.userAgent);
+	// check for match
+	if (iosVersionRaw) {
+		// break into parts
+		const iosVersionMajor = parseInt(iosVersionRaw[1], 10);
+		const iosVersionMinor = parseInt(iosVersionRaw[2], 10);
+		if (iosVersionMajor > 16) iosVersionOk = true;
+		if (iosVersionMajor === 16 && iosVersionMinor >= 4) iosVersionOk = true;
+	}
+}
+
 /**
  * Augment observation data by parsing METAR when API fields are missing
  * @param {Object} observation - The observation object from the API
  * @returns {Object} - Augmented observation with parsed METAR data filled in
  */
 const augmentObservationWithMetar = (observation) => {
-	if (!observation?.rawMessage) {
+	// check for a metar message and for unusable ios versions
+	if (!observation?.rawMessage || (isIos && !iosVersionOk)) {
 		return observation;
 	}
 
