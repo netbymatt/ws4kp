@@ -32,6 +32,18 @@ From a learning standpoint, this codebase make use of a lot of different methods
 * Hand written CSS made easier to mange with SASS
 * A linting library to keep code style consistent
 
+## Quck Start
+
+Ensure you have Node installed.
+```bash
+git clone https://github.com/netbymatt/ws4kp.git
+cd ws4kp
+npm install
+npm start
+```
+
+Open your browser and navigate to https://localhost:8080
+
 ## Does WeatherStar 4000+ work outside of the USA?
 
 This project is tightly coupled to [NOAA's Weather API](https://www.weather.gov/documentation/services-web-api), which is exclusive to the United States. Using NOAA's Weather API is a crucial requirement to provide an authentic WeatherStar 4000+ experience.
@@ -57,14 +69,7 @@ WeatherStar 4000+ supports two deployment modes:
 * Browser-based caching
 * Used by: static file hosting and default `Dockerfile`
 
-## Run Your WeatherStar
-
-Ensure you have Node installed. Clone the repository:
-```bash
-git clone https://github.com/netbymatt/ws4kp.git
-cd ws4kp
-npm install
-```
+## Other methods to run Ws4kp
 
 ### Development Mode (individual JS files, easier debugging)
 ```bash
