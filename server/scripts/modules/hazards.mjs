@@ -71,6 +71,7 @@ class Hazards extends WeatherDisplay {
 			// get the forecast using centralized safe handling
 			const url = new URL('https://api.weather.gov/alerts/active');
 			url.searchParams.append('point', `${this.weatherParameters.latitude},${this.weatherParameters.longitude}`);
+			url.searchParams.append('status', 'actual');
 			const alerts = await safeJson(url, { retryCount: 3, stillWaiting: () => this.stillWaiting() });
 
 			if (!alerts) {
