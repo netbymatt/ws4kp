@@ -376,9 +376,8 @@ const resize = (force = false) => {
 	// Standard scaling: fit within both dimensions
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
 
-	// For Mobile Safari in kiosk mode, always use centering behavior regardless of scale
-	// For other platforms, only use fullscreen/centering behavior for actual fullscreen or kiosk mode where content fits naturally
-	const isKioskLike = isFullscreen || (isKioskMode && scale >= 1.0) || isMobileSafariKiosk;
+	// Use centering behavior for fullscreen, kiosk mode, or Mobile Safari kiosk mode
+	const isKioskLike = isFullscreen || isKioskMode || isMobileSafariKiosk;
 
 	if (debugFlag('resize') || debugFlag('fullscreen')) {
 		console.log(`🖥️ Resize: force=${force} isKioskLike=${isKioskLike} window=${window.innerWidth}x${window.innerHeight} targetWidth=${targetWidth} widthZoom=${widthZoomPercent.toFixed(3)} heightZoom=${heightZoomPercent.toFixed(3)} finalScale=${scale.toFixed(3)} fullscreenElement=${!!document.fullscreenElement} isIOS=${isIOS()} standalone=${window.navigator.standalone} isMobileSafariKiosk=${isMobileSafariKiosk} kioskMode=${settings.kiosk?.value} wideMode=${settings.wide.value}`);
@@ -439,13 +438,26 @@ const resize = (force = false) => {
 		/*
 		 * MOBILE SCALING (Wrapper Scaling)
 		 *
+		 * This path is used for regular mobile browsing (NOT fullscreen/kiosk modes).
 		 * Why scale the wrapper instead of mainContainer?
 		 * - For mobile devices where content is larger than viewport, we need to scale the entire layout
 		 * - The wrapper (#divTwc) contains both the main content AND the bottom navigation bar
 		 * - Scaling the wrapper ensures both elements are scaled together as a unit
-		 * - No centering is applied - content aligns to top-left for typical mobile behavior
+		 * - Content aligns to top-left for typical mobile web browsing behavior (no centering)
 		 * - Uses explicit dimensions to prevent layout issues and eliminate gaps after scaling
 		 */
+
+		// Reset any mainContainer styles that might have been set during fullscreen/kiosk mode
+		mainContainer.style.removeProperty('transform');
+		mainContainer.style.removeProperty('transform-origin');
+		mainContainer.style.removeProperty('width');
+		mainContainer.style.removeProperty('height');
+		mainContainer.style.removeProperty('position');
+		mainContainer.style.removeProperty('left');
+		mainContainer.style.removeProperty('top');
+		mainContainer.style.removeProperty('margin-left');
+		mainContainer.style.removeProperty('margin-top');
+
 		wrapper.style.setProperty('transform', `scale(${scale})`);
 		wrapper.style.setProperty('transform-origin', 'top left'); // Scale from top-left corner
 
@@ -455,9 +467,10 @@ const resize = (force = false) => {
 		const bottomBar = document.querySelector('#divTwcBottom');
 		const bottomBarHeight = bottomBar ? bottomBar.offsetHeight : 40; // fallback to ~40px
 		const totalHeight = 480 + bottomBarHeight;
+		const scaledHeight = totalHeight * scale; // Height after scaling
 
 		wrapper.style.setProperty('width', `${wrapperWidth}px`);
-		wrapper.style.setProperty('height', `${totalHeight}px`);
+		wrapper.style.setProperty('height', `${scaledHeight}px`); // Use scaled height to eliminate gap under #divTwc on index page
 		applyScanlineScaling(scale);
 		return;
 	}
