@@ -73,7 +73,10 @@
 		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
-		}
+		},
+		"cSpell.words": [
+			"hibyehihi"
+		]
 	},
 	"extensions": {
 		"recommendations": [
