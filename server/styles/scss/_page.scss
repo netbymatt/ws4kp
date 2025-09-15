@@ -341,13 +341,14 @@ body {
 	// overflow: hidden;
 	background-image: url(../images/backgrounds/1.png);
 	transform-origin: 0 0;
+	background-repeat: no-repeat;
 }
 
 .wide #container {
 	padding-left: 107px;
 	padding-right: 107px;
+	background: url(../images/backgrounds/1-wide.png);
 	background-repeat: no-repeat;
-	background: url(../images/backgrounds/1-wide.png)
 }
 
 #divTwc:fullscreen #container,

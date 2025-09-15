@@ -559,7 +559,9 @@ const resize = (force = false) => {
 	// Apply shared properties to the target element
 	targetElement.style.setProperty('transform', `scale(${scale})`, 'important');
 	targetElement.style.setProperty('transform-origin', transformOrigin, 'important');
-	targetElement.style.setProperty('width', `${wrapperWidth}px`, 'important');
+	// the width of the target element does not change it is the fixed width of the 4:3 display which is then scaled
+	// the wrapper adds margins and padding to achieve widescreen
+	// targetElement.style.setProperty('width', `${wrapperWidth}px`, 'important');
 	targetElement.style.setProperty('height', `${wrapperHeight}px`, 'important');
 	targetElement.style.setProperty('position', 'absolute', 'important');
 	targetElement.style.setProperty('left', leftPosition, 'important');
