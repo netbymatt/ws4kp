@@ -357,6 +357,17 @@ const isIOS = () => {
 let lastAppliedScale = null;
 let lastAppliedKioskMode = null;
 
+// Helper function to clear CSS properties from elements
+const clearElementStyles = (element, properties) => {
+	properties.forEach((prop) => element.style.removeProperty(prop));
+};
+
+// Define property groups for different scaling modes
+const SCALING_PROPERTIES = {
+	wrapper: ['width', 'height', 'transform', 'transform-origin'],
+	positioning: ['transform', 'transform-origin', 'width', 'height', 'position', 'left', 'top', 'margin-left', 'margin-top'],
+};
+
 // resize the container on a page resize
 const resize = (force = false) => {
 	// Ignore resize events caused by pinch-to-zoom on mobile
@@ -411,52 +422,34 @@ const resize = (force = false) => {
 			console.log('🖥️ Resetting fullscreen/kiosk styles to normal');
 		}
 
-		// Reset wrapper styles (only properties that are actually set in fullscreen/scaling modes)
-		wrapper.style.removeProperty('width');
-		wrapper.style.removeProperty('height');
-		wrapper.style.removeProperty('overflow');
-		wrapper.style.removeProperty('transform');
-		wrapper.style.removeProperty('transform-origin');
-
-		// Reset container styles that might have been applied during fullscreen
-		mainContainer.style.removeProperty('transform');
-		mainContainer.style.removeProperty('transform-origin');
-		mainContainer.style.removeProperty('width');
-		mainContainer.style.removeProperty('height');
-		mainContainer.style.removeProperty('position');
-		mainContainer.style.removeProperty('left');
-		mainContainer.style.removeProperty('top');
-		mainContainer.style.removeProperty('margin-left');
-		mainContainer.style.removeProperty('margin-top');
+		// Reset all scaling-related styles
+		const container = document.querySelector('#container');
+		clearElementStyles(wrapper, SCALING_PROPERTIES.wrapper);
+		clearElementStyles(container, SCALING_PROPERTIES.positioning);
+		clearElementStyles(mainContainer, SCALING_PROPERTIES.positioning);
 
 		applyScanlineScaling(1.0);
 		return;
 	}
 
-	// MOBILE SCALING: Use wrapper scaling for mobile devices (but not Mobile Safari kiosk mode)
-	if ((scale < 1.0 || (isKioskMode && !isKioskLike)) && !isMobileSafariKiosk) {
+	// MOBILE SCALING: Use wrapper scaling for mobile devices (but not when in fullscreen/kiosk mode)
+	if ((scale < 1.0 || (isKioskMode && !isKioskLike)) && !isMobileSafariKiosk && !isKioskLike) {
 		/*
 		 * MOBILE SCALING (Wrapper Scaling)
 		 *
-		 * This path is used for regular mobile browsing (NOT fullscreen/kiosk modes).
+								* This path is used for regular mobile browsing (NOT fullscreen/kiosk modes).
 		 * Why scale the wrapper instead of mainContainer?
 		 * - For mobile devices where content is larger than viewport, we need to scale the entire layout
 		 * - The wrapper (#divTwc) contains both the main content AND the bottom navigation bar
 		 * - Scaling the wrapper ensures both elements are scaled together as a unit
-		 * - Content aligns to top-left for typical mobile web browsing behavior (no centering)
+								* - Content aligns to top-left for typical mobile web browsing behavior (no centering)
 		 * - Uses explicit dimensions to prevent layout issues and eliminate gaps after scaling
 		 */
 
-		// Reset any mainContainer styles that might have been set during fullscreen/kiosk mode
-		mainContainer.style.removeProperty('transform');
-		mainContainer.style.removeProperty('transform-origin');
-		mainContainer.style.removeProperty('width');
-		mainContainer.style.removeProperty('height');
-		mainContainer.style.removeProperty('position');
-		mainContainer.style.removeProperty('left');
-		mainContainer.style.removeProperty('top');
-		mainContainer.style.removeProperty('margin-left');
-		mainContainer.style.removeProperty('margin-top');
+		// Reset any container/mainContainer styles that might have been set during fullscreen/kiosk mode
+		const container = document.querySelector('#container');
+		clearElementStyles(container, SCALING_PROPERTIES.positioning);
+		clearElementStyles(mainContainer, SCALING_PROPERTIES.positioning);
 
 		wrapper.style.setProperty('transform', `scale(${scale})`);
 		wrapper.style.setProperty('transform-origin', 'top left'); // Scale from top-left corner
@@ -480,10 +473,7 @@ const resize = (force = false) => {
 	const wrapperHeight = 480;
 
 	// Reset wrapper styles to avoid double scaling (wrapper remains unstyled)
-	wrapper.style.removeProperty('width');
-	wrapper.style.removeProperty('height');
-	wrapper.style.removeProperty('transform');
-	wrapper.style.removeProperty('transform-origin');
+	clearElementStyles(wrapper, SCALING_PROPERTIES.wrapper);
 
 	// Platform-specific positioning logic
 	let transformOrigin;
@@ -541,7 +531,7 @@ const resize = (force = false) => {
 		const offsetY = (window.innerHeight - scaledHeight) / 2;
 
 		if (debugFlag('fullscreen')) {
-			console.log(`🖥️ Applying fullscreen/kiosk scaling: wrapper=${wrapperWidth}x${wrapperHeight} scale=${scale.toFixed(3)} offset=${offsetX.toFixed(1)},${offsetY.toFixed(1)} transform: scale(${scale}) translate(${offsetX / scale}px, ${offsetY / scale}px)`);
+			console.log(`🖥️ Applying fullscreen/kiosk scaling: wrapper=${wrapperWidth}x${wrapperHeight} scale=${scale.toFixed(3)} offset=${offsetX.toFixed(1)},${offsetY.toFixed(1)} target=${isFullscreen ? '#container' : '#divTwcMain'}`);
 		}
 
 		// Set positioning values for CSS-based centering
@@ -552,25 +542,39 @@ const resize = (force = false) => {
 		marginTop = `-${wrapperHeight / 2}px`; // Pull back by half height
 	}
 
-	// Apply shared mainContainer properties (same for both kiosk modes)
-	mainContainer.style.setProperty('transform', `scale(${scale})`, 'important');
-	mainContainer.style.setProperty('transform-origin', transformOrigin, 'important');
-	mainContainer.style.setProperty('width', `${wrapperWidth}px`, 'important');
-	mainContainer.style.setProperty('height', `${wrapperHeight}px`, 'important');
-	mainContainer.style.setProperty('position', 'absolute', 'important');
-	mainContainer.style.setProperty('left', leftPosition, 'important');
-	mainContainer.style.setProperty('top', topPosition, 'important');
+	// Chrome fullscreen compatibility: apply transform to #container instead of #divTwcMain
+	// This works around Chrome's restriction on styling fullscreen elements directly
+	const container = document.querySelector('#container');
+	const targetElement = isFullscreen ? container : mainContainer;
+
+	// Reset the other element's styles to avoid conflicts
+	if (isFullscreen) {
+		// Reset mainContainer styles when using container for fullscreen
+		clearElementStyles(mainContainer, SCALING_PROPERTIES.positioning);
+	} else {
+		// Reset container styles when using mainContainer for kiosk mode
+		clearElementStyles(container, SCALING_PROPERTIES.positioning);
+	}
+
+	// Apply shared properties to the target element
+	targetElement.style.setProperty('transform', `scale(${scale})`, 'important');
+	targetElement.style.setProperty('transform-origin', transformOrigin, 'important');
+	targetElement.style.setProperty('width', `${wrapperWidth}px`, 'important');
+	targetElement.style.setProperty('height', `${wrapperHeight}px`, 'important');
+	targetElement.style.setProperty('position', 'absolute', 'important');
+	targetElement.style.setProperty('left', leftPosition, 'important');
+	targetElement.style.setProperty('top', topPosition, 'important');
 
 	// Apply or clear margin properties based on positioning method
 	if (marginLeft !== null) {
-		mainContainer.style.setProperty('margin-left', marginLeft, 'important');
+		targetElement.style.setProperty('margin-left', marginLeft, 'important');
 	} else {
-		mainContainer.style.removeProperty('margin-left');
+		targetElement.style.removeProperty('margin-left');
 	}
 	if (marginTop !== null) {
-		mainContainer.style.setProperty('margin-top', marginTop, 'important');
+		targetElement.style.setProperty('margin-top', marginTop, 'important');
 	} else {
-		mainContainer.style.removeProperty('margin-top');
+		targetElement.style.removeProperty('margin-top');
 	}
 
 	applyScanlineScaling(scale);
