@@ -12,9 +12,14 @@ const secondsToTicks = (seconds) => Math.ceil((seconds * 1000) / TICK_INTERVAL_M
 const DEFAULT_UPDATE = secondsToTicks(4.0); // 4 second default for each current conditions
 
 // items on page
-const mainScroll = document.querySelector('#container>.scroll');
-const fixedScroll = document.querySelector('#container>.scroll .fixed');
-const header = document.querySelector('#container>.scroll .scroll-header');
+let mainScroll;
+let fixedScroll;
+let header;
+document.addEventListener('DOMContentLoaded', () => {
+	mainScroll = document.querySelector('#container>.scroll');
+	fixedScroll = document.querySelector('#container>.scroll .fixed');
+	header = document.querySelector('#container>.scroll .scroll-header');
+});
 
 // local variables
 let interval;
