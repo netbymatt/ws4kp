@@ -1,20 +1,19 @@
 <%- include('header.ejs', {titleDual:{ top: 'Storm Prediction' , bottom: 'Center Outlook' }, hasTime: true}) %>
-	<div class="main has-scroll spc-outlook">
-		<div class="container">
-			<div class="risk-levels">
-				<div class="risk-level">High</div>
-				<div class="risk-level">Moderate</div>
-				<div class="risk-level">Enhanced</div>
-				<div class="risk-level">Slight</div>
-				<div class="risk-level">Marginal</div>
-				<div class="risk-level">T'Storm</div>
-			</div>
-			<div class="days">
-				<div class="day template">
-					<div class="day-name">Monday</div>
-					<div class="risk-bar"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<%- include('scroll.ejs') %>
+<div class="main has-scroll spc-outlook">
+  <div class="container">
+    <div class="risk-levels">
+      <div class="risk-level">High</div>
+      <div class="risk-level">Moderate</div>
+      <div class="risk-level">Enhanced</div>
+      <div class="risk-level">Slight</div>
+      <div class="risk-level">Marginal</div>
+      <div class="risk-level">T'Storm</div>
+    </div>
+    <div class="days">
+      <div class="day template">
+        <div class="day-name">Monday</div>
+        <div class="risk-bar"></div>
+      </div>
+    </div>
+  </div>
+</div>

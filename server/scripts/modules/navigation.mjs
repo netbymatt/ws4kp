@@ -330,6 +330,7 @@ const handleNavButton = (button) => {
 			break;
 		case 'menu':
 			setPlaying(false);
+			postMessage({ type: 'current-weather-scroll', method: 'hide' });
 			if (progress) {
 				progress.showCanvas();
 			} else if (settings?.kiosk?.value) {

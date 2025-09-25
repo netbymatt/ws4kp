@@ -1,5 +1,4 @@
 import { locationCleanup } from './utils/string.mjs';
-import { elemForEach } from './utils/elem.mjs';
 import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
 import getHazards from './hazards.mjs';
@@ -12,6 +11,11 @@ const TICK_INTERVAL_MS = 500; // milliseconds per tick
 const secondsToTicks = (seconds) => Math.ceil((seconds * 1000) / TICK_INTERVAL_MS);
 const DEFAULT_UPDATE = secondsToTicks(4.0); // 4 second default for each current conditions
 
+// items on page
+const mainScroll = document.querySelector('#container>.scroll');
+const fixedScroll = document.querySelector('#container>.scroll .fixed');
+const header = document.querySelector('#container>.scroll .scroll-header');
+
 // local variables
 let interval;
 let screenIndex = 0;
@@ -23,6 +27,8 @@ let defaultScreensLoaded = true;
 // start drawing conditions
 // reset starts from the first item in the text scroll list
 const start = () => {
+	// show the block
+	show();
 	// if already started, draw the screen on a reset flag and return
 	if (interval) {
 		if (resetFlag) drawScreen();
@@ -62,6 +68,7 @@ const incrementInterval = (force) => {
 	const display = currentDisplay();
 	if (!display?.okToDrawCurrentConditions) {
 		stop(display?.elemId === 'progress');
+		hide();
 		return;
 	}
 	screenIndex = (screenIndex + 1) % (workingScreens.length);
@@ -91,18 +98,8 @@ const drawScreen = async () => {
 	const thisScreen = workingScreens[screenIndex](scrollData);
 
 	// update classes on the scroll area
-	elemForEach('.weather-display .scroll', (elem) => {
-		elem.classList.forEach((cls) => { if (cls !== 'scroll') elem.classList.remove(cls); });
-		// no scroll on progress
-		if (elem.parentElement.id === 'progress-html') return;
-		thisScreen?.classes?.forEach((cls) => elem.classList.add(cls));
-	});
-	// special case for red background on hazard scroll
-	const mainScrollBg = document.getElementById('scroll-bg');
-	mainScrollBg.className = '';
-	if (thisScreen?.classes?.includes('hazard')) {
-		mainScrollBg.classList.add('hazard');
-	}
+	mainScroll.classList.forEach((cls) => { if (cls !== 'scroll') mainScroll.classList.remove(cls); });
+	thisScreen?.classes?.forEach((cls) => mainScroll.classList.add(cls));
 
 	if (typeof thisScreen === 'string') {
 		// only a string
@@ -131,9 +128,7 @@ const hazards = (data) => {
 	// test for data
 	if (!data.hazards || data.hazards.length === 0) return false;
 
-	// since the hazard scroll element has no left/right margins, pad the beginning and end with non-breaking spaces
-	const padding = '&nbsp;'.repeat(4);
-	const hazard = `${padding}${data.hazards[0].properties.event} ${data.hazards[0].properties.description}${padding}`;
+	const hazard = `${data.hazards[0].properties.event} ${data.hazards[0].properties.description}`;
 
 	return {
 		text: hazard,
@@ -196,17 +191,12 @@ let workingScreens = [...baseScreens, ...additionalScreens];
 
 // internal draw function with preset parameters
 const drawCondition = (text) => {
-	// update all html scroll elements
-	elemForEach('.weather-display .scroll .fixed', (elem) => {
-		elem.innerHTML = text;
-	});
+	fixedScroll.innerHTML = text;
 	setHeader('');
 };
 
 const setHeader = (text) => {
-	elemForEach('.weather-display .scroll .scroll-header', (elem) => {
-		elem.innerHTML = text ?? '';
-	});
+	header.innerHTML = text ?? '';
 };
 
 // reset the screens back to the original set
@@ -229,14 +219,14 @@ const drawScrollCondition = (screen) => {
 	scrollElement.classList.add('scroll-area');
 	scrollElement.innerHTML = screen.text;
 	// add it to the page to get the width
-	document.querySelector('.weather-display .scroll .fixed').innerHTML = scrollElement.outerHTML;
+	fixedScroll.innerHTML = scrollElement.outerHTML;
 	// grab the width
-	const { scrollWidth, clientWidth } = document.querySelector('.weather-display .scroll .fixed .scroll-area');
+	const { scrollWidth, clientWidth } = document.querySelector('#container>.scroll .fixed .scroll-area');
 
 	// calculate the scroll distance and set a minimum scroll
 	const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
-	// calculate the scroll time (scaled by global speed setting)
-	const scrollTime = scrollDistance / SCROLL_SPEED * settings.speed.value;
+	// calculate the scroll time (scaled by global speed setting), minimum 2s (4s when added to start and end delays)
+	const scrollTime = Math.max(scrollDistance / SCROLL_SPEED * settings.speed.value, 2);
 	// add 1 second pause at the end of the scroll animation
 	const endPauseTime = 1.0;
 	const totalAnimationTime = scrollTime + endPauseTime;
@@ -252,17 +242,13 @@ const drawScrollCondition = (screen) => {
 	scrollElement.style.backfaceVisibility = 'hidden'; // Force hardware acceleration
 	scrollElement.style.perspective = '1000px'; // Enable 3D rendering context
 
-	elemForEach('.weather-display .scroll .fixed', (elem) => {
-		elem.innerHTML = '';
-		elem.append(scrollElement.cloneNode(true));
-	});
+	fixedScroll.innerHTML = '';
+	fixedScroll.append(scrollElement.cloneNode(true));
 
 	// start the scroll after the specified delay
 	setTimeout(() => {
 		// change the transform to trigger the scroll
-		elemForEach('.weather-display .scroll .fixed .scroll-area', (elem) => {
-			elem.style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
-		});
+		document.querySelector('#container>.scroll .fixed .scroll-area').style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
 	}, startDelayTime * 1000);
 };
 
@@ -270,7 +256,17 @@ const parseMessage = (event) => {
 	if (event?.data?.type === 'current-weather-scroll') {
 		if (event.data?.method === 'start') start();
 		if (event.data?.method === 'reload') stop(true);
+		if (event.data?.method === 'show') show();
+		if (event.data?.method === 'hide') hide();
 	}
+};
+
+const show = () => {
+	mainScroll.style.display = 'block';
+};
+
+const hide = () => {
+	mainScroll.style.display = 'none';
 };
 
 const screenCount = () => workingScreens.length;
@@ -283,6 +279,8 @@ window.CurrentWeatherScroll = {
 	addScreen,
 	reset,
 	start,
+	show,
+	hide,
 	screenCount,
 	atDefault,
 };
@@ -291,6 +289,8 @@ export {
 	addScreen,
 	reset,
 	start,
+	show,
+	hide,
 	screenCount,
 	atDefault,
 };

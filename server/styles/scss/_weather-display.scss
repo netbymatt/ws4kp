@@ -112,31 +112,32 @@
 
 	}
 
+}
 
-	.scroll {
-		@include u.text-shadow(3px, 1.5px);
+#container>.scroll {
+	display: none;
+	@include u.text-shadow(3px, 1.5px);
+	width: 640px;
+	height: 77px;
+	overflow: hidden;
+	margin-top: 3px;
+	position: absolute;
+	bottom: 0px;
+	z-index: 1;
+
+	&.hazard {
+		background-color: rgb(112, 35, 35);
+	}
+
+	.scroll-container {
 		width: 640px;
-		height: 77px;
-		overflow: hidden;
-		margin-top: 3px;
-		position: relative;
-		z-index: 1;
-
-		&.hazard {
-			background-color: rgb(112, 35, 35);
-		}
 
 		.fixed,
 		.scroll-header {
 			margin-left: 55px;
 			margin-right: 55px;
 			overflow: hidden;
-		}
-
-		// Remove margins for hazard scrolls to maximize text space
-		&.hazard .fixed {
-			margin-left: 0;
-			margin-right: 0;
+			white-space: nowrap;
 		}
 
 		.scroll-header {
@@ -158,21 +159,17 @@
 				// left: calc((elem width) - 640px);
 			}
 		}
-
 	}
+
+
+
 }
 
-#scroll-bg {
-	position: absolute;
-	bottom: 0px;
-	height: 77px;
-	width: 640px;
-
-	&.hazard {
-		background-color: rgb(112, 35, 35);
-	}
-}
-
-.wide #scroll-bg {
+.wide #container>.scroll {
 	width: 854px;
+	margin-left: -107px;
+
+	.scroll-container {
+		margin-left: 107px;
+	}
 }

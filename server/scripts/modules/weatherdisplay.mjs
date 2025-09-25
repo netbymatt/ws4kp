@@ -172,6 +172,7 @@ class WeatherDisplay {
 		if (this.screenIndex < 0) this.screenIndex = 0;
 		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
 		if (this.okToDrawCurrentConditions) postMessage({ type: 'current-weather-scroll', method: 'start' });
+		if (this.okToDrawCurrentConditions === false) postMessage({ type: 'current-weather-scroll', method: 'hide' });
 	}
 
 	finishDraw() {

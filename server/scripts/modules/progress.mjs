@@ -22,7 +22,9 @@ class Progress extends WeatherDisplay {
 	}
 
 	async drawCanvas(displays, loadedCount) {
+		// skip drawing if not displayed, or not yet available
 		if (!this.elem) return;
+		if (this.elem.classList.contains('show') === false) return;
 		super.drawCanvas();
 
 		// get the progress bar cover (makes percentage)
