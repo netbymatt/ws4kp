@@ -8,6 +8,7 @@
 		"start": "node index.mjs",
 		"stop": "pkill -f 'node index.mjs' || echo 'No process found'",
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"build:travelcities": "node datagenerators/travelcities.mjs",
 		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
 		"build": "gulp buildDist",
 		"lint": "eslint ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs",
