@@ -321,6 +321,7 @@ Thanks to the WeatherStar+ community for providing these discussions to further 
 * [ws4channels](https://github.com/rice9797/ws4channels) A Dockerized Node.js application to stream WeatherStar 4000 data into Channels DVR using Puppeteer and FFmpeg.
 * [SSL Certificates](https://github.com/netbymatt/ws4kp/issues/135) Discussion about how to host with an SSL certificate (enables geolocation).
 * [Changing playlists](https://github.com/netbymatt/ws4kp/issues/138) Possible ways to automatically change the playlist on a schedule.
+* [Customize Travel Forecast Cities](https://github.com/netbymatt/ws4kp/issues/146#issuecomment-3363940202)
 
 ## Customization
 
