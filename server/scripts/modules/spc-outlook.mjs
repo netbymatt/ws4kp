@@ -57,6 +57,7 @@ class SpcOutlook extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters, refresh) {
+		if (weatherParameters) this.weatherParameters = weatherParameters;
 		if (!super.getData(weatherParameters, refresh)) return;
 
 		// SPC outlook data does not need to be reloaded on a location change, only during silent refresh
@@ -93,7 +94,7 @@ class SpcOutlook extends WeatherDisplay {
 			}
 		}
 		// parse the data
-		this.data = testAllPoints([weatherParameters.longitude, weatherParameters.latitude], this.rawOutlookData);
+		this.data = testAllPoints([this.weatherParameters.longitude, this.weatherParameters.latitude], this.rawOutlookData);
 
 		// check if there's a "risk" for any of the three days, otherwise skip the SPC Outlook screen
 		if (this.data.reduce((prev, cur) => prev || !!cur, false)) {
