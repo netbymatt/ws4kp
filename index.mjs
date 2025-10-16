@@ -8,6 +8,7 @@ import {
 import playlist from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 import cache from './proxy/cache.mjs';
+import devTools from './src/com.chrome.devtools.mjs';
 
 const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
 const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
@@ -168,6 +169,7 @@ if (process.env?.DIST === '1') {
 	app.use('/geoip', geoip);
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
+	app.get('/.well-known/appspecific/com.chrome.devtools.json', devTools);
 	app.get('*name', express.static('./server', staticOptions));
 }
 
