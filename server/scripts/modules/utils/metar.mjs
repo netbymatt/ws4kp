@@ -5,21 +5,22 @@ import en from '../../vendor/auto/locale/en.js';
 
 // metar-taf-parser requires regex lookbehind
 // this does not work in iOS < 16.4
-// this is a detection algorithm for iOS versions
-const isIos = /iP(ad|od|hone)/i.test(window.navigator.userAgent);
-let iosVersionOk = false;
-if (isIos) {
-	// regex match the version string
-	const iosVersionRaw = /OS (\d+)_(\d+)/.exec(window.navigator.userAgent);
-	// check for match
-	if (iosVersionRaw) {
-		// break into parts
-		const iosVersionMajor = parseInt(iosVersionRaw[1], 10);
-		const iosVersionMinor = parseInt(iosVersionRaw[2], 10);
-		if (iosVersionMajor > 16) iosVersionOk = true;
-		if (iosVersionMajor === 16 && iosVersionMinor >= 4) iosVersionOk = true;
+// this is a detection algorithm for missing lookbehind support
+const supportsRegexLookAheadLookBehindCheck = () => {
+	try {
+		return (
+			// deliberately using RegExp for broader browser support during check
+			/* eslint-disable prefer-regex-literals */
+			'hibyehihi'
+				.replace(new RegExp('(?<=hi)hi', 'g'), 'hello')
+				.replace(new RegExp('hi(?!bye)', 'g'), 'hey') === 'hibyeheyhello'
+			/* eslint-enable prefer-regex-literals */
+		);
+	} catch {
+		return false;
 	}
-}
+};
+const supportsRegexLookAheadLookBehind = supportsRegexLookAheadLookBehindCheck();
 
 /**
  * Augment observation data by parsing METAR when API fields are missing
@@ -27,8 +28,8 @@ if (isIos) {
  * @returns {Object} - Augmented observation with parsed METAR data filled in
  */
 const augmentObservationWithMetar = (observation) => {
-	// check for a metar message and for unusable ios versions
-	if (!observation?.rawMessage || (isIos && !iosVersionOk)) {
+	// check for a metar message and for regex lookbehind support
+	if (!observation?.rawMessage || (!supportsRegexLookAheadLookBehind)) {
 		return observation;
 	}
 
