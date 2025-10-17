@@ -298,4 +298,5 @@ export {
 	hide,
 	screenCount,
 	atDefault,
+	hazards,
 };

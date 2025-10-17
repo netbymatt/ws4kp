@@ -1,5 +1,5 @@
 import Setting from './utils/setting.mjs';
-import { reset as resetScroll, addScreen as addScroll } from './currentweatherscroll.mjs';
+import { reset as resetScroll, addScreen as addScroll, hazards } from './currentweatherscroll.mjs';
 import { json } from './utils/fetch.mjs';
 
 let firstRun = true;
@@ -42,8 +42,9 @@ const parseFeed = (textInput) => {
 		return;
 	}
 
-	// add single text scroll
+	// add single text scroll after hazards if present
 	resetScroll();
+	addScroll(hazards);
 	addScroll(
 		() => (
 			{
@@ -81,6 +82,8 @@ const getFeed = async (url) => {
 
 	// reset the scroll, then add the screens
 	resetScroll();
+	// add the hazards scroll first
+	addScroll(hazards);
 	titles.forEach((title) => {
 		// data is provided to the screen handler, so we return a function
 		addScroll(
