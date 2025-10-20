@@ -62,7 +62,7 @@ location = / {
     if ($args = '') {
         rewrite ^ /redirect.html last;
     }
-    rewrite ^/$ /index.html?$args redirect;
+    rewrite ^/$ /index.html?$args? redirect;
 }
 
 location = /index.html {
