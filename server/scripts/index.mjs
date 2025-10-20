@@ -113,7 +113,14 @@ const init = async () => {
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
 
-	if (query && latLon && !fromGPS) {
+	if (parsedParameters.latLonQuery && !parsedParameters.latLon) {
+		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
+		txtAddress.value = parsedParameters.latLonQuery;
+		const geometry = await geocodeLatLonQuery(parsedParameters.latLonQuery);
+		if (geometry) {
+			doRedirectToGeometry(geometry);
+		}
+	} else if (query && latLon && !fromGPS) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = query;
 		loadData(JSON.parse(latLon));
@@ -160,6 +167,26 @@ const init = async () => {
 	// swipe functionality
 	document.querySelector('#container').addEventListener('swiped-left', () => swipeCallBack('left'));
 	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
+};
+
+const geocodeLatLonQuery = async (query) => {
+	try {
+		const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
+			data: {
+				text: query,
+				f: 'json',
+			},
+		});
+
+		const loc = data.locations?.[0];
+		if (loc) {
+			return loc.feature.geometry;
+		}
+		return null;
+	} catch (error) {
+		console.error('Geocoding failed:', error);
+		return null;
+	}
 };
 
 const autocompleteOnSelect = async (suggestion) => {
