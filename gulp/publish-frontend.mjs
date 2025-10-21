@@ -1,7 +1,4 @@
 import { config } from 'dotenv';
-config({
-	path: ['gulp/.env', '.env']
-})
 import {
 	src, dest, series, parallel,
 } from 'gulp';
@@ -21,6 +18,10 @@ import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
 import reader from '../src/playlist-reader.mjs';
+
+config({
+	path: ['gulp/.env', '.env'],
+});
 
 const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
 
@@ -87,7 +88,7 @@ const mjsSources = [
 ];
 
 if (!process.env.DISABLE_PERSONAL) {
-	mjsSources.push('server/scripts/modues/personal-weather.mjs')
+	mjsSources.push('server/scripts/modules/personal-weather.mjs');
 }
 
 const buildJs = () => src(mjsSources)
