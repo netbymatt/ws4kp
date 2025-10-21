@@ -222,4 +222,4 @@ const getTravelCitiesDayName = (cities) => cities.reduce((dayName, city) => {
 }, '');
 
 // register display, not active by default
-registerDisplay(new TravelForecast(5, 'travel', false));
+registerDisplay(new TravelForecast(6, 'travel', false));

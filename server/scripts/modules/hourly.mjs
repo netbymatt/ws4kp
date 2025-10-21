@@ -255,7 +255,7 @@ const expand = (data, maxHours = 24) => {
 };
 
 // register display
-const display = new Hourly(3, 'hourly', false);
+const display = new Hourly(4, 'hourly', false);
 registerDisplay(display);
 
 export default display.getHourlyData.bind(display);

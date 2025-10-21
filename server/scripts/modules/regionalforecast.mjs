@@ -235,4 +235,4 @@ const getAndFormatPoint = async (lat, lon) => {
 };
 
 // register display
-registerDisplay(new RegionalForecast(6, 'regional-forecast'));
+registerDisplay(new RegionalForecast(7, 'regional-forecast'));

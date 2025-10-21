@@ -63,6 +63,9 @@
   <script type="module" src="scripts/modules/settings.mjs"></script>
   <script type="module" src="scripts/modules/media.mjs"></script>
   <script type="module" src="scripts/modules/custom-rss-feed.mjs"></script>
+	<% if (!DISABLE_PERSONAL) { %>
+  <script type="module" src="scripts/modules/personal-weather.mjs"></script>
+	<% } %>
   <script type="module" src="scripts/index.mjs"></script>
   <% } %>
 
@@ -109,6 +112,11 @@
         <div id="current-weather-html" class="weather-display">
           <%- include('partials/current-weather.ejs') %>
         </div>
+				<% if (!DISABLE_PERSONAL) { %>
+				<div id="personal-weather-html" class="weather-display">
+          <%- include('partials/personal-weather.ejs') %>
+        </div>
+				<% } %>
         <div id="local-forecast-html" class="weather-display">
           <%- include('partials/local-forecast.ejs') %>
         </div>

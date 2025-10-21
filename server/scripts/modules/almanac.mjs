@@ -205,7 +205,7 @@ const formatTimesForColumn = (times) => {
 };
 
 // register display
-const display = new Almanac(9, 'almanac');
+const display = new Almanac(10, 'almanac');
 registerDisplay(display);
 
 export default display.getSun.bind(display);

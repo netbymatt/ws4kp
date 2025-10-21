@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({
+	path: ['gulp/.env', '.env']
+})
 import {
 	src, dest, series, parallel,
 } from 'gulp';
@@ -83,6 +86,10 @@ const mjsSources = [
 	'server/scripts/index.mjs',
 ];
 
+if (!process.env.DISABLE_PERSONAL) {
+	mjsSources.push('server/scripts/modues/personal-weather.mjs')
+}
+
 const buildJs = () => src(mjsSources)
 	.pipe(webpack(webpackOptions))
 	.pipe(dest(RESOURCES_PATH));
@@ -113,6 +120,7 @@ const compressHtml = async () => src(htmlSources)
 		version,
 		OVERRIDES,
 		query: {},
+		DISABLE_PERSONAL: process.env.DISABLE_PERSONAL === '1',
 	}))
 	.pipe(rename({ extname: '.html' }))
 	.pipe(htmlmin({ collapseWhitespace: true }))

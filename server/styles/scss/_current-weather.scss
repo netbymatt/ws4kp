@@ -1,7 +1,9 @@
 @use 'shared/_colors' as c;
 @use 'shared/_utils' as u;
 
-.weather-display .main.current-weather {
+// also shared with personal weather
+.weather-display .main.current-weather,
+.weather-display .main.personal-weather {
 	&.main {
 
 		.col {

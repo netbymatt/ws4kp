@@ -148,4 +148,4 @@ const drawPath = (path, ctx, options) => {
 const formatTime = (time) => time.setZone(timeZone()).toFormat('ha').slice(0, -1);
 
 // register display
-registerDisplay(new HourlyGraph(4, 'hourly-graph'));
+registerDisplay(new HourlyGraph(5, 'hourly-graph'));

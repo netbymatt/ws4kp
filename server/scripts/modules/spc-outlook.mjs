@@ -146,4 +146,4 @@ class SpcOutlook extends WeatherDisplay {
 }
 
 // register display
-registerDisplay(new SpcOutlook(10, 'spc-outlook'));
+registerDisplay(new SpcOutlook(11, 'spc-outlook'));
