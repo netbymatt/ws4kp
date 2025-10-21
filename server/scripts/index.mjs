@@ -106,7 +106,7 @@ const init = async () => {
 
 	// attempt to parse the url parameters
 	const parsedParameters = parseQueryString();
-	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
+	const loadFromParsed = !!parsedParameters.latLon;
 
 	// Auto load the parsed parameters and fall back to the previous query
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
@@ -120,10 +120,20 @@ const init = async () => {
 		if (geometry) {
 			doRedirectToGeometry(geometry);
 		}
-	} else if (query && latLon && !fromGPS) {
-		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
-		txtAddress.value = query;
-		loadData(JSON.parse(latLon));
+	} else if (latLon && !fromGPS) {
+		// update in-page search box if using cached data, or parsed parameter
+		if ((query && !loadFromParsed) || (parsedParameters.latLonQuery && loadFromParsed)) {
+			const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
+			txtAddress.value = query;
+		}
+		// use lat-long lookup if that's all that was provided in the query string
+		if (loadFromParsed && parsedParameters.latLon && !parsedParameters.latLonQuery) {
+			const { lat, lon } = JSON.parse(latLon);
+			getForecastFromLatLon(lat, lon, true);
+		} else {
+			// otherwise use pre-stored data	
+			loadData(JSON.parse(latLon));
+		}
 	}
 	if (fromGPS) {
 		btnGetGpsClick();
