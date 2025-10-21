@@ -1,0 +1,57 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+
+// also shared with personal weather
+.weather-display .main.personal-weather {
+	&.main {
+
+		@include u.text-shadow();
+
+		font-family: "Star4000 Large";
+		font-size: 20px;
+		font-weight: bold;
+		line-height: 24px;
+		top: 20px;
+
+		.row {
+			margin-bottom: 12px;
+
+			.label,
+			.value {
+				display: inline-block;
+			}
+
+			.label {
+				margin-left: 20px;
+			}
+
+			.value {
+				float: right;
+				margin-right: 10px;
+			}
+
+		}
+
+		.center {
+			text-align: center;
+		}
+
+		.temp {
+			font-family: 'Star4000 Large';
+			font-size: 24pt;
+			position: absolute;
+			top: 20px;
+			right: 0px;
+		}
+
+		.deviceName,
+		.deviceLocation {
+			color: c.$title-color;
+			max-height: 32px;
+			margin-bottom: 10px;
+			padding-top: 4px;
+			overflow: hidden;
+			text-wrap: nowrap;
+		}
+	}
+}

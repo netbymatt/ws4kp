@@ -13,6 +13,7 @@ const fahrenheitToCelsius = (Fahrenheit) => Math.round((Fahrenheit - 32) * 5 / 9
 const kilometersToMiles = (Kilometers) => Math.round(Kilometers / 1.609_34);
 const metersToFeet = (Meters) => Math.round(Meters / 0.3048);
 const pascalToInHg = (Pascal) => round2(Pascal * 0.000_295_3, 2);
+const mmToIn = (mm) => round2(mm / 25.4);
 
 // each module/page/slide creates it's own unit converter as needed by providing the base units available
 // the factory function then returns an appropriate converter or pass-thru function for use on the page
@@ -98,6 +99,23 @@ const distanceKilometers = (defaultUnit = 'si') => {
 	return converter;
 };
 
+// millimeters (annoying with camel case)
+const distanceMm = (defaultUnit = 'si') => {
+	// default to passthru
+	let converter = passthru();
+	// change the converter if there is a mismatch
+	if (defaultUnit !== settings.units.value) {
+		converter = convert((value) => Math.round(mmToIn(value)));
+	}
+	// append units
+	if (settings.units.value === 'si') {
+		converter.units = ' mm.';
+	} else {
+		converter.units = ' in.';
+	}
+	return converter;
+};
+
 const pressure = (defaultUnit = 'si') => {
 	// default to passthru (millibar)
 	let converter = passthru(100);
@@ -121,6 +139,7 @@ export {
 	distanceMeters,
 	distanceKilometers,
 	pressure,
+	distanceMm,
 
 	// formatter
 	round2,
