@@ -231,7 +231,7 @@ class CurrentWeather extends WeatherDisplay {
 		this.setAutoReload();
 		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
 		return new Promise((resolve) => {
-			if (this.data) resolve(this.data);
+			if (this.data) resolve({ data: this.data, parameters: this.weatherParameters });
 			// data not available, put it into the data callback queue
 			this.getDataCallbacks.push(() => resolve(this.data));
 		});

@@ -84,7 +84,7 @@ const incrementInterval = (force) => {
 
 const drawScreen = async () => {
 	// get the conditions
-	const data = await getCurrentWeather();
+	const { data, parameters } = await getCurrentWeather();
 
 	// create a data object (empty if no valid current weather conditions)
 	const scrollData = data || {};
@@ -100,7 +100,7 @@ const drawScreen = async () => {
 	// if we have no current weather and no hazards, there's nothing to display
 	if (!data && (!scrollData.hazards || scrollData.hazards.length === 0)) return;
 
-	const thisScreen = workingScreens[screenIndex](scrollData);
+	const thisScreen = workingScreens[screenIndex](scrollData, parameters);
 
 	// update classes on the scroll area
 	mainScroll.classList.forEach((cls) => { if (cls !== 'scroll') mainScroll.classList.remove(cls); });
