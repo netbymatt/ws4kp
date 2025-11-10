@@ -347,6 +347,14 @@ Note: not all units are converted to metric, if selected. Some text-based produc
 
 This is a known problem with the Ws4kp as it ages. It was a problem with the [actual Weatherstar hardware](https://youtu.be/rcUwlZ4pqh0?feature=shared&t=116) as well. 
 
+## Phone App
+
+An Android app is in a closed beta test. It's nothing too special, just a wrapper for displaying the website in a browser.
+
+You can get this functionality without an app on both Andriod and iOS by using the install or add to home screen feature of your browser.
+
+iOS native app? No. I own zero Apple devices and thus have no way to develop, test, compile or verify myself to the app store. That application will have to come from the community.
+
 ## Related Projects
 
 Not retro enough? Try the [Weatherstar 3000+](https://github.com/netbymatt/ws3kp)
