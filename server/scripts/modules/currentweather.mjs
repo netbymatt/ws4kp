@@ -13,6 +13,7 @@ import {
 } from './utils/units.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { isDataStale, enhanceObservationWithMapClick } from './utils/mapclick.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 
 // some stations prefixed do not provide all the necessary data
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
@@ -49,7 +50,7 @@ class CurrentWeather extends WeatherDisplay {
 				// eslint-disable-next-line no-await-in-loop
 				candidateObservation = await safeJson(`${station.id}/observations`, {
 					data: {
-						limit: 2, // we need the two most recent observations to calculate pressure direction
+						limit: 5, // we need the two most recent observations to calculate pressure direction, and to back fill any missing data
 					},
 					retryCount: 3,
 					stillWaiting: () => this.stillWaiting(),
@@ -266,7 +267,7 @@ const parseData = (data) => {
 	const kilometersConverter = distanceKilometers();
 	const pressureConverter = pressure();
 
-	const observations = data.features[0].properties;
+	const observations = backfill(data.features);
 	// values from api are provided in metric
 	data.observations = observations;
 	data.Temperature = temperatureConverter(observations.temperature.value);
@@ -305,6 +306,46 @@ const parseData = (data) => {
 
 	return data;
 };
+
+// default to the latest data in the provided observations, but use older data if something is missing
+const backfill = (data) => {
+	// make easy to use timestamps
+	const sortedData = data.map((observation) => {
+		observation.timestamp = DateTime.fromISO(observation.properties.timestamp);
+		return observation;
+	});
+
+	// sort by timestamp with [0] being the earliest
+	sortedData.sort((a, b) => b.timestamp - a.timestamp);
+
+	// create the result data
+	const result = {};
+
+	// backfill each property
+	Object.keys(sortedData[0].properties).forEach((key) => {
+		// qualify the key (must have value)
+		if (Object.hasOwn(sortedData[0].properties[key], 'value')) {
+			// backfill this property
+			result[key] = backfillProperty(sortedData, key);
+		} else {
+			// use the property as is
+			result[key] = sortedData[0].properties[key];
+		}
+	});
+
+	return result;
+};
+
+// return the property with a value closest to the [0] index
+// reduce returns the first non-null value in the array
+const backfillProperty = (data, key) => data.reduce(
+	(prev, cur) => {
+		const curValue = cur.properties?.[key]?.value;
+		if (prev.value === null && curValue !== null && curValue !== undefined) return cur.properties[key];
+		return prev;
+	},
+	{ value: null }, // null is the default provided by the api
+);
 
 const display = new CurrentWeather(1, 'current-weather');
 registerDisplay(display);
