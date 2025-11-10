@@ -136,7 +136,7 @@ services:
       # Each argument in the permalink URL can become an environment variable on the Docker host by adding WSQS_
       # Following the "Sharing a Permalink" example below, here are a few environment variables defined. Visit that section for a
       # more complete list of configuration options.
-      - WSQS_latLonQuery="Orlando International Airport Orlando FL USA"
+      - WSQS_latLonQuery=Orlando International Airport Orlando FL USA
       - WSQS_hazards_checkbox=false
       - WSQS_current_weather_checkbox=true
     ports:
