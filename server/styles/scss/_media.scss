@@ -40,6 +40,7 @@
 		width: 100%;
 		background-color: #000;
 		text-align: center;
+		z-index: 100;
 
 		@media (prefers-color-scheme: dark) {
 			background-color: #303030;
