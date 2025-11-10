@@ -1,10 +1,16 @@
 import Setting from './utils/setting.mjs';
+import { registerHiddenSetting } from './share.mjs';
 
 // Initialize settings immediately so other modules can access them
 const settings = { speed: { value: 1.0 } };
 
 // Track settings that need DOM changes after early initialization
 const deferredDomSettings = new Set();
+
+// don't show checkboxes for these settings
+const hiddenSettings = [
+	'scanLines',
+];
 
 // Declare change functions first, before they're referenced in init() to avoid the Temporal Dead Zone (TDZ)
 const wideScreenChange = (value) => {
@@ -63,13 +69,19 @@ const scanLineChange = (value) => {
 		return;
 	}
 
+	const modeSelect = document.getElementById('settings-scanLineMode-label');
+
 	if (value) {
 		container.classList.add('scanlines');
 		navIcons.classList.add('on');
+		modeSelect?.style?.removeProperty('display');
 	} else {
 		// Remove all scanline classes
 		container.classList.remove('scanlines', 'scanlines-auto', 'scanlines-fine', 'scanlines-normal', 'scanlines-thick', 'scanlines-classic', 'scanlines-retro');
 		navIcons.classList.remove('on');
+		if (modeSelect) {
+			modeSelect.style.display = 'none';
+		}
 	}
 };
 
@@ -206,10 +218,28 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// Then generate the settings UI
-	const settingHtml = Object.values(settings).map((d) => d.generate());
+	const settingHtml = Object.values(settings).map((setting) => {
+		if (hiddenSettings.includes(setting.shortName)) {
+			// setting is hidden, register it
+			registerHiddenSetting(setting.elemId, setting);
+			return false;
+		}
+		// generate HTML for setting
+		return setting.generate();
+	}).filter((d) => d);
 	const settingsSection = document.querySelector('#settings');
 	settingsSection.innerHTML = '';
 	settingsSection.append(...settingHtml);
+
+	// update visibility on some settings
+	const modeSelect = document.getElementById('settings-scanLineMode-label');
+	const { value } = settings.scanLines;
+	if (value) {
+		modeSelect?.style?.removeProperty('display');
+	} else if (modeSelect) {
+		modeSelect.style.display = 'none';
+	}
+	registerHiddenSetting('settings-scanLineMode-select', settings.scanLineMode);
 });
 
 export default settings;

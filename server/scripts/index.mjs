@@ -4,11 +4,12 @@ import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, isIOS,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
-import { parseQueryString } from './modules/share.mjs';
+import { registerHiddenSetting } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
 import { loadAllData } from './modules/utils/data-loader.mjs';
 import { debugFlag } from './modules/utils/debug.mjs';
+import { parseQueryString } from './modules/utils/setting.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -131,7 +132,7 @@ const init = async () => {
 			const { lat, lon } = JSON.parse(latLon);
 			getForecastFromLatLon(lat, lon, true);
 		} else {
-			// otherwise use pre-stored data	
+			// otherwise use pre-stored data
 			loadData(JSON.parse(latLon));
 		}
 	}
@@ -177,6 +178,10 @@ const init = async () => {
 	// swipe functionality
 	document.querySelector('#container').addEventListener('swiped-left', () => swipeCallBack('left'));
 	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
+
+	// register hidden settings for search and location query
+	registerHiddenSetting('latLonQuery', () => localStorage.getItem('latLonQuery'));
+	registerHiddenSetting('latLon', () => localStorage.getItem('latLon'));
 };
 
 const geocodeLatLonQuery = async (query) => {

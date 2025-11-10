@@ -147,9 +147,15 @@
         <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
       </div>
       <div id="divTwcBottomRight">
-        <div id="ToggleMedia">
-          <img class="navButton off" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Unmute" />
-          <img class="navButton on" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Mute" />
+        <div id="ToggleMediaContainer">
+          <div id="ToggleMedia">
+            <img class="navButton off" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Unmute" />
+            <img class="navButton on" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Volume" />
+          </div>
+          <div class="volume-slider">
+            <input type="range" min="1" max="100" value="75" /><br>
+            <img class="navButton" src="images/nav/ic_volume_off_white_24dp_2x.png" title="Mute" />
+          </div>
         </div>
         <div id="ToggleScanlines">
           <img class="navButton off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" title="Scan lines on" />

@@ -1,9 +1,13 @@
 import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
+import { registerHiddenSetting } from './share.mjs';
 
 let playlist;
 let currentTrack = 0;
 let player;
+let sliderTimeout = null;
+let volumeSlider = null;
+let volumeSliderInput = null;
 
 const mediaPlaying = new Setting('mediaPlaying', {
 	name: 'Media Playing',
@@ -14,9 +18,24 @@ const mediaPlaying = new Setting('mediaPlaying', {
 
 document.addEventListener('DOMContentLoaded', () => {
 	// add the event handler to the page
-	document.getElementById('ToggleMedia').addEventListener('click', toggleMedia);
+	document.getElementById('ToggleMedia').addEventListener('click', handleClick);
+	// get the slider elements
+	volumeSlider = document.querySelector('#ToggleMediaContainer .volume-slider');
+	volumeSliderInput = volumeSlider.querySelector('input');
+
+	// catch interactions with the volume slider (timeout handler)
+	// called on any interaction via 'input' (vs change) for immediate volume response
+	volumeSlider.addEventListener('input', setSliderTimeout);
+	volumeSlider.addEventListener('input', sliderChanged);
+
+	// add listener for mute (pause) button under the volume slider
+	volumeSlider.querySelector('img').addEventListener('click', stopMedia);
+
 	// get the playlist
 	getMedia();
+
+	// register the volume setting
+	registerHiddenSetting(mediaVolume.elemId, mediaVolume);
 });
 
 const scanMusicDirectory = async () => {
@@ -77,7 +96,7 @@ const enableMediaPlayer = () => {
 		// randomize the list
 		randomizePlaylist();
 		// enable the icon
-		const icon = document.getElementById('ToggleMedia');
+		const icon = document.getElementById('ToggleMediaContainer');
 		icon.classList.add('available');
 		// set the button type
 		setIcon();
@@ -85,15 +104,12 @@ const enableMediaPlayer = () => {
 		if (mediaPlaying.value === true) {
 			startMedia();
 		}
-		// add the volume control to the page
-		const settingsSection = document.querySelector('#settings');
-		settingsSection.append(mediaVolume.generate());
 	}
 };
 
 const setIcon = () => {
 	// get the icon
-	const icon = document.getElementById('ToggleMedia');
+	const icon = document.getElementById('ToggleMediaContainer');
 	if (mediaPlaying.value === true) {
 		icon.classList.add('playing');
 	} else {
@@ -101,16 +117,52 @@ const setIcon = () => {
 	}
 };
 
-const toggleMedia = (forcedState) => {
-	// handle forcing
-	if (typeof forcedState === 'boolean') {
-		mediaPlaying.value = forcedState;
-	} else {
-		// toggle the state
-		mediaPlaying.value = !mediaPlaying.value;
+const handleClick = () => {
+	// if media is off, start it
+	if (mediaPlaying.value === false) {
+		mediaPlaying.value = true;
 	}
+
+	if (mediaPlaying.value === true && !volumeSlider.classList.contains('show')) {
+		// if media is playing and the slider isn't open, open it
+		showVolumeSlider();
+	} else {
+		// hide the volume slider
+		hideVolumeSlider();
+	}
+
 	// handle the state change
 	stateChanged();
+};
+
+// set a timeout for the volume slider (called by interactions with the slider)
+const setSliderTimeout = () => {
+	// clear existing timeout
+	if (sliderTimeout) clearTimeout(sliderTimeout);
+	// set a new timeout
+	sliderTimeout = setTimeout(hideVolumeSlider, 5000);
+};
+
+// show the volume slider and configure a timeout
+const showVolumeSlider = () => {
+	setSliderTimeout();
+
+	// show the slider
+	if (volumeSlider) {
+		volumeSlider.classList.add('show');
+	}
+};
+
+// hide the volume slider and clean up the timeout
+const hideVolumeSlider = () => {
+	// clear the timeout handler
+	if (sliderTimeout) clearTimeout(sliderTimeout);
+	sliderTimeout = null;
+
+	// hide the element
+	if (volumeSlider) {
+		volumeSlider.classList.remove('show');
+	}
 };
 
 const startMedia = async () => {
@@ -134,9 +186,12 @@ const startMedia = async () => {
 };
 
 const stopMedia = () => {
+	hideVolumeSlider();
 	if (!player) return;
 	player.pause();
+	mediaPlaying.value = false;
 	setTrackName('Not playing');
+	setIcon();
 };
 
 const stateChanged = () => {
@@ -167,6 +222,16 @@ const randomizePlaylist = () => {
 const setVolume = (newVolume) => {
 	if (player) {
 		player.volume = newVolume;
+	}
+};
+
+const sliderChanged = () => {
+	// get the value of the slider
+	if (volumeSlider) {
+		const newValue = volumeSliderInput.value;
+		const cleanValue = parseFloat(newValue) / 100;
+		setVolume(cleanValue);
+		mediaVolume.value = cleanValue;
 	}
 };
 
@@ -205,7 +270,9 @@ const initializePlayer = () => {
 	player.src = `music/${playlist.availableFiles[currentTrack]}`;
 	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
+	// set volume and slider indicator
 	setVolume(mediaVolume.value);
+	volumeSliderInput.value = Math.round(mediaVolume.value * 100);
 };
 
 const playerCanPlay = async () => {
@@ -238,5 +305,5 @@ const setTrackName = (fileName) => {
 
 export {
 	// eslint-disable-next-line import/prefer-default-export
-	toggleMedia,
+	handleClick,
 };
