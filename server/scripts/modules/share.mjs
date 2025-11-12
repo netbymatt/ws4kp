@@ -1,11 +1,10 @@
 import { elemForEach } from './utils/elem.mjs';
+import Setting from './utils/setting.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());
 
-// shorthand mappings for frequently used values
-const specialMappings = {
-	kiosk: 'settings-kiosk-checkbox',
-};
+// array of settings that are not checkboxes or dropdowns (i.e. volume slider)
+const hiddenSettings = [];
 
 const init = () => {
 	// add action to existing link
@@ -45,9 +44,15 @@ const createLink = async (e) => {
 		}
 	}));
 
-	// add the location string
-	queryStringElements.latLonQuery = localStorage.getItem('latLonQuery');
-	queryStringElements.latLon = localStorage.getItem('latLon');
+	// get any hidden settings
+	hiddenSettings.forEach((setting) => {
+		// determine type
+		if (setting.value instanceof Setting) {
+			queryStringElements[setting.name] = setting.value.value;
+		} else if (typeof setting.value === 'function') {
+			queryStringElements[setting.name] = setting.value();
+		}
+	});
 
 	const queryString = (new URLSearchParams(queryStringElements)).toString();
 
@@ -90,29 +95,17 @@ const writeLinkToPage = (url) => {
 	shareLinkUrl.select();
 };
 
-const parseQueryString = () => {
-	// return memoized result
-	if (parseQueryString.params) return parseQueryString.params;
-	const urlSearchParams = new URLSearchParams(window.location.search);
-
-	// turn into an array of key-value pairs
-	const paramsArray = [...urlSearchParams];
-
-	// add additional expanded keys
-	paramsArray.forEach((paramPair) => {
-		const expandedKey = specialMappings[paramPair[0]];
-		if (expandedKey) {
-			paramsArray.push([expandedKey, paramPair[1]]);
-		}
+const registerHiddenSetting = (name, value) => {
+	// name is the id of the element
+	// value can be a function that returns the current value of the setting
+	// or an instance of Setting
+	hiddenSettings.push({
+		name,
+		value,
 	});
-
-	// memoize result
-	parseQueryString.params = Object.fromEntries(paramsArray);
-
-	return parseQueryString.params;
 };
 
 export {
 	createLink,
-	parseQueryString,
+	registerHiddenSetting,
 };

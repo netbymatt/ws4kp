@@ -1,5 +1,3 @@
-import { parseQueryString } from '../share.mjs';
-
 const SETTINGS_KEY = 'Settings';
 
 const DEFAULTS = {
@@ -13,6 +11,11 @@ const DEFAULTS = {
 	values: [],
 	visible: true,
 	placeholder: '',
+};
+
+// shorthand mappings for frequently used values
+const specialMappings = {
+	kiosk: 'settings-kiosk-checkbox',
 };
 
 class Setting {
@@ -35,9 +38,10 @@ class Setting {
 		this.visible = options.visible;
 		this.changeAction = options.changeAction;
 		this.placeholder = options.placeholder;
+		this.elemId = `settings-${shortName}-${this.type}`;
 
 		// get value from url
-		const urlValue = parseQueryString()?.[`settings-${shortName}-${this.type}`];
+		const urlValue = parseQueryString()?.[this.elemId];
 		let urlState;
 		if (this.type === 'checkbox' && urlValue !== undefined) {
 			urlState = urlValue === 'true';
@@ -254,7 +258,10 @@ class Setting {
 				break;
 			case 'checkbox':
 			default:
-				this.element.querySelector('input').checked = newValue;
+				// allow for a hidden checkbox (typically items in the player control bar)
+				if (this.element) {
+					this.element.querySelector('input').checked = newValue;
+				}
 		}
 		this.storeToLocalStorage(this.myValue);
 
@@ -285,4 +292,30 @@ class Setting {
 	}
 }
 
+const parseQueryString = () => {
+	// return memoized result
+	if (parseQueryString.params) return parseQueryString.params;
+	const urlSearchParams = new URLSearchParams(window.location.search);
+
+	// turn into an array of key-value pairs
+	const paramsArray = [...urlSearchParams];
+
+	// add additional expanded keys
+	paramsArray.forEach((paramPair) => {
+		const expandedKey = specialMappings[paramPair[0]];
+		if (expandedKey) {
+			paramsArray.push([expandedKey, paramPair[1]]);
+		}
+	});
+
+	// memoize result
+	parseQueryString.params = Object.fromEntries(paramsArray);
+
+	return parseQueryString.params;
+};
+
 export default Setting;
+
+export {
+	parseQueryString,
+};

@@ -3,7 +3,7 @@
 import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { safeJson } from './utils/fetch.mjs';
-import { temperature as temperatureUnit, distanceKilometers } from './utils/units.mjs';
+import { temperature as temperatureUnit, windSpeed as windUnit } from './utils/units.mjs';
 import { getHourlyIcon } from './icons.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -191,7 +191,7 @@ class Hourly extends WeatherDisplay {
 const parseForecast = async (data) => {
 	// get unit converters
 	const temperatureConverter = temperatureUnit();
-	const distanceConverter = distanceKilometers();
+	const windConverter = windUnit();
 
 	// parse data
 	const temperature = expand(data.temperature.values);
@@ -210,8 +210,8 @@ const parseForecast = async (data) => {
 		temperature: temperatureConverter(temperature[idx]),
 		temperatureUnit: temperatureConverter.units,
 		apparentTemperature: temperatureConverter(apparentTemperature[idx]),
-		windSpeed: distanceConverter(windSpeed[idx]),
-		windUnit: distanceConverter.units,
+		windSpeed: windConverter(windSpeed[idx]),
+		windUnit: windConverter.units,
 		windDirection: directionToNSEW(windDirection[idx]),
 		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
 		skyCover: skyCover[idx],

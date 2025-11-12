@@ -2,8 +2,9 @@
 	display: none;
 }
 
-#ToggleMedia {
+#ToggleMediaContainer {
 	display: none;
+	position: relative;
 
 	&.available {
 		display: inline-block;
@@ -30,5 +31,33 @@
 
 
 	}
+
+	.volume-slider {
+		display: none;
+		position: absolute;
+		top: 0px;
+		transform: translateY(-100%);
+		width: 100%;
+		background-color: #000;
+		text-align: center;
+		z-index: 100;
+
+		@media (prefers-color-scheme: dark) {
+			background-color: #303030;
+		}
+
+		input[type="range"] {
+			writing-mode: vertical-lr;
+			direction: rtl;
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
+
+		&.show {
+			display: block;
+		}
+	}
+
+
 
 }

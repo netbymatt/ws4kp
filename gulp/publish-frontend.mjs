@@ -14,6 +14,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
 import file from 'gulp-file';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import log from 'fancy-log';
 import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
@@ -213,11 +214,15 @@ const buildPlaylist = async () => {
 	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
 };
 
+const logVersion = async () => {
+	log(`Version Published: ${version}`);
+};
+
 const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-const publishFrontend = series(buildDist, uploadImages, upload, invalidate);
+const publishFrontend = series(buildDist, uploadImages, upload, invalidate, logVersion);
 const stageFrontend = series(previewVersion, buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
 
 export default publishFrontend;

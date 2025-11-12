@@ -4,11 +4,12 @@ import {
 	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, isIOS,
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
-import { parseQueryString } from './modules/share.mjs';
+import { registerHiddenSetting } from './modules/share.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
 import { loadAllData } from './modules/utils/data-loader.mjs';
 import { debugFlag } from './modules/utils/debug.mjs';
+import { parseQueryString } from './modules/utils/setting.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -106,17 +107,34 @@ const init = async () => {
 
 	// attempt to parse the url parameters
 	const parsedParameters = parseQueryString();
-	const loadFromParsed = parsedParameters.latLonQuery && parsedParameters.latLon;
+	const loadFromParsed = !!parsedParameters.latLon;
 
 	// Auto load the parsed parameters and fall back to the previous query
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
 	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
 
-	if (query && latLon && !fromGPS) {
+	if (parsedParameters.latLonQuery && !parsedParameters.latLon) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
-		txtAddress.value = query;
-		loadData(JSON.parse(latLon));
+		txtAddress.value = parsedParameters.latLonQuery;
+		const geometry = await geocodeLatLonQuery(parsedParameters.latLonQuery);
+		if (geometry) {
+			doRedirectToGeometry(geometry);
+		}
+	} else if (latLon && !fromGPS) {
+		// update in-page search box if using cached data, or parsed parameter
+		if ((query && !loadFromParsed) || (parsedParameters.latLonQuery && loadFromParsed)) {
+			const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
+			txtAddress.value = query;
+		}
+		// use lat-long lookup if that's all that was provided in the query string
+		if (loadFromParsed && parsedParameters.latLon && !parsedParameters.latLonQuery) {
+			const { lat, lon } = JSON.parse(latLon);
+			getForecastFromLatLon(lat, lon, true);
+		} else {
+			// otherwise use pre-stored data
+			loadData(JSON.parse(latLon));
+		}
 	}
 	if (fromGPS) {
 		btnGetGpsClick();
@@ -160,6 +178,30 @@ const init = async () => {
 	// swipe functionality
 	document.querySelector('#container').addEventListener('swiped-left', () => swipeCallBack('left'));
 	document.querySelector('#container').addEventListener('swiped-right', () => swipeCallBack('right'));
+
+	// register hidden settings for search and location query
+	registerHiddenSetting('latLonQuery', () => localStorage.getItem('latLonQuery'));
+	registerHiddenSetting('latLon', () => localStorage.getItem('latLon'));
+};
+
+const geocodeLatLonQuery = async (query) => {
+	try {
+		const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
+			data: {
+				text: query,
+				f: 'json',
+			},
+		});
+
+		const loc = data.locations?.[0];
+		if (loc) {
+			return loc.feature.geometry;
+		}
+		return null;
+	} catch (error) {
+		console.error('Geocoding failed:', error);
+		return null;
+	}
 };
 
 const autocompleteOnSelect = async (suggestion) => {

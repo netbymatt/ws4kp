@@ -816,3 +816,9 @@ body.kiosk #loading .instructions {
 		display: none !important;
 	}
 }
+
+#divInfo {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	max-width: 250px;
+}

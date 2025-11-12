@@ -5,7 +5,7 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import {
 	msg, displayNavMessage, isPlaying, updateStatus, timeZone,
 } from './navigation.mjs';
-import { parseQueryString } from './share.mjs';
+import { parseQueryString } from './utils/setting.mjs';
 import settings from './settings.mjs';
 import { elemForEach } from './utils/elem.mjs';
 import { debugFlag } from './utils/debug.mjs';

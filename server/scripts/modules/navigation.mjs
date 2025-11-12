@@ -109,6 +109,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 		weatherParameters.forecast = point.properties.forecast;
 		weatherParameters.forecastGridData = point.properties.forecastGridData;
 		weatherParameters.stations = stations.features;
+		weatherParameters.relativeLocation = point.properties.relativeLocation.properties;
 
 		// update the main process for display purposes
 		populateWeatherParameters(weatherParameters, point.properties);
