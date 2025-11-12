@@ -12,6 +12,7 @@
 		font-weight: bold;
 		line-height: 24px;
 		top: 20px;
+		height: 290px;
 
 		.row {
 			margin-bottom: 12px;
@@ -52,6 +53,16 @@
 			padding-top: 4px;
 			overflow: hidden;
 			text-wrap: nowrap;
+		}
+
+		.timestamp {
+			position: absolute;
+			bottom: 15px;
+			right: 10px;
+			text-align: right;
+			font-family: "Star4000 Small";
+			font-size: 24pt;
+			font-weight: normal;
 		}
 	}
 }

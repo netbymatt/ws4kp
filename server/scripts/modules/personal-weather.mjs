@@ -6,6 +6,7 @@ import { registerDisplay } from './navigation.mjs';
 import {
 	temperature, pressure, distanceMm, windSpeed,
 } from './utils/units.mjs';
+import { DateTime } from '../vendor/auto/luxon.mjs';
 
 class PersonalWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -57,6 +58,8 @@ class PersonalWeather extends WeatherDisplay {
 			deviceLocation: this.data.device_location,
 			humidity: `${this.data.Humidity}%`,
 			pressure: `${this.data.Pressure} ${this.data.PressureUnit}`,
+			dailyRain: `${this.data.DailyRain} ${this.data.DailyRainUnit}`,
+			timestamp: `At ${this.data.timestamp}`,
 		};
 
 		const area = this.elem.querySelector('.main');
@@ -97,6 +100,7 @@ const parseData = (data) => {
 	data.WindUnit = windConverter.units;
 	data.DailyRain = inConverter(data.dailyrainin);
 	data.DailyRainUnit = inConverter.units;
+	data.timestamp = DateTime.fromISO(data.date).toFormat('H:mm:ss a EEE MMM d').toUpperCase();
 
 	// set wind speed of 0 as calm
 	if (data.WindSpeed === 0) data.WindSpeed = 'Calm';
