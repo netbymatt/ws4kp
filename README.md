@@ -200,7 +200,9 @@ https://weatherstar.netbymatt.com/?settings-units-select=metric
 ```
 
 ### Kiosk mode
-Kiosk mode can be activated by a checkbox on the page. Note that there is no way out of kiosk mode (except refresh or closing the browser), and the play/pause and other controls will not be available. This is deliberate as a browser's kiosk mode it intended not to be exited or significantly modified. A separate full-screen icon is available in the tool bar to go full-screen on a laptop or mobile browser.
+Kiosk mode can be activated by a checkbox on the page. This will start Weatherstar in a fullscreen-like view without the play/volume/etc toolbar and scaled to fill the entire space. This does not activate the browser's fullscreen or kiosk mode. Those can only be activated by user interaction or by launching the browser with specific parameters such as `--start-fullscreen` or `--kiosk`. 
+
+ When using kiosk mode (via the checkbox), there will be no way to exit the fullscreen-like view of weatherstar. Reloading the page should remove the kiosk checkbox and return you to the normal view. This is deliberate as a browser's kiosk mode it intended not to be exited or significantly modified. A separate full-screen icon is available in the tool bar to go full-screen on a laptop or mobile browser.
 
 It's also possible to enter kiosk mode using a permalink. First generate a [Permalink](#sharing-a-permalink-bookmarking), then to the end of it add `&kiosk=true`. Opening this link will load all of the selected displays included in the Permalink, enter kiosk mode immediately upon loading and start playing the forecast.
 
