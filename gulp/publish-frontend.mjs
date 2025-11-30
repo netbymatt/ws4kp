@@ -15,10 +15,15 @@ import { readFile } from 'fs/promises';
 import file from 'gulp-file';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import log from 'fancy-log';
+import dartSass from 'sass';
+import gulpSass from 'gulp-sass';
+import sourceMaps from 'gulp-sourcemaps';
 import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
 import reader from '../src/playlist-reader.mjs';
+
+const sass = gulpSass(dartSass);
 
 const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
 
@@ -36,6 +41,7 @@ const webpackOptions = {
 	resolve: {
 		roots: ['./'],
 	},
+	devtool: 'source-map',
 	optimization: {
 		minimize: true,
 		minimizer: [
@@ -89,10 +95,13 @@ const buildJs = () => src(mjsSources)
 	.pipe(dest(RESOURCES_PATH));
 
 const cssSources = [
-	'server/styles/main.css',
+	'server/styles/scss/**/*.scss',
 ];
-const copyCss = () => src(cssSources)
-	.pipe(concat('ws.min.css'))
+const buildCss = () => src(cssSources)
+	.pipe(sourceMaps.init())
+	.pipe(sass({ style: 'compressed' }).on('error', sass.logError))
+	.pipe(rename({ suffix: '.min' }))
+	.pipe(sourceMaps.write('./'))
 	.pipe(dest(RESOURCES_PATH));
 
 const htmlSources = [
@@ -141,7 +150,6 @@ const s3 = s3Upload({
 });
 const uploadSources = [
 	'dist/**',
-	'!dist/**/*.map',
 	'!dist/images/**/*',
 	'!dist/fonts/**/*',
 ];
@@ -209,7 +217,7 @@ const logVersion = async () => {
 	log(`Version Published: ${version}`);
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsVendor, copyCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
 
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
