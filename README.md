@@ -1,3 +1,5 @@
+![Weatherstar 4000+ Current Conditions](https://github.com/netbymatt/ws4kp/blob/main/server/images/social/1200x600.png)
+
 # WeatherStar 4000+
 
 A live version of this project is available at https://weatherstar.netbymatt.com
