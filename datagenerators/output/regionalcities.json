@@ -730,6 +730,16 @@
 		}
 	},
 	{
+		"city": "Lubbock",
+		"lat": 33.5836,
+		"lon": -101.8549,
+		"point": {
+			"x": 49,
+			"y": 34,
+			"wfo": "LUB"
+		}
+	},
+	{
 		"city": "Manchester",
 		"lat": 42.9956,
 		"lon": -71.4548,

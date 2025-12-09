@@ -51,7 +51,7 @@ class RegionalForecast extends WeatherDisplay {
 		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, mapOffsetXY.x, mapOffsetXY.y, this.weatherParameters.state);
 
 		// get a target distance
-		let targetDistance = 2.5;
+		let targetDistance = 2.4;
 		if (this.weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
