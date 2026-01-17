@@ -40,9 +40,10 @@ class HourlyGraph extends WeatherDisplay {
 		const temperature = data.map((d) => d.temperature);
 		const probabilityOfPrecipitation = data.map((d) => d.probabilityOfPrecipitation);
 		const skyCover = data.map((d) => d.skyCover);
+		const dewpoint = data.map((d) => d.dewpoint);
 
 		this.data = {
-			skyCover, temperature, probabilityOfPrecipitation, temperatureUnit: data[0].temperatureUnit,
+			skyCover, temperature, probabilityOfPrecipitation, temperatureUnit: data[0].temperatureUnit, dewpoint,
 		};
 
 		this.setStatus(STATUS.loaded);
@@ -63,12 +64,16 @@ class HourlyGraph extends WeatherDisplay {
 
 		// calculate time scale
 		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, availableWidth);
+		const timeStep = this.data.temperature.length / 4;
 		const startTime = DateTime.now().startOf('hour');
-		document.querySelector('.x-axis .l-1').innerHTML = formatTime(startTime);
-		document.querySelector('.x-axis .l-2').innerHTML = formatTime(startTime.plus({ hour: 6 }));
-		document.querySelector('.x-axis .l-3').innerHTML = formatTime(startTime.plus({ hour: 12 }));
-		document.querySelector('.x-axis .l-4').innerHTML = formatTime(startTime.plus({ hour: 18 }));
-		document.querySelector('.x-axis .l-5').innerHTML = formatTime(startTime.plus({ hour: 24 }));
+		let prevTime = startTime;
+		Array(5).fill().forEach((val, idx) => {
+			// track the previous label so a day of week can be added when it changes
+			const label = formatTime(startTime.plus({ hour: idx * timeStep }), prevTime);
+			prevTime = label.ts;
+			// write to page
+			document.querySelector(`.x-axis .l-${idx + 1}`).innerHTML = label.formatted;
+		});
 
 		// order is important last line drawn is on top
 		// clouds
@@ -86,11 +91,22 @@ class HourlyGraph extends WeatherDisplay {
 			lineWidth: 3,
 		});
 
+		// calculate temperature scale for min and max of dewpoint and temperature
+		const minScale = Math.min(...this.data.dewpoint, ...this.data.temperature);
+		const maxScale = Math.max(...this.data.dewpoint, ...this.data.temperature);
+		const thirdScale = (minScale + maxScale) / 3;
+		const midScale1 = Math.round(minScale + thirdScale);
+		const midScale2 = Math.round(minScale + (thirdScale * 2));
+		const tempScale = calcScale(minScale, availableHeight - 10, maxScale, 10);
+
+		// dewpoint
+		const dewpointPath = createPath(this.data.dewpoint, timeScale, tempScale);
+		drawPath(dewpointPath, ctx, {
+			strokeStyle: 'green',
+			lineWidth: 3,
+		});
+
 		// temperature
-		const minTemp = Math.min(...this.data.temperature);
-		const maxTemp = Math.max(...this.data.temperature);
-		const midTemp = Math.round((minTemp + maxTemp) / 2);
-		const tempScale = calcScale(minTemp, availableHeight - 10, maxTemp, 10);
 		const tempPath = createPath(this.data.temperature, timeScale, tempScale);
 		drawPath(tempPath, ctx, {
 			strokeStyle: 'red',
@@ -100,15 +116,17 @@ class HourlyGraph extends WeatherDisplay {
 		// temperature axis labels
 		// limited to 3 characters, sacraficing degree character
 		const degree = String.fromCharCode(176);
-		this.elem.querySelector('.y-axis .l-1').innerHTML = (maxTemp + degree).substring(0, 3);
-		this.elem.querySelector('.y-axis .l-2').innerHTML = (midTemp + degree).substring(0, 3);
-		this.elem.querySelector('.y-axis .l-3').innerHTML = (minTemp + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-1').innerHTML = (maxScale + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-2').innerHTML = (midScale2 + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-3').innerHTML = (midScale1 + degree).substring(0, 3);
+		this.elem.querySelector('.y-axis .l-4').innerHTML = (minScale + degree).substring(0, 3);
 
 		// set the image source
 		this.image.src = canvas.toDataURL();
 
 		// change the units in the header
 		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
+		this.elem.querySelector('.dewpoint').innerHTML = `Dewpoint ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
 
 		super.drawCanvas();
 		this.finishDraw();
@@ -145,7 +163,18 @@ const drawPath = (path, ctx, options) => {
 };
 
 // format as 1p, 12a, etc.
-const formatTime = (time) => time.setZone(timeZone()).toFormat('ha').slice(0, -1);
+const formatTime = (time, prev) => {
+	// if the day of the week changes, show the day of the week in the label
+	let format = 'ha';
+	if (prev.weekday !== time.weekday) format = 'ccc ha';
+
+	const ts = time.setZone(timeZone());
+
+	return {
+		ts,
+		formatted: ts.toFormat(format).slice(0, -1),
+	};
+};
 
 // register display
 registerDisplay(new HourlyGraph(4, 'hourly-graph'));

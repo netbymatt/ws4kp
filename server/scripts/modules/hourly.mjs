@@ -75,7 +75,10 @@ class Hourly extends WeatherDisplay {
 
 		const startingHour = DateTime.local().setZone(timeZone());
 
-		const lines = this.data.map((data, index) => {
+		// shorten to 24 hours
+		const shortData = this.data.slice(0, 24);
+
+		const lines = shortData.map((data, index) => {
 			const fillValues = {};
 			// hour
 			const hour = startingHour.plus({ hours: index });
@@ -102,7 +105,7 @@ class Hourly extends WeatherDisplay {
 			const filledRow = this.fillTemplate('hourly-row', fillValues);
 
 			// alter the color of the feels like column to reflect wind chill or heat index
-			if (feelsLike < temperature) {
+			if (data.apparentTemperature < data.temperature) {
 				filledRow.querySelector('.like').classList.add('wind-chill');
 			} else if (feelsLike > temperature) {
 				filledRow.querySelector('.like').classList.add('heat-index');
@@ -203,6 +206,7 @@ const parseForecast = async (data) => {
 	const iceAccumulation = expand(data.iceAccumulation.values); 	// ice icon
 	const probabilityOfPrecipitation = expand(data.probabilityOfPrecipitation.values);	// rain icon
 	const snowfallAmount = expand(data.snowfallAmount.values);	// snow icon
+	const dewpoint = expand(data.dewpoint.values);
 
 	const icons = await determineIcon(skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed);
 
@@ -216,6 +220,7 @@ const parseForecast = async (data) => {
 		probabilityOfPrecipitation: probabilityOfPrecipitation[idx],
 		skyCover: skyCover[idx],
 		icon: icons[idx],
+		dewpoint: temperatureConverter(dewpoint[idx]),
 	}));
 };
 
@@ -233,7 +238,7 @@ const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPr
 };
 
 // expand a set of values with durations to an hour-by-hour array
-const expand = (data, maxHours = 24) => {
+const expand = (data, maxHours = 36) => {
 	const startOfHour = DateTime.utc().startOf('hour').toMillis();
 	const result = []; // resulting expanded values
 	data.forEach((item) => {

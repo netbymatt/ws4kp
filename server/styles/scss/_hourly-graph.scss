@@ -11,7 +11,7 @@
 			right: 60px;
 			width: 360px;
 			font-family: 'Star4000 Small';
-			font-size: 32px;
+			font-size: 28px;
 			@include u.text-shadow();
 			text-align: right;
 
@@ -21,6 +21,10 @@
 
 			.temperature {
 				color: red;
+			}
+
+			.dewpoint {
+				color: green;
 			}
 
 			.cloud {
@@ -52,32 +56,33 @@
 
 		.x-axis {
 			bottom: 0px;
-			left: 0px;
-			width: 640px;
+			left: 54px;
+			width: 532px;
 			height: 20px;
 
 			.label {
 				text-align: center;
-				width: 50px;
+				transform: translateX(-50%);
+				white-space: nowrap;
 
 				&.l-1 {
-					left: 25px;
+					left: 0px;
 				}
 
 				&.l-2 {
-					left: 158px;
+					left: calc(532px / 4 * 1);
 				}
 
 				&.l-3 {
-					left: 291px;
+					left: calc(532px / 4 * 2);
 				}
 
 				&.l-4 {
-					left: 424px;
+					left: calc(532px / 4 * 3);
 				}
 
 				&.l-5 {
-					left: 557px;
+					left: calc(532px / 4 * 4);
 				}
 			}
 
@@ -110,10 +115,14 @@
 				}
 
 				&.l-2 {
-					top: 140px;
+					top: calc(280px / 3);
 				}
 
 				&.l-3 {
+					bottom: calc(280px / 3 - 11px);
+				}
+
+				&.l-4 {
 					bottom: 0px;
 				}
 			}
