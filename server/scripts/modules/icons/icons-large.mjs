@@ -13,7 +13,7 @@ const largeIcon = (link, _isNightTime) => {
 	} catch (error) {
 		console.warn(`largeIcon: ${error.message}`);
 		// Return a fallback icon to prevent downstream errors
-		return addPath(`No-Data.gif?${conditionIcon}${isNightTime ? '-n' : ''}`);
+		return addPath(`No-Data-Large.gif?${conditionIcon}${isNightTime ? '-n' : ''}`);
 	}
 
 	// find the icon
@@ -102,6 +102,8 @@ const largeIcon = (link, _isNightTime) => {
 
 		case 'snow_fzra':
 		case 'snow_fzra-n':
+		case 'winter_mix':
+		case 'winter_mix-n':
 			return addPath('Freezing-Rain-Snow.gif');
 
 		case 'fzra':
@@ -141,6 +143,8 @@ const largeIcon = (link, _isNightTime) => {
 			return addPath('Thunderstorm.gif');
 
 		case 'wind_skc':
+		case 'wind_':
+		case 'wind_-n':
 			return addPath('Windy.gif');
 
 		case 'wind_skc-n':
@@ -169,7 +173,7 @@ const largeIcon = (link, _isNightTime) => {
 		default: {
 			console.warn(`Unknown weather condition '${conditionIcon}' from ${link}; using fallback icon`);
 			// Return a reasonable fallback instead of false to prevent downstream errors
-			return addPath(`No-Data.gif?${conditionIcon}${isNightTime ? '-n' : ''}`);
+			return addPath(`No-Data-Large.gif?${conditionIcon}${isNightTime ? '-n' : ''}`);
 		}
 	}
 };

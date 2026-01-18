@@ -170,7 +170,7 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'blizzard':
 		case 'blizzard-n':
-			return addPath('Blowing Snow.gif');
+			return addPath('Blowing-Snow.gif');
 
 		default:
 			console.warn(`Unknown weather condition '${conditionIcon}' from ${link}; using fallback icon`);
