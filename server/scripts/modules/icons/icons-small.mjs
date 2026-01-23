@@ -133,6 +133,7 @@ const smallIcon = (link, _isNightTime) => {
 
 		case 'wind_few':
 		case 'wind_few-n':
+		case 'wind_':
 			return addPath('Wind.gif');
 
 		case 'wind_sct':

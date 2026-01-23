@@ -94,7 +94,7 @@ class HourlyGraph extends WeatherDisplay {
 		// calculate temperature scale for min and max of dewpoint and temperature
 		const minScale = Math.min(...this.data.dewpoint, ...this.data.temperature);
 		const maxScale = Math.max(...this.data.dewpoint, ...this.data.temperature);
-		const thirdScale = (minScale + maxScale) / 3;
+		const thirdScale = (maxScale - minScale) / 3;
 		const midScale1 = Math.round(minScale + thirdScale);
 		const midScale2 = Math.round(minScale + (thirdScale * 2));
 		const tempScale = calcScale(minScale, availableHeight - 10, maxScale, 10);
