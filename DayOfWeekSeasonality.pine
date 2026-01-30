@@ -45,23 +45,6 @@ calcColor(float value, int topTranspValue = na) =>
 
 changePercent(float source) => 100.0 * (source - source[1]) / source[1]
 
-method nonNA(array<float> this) =>
-    int result = 0
-    for item in this
-        if not na(item)
-            result += 1
-    result
-
-method percentPositive(array<float> this) =>
-    int countNonNA = 0
-    int pos = 0
-    for item in this
-        if not na(item)
-            countNonNA += 1
-            if item >= 0
-                pos += 1
-    100.0 * pos / countNonNA
-
 // Accumulate daily changes by year and day of week
 // Returns [yearArray, sumMatrix, countMatrix]
 calculateDowChanges(int startYear, int prevBarYear, int prevBarDow) =>
@@ -72,20 +55,16 @@ calculateDowChanges(int startYear, int prevBarYear, int prevBarDow) =>
     float prevChange = changePercent(close[1])
 
     if prevBarYear >= startYear and not na(prevChange)
-        // Check if we need a new row for this year
         int rowIdx = yearArray.indexof(prevBarYear)
         if rowIdx == -1
-            // New year - add row
             sumMatrix.add_row()
             countMatrix.add_row()
             yearArray.push(prevBarYear)
             rowIdx := yearArray.size() - 1
-            // Initialize the new row to zeros
             for col = 0 to 7
                 sumMatrix.set(rowIdx, col, 0.0)
                 countMatrix.set(rowIdx, col, 0)
 
-        // Accumulate sum and count for this year + day of week
         float oldSum   = sumMatrix.get(rowIdx, prevBarDow)
         int   oldCount = countMatrix.get(rowIdx, prevBarDow)
         sumMatrix.set(rowIdx, prevBarDow, oldSum + prevChange)
@@ -133,12 +112,9 @@ if barstate.islast and not na(sumMatrix) and sumMatrix.rows() > 0
     for [i, name] in dayNames
         dataTable.cell(i, 0, name, bgcolor = infoBgColor, text_color = textColor, height = cellHeight, width = cellWidth)
 
-    // Build arrays for column stats
-    var array<array<float>> colValues = array.new<array<float>>(8)
-    for col = 0 to 7
-        colValues.set(col, array.new<float>())
+    // Data rows - compute averages from sum/count and store in matrix for metrics
+    matrix<float> avgMatrix = matrix.new<float>(numDataRows, 8, na)
 
-    // Data rows - compute averages from sum/count
     for row = 0 to numDataRows - 1
         int thisYear = yearIndexArray.get(row)
         dataTable.cell(0, row + 1, str.tostring(thisYear), bgcolor = infoBgColor, text_color = textColor, height = cellHeight, width = cellWidth)
@@ -147,7 +123,7 @@ if barstate.islast and not na(sumMatrix) and sumMatrix.rows() > 0
             int cnt = countMatrix.get(row, col)
             if cnt > 0
                 float avg = sumMatrix.get(row, col) / cnt
-                colValues.get(col).push(avg)
+                avgMatrix.set(row, col, avg)
                 dataTable.cell(col, row + 1, str.tostring(avg, format.percent), bgcolor = calcColor(avg, cutoffPercentInput), text_color = textColor, height = cellHeight, width = cellWidth)
             else
                 dataTable.cell(col, row + 1, "-", bgcolor = color.new(color.gray, 80), text_color = textColor, height = cellHeight, width = cellWidth)
@@ -162,8 +138,7 @@ if barstate.islast and not na(sumMatrix) and sumMatrix.rows() > 0
             int avgRow = numDataRows + 2
             dataTable.cell(0, avgRow, "Avgs:", bgcolor = infoBgColor, text_color = textColor, height = cellHeight, width = cellWidth)
             for col = 1 to 7
-                array<float> vals = colValues.get(col)
-                float avg = vals.size() > 0 ? vals.avg() : na
+                float avg = avgMatrix.col(col).avg()
                 string txt = na(avg) ? "-" : str.tostring(avg, format.percent)
                 dataTable.cell(col, avgRow, txt, bgcolor = calcColor(avg, cutoffPercentInput), text_color = textColor, height = cellHeight, width = cellWidth)
 
@@ -171,8 +146,7 @@ if barstate.islast and not na(sumMatrix) and sumMatrix.rows() > 0
             int sdRow = numDataRows + 3
             dataTable.cell(0, sdRow, "StDev:", bgcolor = infoBgColor, text_color = textColor, height = cellHeight, width = cellWidth)
             for col = 1 to 7
-                array<float> vals = colValues.get(col)
-                float sd = vals.size() > 1 ? vals.stdev(false) : na
+                float sd = avgMatrix.col(col).stdev(false)
                 string txt = na(sd) ? "-" : str.tostring(sd, "##.##")
                 dataTable.cell(col, sdRow, txt, bgcolor = color.new(color.gray, 80), text_color = textColor, height = cellHeight, width = cellWidth)
 
@@ -180,8 +154,15 @@ if barstate.islast and not na(sumMatrix) and sumMatrix.rows() > 0
             int posRow = numDataRows + 4
             dataTable.cell(0, posRow, "Pos%:", bgcolor = infoBgColor, text_color = textColor, height = cellHeight, width = cellWidth)
             for col = 1 to 7
-                array<float> vals = colValues.get(col)
-                float pct = vals.size() > 0 ? vals.percentPositive() : na
+                array<float> colArr = avgMatrix.col(col)
+                int total = 0
+                int positive = 0
+                for val in colArr
+                    if not na(val)
+                        total += 1
+                        if val >= 0
+                            positive += 1
+                float pct = total > 0 ? 100.0 * positive / total : na
                 string txt = na(pct) ? "-" : str.tostring(pct, '#') + "%"
                 dataTable.cell(col, posRow, txt, bgcolor = calcColor(pct - 50, 50), text_color = textColor, height = cellHeight, width = cellWidth)
 //#endregion
