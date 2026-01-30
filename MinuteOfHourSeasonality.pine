@@ -1,0 +1,246 @@
+//@version=6
+indicator("Minute of Hour Seasonality", overlay = false, max_boxes_count = 500)
+
+//#region ———————————————————— Constants, inputs, and global variables
+
+// Tooltips
+string TT_SY = "The year to start seasonality calculations."
+string TT_PC = "The base color for boxes and table cells that show positive values."
+string TT_NC = "The base color for boxes and table cells that show negative values."
+string TT_CP = "The cutoff for maximum color intensity. Absolute values at or above this level have the same color."
+string TT_WT = "The table width as a percentage of the pane where the table is located."
+string TT_HG = "The table height as a percentage of the pane where the table is located."
+string TT_SA = "Toggles the 'Avgs' row, which shows average change percentages for each minute bucket."
+string TT_SD = "Toggles the 'StDev' row, which shows the standard deviation of each minute bucket's percentages."
+string TT_SP = "Toggles the 'Pos%' row, which shows the percentage of positive changes in each minute bucket's column."
+string TT_BK = "Group minutes into buckets. E.g., 5 = five 12-minute buckets (0-11, 12-23, etc.), 1 = each minute separately."
+
+// Start year setting
+int startYearInput = input.int(2020, "Starting year", minval = 1800, tooltip = TT_SY, display = display.none)
+
+// Minute bucket settings
+string MINUTES_GRP  = "Minute settings"
+int    bucketSize   = input.int(5, "Bucket size (minutes)", minval = 1, maxval = 30, group = MINUTES_GRP, tooltip = TT_BK)
+
+// Color settings
+string COLOR_GRP          = "Color settings"
+color  posColorInput      = color.new(input.color(#089981, "Positive Color", group = COLOR_GRP, tooltip = TT_PC), 0)
+color  negColorInput      = color.new(input.color(#F23745, "Negative Color", group = COLOR_GRP, tooltip = TT_NC), 0)
+int    cutoffPercentInput = input.int(1, "Color intensity cutoff (%)", group = COLOR_GRP, tooltip = TT_CP, display = display.none)
+
+// Table settings
+string HEATMAP_GRP          = "Heatmap settings"
+string tablePositionInput   = input.string("Center", "Table Position", options = ["Left", "Center", "Right"], group = HEATMAP_GRP, display = display.none)
+float  tableWidthInput      = input.float(100, "Table Width (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_WT, display = display.none)
+float  tableHeightInput     = input.float(95, "Table Height (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_HG, display = display.none)
+bool   showAvgInput         = input.bool(true, "Show Averages", group = HEATMAP_GRP, tooltip = TT_SA)
+bool   showStDevInput       = input.bool(true, "Show Standard Deviation", group = HEATMAP_GRP, tooltip = TT_SD)
+bool   showPosInput         = input.bool(true, "Show Percent Positive", group = HEATMAP_GRP, tooltip = TT_SP)
+bool   showMetrics          = showAvgInput or showStDevInput or showPosInput
+
+// Calculate number of buckets
+int numBuckets = math.ceil(60 / bucketSize)
+
+//@variable The current minute at the time.
+int currMinute = minute(time_close - 1)
+
+prevTimeClose     = time_close[1] - 1
+int prevBarYear   = year(prevTimeClose)
+int prevBarMonth  = month(prevTimeClose)
+int prevBarDay    = dayofmonth(prevTimeClose)
+int prevBarHour   = hour(prevTimeClose)
+int prevBarMinute = minute(prevTimeClose)
+//#endregion
+
+
+//#region ———————————————————— Functions and methods
+
+//@function Calculates color used by the boxes and Heatmap cells.
+calcColor(float value, int topTranspValue = na) =>
+    color naColor     = color.gray
+    float heavyTransp = 50
+    float lightTransp = 90
+    color heavyColor  = color.new(value >= 0 ? posColorInput : negColorInput, heavyTransp)
+    color lightColor  = color.new(value >= 0 ? posColorInput : negColorInput, lightTransp)
+    color baseColor   = na(value) ? naColor : value >= 0 ? posColorInput : negColorInput
+    color transpColor = color.from_gradient(math.abs(value), 0, topTranspValue, lightColor, heavyColor)
+    color result      = na(topTranspValue) ? baseColor : transpColor
+
+//@function Returns the one-bar change percentage of the `source`.
+changePercent(float source) => 100.0 * (source - source[1]) / source[1]
+
+//@function Returns the number of non-na values in `this` array.
+method nonNA(array<float> this) =>
+    int result = 0
+    for item in this
+        if not na(item)
+            result += 1
+    result
+
+//@function Returns the percentage of positive non-na values in `this` array.
+method percentPositive(array<float> this) =>
+    int nonNA = 0
+    int pos   = 0
+    for item in this
+        if not na(item)
+            nonNA += 1
+            if item >= 0
+                pos += 1
+    float result = 100.0 * pos / nonNA
+
+//@function Converts minute to bucket index.
+minuteToBucket(int m, int bSize) =>
+    math.floor(m / bSize) + 1
+
+//@function Calculates a matrix of minute-based changes.
+//@param startYear The year where calculations start.
+//@returns A tuple containing an array of hour indices and the matrix of minute changes.
+calculateMinuteChanges(int startYear, int prevBarYear, int prevBarMonth, int prevBarDay, int prevBarHour, int prevBarMinute, int bSize, int numB) =>
+    // Matrix: rows = hours, columns = 0 (hour label) + minute buckets
+    var matrix<float> dataMatrix     = matrix.new<float>(0, numB + 1)
+    var array<int>    hourIndexArray = array.new<int>()
+    float             prevChange     = changePercent(close[1])
+
+    if prevBarYear >= startYear
+        // Create unique hour identifier: YYYYMMDDHH
+        int hourId = prevBarYear * 1000000 + prevBarMonth * 10000 + prevBarDay * 100 + prevBarHour
+
+        // Check if we need a new row for this hour
+        if hourIndexArray.size() == 0 or hourIndexArray.last() != hourId
+            dataMatrix.add_row()
+            hourIndexArray.push(hourId)
+
+        // Set the change for this minute bucket
+        int bucketIdx = minuteToBucket(prevBarMinute, bSize)
+        dataMatrix.set(dataMatrix.rows() - 1, bucketIdx, prevChange)
+
+    [hourIndexArray, dataMatrix]
+//#endregion
+
+
+//#region ———————————————————— Main calculations and outputs
+
+// Request minute data (using 1-minute timeframe)
+[hourIndexArray, changesMatrix] = request.security(
+     syminfo.tickerid, "1", calculateMinuteChanges(startYearInput, prevBarYear, prevBarMonth, prevBarDay, prevBarHour, prevBarMinute, bucketSize, numBuckets),
+     lookahead = barmerge.lookahead_on
+ )
+
+// Current minute calculations
+var float currMinuteAverage = na
+var float currMinuteStDev   = na
+var float currMinuteCount   = na
+
+if timeframe.change("1") and not na(changesMatrix)
+    int colIdx = minuteToBucket(currMinute, bucketSize)
+    if colIdx <= changesMatrix.columns() - 1
+        currMinuteAverage := changesMatrix.col(colIdx).avg()
+        currMinuteStDev   := changesMatrix.col(colIdx).stdev(false)
+        currMinuteCount   := changesMatrix.col(colIdx).nonNA()
+
+// Display plots
+displayLoc = display.data_window + display.status_line
+plot(currMinuteAverage, "Historical avg for current minute bucket", color = calcColor(currMinuteAverage), display = displayLoc, format = format.percent)
+plot(currMinuteStDev, "Historical stdev for current minute bucket", color = color.gray, display = displayLoc, precision = 2)
+plot(currMinuteCount, "No. of samples used in average", display = display.data_window, precision = 0)
+
+//@function Generates minute bucket labels.
+getMinuteLabels(int bSize, int numB) =>
+    var labels = array.new<string>(numB + 1)
+    labels.set(0, "Hour")
+    for i = 0 to numB - 1
+        int startMin = i * bSize
+        int endMin   = math.min((i + 1) * bSize - 1, 59)
+        string label = bSize == 1 ? ":" + str.tostring(startMin, "00") : ":" + str.tostring(startMin, "00") + "-" + str.tostring(endMin, "00")
+        labels.set(i + 1, label)
+    labels
+
+//@function Calculates total rows for the heatmap table.
+countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput) =>
+    totalRowCount = 1
+    totalRowCount += changesMatrix.rows()
+    if showMetrics
+        totalRowCount += 1
+        totalRowCount += showAvgInput ? 1 : 0
+        totalRowCount += showStDevInput ? 1 : 0
+        totalRowCount += showPosInput ? 1 : 0
+    totalRowCount
+
+
+// Heatmap rendering
+if barstate.islast
+
+    tablePosition = switch tablePositionInput
+        "Left"   => position.bottom_left
+        "Center" => position.bottom_center
+        "Right"  => position.bottom_right
+
+    int numCols = numBuckets + 1
+    table dataTable           = table.new(tablePosition, numCols, changesMatrix.rows() + 5)
+    color informerCellBgcolor = color.new(color.gray, 80)
+    color textColor           = chart.fg_color
+    int   totalRowCount       = countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput)
+    float cellHeight          = tableHeightInput / totalRowCount
+    float cellWidth           = tableWidthInput / numCols
+
+    // Minute bucket headers
+    var minuteLabels = getMinuteLabels(bucketSize, numBuckets)
+    for [index, item] in minuteLabels
+        dataTable.cell(index, 0, item, bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Hourly data cells
+    for [arrIndex, arr] in changesMatrix
+        int thisHourId = hourIndexArray.get(arrIndex)
+        int thisYear   = math.floor(thisHourId / 1000000)
+        int thisMonth  = math.floor((thisHourId % 1000000) / 10000)
+        int thisDay    = math.floor((thisHourId % 10000) / 100)
+        int thisHour   = thisHourId % 100
+        string hourLabel = str.tostring(thisYear) + "-" + str.tostring(thisMonth, "00") + "-" + str.tostring(thisDay, "00") + " " + str.tostring(thisHour, "00") + ":00"
+
+        for [itemIndex, item] in arr
+            if itemIndex == 0
+                dataTable.cell(
+                     itemIndex, arrIndex + 1, hourLabel, bgcolor = informerCellBgcolor,
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+            else
+                cellText  = str.tostring(item, format.percent)
+                cellColor = calcColor(item, cutoffPercentInput)
+                dataTable.cell(itemIndex, arrIndex + 1, cellText, bgcolor = cellColor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Metrics rows
+    if showMetrics
+        dividerRow = changesMatrix.rows() + 1
+        dataTable.cell(0, dividerRow, "", text_color = na, bgcolor = informerCellBgcolor, text_size = size.tiny, height = cellHeight, width = cellWidth)
+        dataTable.merge_cells(0, dividerRow, numCols - 1, dividerRow)
+
+        if showAvgInput
+            avgsRow = changesMatrix.rows() + 2
+            dataTable.cell(0, avgsRow, "Avgs:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numBuckets
+                avgValue = changesMatrix.col(i).avg()
+                dataTable.cell(
+                     i, avgsRow, str.tostring(avgValue, format.percent),
+                     bgcolor = calcColor(avgValue, cutoffPercentInput), text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showStDevInput
+            stDevRow = changesMatrix.rows() + 3
+            dataTable.cell(0, stDevRow, "StDev:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numBuckets
+                stdevValue = changesMatrix.col(i).stdev(false)
+                dataTable.cell(
+                     i, stDevRow, str.tostring(stdevValue, "##.##"), bgcolor = color.new(color.gray, 80),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showPosInput
+            ratioRow = changesMatrix.rows() + 4
+            dataTable.cell(0, ratioRow, "Pos%:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numBuckets
+                ratioValue = changesMatrix.col(i).percentPositive()
+                dataTable.cell(
+                     i, ratioRow, str.tostring(ratioValue, '#') + "%", bgcolor = calcColor(ratioValue - 50, 50),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+//#endregion

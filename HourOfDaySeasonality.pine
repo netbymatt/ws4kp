@@ -1,0 +1,262 @@
+//@version=6
+indicator("Hour of Day Seasonality", overlay = false, max_boxes_count = 500)
+
+//#region ———————————————————— Constants, inputs, and global variables
+
+// Tooltips
+string TT_SY = "The year to start seasonality calculations."
+string TT_PC = "The base color for boxes and table cells that show positive values."
+string TT_NC = "The base color for boxes and table cells that show negative values."
+string TT_CP = "The cutoff for maximum color intensity. Absolute values at or above this level have the same color."
+string TT_WT = "The table width as a percentage of the pane where the table is located."
+string TT_HG = "The table height as a percentage of the pane where the table is located."
+string TT_SA = "Toggles the 'Avgs' row, which shows average change percentages for each hour."
+string TT_SD = "Toggles the 'StDev' row, which shows the standard deviation of each hour's percentages."
+string TT_SP = "Toggles the 'Pos%' row, which shows the percentage of positive changes in each hour's column."
+string TT_SH = "Start hour for display (0-23). Use to focus on market hours."
+string TT_EH = "End hour for display (0-23). Use to focus on market hours."
+
+// Start year setting
+int startYearInput = input.int(2020, "Starting year", minval = 1800, tooltip = TT_SY, display = display.none)
+
+// Hour range settings
+string HOURS_GRP   = "Hour range"
+int    startHour   = input.int(0, "Start Hour (0-23)", minval = 0, maxval = 23, group = HOURS_GRP, tooltip = TT_SH)
+int    endHour     = input.int(23, "End Hour (0-23)", minval = 0, maxval = 23, group = HOURS_GRP, tooltip = TT_EH)
+
+// Color settings
+string COLOR_GRP          = "Color settings"
+color  posColorInput      = color.new(input.color(#089981, "Positive Color", group = COLOR_GRP, tooltip = TT_PC), 0)
+color  negColorInput      = color.new(input.color(#F23745, "Negative Color", group = COLOR_GRP, tooltip = TT_NC), 0)
+int    cutoffPercentInput = input.int(1, "Color intensity cutoff (%)", group = COLOR_GRP, tooltip = TT_CP, display = display.none)
+
+// Table settings
+string HEATMAP_GRP          = "Heatmap settings"
+string tablePositionInput   = input.string("Center", "Table Position", options = ["Left", "Center", "Right"], group = HEATMAP_GRP, display = display.none)
+float  tableWidthInput      = input.float(100, "Table Width (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_WT, display = display.none)
+float  tableHeightInput     = input.float(95, "Table Height (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_HG, display = display.none)
+bool   showAvgInput         = input.bool(true, "Show Averages", group = HEATMAP_GRP, tooltip = TT_SA)
+bool   showStDevInput       = input.bool(true, "Show Standard Deviation", group = HEATMAP_GRP, tooltip = TT_SD)
+bool   showPosInput         = input.bool(true, "Show Percent Positive", group = HEATMAP_GRP, tooltip = TT_SP)
+bool   showMetrics          = showAvgInput or showStDevInput or showPosInput
+
+// Calculate number of hours to display
+int numHours = endHour >= startHour ? endHour - startHour + 1 : (24 - startHour) + endHour + 1
+
+//@variable The current hour at the time.
+int currHour = hour(time_close - 1)
+
+prevTimeClose    = time_close[1] - 1
+int prevBarYear  = year(prevTimeClose)
+int prevBarMonth = month(prevTimeClose)
+int prevBarDay   = dayofmonth(prevTimeClose)
+int prevBarHour  = hour(prevTimeClose)
+//#endregion
+
+
+//#region ———————————————————— Functions and methods
+
+//@function Calculates color used by the boxes and Heatmap cells.
+calcColor(float value, int topTranspValue = na) =>
+    color naColor     = color.gray
+    float heavyTransp = 50
+    float lightTransp = 90
+    color heavyColor  = color.new(value >= 0 ? posColorInput : negColorInput, heavyTransp)
+    color lightColor  = color.new(value >= 0 ? posColorInput : negColorInput, lightTransp)
+    color baseColor   = na(value) ? naColor : value >= 0 ? posColorInput : negColorInput
+    color transpColor = color.from_gradient(math.abs(value), 0, topTranspValue, lightColor, heavyColor)
+    color result      = na(topTranspValue) ? baseColor : transpColor
+
+//@function Returns the one-bar change percentage of the `source`.
+changePercent(float source) => 100.0 * (source - source[1]) / source[1]
+
+//@function Returns the number of non-na values in `this` array.
+method nonNA(array<float> this) =>
+    int result = 0
+    for item in this
+        if not na(item)
+            result += 1
+    result
+
+//@function Returns the percentage of positive non-na values in `this` array.
+method percentPositive(array<float> this) =>
+    int nonNA = 0
+    int pos   = 0
+    for item in this
+        if not na(item)
+            nonNA += 1
+            if item >= 0
+                pos += 1
+    float result = 100.0 * pos / nonNA
+
+//@function Checks if hour is within display range.
+isHourInRange(int h, int startH, int endH) =>
+    if startH <= endH
+        h >= startH and h <= endH
+    else
+        // Wraps around midnight
+        h >= startH or h <= endH
+
+//@function Converts hour to column index based on start hour.
+hourToColumn(int h, int startH, int endH) =>
+    if startH <= endH
+        h - startH + 1
+    else
+        if h >= startH
+            h - startH + 1
+        else
+            (24 - startH) + h + 1
+
+//@function Calculates a matrix of hourly changes.
+//@param startYear The year where calculations start.
+//@returns A tuple containing an array of day indices and the matrix of hourly changes.
+calculateHourlyChanges(int startYear, int prevBarYear, int prevBarMonth, int prevBarDay, int prevBarHour, int startH, int endH, int numH) =>
+    // Matrix: rows = days, columns = 0 (day label) + hours
+    var matrix<float> dataMatrix    = matrix.new<float>(0, numH + 1)
+    var array<int>    dayIndexArray = array.new<int>()
+    float             prevChange    = changePercent(close[1])
+
+    if prevBarYear >= startYear and isHourInRange(prevBarHour, startH, endH)
+        // Create unique day identifier: YYYYMMDD
+        int dayId = prevBarYear * 10000 + prevBarMonth * 100 + prevBarDay
+
+        // Check if we need a new row for this day
+        if dayIndexArray.size() == 0 or dayIndexArray.last() != dayId
+            dataMatrix.add_row()
+            dayIndexArray.push(dayId)
+
+        // Set the change for this hour
+        int colIndex = hourToColumn(prevBarHour, startH, endH)
+        dataMatrix.set(dataMatrix.rows() - 1, colIndex, prevChange)
+
+    [dayIndexArray, dataMatrix]
+//#endregion
+
+
+//#region ———————————————————— Main calculations and outputs
+
+// Request hourly data
+[dayIndexArray, changesMatrix] = request.security(
+     syminfo.tickerid, "60", calculateHourlyChanges(startYearInput, prevBarYear, prevBarMonth, prevBarDay, prevBarHour, startHour, endHour, numHours),
+     lookahead = barmerge.lookahead_on
+ )
+
+// Current hour calculations
+var float currHourAverage = na
+var float currHourStDev   = na
+var float currHourCount   = na
+
+if timeframe.change("60") and not na(changesMatrix) and isHourInRange(currHour, startHour, endHour)
+    int colIdx = hourToColumn(currHour, startHour, endHour)
+    if colIdx <= changesMatrix.columns() - 1
+        currHourAverage := changesMatrix.col(colIdx).avg()
+        currHourStDev   := changesMatrix.col(colIdx).stdev(false)
+        currHourCount   := changesMatrix.col(colIdx).nonNA()
+
+// Display plots
+displayLoc = display.data_window + display.status_line
+plot(currHourAverage, "Historical avg for current hour", color = calcColor(currHourAverage), display = displayLoc, format = format.percent)
+plot(currHourStDev, "Historical stdev for current hour", color = color.gray, display = displayLoc, precision = 2)
+plot(currHourCount, "No. of hours used in average", display = display.data_window, precision = 0)
+
+//@function Generates hour labels array based on range.
+getHourLabels(int startH, int endH, int numH) =>
+    var labels = array.new<string>(numH + 1)
+    labels.set(0, "Date")
+    int idx = 1
+    int h = startH
+    for i = 0 to numH - 1
+        string hourStr = str.tostring(h, "00") + ":00"
+        labels.set(idx, hourStr)
+        idx += 1
+        h := (h + 1) % 24
+    labels
+
+//@function Calculates total rows for the heatmap table.
+countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput) =>
+    totalRowCount = 1
+    totalRowCount += changesMatrix.rows()
+    if showMetrics
+        totalRowCount += 1
+        totalRowCount += showAvgInput ? 1 : 0
+        totalRowCount += showStDevInput ? 1 : 0
+        totalRowCount += showPosInput ? 1 : 0
+    totalRowCount
+
+
+// Heatmap rendering
+if barstate.islast
+
+    tablePosition = switch tablePositionInput
+        "Left"   => position.bottom_left
+        "Center" => position.bottom_center
+        "Right"  => position.bottom_right
+
+    int numCols = numHours + 1
+    table dataTable           = table.new(tablePosition, numCols, changesMatrix.rows() + 5)
+    color informerCellBgcolor = color.new(color.gray, 80)
+    color textColor           = chart.fg_color
+    int   totalRowCount       = countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput)
+    float cellHeight          = tableHeightInput / totalRowCount
+    float cellWidth           = tableWidthInput / numCols
+
+    // Hour headers
+    var hourLabels = getHourLabels(startHour, endHour, numHours)
+    for [index, item] in hourLabels
+        dataTable.cell(index, 0, item, bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Daily data cells
+    for [arrIndex, arr] in changesMatrix
+        int thisDayId = dayIndexArray.get(arrIndex)
+        int thisYear  = math.floor(thisDayId / 10000)
+        int thisMonth = math.floor((thisDayId % 10000) / 100)
+        int thisDay   = thisDayId % 100
+        string dateLabel = str.tostring(thisYear) + "-" + str.tostring(thisMonth, "00") + "-" + str.tostring(thisDay, "00")
+
+        for [itemIndex, item] in arr
+            if itemIndex == 0
+                dataTable.cell(
+                     itemIndex, arrIndex + 1, dateLabel, bgcolor = informerCellBgcolor,
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+            else
+                cellText  = str.tostring(item, format.percent)
+                cellColor = calcColor(item, cutoffPercentInput)
+                dataTable.cell(itemIndex, arrIndex + 1, cellText, bgcolor = cellColor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Metrics rows
+    if showMetrics
+        dividerRow = changesMatrix.rows() + 1
+        dataTable.cell(0, dividerRow, "", text_color = na, bgcolor = informerCellBgcolor, text_size = size.tiny, height = cellHeight, width = cellWidth)
+        dataTable.merge_cells(0, dividerRow, numCols - 1, dividerRow)
+
+        if showAvgInput
+            avgsRow = changesMatrix.rows() + 2
+            dataTable.cell(0, avgsRow, "Avgs:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numHours
+                avgValue = changesMatrix.col(i).avg()
+                dataTable.cell(
+                     i, avgsRow, str.tostring(avgValue, format.percent),
+                     bgcolor = calcColor(avgValue, cutoffPercentInput), text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showStDevInput
+            stDevRow = changesMatrix.rows() + 3
+            dataTable.cell(0, stDevRow, "StDev:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numHours
+                stdevValue = changesMatrix.col(i).stdev(false)
+                dataTable.cell(
+                     i, stDevRow, str.tostring(stdevValue, "##.##"), bgcolor = color.new(color.gray, 80),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showPosInput
+            ratioRow = changesMatrix.rows() + 4
+            dataTable.cell(0, ratioRow, "Pos%:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to numHours
+                ratioValue = changesMatrix.col(i).percentPositive()
+                dataTable.cell(
+                     i, ratioRow, str.tostring(ratioValue, '#') + "%", bgcolor = calcColor(ratioValue - 50, 50),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+//#endregion

@@ -1,0 +1,219 @@
+//@version=6
+indicator("Day of Week Seasonality", overlay = false, max_boxes_count = 500)
+
+//#region ———————————————————— Constants, inputs, and global variables
+
+// Tooltips
+string TT_SY = "The year to start seasonality calculations."
+string TT_PC = "The base color for boxes and table cells that show positive values."
+string TT_NC = "The base color for boxes and table cells that show negative values."
+string TT_CP = "The cutoff for maximum color intensity. Absolute values at or above this level have the same color."
+string TT_WT = "The table width as a percentage of the pane where the table is located."
+string TT_HG = "The table height as a percentage of the pane where the table is located."
+string TT_SA = "Toggles the 'Avgs' row, which shows average change percentages for each day."
+string TT_SD = "Toggles the 'StDev' row, which shows the standard deviation of each day's percentages."
+string TT_SP = "Toggles the 'Pos%' row, which shows the percentage of positive changes in each day's column."
+
+// Start year setting
+int startYearInput = input.int(2020, "Starting year", minval = 1800, tooltip = TT_SY, display = display.none)
+
+// Color settings
+string COLOR_GRP          = "Color settings"
+color  posColorInput      = color.new(input.color(#089981, "Positive Color", group = COLOR_GRP, tooltip = TT_PC), 0)
+color  negColorInput      = color.new(input.color(#F23745, "Negative Color", group = COLOR_GRP, tooltip = TT_NC), 0)
+int    cutoffPercentInput = input.int(3, "Color intensity cutoff (%)", group = COLOR_GRP, tooltip = TT_CP, display = display.none)
+
+// Table settings
+string HEATMAP_GRP          = "Heatmap settings"
+string tablePositionInput   = input.string("Center", "Table Position", options = ["Left", "Center", "Right"], group = HEATMAP_GRP, display = display.none)
+float  tableWidthInput      = input.float(80, "Table Width (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_WT, display = display.none)
+float  tableHeightInput     = input.float(95, "Table Height (%)", maxval = 100, minval = 0, group = HEATMAP_GRP, tooltip = TT_HG, display = display.none)
+bool   showAvgInput         = input.bool(true, "Show Averages", group = HEATMAP_GRP, tooltip = TT_SA)
+bool   showStDevInput       = input.bool(true, "Show Standard Deviation", group = HEATMAP_GRP, tooltip = TT_SD)
+bool   showPosInput         = input.bool(true, "Show Percent Positive", group = HEATMAP_GRP, tooltip = TT_SP)
+bool   showMetrics          = showAvgInput or showStDevInput or showPosInput
+
+//@variable The current year at the time.
+int currYear = year(time_close - 1)
+//@variable The current day of week (1 = Sunday, 7 = Saturday in Pine Script).
+int currDayOfWeek = dayofweek(time_close - 1)
+
+prevTimeClose    = time_close[1] - 1
+int prevBarYear  = year(prevTimeClose)
+int prevBarWeek  = weekofyear(prevTimeClose)
+int prevBarDow   = dayofweek(prevTimeClose)
+//#endregion
+
+
+//#region ———————————————————— Functions and methods
+
+//@function Calculates color used by the boxes and Heatmap cells.
+calcColor(float value, int topTranspValue = na) =>
+    color naColor     = color.gray
+    float heavyTransp = 50
+    float lightTransp = 90
+    color heavyColor  = color.new(value >= 0 ? posColorInput : negColorInput, heavyTransp)
+    color lightColor  = color.new(value >= 0 ? posColorInput : negColorInput, lightTransp)
+    color baseColor   = na(value) ? naColor : value >= 0 ? posColorInput : negColorInput
+    color transpColor = color.from_gradient(math.abs(value), 0, topTranspValue, lightColor, heavyColor)
+    color result      = na(topTranspValue) ? baseColor : transpColor
+
+//@function Returns the one-bar change percentage of the `source`.
+changePercent(float source) => 100.0 * (source - source[1]) / source[1]
+
+//@function Returns the number of non-na values in `this` array.
+method nonNA(array<float> this) =>
+    int result = 0
+    for item in this
+        if not na(item)
+            result += 1
+    result
+
+//@function Returns the percentage of positive non-na values in `this` array.
+method percentPositive(array<float> this) =>
+    int nonNA = 0
+    int pos   = 0
+    for item in this
+        if not na(item)
+            nonNA += 1
+            if item >= 0
+                pos += 1
+    float result = 100.0 * pos / nonNA
+
+//@function Calculates a matrix of daily changes by day of week.
+//@param startYear The year where calculations start.
+//@returns A tuple containing an array of week indices and the matrix of daily changes.
+calculateDailyChanges(int startYear, int prevBarYear, int prevBarWeek, int prevBarDow) =>
+    // Matrix: rows = weeks, columns = 0 (week label) + 7 days (Sun=1 to Sat=7)
+    var matrix<float> dataMatrix     = matrix.new<float>(0, 8)
+    var array<int>    weekIndexArray = array.new<int>()
+    float             prevChange     = changePercent(close[1])
+
+    if prevBarYear >= startYear
+        // Create unique week identifier: YYYYWW
+        int weekId = prevBarYear * 100 + prevBarWeek
+
+        // Check if we need a new row for this week
+        if weekIndexArray.size() == 0 or weekIndexArray.last() != weekId
+            dataMatrix.add_row()
+            weekIndexArray.push(weekId)
+
+        // Set the change for this day of week (column index = dayofweek value)
+        dataMatrix.set(dataMatrix.rows() - 1, prevBarDow, prevChange)
+
+    [weekIndexArray, dataMatrix]
+//#endregion
+
+
+//#region ———————————————————— Main calculations and outputs
+
+// Request daily data
+[weekIndexArray, changesMatrix] = request.security(
+     syminfo.tickerid, "1D", calculateDailyChanges(startYearInput, prevBarYear, prevBarWeek, prevBarDow),
+     lookahead = barmerge.lookahead_on
+ )
+
+// Current day calculations
+var float currDayAverage  = na
+var float currDayStDev    = na
+var float currDayCount    = na
+
+if timeframe.change("1D") and not na(changesMatrix)
+    currDayAverage := changesMatrix.col(currDayOfWeek).avg()
+    currDayStDev   := changesMatrix.col(currDayOfWeek).stdev(false)
+    currDayCount   := changesMatrix.col(currDayOfWeek).nonNA()
+
+// Display plots
+displayLoc = display.data_window + display.status_line
+plot(currDayAverage, "Historical avg for current day", color = calcColor(currDayAverage), display = displayLoc, format = format.percent)
+plot(currDayStDev, "Historical stdev for current day", color = color.gray, display = displayLoc, precision = 2)
+plot(currDayCount, "No. of days used in average", display = display.data_window, precision = 0)
+
+//@variable Day names for columns (index 0 = label column, 1-7 = Sun-Sat)
+var dayNames = array.from("Week", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+//@function Calculates total rows for the heatmap table.
+countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput) =>
+    totalRowCount = 1                       // Header row
+    totalRowCount += changesMatrix.rows()   // Data rows
+    if showMetrics
+        totalRowCount += 1                  // Divider
+        totalRowCount += showAvgInput ? 1 : 0
+        totalRowCount += showStDevInput ? 1 : 0
+        totalRowCount += showPosInput ? 1 : 0
+    totalRowCount
+
+
+// Heatmap rendering
+if barstate.islast
+
+    tablePosition = switch tablePositionInput
+        "Left"   => position.bottom_left
+        "Center" => position.bottom_center
+        "Right"  => position.bottom_right
+
+    table dataTable           = table.new(tablePosition, 8, changesMatrix.rows() + 5)
+    color informerCellBgcolor = color.new(color.gray, 80)
+    color textColor           = chart.fg_color
+    int   totalRowCount       = countRows(changesMatrix, showMetrics, showAvgInput, showStDevInput, showPosInput)
+    float cellHeight          = tableHeightInput / totalRowCount
+    float cellWidth           = tableWidthInput / 8.0
+
+    // Day headers
+    for [index, item] in dayNames
+        dataTable.cell(index, 0, item, bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Weekly data cells
+    for [arrIndex, arr] in changesMatrix
+        int thisWeekId = weekIndexArray.get(arrIndex)
+        int thisYear   = math.floor(thisWeekId / 100)
+        int thisWeek   = thisWeekId % 100
+        string weekLabel = str.tostring(thisYear) + "-W" + str.tostring(thisWeek, "00")
+
+        for [itemIndex, item] in arr
+            if itemIndex == 0
+                dataTable.cell(
+                     itemIndex, arrIndex + 1, weekLabel, bgcolor = informerCellBgcolor,
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+            else
+                cellText  = str.tostring(item, format.percent)
+                cellColor = calcColor(item, cutoffPercentInput)
+                dataTable.cell(itemIndex, arrIndex + 1, cellText, bgcolor = cellColor, text_color = textColor, height = cellHeight, width = cellWidth)
+
+    // Metrics rows
+    if showMetrics
+        dividerRow = changesMatrix.rows() + 1
+        dataTable.cell(0, dividerRow, "", text_color = na, bgcolor = informerCellBgcolor, text_size = size.tiny, height = cellHeight, width = cellWidth)
+        dataTable.merge_cells(0, dividerRow, 7, dividerRow)
+
+        if showAvgInput
+            avgsRow = changesMatrix.rows() + 2
+            dataTable.cell(0, avgsRow, "Avgs:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to 7
+                avgValue = changesMatrix.col(i).avg()
+                dataTable.cell(
+                     i, avgsRow, str.tostring(avgValue, format.percent),
+                     bgcolor = calcColor(avgValue, cutoffPercentInput), text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showStDevInput
+            stDevRow = changesMatrix.rows() + 3
+            dataTable.cell(0, stDevRow, "StDev:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to 7
+                stdevValue = changesMatrix.col(i).stdev(false)
+                dataTable.cell(
+                     i, stDevRow, str.tostring(stdevValue, "##.##"), bgcolor = color.new(color.gray, 80),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+
+        if showPosInput
+            ratioRow = changesMatrix.rows() + 4
+            dataTable.cell(0, ratioRow, "Pos%:", bgcolor = informerCellBgcolor, text_color = textColor, height = cellHeight, width = cellWidth)
+            for i = 1 to 7
+                ratioValue = changesMatrix.col(i).percentPositive()
+                dataTable.cell(
+                     i, ratioRow, str.tostring(ratioValue, '#') + "%", bgcolor = calcColor(ratioValue - 50, 50),
+                     text_color = textColor, height = cellHeight, width = cellWidth
+                 )
+//#endregion
