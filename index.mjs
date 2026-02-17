@@ -158,6 +158,7 @@ if (process.env?.DIST === '1') {
 	// 'npm run build' and then 'DIST=1 npm start'
 	app.use('/scripts', express.static('./server/scripts', staticOptions));
 	app.use('/geoip', geoip);
+	app.use('/music', express.static('./server/music', staticOptions));
 
 	// render the EJS template in production mode (serve compressed files from dist directory)
 	app.get('/', (req, res) => { renderIndex(req, res, true); });
