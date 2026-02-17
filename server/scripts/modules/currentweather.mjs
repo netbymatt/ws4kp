@@ -324,7 +324,7 @@ const backfill = (data) => {
 	// backfill each property
 	Object.keys(sortedData[0].properties).forEach((key) => {
 		// qualify the key (must have value)
-		if (Object.hasOwn(sortedData[0].properties[key], 'value')) {
+		if (Object.hasOwn(sortedData[0].properties?.[key] ?? {}, 'value')) {
 			// backfill this property
 			result[key] = backfillProperty(sortedData, key);
 		} else {
