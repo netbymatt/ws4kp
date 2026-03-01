@@ -336,6 +336,11 @@ When using Docker:
 * **Static deployment**: Mount your `custom.js` file to `/usr/share/nginx/html/scripts/custom.js`
 * **Server deployment**: Mount your `custom.js` file to `/app/server/scripts/custom.js`
 
+### Custom text scroll
+If you would like your Weatherstar to have custom scrolling text in the bottom blue bar, turn on the setting for `Enable RSS Feed/Text` and then enter text in the resulting text box. Then press set.
+
+Tip: You can have Weatherstar select randomly between several text strings on each pass through the current conditions. Use a pipe character to separate string. `Welcome to Weatherstar|Thanks for watching`.
+
 ## Issue reporting and feature requests
 
 Please do not report issues with api.weather.gov being down. It's a new service and not considered fully operational yet. I've also observed that the API can go down on a regional basis (based on NWS office locations). This means that you may have problems getting data for, say, Chicago right now, but Dallas and others are working just fine.
