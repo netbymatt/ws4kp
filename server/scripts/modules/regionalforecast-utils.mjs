@@ -23,7 +23,7 @@ const buildForecast = (forecast, city, cityXY) => {
 const getRegionalObservation = async (point, city) => {
 	try {
 		// get stations using centralized safe handling
-		const stations = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=1`);
+		const stations = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=10`);
 
 		if (!stations || !stations.features || stations.features.length === 0) {
 			if (debugFlag('verbose-failures')) {
@@ -32,9 +32,13 @@ const getRegionalObservation = async (point, city) => {
 			return false;
 		}
 
-		// get the first station
-		const station = stations.features[0].id;
-		const stationId = stations.features[0].properties.stationIdentifier;
+		// get the first station with a 4-letter id (generally has appropriate data)
+		const station4Letter = stations.features.find((station) => {
+			if (station.properties.stationIdentifier.length === 4) return station.properties;
+			return false;
+		});
+		const station = station4Letter.id;
+		const stationId = station4Letter.properties.stationIdentifier;
 		// get the observation data using centralized safe handling
 		const observation = await safeJson(`${station}/observations/latest`);
 
