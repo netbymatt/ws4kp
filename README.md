@@ -34,7 +34,7 @@ From a learning standpoint, this codebase make use of a lot of different methods
 * Hand written CSS made easier to mange with SASS
 * A linting library to keep code style consistent
 
-## Quck Start
+## Quick Start
 
 Ensure you have Node installed.
 ```bash
