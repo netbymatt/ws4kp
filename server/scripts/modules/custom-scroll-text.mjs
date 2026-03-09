@@ -3,8 +3,6 @@ import { reset as resetScroll, addScreen as addScroll, hazards } from './current
 
 let firstRun = true;
 
-const parser = new DOMParser();
-
 // change of enable handler
 const changeEnable = (newValue) => {
 	let newDisplay;

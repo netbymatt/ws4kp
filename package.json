@@ -31,7 +31,7 @@
 		"@eslint/eslintrc": "^3.3.1",
 		"ajv": "^8.17.1",
 		"del": "^8.0.0",
-		"eslint": "^9.0.0",
+		"eslint": "^10.0.3",
 		"eslint-config-airbnb-base": "15.0.0",
 		"eslint-plugin-import": "^2.10.0",
 		"fancy-log": "^2.0.0",
