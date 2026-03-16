@@ -138,15 +138,14 @@ const parse = (fullForecast, forecastUrl) => {
 		// get the object to modify/populate
 		const fDay = forecast[destIndex];
 
-		// preload the icon
-		preloadImg(fDay.icon);
-
 		if (period.isDaytime) {
 			// day time is the high temperature
 			fDay.high = period.temperature;
 			fDay.icon = getLargeIcon(period.icon);
 			fDay.text = shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = dates[destIndex];
+			// preload the icon
+			preloadImg(fDay.icon);
 			// Wait for the corresponding night period to increment
 		} else {
 			// low temperature

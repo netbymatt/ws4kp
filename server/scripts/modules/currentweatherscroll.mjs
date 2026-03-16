@@ -261,6 +261,7 @@ const parseMessage = (event) => {
 	if (event?.data?.type === 'current-weather-scroll') {
 		if (event.data?.method === 'start') start();
 		if (event.data?.method === 'reload') stop(true);
+		if (event.data?.method === 'non-display') nonDisplay();
 		if (event.data?.method === 'show') show();
 		if (event.data?.method === 'hide') hide();
 	}
@@ -272,6 +273,20 @@ const show = () => {
 
 const hide = () => {
 	mainScroll.style.display = 'none';
+};
+
+const nonDisplay = () => {
+	if (interval) {
+		clearInterval(interval);
+		interval = null;
+		stop();
+		// if greater than default update (typically long scroll) skip to the next weather screen
+		if (nextUpdate > DEFAULT_UPDATE) {
+			screenIndex = (screenIndex + 1) % (workingScreens.length);
+			sinceLastUpdate = 0;
+			nextUpdate = DEFAULT_UPDATE;
+		}
+	}
 };
 
 const screenCount = () => workingScreens.length;
