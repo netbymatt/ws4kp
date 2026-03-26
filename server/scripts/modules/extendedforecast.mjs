@@ -97,11 +97,9 @@ const parse = (fullForecast, forecastUrl) => {
 	// Skip the first period if it's nighttime (like "Tonight") since extended forecast
 	// should focus on upcoming full days, not the end of the current day
 	let startIndex = 0;
-	let dateOffset = 0; // offset for date labels when we skip periods
 
 	if (activePeriods.length > 0 && !activePeriods[0].isDaytime) {
 		startIndex = 1;
-		dateOffset = 1; // start date labels from tomorrow since we're skipping tonight
 		if (debugFlag('extendedforecast')) {
 			console.log(`ExtendedForecast: Skipping first period "${activePeriods[0].name}" because it's nighttime`);
 		}
@@ -111,25 +109,14 @@ const parse = (fullForecast, forecastUrl) => {
 		}
 	}
 
-	// create a list of days starting with the appropriate day
-	const Days = [0, 1, 2, 3, 4, 5, 6];
-	const dates = Days.map((shift) => {
-		const date = DateTime.local().startOf('day').plus({ days: shift + dateOffset });
-		return date.toLocaleString({ weekday: 'short' });
-	});
-
-	if (debugFlag('extendedforecast')) {
-		console.log(`ExtendedForecast: Generated date labels: [${dates.join(', ')}]`);
-	}
-
 	// track the destination forecast index
 	let destIndex = 0;
 	const forecast = [];
 
+	// if the first period is nighttime it is skipped above via startIndex
 	for (let i = startIndex; i < activePeriods.length; i += 1) {
 		const period = activePeriods[i];
 
-		// create the destination object if necessary
 		if (!forecast[destIndex]) {
 			forecast.push({
 				dayName: '', low: undefined, high: undefined, text: undefined, icon: undefined,
@@ -143,7 +130,7 @@ const parse = (fullForecast, forecastUrl) => {
 			fDay.high = period.temperature;
 			fDay.icon = getLargeIcon(period.icon);
 			fDay.text = shortenExtendedForecastText(period.shortForecast);
-			fDay.dayName = dates[destIndex];
+			fDay.dayName = DateTime.fromISO(period.startTime).startOf('day').toLocaleString({ weekday: 'short' });
 			// preload the icon
 			preloadImg(fDay.icon);
 			// Wait for the corresponding night period to increment
