@@ -346,7 +346,7 @@ var TimeIndicator;
     TimeIndicator["TL"] = "TL";
 })(TimeIndicator || (TimeIndicator = {}));
 /**
- * https://www.aviationweather.gov/taf/decoder
+ * https://web.archive.org/web/20230318235549/https://aviationweather.gov/taf/decoder
  */
 var WeatherChangeType;
 (function (WeatherChangeType) {
@@ -2535,7 +2535,8 @@ class MetarParser extends AbstractParser {
         while (i < trendParts.length &&
             trendParts[i] !== this.TEMPO &&
             trendParts[i] !== this.INTER &&
-            trendParts[i] !== this.BECMG) {
+            trendParts[i] !== this.BECMG &&
+            trendParts[i] !== this.RMK) {
             if (trendParts[i].startsWith(this.FM) ||
                 trendParts[i].startsWith(this.TL) ||
                 trendParts[i].startsWith(this.AT)) {
