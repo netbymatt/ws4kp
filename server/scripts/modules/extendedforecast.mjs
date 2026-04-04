@@ -17,7 +17,13 @@ class ExtendedForecast extends WeatherDisplay {
 		super(navId, elemId, 'Extended Forecast', true);
 
 		// set timings
-		this.timing.totalScreens = 2;
+		if (settings.enhancedScreens?.value) {
+			this.timing.totalScreens = 1;
+			this.perPage = 4;
+		} else {
+			this.timing.totalScreens = 2;
+			this.perPage = 3;
+		}
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -54,7 +60,7 @@ class ExtendedForecast extends WeatherDisplay {
 
 		// determine bounds
 		// grab the first three or second set of three array elements
-		const forecast = parse(this.data.properties.periods, this.weatherParameters.forecast).slice(0 + 3 * this.screenIndex, 3 + this.screenIndex * 3);
+		const forecast = parse(this.data.properties.periods, this.weatherParameters.forecast).slice(0 + this.perPage * this.screenIndex, this.perPage + this.screenIndex * this.perPage);
 
 		// create each day template
 		const days = forecast.map((Day) => {

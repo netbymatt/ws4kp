@@ -47,10 +47,7 @@ class Almanac extends WeatherDisplay {
 	}
 
 	calcSunMoonData(weatherParameters) {
-		const sun = [
-			SunCalc.getTimes(new Date(), weatherParameters.latitude, weatherParameters.longitude),
-			SunCalc.getTimes(DateTime.local().plus({ days: 1 }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude),
-		];
+		const sun = [0, 1, 2, 3, 4, 5, 6].map((days) => SunCalc.getTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
 
 		// brute force the moon phases by scanning the next 30 days
 		const moon = [];
