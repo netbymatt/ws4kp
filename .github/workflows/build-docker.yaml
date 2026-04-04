@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'
+      - '!screen-enhance'
+      - '!screen-enhance/**'
     tags:
       - 'v*.*.*'
       - 'v*.*'
