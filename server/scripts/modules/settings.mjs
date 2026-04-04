@@ -130,6 +130,16 @@ const init = () => {
 		changeAction: wideScreenChange,
 		sticky: true,
 	});
+	settings.portrait = new Setting('portrait', {
+		name: 'Allow Portrait',
+		defaultValue: false,
+		sticky: true,
+	});
+	settings.enhancedScreens = new Setting('enhancedScreens', {
+		name: 'Enhanced Screens',
+		defaultValue: false,
+		sticky: true,
+	});
 	settings.kiosk = new Setting('kiosk', {
 		name: 'Kiosk',
 		defaultValue: false,
