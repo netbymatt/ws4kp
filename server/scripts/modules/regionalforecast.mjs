@@ -14,11 +14,29 @@ import * as utils from './regionalforecast-utils.mjs';
 import { getPoint } from './utils/weather.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import filterExpiredPeriods from './utils/forecast-utils.mjs';
+import settings from './settings.mjs';
 
-// map offset
-const mapOffsetXY = {
-	x: 240,
-	y: 117,
+// set up spacing and scales
+const scaling = () => {
+	// available space
+	const available = {
+		x: 640,
+	};
+
+	// map offset
+	const mapOffsetXY = {
+		x: 240,
+		y: 117,
+	};
+
+	if (settings.wide?.value && settings.enhancedScreens?.value) {
+		mapOffsetXY.x = 320;
+		available.x = 854;
+	}
+	return {
+		mapOffsetXY,
+		available,
+	};
 };
 
 class RegionalForecast extends WeatherDisplay {
@@ -45,6 +63,7 @@ class RegionalForecast extends WeatherDisplay {
 		this.elem.querySelector('.map img').src = baseMap;
 
 		// get user's location in x/y
+		const { available, mapOffsetXY } = scaling();
 		const sourceXY = utils.getXYFromLatitudeLongitude(this.weatherParameters.latitude, this.weatherParameters.longitude, mapOffsetXY.x, mapOffsetXY.y, weatherParameters.state);
 
 		// get latitude and longitude limits
@@ -102,7 +121,7 @@ class RegionalForecast extends WeatherDisplay {
 				}
 
 				// get XY on map for city
-				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state);
+				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available - 60);
 
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
@@ -188,7 +207,8 @@ class RegionalForecast extends WeatherDisplay {
 		}
 
 		// draw the map
-		const scale = 640 / (mapOffsetXY.x * 2);
+		const { available, mapOffsetXY } = scaling();
+		const scale = available.x / (mapOffsetXY.x * 2);
 		const map = this.elem.querySelector('.map');
 		map.style.transform = `scale(${scale}) translate(-${sourceXY.x}px, -${sourceXY.y}px)`;
 

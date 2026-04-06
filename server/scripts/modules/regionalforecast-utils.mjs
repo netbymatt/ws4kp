@@ -209,7 +209,7 @@ const getMinMaxLatitudeLongitudeHI = (X, Y, OffsetX, OffsetY) => {
 	};
 };
 
-const getXYForCity = (City, MaxLatitude, MinLongitude, state) => {
+const getXYForCity = (City, MaxLatitude, MinLongitude, state, maxX = 580) => {
 	if (state === 'AK') getXYForCityAK(City, MaxLatitude, MinLongitude);
 	if (state === 'HI') getXYForCityHI(City, MaxLatitude, MinLongitude);
 	let x = (City.lon - MinLongitude) * 57;
@@ -219,7 +219,7 @@ const getXYForCity = (City, MaxLatitude, MinLongitude, state) => {
 	if (y > 282) y = 282;
 
 	if (x < 40) x = 40;
-	if (x > 580) x = 580;
+	if (x > maxX) x = maxX;
 
 	return { x, y };
 };
