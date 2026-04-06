@@ -46,8 +46,8 @@ const setTiles = (data) => {
 	// determine which tiles are used
 	const usedTiles = [
 		true,
-		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE.width,
-		TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE.width,
+		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE().width,
+		TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE().width,
 	];
 	// if we need t[1] and t[2] then we also need t[3]
 	usedTiles.push(usedTiles[1] && usedTiles[2]);

@@ -1,5 +1,5 @@
 import { removeDopplerRadarImageNoise } from './radar-utils.mjs';
-import { RADAR_FULL_SIZE, RADAR_FINAL_SIZE } from './radar-constants.mjs';
+import { RADAR_FULL_SIZE, RADAR_FINAL_SIZE, RADAR_SOURCE_SIZE } from './radar-constants.mjs';
 
 // process a single radar image and place it on the provided canvas
 const processRadar = async (data) => {
@@ -13,8 +13,8 @@ const processRadar = async (data) => {
 
 	// calculate offsets and sizes
 	const radarSource = {
-		width: 240,
-		height: 163,
+		width: RADAR_SOURCE_SIZE().width,
+		height: RADAR_SOURCE_SIZE().height,
 		x: Math.round(radarSourceXY.x / 2),
 		y: Math.round(radarSourceXY.y / 2),
 	};
@@ -52,11 +52,11 @@ const processRadar = async (data) => {
 
 	// stretch the radar image
 	const stretchCanvas = document.createElement('canvas');
-	stretchCanvas.width = RADAR_FINAL_SIZE.width;
-	stretchCanvas.height = RADAR_FINAL_SIZE.height;
+	stretchCanvas.width = RADAR_FINAL_SIZE().width;
+	stretchCanvas.height = RADAR_FINAL_SIZE().height;
 	const stretchContext = stretchCanvas.getContext('2d', { willReadFrequently: true });
 	stretchContext.imageSmoothingEnabled = false;
-	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, RADAR_FINAL_SIZE.width, RADAR_FINAL_SIZE.height);
+	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, RADAR_FINAL_SIZE().width, RADAR_FINAL_SIZE().height);
 
 	return stretchCanvas.toDataURL();
 };
