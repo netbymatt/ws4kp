@@ -1,5 +1,6 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 #radar-html.weather-display {
 	background-image: url('../images/backgrounds/4.png');
@@ -104,6 +105,7 @@
 .weather-display .main.radar {
 	overflow: hidden;
 	height: 367px;
+	width: p.$standard-width;
 
 	.container {
 
