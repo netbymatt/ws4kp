@@ -1,10 +1,16 @@
-@use 'shared/_colors' as c;
-@use 'shared/_utils' as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 .weather-display .progress {
 	@include u.text-shadow();
 	font-family: 'Star4000 Extended';
 	font-size: 19pt;
+
+	// clamp width to standard
+	&.main {
+		width: calc(p.$standard-width - (2 * p.$blue-box-margin));
+	}
 
 	.container {
 		position: relative;

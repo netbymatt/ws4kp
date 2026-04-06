@@ -1,28 +1,42 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 .weather-display {
-	width: 640px;
-	height: 480px;
+	width: p.$standard-width;
+	height: p.$standard-height;
 	overflow: hidden;
 	position: relative;
 	background-image: url(../images/backgrounds/1.png);
+
+	// adjust for wide
+	.wide & {
+		width: p.$wide-width;
+		background-position-x: p.$wide-margin;
+		background-repeat: no-repeat;
+	}
 
 	/* this method is required to hide blocks so they can be measured while off screen */
 	height: 0px;
 
 	&.show {
-		height: 480px;
+		height: p.$standard-height;
 	}
 
 	.template {
 		display: none;
 	}
 
-	.header {
-		width: 640px;
+	>.header {
+		width: p.$standard-width;
 		height: 60px;
+		position: relative;
 		padding-top: 30px;
+
+		// adjust for wide
+		.wide & {
+			left: p.$wide-margin;
+		}
 
 		.title {
 			color: c.$title-color;
@@ -92,8 +106,21 @@
 	.main {
 		position: relative;
 
+		// adjust for wide
+		.wide & {
+			left: p.$wide-margin;
+		}
+
+		// adjust for enhanced when possible
+		.wide.enhanced & {
+			&.can-enhance {
+				left: 0px;
+				width: p.$wide-width;
+			}
+		}
+
 		&.has-scroll {
-			width: 640px;
+			width: p.$standard-width;
 			margin-top: 0;
 			height: 310px;
 			overflow: hidden;
@@ -117,7 +144,7 @@
 #container>.scroll {
 	display: none;
 	@include u.text-shadow(3px, 1.5px);
-	width: 640px;
+	width: p.$standard-width;
 	height: 77px;
 	overflow: hidden;
 	margin-top: 3px;
@@ -125,12 +152,17 @@
 	bottom: 0px;
 	z-index: 1;
 
+	// adjust for wide
+	.wide & {
+		left: p.$wide-margin;
+	}
+
 	&.hazard {
 		background-color: rgb(112, 35, 35);
 	}
 
 	.scroll-container {
-		width: 640px;
+		width: p.$standard-width;
 
 		.fixed,
 		.scroll-header {
@@ -156,7 +188,7 @@
 				position: relative;
 				// the following added by js code as it is dependent on the content of the element
 				// transition: left (x)s;
-				// left: calc((elem width) - 640px);
+				// left: calc((elem width) - p.$standard-width);
 			}
 		}
 	}
@@ -167,9 +199,9 @@
 
 .wide #container>.scroll {
 	width: 854px;
-	margin-left: -107px;
+	margin-left: -1*p.$wide-margin;
 
 	.scroll-container {
-		margin-left: 107px;
+		margin-left: p.$wide-margin;
 	}
 }

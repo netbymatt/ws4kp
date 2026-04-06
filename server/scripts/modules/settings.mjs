@@ -32,6 +32,25 @@ const wideScreenChange = (value) => {
 	window.dispatchEvent(new Event('resize'));
 };
 
+const enhancedScreenChange = (value) => {
+	const container = document.querySelector('#divTwc');
+	if (!container) {
+		// DOM not ready; defer enabling if set
+		if (value) {
+			deferredDomSettings.add('enhanced');
+		}
+		return;
+	}
+
+	if (value) {
+		container.classList.add('enhanced');
+	} else {
+		container.classList.remove('enhanced');
+	}
+	// Trigger resize to recalculate scaling for new width
+	window.dispatchEvent(new Event('resize'));
+};
+
 const kioskChange = (value) => {
 	const body = document.querySelector('body');
 	if (!body) {
@@ -138,6 +157,7 @@ const init = () => {
 	settings.enhancedScreens = new Setting('enhancedScreens', {
 		name: 'Enhanced Screens',
 		defaultValue: false,
+		changeAction: enhancedScreenChange,
 		sticky: true,
 	});
 	settings.kiosk = new Setting('kiosk', {

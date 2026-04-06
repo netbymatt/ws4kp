@@ -1,8 +1,10 @@
-@use 'shared/_colors' as c;
-@use 'shared/_utils' as u;
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 .weather-display .main.current-weather {
 	&.main {
+		width: calc(p.$standard-width - (2 * p.$blue-box-margin));
 
 		.col {
 			height: 50px;
@@ -17,7 +19,6 @@
 			&.left {
 				font-family: 'Star4000 Extended';
 				font-size: 24pt;
-
 			}
 
 			&.right {

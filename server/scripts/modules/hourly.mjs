@@ -238,7 +238,7 @@ const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPr
 };
 
 // expand a set of values with durations to an hour-by-hour array
-const expand = (data, maxHours = 36) => {
+const expand = (data, maxHours = 48) => {
 	const startOfHour = DateTime.utc().startOf('hour').toMillis();
 	const result = []; // resulting expanded values
 	data.forEach((item) => {

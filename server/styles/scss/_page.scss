@@ -1,5 +1,6 @@
 @use 'shared/_utils'as u;
 @use 'shared/_colors'as c;
+@use 'shared/positions'as p;
 
 @font-face {
 	font-family: "Star4000";
@@ -345,8 +346,7 @@ body {
 }
 
 .wide #container {
-	padding-left: 107px;
-	padding-right: 107px;
+	width: p.$wide-width;
 	background: url(../images/backgrounds/1-wide.png);
 	background-repeat: no-repeat;
 }
@@ -367,6 +367,10 @@ body {
 	align-items: center;
 	text-align: center;
 	justify-content: center;
+
+	.wide & {
+		margin-left: p.$wide-margin;
+	}
 
 	.title {
 		font-family: Star4000 Large;

@@ -5,10 +5,30 @@ import getHourlyData from './hourly.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
+import settings from './settings.mjs';
 
-// get available space
-const availableWidth = 532;
-const availableHeight = 285;
+// set up spacing and scales
+const scaling = () => {
+	const available = {
+		width: 532,
+		height: 285,
+	};
+	const dataLength = {
+		hours: 36,
+		xTicks: 4,
+	};
+
+	if (settings.wide?.value && settings.enhancedScreens?.value) {
+		available.width = available.width + 107 + 107;
+		available.height = 285;
+		dataLength.hours = 48;
+		dataLength.xTicks = 6;
+	}
+	return {
+		available,
+		dataLength,
+	};
+};
 
 class HourlyGraph extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
@@ -46,28 +66,43 @@ class HourlyGraph extends WeatherDisplay {
 			skyCover, temperature, probabilityOfPrecipitation, temperatureUnit: data[0].temperatureUnit, dewpoint,
 		};
 
+		// get the data length for current settings
+		const { dataLength } = scaling();
+
+		// clamp down the data to the allowed size
+		Object.entries(this.data).forEach(([key, value]) => {
+			if (Array.isArray(value)) {
+				this.data[key] = value.slice(0, dataLength.hours);
+			}
+		});
+
 		this.setStatus(STATUS.loaded);
 	}
 
 	drawCanvas() {
+		// get scaling parameters
+		const { dataLength, available } = scaling();
+
+		// get the image
 		if (!this.image) this.image = this.elem.querySelector('.chart img');
 
-		this.image.width = availableWidth;
-		this.image.height = availableHeight;
+		// set up image
+		this.image.width = available.width;
+		this.image.height = available.height;
 
 		// get context
 		const canvas = document.createElement('canvas');
-		canvas.width = availableWidth;
-		canvas.height = availableHeight;
+		canvas.width = available.width;
+		canvas.height = available.height;
 		const ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 
 		// calculate time scale
-		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, availableWidth);
-		const timeStep = this.data.temperature.length / 4;
+		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, available.width);
+		const timeStep = this.data.temperature.length / (dataLength.xTicks);
 		const startTime = DateTime.now().startOf('hour');
 		let prevTime = startTime;
-		Array(5).fill().forEach((val, idx) => {
+		Array(dataLength.xTicks + 1).fill().forEach((val, idx) => {
 			// track the previous label so a day of week can be added when it changes
 			const label = formatTime(startTime.plus({ hour: idx * timeStep }), prevTime);
 			prevTime = label.ts;
@@ -77,7 +112,7 @@ class HourlyGraph extends WeatherDisplay {
 
 		// order is important last line drawn is on top
 		// clouds
-		const percentScale = calcScale(0, availableHeight - 10, 100, 10);
+		const percentScale = calcScale(0, available.height - 10, 100, 10);
 		const cloud = createPath(this.data.skyCover, timeScale, percentScale);
 		drawPath(cloud, ctx, {
 			strokeStyle: 'lightgrey',
@@ -97,7 +132,7 @@ class HourlyGraph extends WeatherDisplay {
 		const thirdScale = (maxScale - minScale) / 3;
 		const midScale1 = Math.round(minScale + thirdScale);
 		const midScale2 = Math.round(minScale + (thirdScale * 2));
-		const tempScale = calcScale(minScale, availableHeight - 10, maxScale, 10);
+		const tempScale = calcScale(minScale, available.height - 10, maxScale, 10);
 
 		// dewpoint
 		const dewpointPath = createPath(this.data.dewpoint, timeScale, tempScale);

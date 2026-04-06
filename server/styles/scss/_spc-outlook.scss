@@ -1,5 +1,6 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 #spc-outlook-html.weather-display {
 	background-image: url('../images/backgrounds/6.png');
