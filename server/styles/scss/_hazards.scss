@@ -1,5 +1,6 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/positions'as p;
 
 #hazards-html.weather-display {
 	background-image: url('../images/backgrounds/7.png');
@@ -8,7 +9,7 @@
 .weather-display .main.hazards {
 	&.main {
 		overflow-y: hidden;
-		height: 480px;
+		height: p.$standard-height;
 		background-color: rgb(112, 35, 35);
 
 

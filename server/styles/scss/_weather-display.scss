@@ -122,7 +122,7 @@
 		&.has-scroll {
 			width: p.$standard-width;
 			margin-top: 0;
-			height: 310px;
+			height: p.$standard-scroll-height;
 			overflow: hidden;
 
 			&.no-header {
@@ -132,8 +132,8 @@
 		}
 
 		&.has-box {
-			margin-left: 64px;
-			margin-right: 64px;
+			margin-left: p.$blue-box-margin;
+			margin-right: p.$blue-box-margin;
 			width: calc(100% - 128px);
 		}
 
@@ -198,7 +198,7 @@
 }
 
 .wide #container>.scroll {
-	width: 854px;
+	width: p.$wide-width;
 	margin-left: -1*p.$wide-margin;
 
 	.scroll-container {

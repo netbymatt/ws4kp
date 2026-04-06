@@ -34,7 +34,7 @@ body {
 }
 
 #divQuery {
-	max-width: 640px;
+	max-width: p.$standard-width;
 	padding: 8px;
 
 	.buttons {
@@ -147,11 +147,11 @@ body {
 	background-color: #000000;
 	color: #ffffff;
 	width: 100%;
-	max-width: 640px;
+	max-width: p.$standard-width;
 	margin: 0; // Ensure edge-to-edge display
 
 	&.wide {
-		max-width: 854px;
+		max-width: p.$wide-width;
 	}
 }
 
@@ -160,12 +160,12 @@ body {
 }
 
 #divTwcMain {
-	width: 640px;
-	height: 480px;
+	width: p.$standard-width;
+	height: p.$standard-height;
 	position: relative;
 
 	.wide & {
-		width: 854px;
+		width: p.$wide-width;
 	}
 }
 
@@ -210,10 +210,10 @@ body {
 	background-color: #000000;
 
 	color: #ffffff;
-	width: 640px;
+	width: p.$standard-width;
 
 	.wide & {
-		width: 854px;
+		width: p.$wide-width;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -275,7 +275,7 @@ body {
 	flex-direction: row;
 	background-color: #000000;
 	color: #ffffff;
-	max-width: 640px;
+	max-width: p.$standard-width;
 }
 
 #divTwcNav>div {
@@ -337,8 +337,8 @@ body {
 
 #container {
 	position: relative;
-	width: 640px;
-	height: 480px;
+	width: p.$standard-width;
+	height: p.$standard-height;
 	// overflow: hidden;
 	background-image: url(../images/backgrounds/1.png);
 	transform-origin: 0 0;
@@ -359,8 +359,8 @@ body {
 }
 
 #loading {
-	width: 640px;
-	height: 480px;
+	width: p.$standard-width;
+	height: p.$standard-height;
 	max-width: 100%;
 	text-shadow: 4px 4px black;
 	display: flex;
