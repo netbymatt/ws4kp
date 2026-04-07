@@ -1,9 +1,10 @@
 <%- include('header.ejs', {titleDual:{ top: 'Latest' , bottom: 'Observations' }, noaaLogo: true, hasTime: true }) %>
-<div class="main has-scroll latest-observations has-box">
+<div class="main has-scroll latest-observations has-box can-enhance">
   <div class="container">
     <div class="column-headers">
       <div class="temp english">&deg;F</div>
       <div class="temp metric">&deg;C</div>
+      <div class="like">Like</div>
       <div class="weather">Weather</div>
       <div class="wind">Wind</div>
     </div>
@@ -11,6 +12,7 @@
       <div class="observation-row template">
         <div class="location"></div>
         <div class="temp"></div>
+        <div class="like"></div>
         <div class="weather"></div>
         <div class="wind"></div>
       </div>

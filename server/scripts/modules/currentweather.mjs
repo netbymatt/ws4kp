@@ -14,6 +14,7 @@ import {
 import { debugFlag } from './utils/debug.mjs';
 import { isDataStale, enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
+import settings from './settings.mjs';
 
 // some stations prefixed do not provide all the necessary data
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
@@ -192,7 +193,9 @@ class CurrentWeather extends WeatherDisplay {
 		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : this.data.WindSpeed;
 
 		// get location (city name) from StationInfo if available (allows for overrides)
-		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substr(0, 20);
+		// longer name allowed if in wide-enhanced
+		const locationLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 25 : 20;
+		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substr(0, locationLimit);
 
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),

@@ -159,12 +159,17 @@ class LatestObservations extends WeatherDisplay {
 			const windDirection = directionToNSEW(condition.windDirection.value);
 
 			const Temperature = temperatureConverter(condition.temperature.value);
+			const Like = likeTemperature(condition.heatIndex?.value, condition.windChill?.value, Temperature, temperatureConverter);
 			const WindSpeed = windConverter(condition.windSpeed.value);
 
+			const locationLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 20 : 14;
+			const weatherLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 10 : 9;
+
 			const fill = {
-				location: locationCleanup(condition.city).substr(0, 14),
+				location: locationCleanup(condition.city).substr(0, locationLimit),
 				temp: Temperature,
-				weather: shortenCurrentConditions(condition.textDescription).substr(0, 9),
+				like: Like.value,
+				weather: shortenCurrentConditions(condition.textDescription).substr(0, weatherLimit),
 			};
 
 			if (WindSpeed > 0) {
@@ -175,7 +180,12 @@ class LatestObservations extends WeatherDisplay {
 				fill.wind = 'Calm';
 			}
 
-			return this.fillTemplate('observation-row', fill);
+			const filledRow = this.fillTemplate('observation-row', fill);
+
+			// add the feels like class
+			filledRow.querySelector('.like').classList.add(Like.cssClass);
+
+			return filledRow;
 		});
 
 		const linesContainer = this.elem.querySelector('.observation-lines');
@@ -185,6 +195,25 @@ class LatestObservations extends WeatherDisplay {
 		this.finishDraw();
 	}
 }
+
+// generate a "feels like" temperature from heat index and wind chill.
+const likeTemperature = (heat, wind, actual, converter) => {
+	// figure out the feels like value
+	let value = '';
+	if (heat) value = converter(heat);
+	if (wind) value = converter(wind);
+
+	// determine if there's a red/blue color class to add
+	let cssClass;
+	if (value !== '') {
+		if (value > actual) cssClass = 'heat-index';
+		if (value < actual) cssClass = 'wind-chill';
+	}
+	return {
+		value,
+		cssClass,
+	};
+};
 
 const shortenCurrentConditions = (_condition) => {
 	let condition = _condition;

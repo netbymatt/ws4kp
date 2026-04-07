@@ -84,11 +84,11 @@
 					left: 425px;
 
 					&.heat-index {
-						color: #e00;
+						color: c.$heat-index;
 					}
 
 					&.wind-chill {
-						color: c.$extended-low;
+						color: c.$wind-chill;
 					}
 				}
 

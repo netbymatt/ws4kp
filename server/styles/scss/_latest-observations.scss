@@ -46,6 +46,39 @@
 			left: 430px;
 		}
 
+		.like {
+			display: none;
+		}
+
+		// wide and enhanced moves the columns and enables the like column
+		.wide.enhanced & {
+			.temp {
+				left: 320px;
+			}
+
+			.like {
+				left: 380px;
+				display: block;
+
+				&.heat-index {
+					color: c.$heat-index;
+				}
+
+				&.wind-chill {
+					color: c.$wind-chill;
+				}
+			}
+
+			.weather {
+				left: 470px;
+			}
+
+			.wind {
+				left: 630px;
+			}
+
+		}
+
 		.observation-lines {
 			min-height: 338px;
 			padding-top: 10px;

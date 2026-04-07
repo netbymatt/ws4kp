@@ -14,6 +14,12 @@
 			padding-top: 10px;
 			position: absolute;
 
+			.wide.enhanced & {
+				width: 300px;
+				margin-left: 25px;
+				margin-right: 25px;
+			}
+
 			@include u.text-shadow();
 
 			&.left {
