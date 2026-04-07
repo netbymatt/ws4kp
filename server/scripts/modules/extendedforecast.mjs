@@ -17,7 +17,7 @@ class ExtendedForecast extends WeatherDisplay {
 		super(navId, elemId, 'Extended Forecast', true);
 
 		// set timings
-		if (settings.enhancedScreens?.value) {
+		if (settings.portrait?.value) {
 			this.timing.totalScreens = 1;
 			this.perPage = 4;
 		} else {

@@ -69,7 +69,7 @@ class Almanac extends WeatherDisplay {
 
 			// stop after 30 days or 4 moon phases
 			iterations += 1;
-		} while (iterations <= 30 && moon.length < 4);
+		} while (iterations <= 45 && moon.length < 5);
 
 		return {
 			sun,
@@ -123,21 +123,16 @@ class Almanac extends WeatherDisplay {
 
 		// Set day names
 		const Today = DateTime.local();
-		const Tomorrow = Today.plus({ days: 1 });
-		this.elem.querySelector('.day-1').textContent = Today.toLocaleString({ weekday: 'long' });
-		this.elem.querySelector('.day-2').textContent = Tomorrow.toLocaleString({ weekday: 'long' });
+		// fill all three days, even if some are hidden by non-enhanced
+		for (let i = 0; i < 3; i += 1) {
+			this.elem.querySelector(`.day-${i}`).textContent = Today.plus({ days: i }).toLocaleString({ weekday: 'long' });
 
-		const todaySunrise = DateTime.fromJSDate(info.sun[0].sunrise);
-		const todaySunset = DateTime.fromJSDate(info.sun[0].sunset);
-		const [todaySunriseFormatted, todaySunsetFormatted] = formatTimesForColumn([todaySunrise, todaySunset]);
-		this.elem.querySelector('.rise-1').textContent = todaySunriseFormatted;
-		this.elem.querySelector('.set-1').textContent = todaySunsetFormatted;
-
-		const tomorrowSunrise = DateTime.fromJSDate(info.sun[1].sunrise);
-		const tomorrowSunset = DateTime.fromJSDate(info.sun[1].sunset);
-		const [tomorrowSunriseFormatted, tomorrowSunsetformatted] = formatTimesForColumn([tomorrowSunrise, tomorrowSunset]);
-		this.elem.querySelector('.rise-2').textContent = tomorrowSunriseFormatted;
-		this.elem.querySelector('.set-2').textContent = tomorrowSunsetformatted;
+			const sunrise = DateTime.fromJSDate(info.sun[i].sunrise);
+			const sunset = DateTime.fromJSDate(info.sun[i].sunset);
+			const [sunriseFormatted, sunsetFormatted] = formatTimesForColumn([sunrise, sunset]);
+			this.elem.querySelector(`.rise-${i}`).textContent = sunriseFormatted;
+			this.elem.querySelector(`.set-${i}`).textContent = sunsetFormatted;
+		}
 
 		// Moon data
 		const days = info.moon.map((MoonPhase) => {
