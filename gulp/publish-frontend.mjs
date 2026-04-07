@@ -15,7 +15,7 @@ import { readFile } from 'fs/promises';
 import file from 'gulp-file';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import log from 'fancy-log';
-import dartSass from 'sass';
+import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
 import sourceMaps from 'gulp-sourcemaps';
 import OVERRIDES from '../src/overrides.mjs';
@@ -222,7 +222,7 @@ const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, co
 // upload_images could be in parallel with upload, but _images logs a lot and has little changes
 // by running upload last the majority of the changes will be at the bottom of the log for easy viewing
 const publishFrontend = series(buildDist, uploadImages, upload, invalidate, logVersion);
-const stageFrontend = series(previewVersion, buildDist, uploadImagesPreview, uploadPreview, invalidatePreview);
+const stageFrontend = series(previewVersion, buildDist, uploadImagesPreview, uploadPreview, invalidatePreview, logVersion);
 
 export default publishFrontend;
 

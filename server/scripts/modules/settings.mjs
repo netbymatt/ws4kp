@@ -37,7 +37,7 @@ const enhancedScreenChange = (value) => {
 	if (!container) {
 		// DOM not ready; defer enabling if set
 		if (value) {
-			deferredDomSettings.add('enhanced');
+			deferredDomSettings.add('enhancedScreens');
 		}
 		return;
 	}
