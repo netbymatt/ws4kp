@@ -37,6 +37,11 @@ const init = async () => {
 		resizeTimeout = setTimeout(() => resize(), 100);
 	});
 
+	// redraw current screen (typically from enhanced setting change)
+	window.addEventListener('redraw', () => {
+		currentDisplay()?.drawCanvas();
+	});
+
 	// Handle orientation changes (Mobile Safari doesn't always fire resize events on orientation change)
 	window.addEventListener('orientationchange', () => {
 		if (debugFlag('resize')) {

@@ -48,7 +48,7 @@ const enhancedScreenChange = (value) => {
 		container.classList.remove('enhanced');
 	}
 	// Trigger resize to recalculate scaling for new width
-	window.dispatchEvent(new Event('resize'));
+	window.dispatchEvent(new Event('redraw'));
 };
 
 const kioskChange = (value) => {
