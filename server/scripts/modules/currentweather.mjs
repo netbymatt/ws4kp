@@ -15,9 +15,6 @@ import { debugFlag } from './utils/debug.mjs';
 import { isDataStale, enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 
-// some stations prefixed do not provide all the necessary data
-const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
-
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Current Conditions', true);
@@ -29,8 +26,8 @@ class CurrentWeather extends WeatherDisplay {
 		// note: current weather does not use old data on a silent refresh
 		// this is deliberate because it can pull data from more than one station in sequence
 
-		// filter for 4-letter observation stations, only those contain sky conditions and thus an icon
-		const filteredStations = this.weatherParameters.stations.filter((station) => station?.properties?.stationIdentifier?.length === 4 && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
+		// get the available stations
+		const { stations } = this.weatherParameters;
 
 		// Load the observations
 		let observations;
@@ -38,9 +35,9 @@ class CurrentWeather extends WeatherDisplay {
 
 		// station number counter
 		let stationNum = 0;
-		while (!observations && stationNum < filteredStations.length) {
+		while (!observations && stationNum < stations.length) {
 			// get the station
-			station = filteredStations[stationNum];
+			station = stations[stationNum];
 			const stationId = station.properties.stationIdentifier;
 
 			stationNum += 1;

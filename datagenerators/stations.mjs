@@ -8,12 +8,10 @@ import states from './stations-states.mjs';
 import chunk from './chunk.mjs';
 import overrides from './stations-overrides.mjs';
 import postProcessor from './stations-postprocessor.mjs';
+import { stationFilter } from '../server/scripts/modules/utils/string.mjs';
 
 // check for cached flag
 const USE_CACHE = process.argv.includes('--use-cache');
-
-// skip stations starting with these letters
-const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
 
 // chunk the list of states
 const chunkStates = chunk(states, 3);
@@ -41,10 +39,8 @@ if (!USE_CACHE) {
 					// eslint-disable-next-line no-await-in-loop
 					const stationsRaw = await https(next);
 					stations = JSON.parse(stationsRaw);
-					// filter stations for 4 letter identifiers
-					const stationsFiltered4 = stations.features.filter((station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/));
 					// filter against starting letter
-					const stationsFiltered = stationsFiltered4.filter((station) => !skipStations.includes(station.properties.stationIdentifier.slice(0, 1)));
+					const stationsFiltered = stations.filter(stationFilter);
 					// add each resulting station to the output
 					stationsFiltered.forEach((station) => {
 						const id = station.properties.stationIdentifier;
