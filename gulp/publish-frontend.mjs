@@ -19,6 +19,7 @@ import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
 import sourceMaps from 'gulp-sourcemaps';
 import OVERRIDES from '../src/overrides.mjs';
+import { DateTime } from 'luxon';
 
 // get cloudfront
 import reader from '../src/playlist-reader.mjs';
@@ -110,10 +111,9 @@ const htmlSources = [
 const packageJson = await readFile('package.json');
 let { version } = JSON.parse(packageJson);
 const previewVersion = async () => {
-	// generate a relatively unique timestamp for cache invalidation of the preview site
-	const now = new Date();
-	const msNow = now.getTime() % 1_000_000;
-	version = msNow.toString();
+	// generate a unique timestamp for cache invalidation of the preview site
+	const now = DateTime.utc();
+	version = now.toFormat('yyyyLLddHHmmss')
 };
 
 const compressHtml = async () => src(htmlSources)
