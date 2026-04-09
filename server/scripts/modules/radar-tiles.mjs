@@ -51,8 +51,8 @@ const setTiles = (data) => {
 	const secondRow = tileShift.y + TILE_SIZE.y > RADAR_FINAL_SIZE().height;
 	const usedTiles = [
 		true,
-		tileShift.x + TILE_SIZE.x > RADAR_FINAL_SIZE.width,
-		tileShift.x + (TILE_SIZE.x * 2) > RADAR_FINAL_SIZE.width,
+		tileShift.x + TILE_SIZE.x > RADAR_FINAL_SIZE().width,
+		tileShift.x + (TILE_SIZE.x * 2) > RADAR_FINAL_SIZE().width,
 		secondRow,
 	];
 	// second row is a copy of the first row when in use
