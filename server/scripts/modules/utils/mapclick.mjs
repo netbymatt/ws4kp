@@ -650,7 +650,7 @@ export const enhanceObservationWithMapClick = async (observationData, options = 
 	}
 
 	return {
-		data: mapClickProps,
+		data: { ...mapClickProps, timestamp: observationData.timestamp },
 		wasImproved: true,
 		improvements,
 		missingFields: [...mapClickMissingRequired, ...mapClickMissingOptional],
