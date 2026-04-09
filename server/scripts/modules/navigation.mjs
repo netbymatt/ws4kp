@@ -6,6 +6,7 @@ import { safeJson } from './utils/fetch.mjs';
 import { getPoint } from './utils/weather.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import settings from './settings.mjs';
+import { stationFilter } from './utils/string.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -90,7 +91,15 @@ const getWeather = async (latLon, haveDataCallback) => {
 			return;
 		}
 
-		const StationId = stations.features[0].properties.stationIdentifier;
+		// filter stations for proper format
+		const stationsFiltered = stations.features.filter(stationFilter);
+		// check for stations available after filtering
+		if (stationsFiltered.length === 0) {
+			console.warn('No observation stations left for location after filtering');
+			return;
+		}
+
+		const StationId = stationsFiltered[0].properties.stationIdentifier;
 
 		let { city } = point.properties.relativeLocation.properties;
 		const { state } = point.properties.relativeLocation.properties;
@@ -113,7 +122,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 		weatherParameters.timeZone = point.properties.timeZone;
 		weatherParameters.forecast = point.properties.forecast;
 		weatherParameters.forecastGridData = point.properties.forecastGridData;
-		weatherParameters.stations = stations.features;
+		weatherParameters.stations = stationsFiltered;
 		weatherParameters.relativeLocation = point.properties.relativeLocation.properties;
 
 		// update the main process for display purposes

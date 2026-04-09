@@ -9,10 +9,12 @@ const pixelToFile = (xPixel, yPixel) => {
 	return `${yTile}-${xTile}`;
 };
 
-// convert a pixel location in the overall map to a pixel location on the tile
+// convert a pixel location in the overall map to a pixel location on the tile set
 const modTile = (xPixel, yPixel) => {
-	const x = Math.round(xPixel) % TILE_SIZE.x;
-	const y = Math.round(yPixel) % TILE_SIZE.y;
+	// adjust for additional 1 tile when odd
+	const x = (Math.floor(xPixel) % (TILE_SIZE.x));
+	const y = (Math.floor(yPixel) % (TILE_SIZE.y));
+
 	return { x, y };
 };
 
@@ -46,11 +48,11 @@ const setTiles = (data) => {
 	const tileShift = modTile(sourceXY.x, sourceXY.y);
 
 	// determine which tiles are used
-	const secondRow = TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE().width;
+	const secondRow = tileShift.y + TILE_SIZE.y > RADAR_FINAL_SIZE().height;
 	const usedTiles = [
 		true,
-		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE().width,
-		TILE_SIZE.x - (tileShift.x * 2) < RADAR_FINAL_SIZE().width,
+		tileShift.x + TILE_SIZE.x > RADAR_FINAL_SIZE.width,
+		tileShift.x + (TILE_SIZE.x * 2) > RADAR_FINAL_SIZE.width,
 		secondRow,
 	];
 	// second row is a copy of the first row when in use
