@@ -72,7 +72,7 @@ const init = async () => {
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
 
 	document.querySelector('#divTwc').addEventListener('mousemove', () => {
-		if (document.fullscreenElement) updateFullScreenNavigate();
+		if (document.fullscreenElement || settings.kiosk?.value) updateFullScreenNavigate();
 	});
 
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
@@ -384,7 +384,7 @@ const updateFullScreenNavigate = () => {
 	}
 
 	navigateFadeIntervalId = setTimeout(() => {
-		if (document.fullscreenElement) {
+		if (document.fullscreenElement || settings.kiosk?.value) {
 			divTwcBottom.classList.remove('visible');
 			divTwcBottom.classList.add('hidden');
 			document.querySelector('#divTwc').classList.add('no-cursor');
