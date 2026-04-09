@@ -5,6 +5,10 @@
 #radar-html.weather-display {
 	background-image: url('../images/backgrounds/4.png');
 
+	.wide & {
+		background: url(../images/backgrounds/4-wide.png);
+	}
+
 	.header {
 		height: 83px;
 
@@ -122,8 +126,4 @@
 			position: relative;
 		}
 	}
-}
-
-.wide.radar #container {
-	background: url(../images/backgrounds/4-wide.png);
 }
