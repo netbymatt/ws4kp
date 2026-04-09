@@ -113,7 +113,7 @@ let { version } = JSON.parse(packageJson);
 const previewVersion = async () => {
 	// generate a unique timestamp for cache invalidation of the preview site
 	const now = DateTime.utc();
-	version = now.toFormat('yyyyLLddHHmmss')
+	version = now.toFormat('yyyyLLddHHmm').substring(3);
 };
 
 const compressHtml = async () => src(htmlSources)
