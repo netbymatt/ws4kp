@@ -9,7 +9,7 @@ import filterExpiredPeriods from './utils/forecast-utils.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
 class LocalForecast extends WeatherDisplay {
-	static BASE_FORECAST_DURATION_MS = 5000; // Base duration (in ms) for a standard 3-5 line forecast page
+	static BASE_FORECAST_DURATION_MS = 10000; // Base duration (in ms) for a standard 3-5 line forecast page
 
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Forecast', true);
