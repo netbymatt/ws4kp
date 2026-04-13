@@ -162,8 +162,8 @@ class LatestObservations extends WeatherDisplay {
 			const Like = likeTemperature(condition.heatIndex?.value, condition.windChill?.value, Temperature, temperatureConverter);
 			const WindSpeed = windConverter(condition.windSpeed.value);
 
-			const locationLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 20 : 14;
-			const weatherLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 10 : 9;
+			const locationLimit = (settings.wide?.value && settings.enhanced?.value) ? 20 : 14;
+			const weatherLimit = (settings.wide?.value && settings.enhanced?.value) ? 10 : 9;
 
 			const fill = {
 				location: locationCleanup(condition.city).substr(0, locationLimit),

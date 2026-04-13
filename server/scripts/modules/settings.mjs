@@ -10,6 +10,11 @@ const deferredDomSettings = new Set();
 // don't show checkboxes for these settings
 const hiddenSettings = [
 	'scanLines',
+
+	// wide, portrait and enhanced are handled by a dropdown which sets these individual settings accordingly
+	'wide',
+	'portrait',
+	'enhanced',
 ];
 
 // Declare change functions first, before they're referenced in init() to avoid the Temporal Dead Zone (TDZ)
@@ -32,12 +37,31 @@ const wideScreenChange = (value) => {
 	window.dispatchEvent(new Event('resize'));
 };
 
-const enhancedScreenChange = (value) => {
+const portraitChange = (value) => {
 	const container = document.querySelector('#divTwc');
 	if (!container) {
 		// DOM not ready; defer enabling if set
 		if (value) {
-			deferredDomSettings.add('enhancedScreens');
+			deferredDomSettings.add('portrait');
+		}
+		return;
+	}
+
+	if (value) {
+		container.classList.add('portrait');
+	} else {
+		container.classList.remove('portrait');
+	}
+	// Trigger resize to recalculate scaling for new width
+	window.dispatchEvent(new Event('resize'));
+};
+
+const enhancedChange = (value) => {
+	const container = document.querySelector('#divTwc');
+	if (!container) {
+		// DOM not ready; defer enabling if set
+		if (value) {
+			deferredDomSettings.add('enhanced');
 		}
 		return;
 	}
@@ -49,6 +73,31 @@ const enhancedScreenChange = (value) => {
 	}
 	// Trigger resize to recalculate scaling for new width
 	window.dispatchEvent(new Event('redraw'));
+};
+
+const viewModeChange = (value) => {
+	// set the appropriate mode bits which triggers change actions above
+	switch (value) {
+		case 'wide':
+			settings.wide.value = true;
+			settings.enhanced.value = false;
+			settings.portrait.value = false;
+			break;
+		case 'wide-enhanced':
+			settings.wide.value = true;
+			settings.enhanced.value = true;
+			settings.portrait.value = false;
+			break;
+		case 'portrait-enhanced':
+			settings.wide.value = false;
+			settings.enhanced.value = true;
+			settings.portrait.value = true;
+			break;
+		default:
+			settings.wide.value = false;
+			settings.enhanced.value = false;
+			settings.portrait.value = false;
+	}
 };
 
 const kioskChange = (value) => {
@@ -151,14 +200,36 @@ const init = () => {
 	});
 	settings.portrait = new Setting('portrait', {
 		name: 'Allow Portrait',
+		changeAction: portraitChange,
 		defaultValue: false,
 		sticky: true,
 	});
-	settings.enhancedScreens = new Setting('enhancedScreens', {
+	settings.enhanced = new Setting('enhanced', {
 		name: 'Enhanced Screens',
 		defaultValue: false,
-		changeAction: enhancedScreenChange,
+		changeAction: enhancedChange,
 		sticky: true,
+	});
+	// widescreen, portrait and enhanced are handled by a dropdown
+	// the dropdown change action sets the above bits accordingly
+	// first, figure out the default value based on other settings
+	// this also enforces rules on how these can be combined
+	let viewModeDefault = 'standard';
+	if (settings.wide.value && !settings.enhanced.value) viewModeDefault = 'wide';
+	if (settings.wide.value && settings.enhanced.value) viewModeDefault = 'wide-enhanced';
+	if (settings.portrait.value) viewModeDefault = 'portrait-enhanced';
+	settings.viewMode = new Setting('viewMode', {
+		name: 'Display mode',
+		type: 'select',
+		defaultValue: viewModeDefault,
+		changeAction: viewModeChange,
+		sticky: false,	// not sticky because the above 3 settings are sticky and define this item's starting state
+		values: [
+			['standard', 'Standard'],
+			['wide', 'Widescreen'],
+			['wide-enhanced', 'Widescreen enhanced'],
+			['portrait-enhanced', 'Portrait enhanced'],
+		],
 	});
 	settings.kiosk = new Setting('kiosk', {
 		name: 'Kiosk',

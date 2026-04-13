@@ -4,7 +4,7 @@ const radarFinalSize = () => {
 	const size = {
 		width: 640, height: 367,
 	};
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		size.width = 854;
 	}
 	return size;
@@ -15,7 +15,7 @@ const radarSourceSize = () => {
 		width: 240,
 		height: 163,
 	};
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		size.width = 240 / 640 * 854; // original size of 640 scaled up to wide at 854
 	}
 	return size;
@@ -26,7 +26,7 @@ const radarOffset = () => {
 		x: 240,
 		y: 138,
 	};
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		// 107 is the margins shift, 640/854 is the scaling factor normal => wide, /2 is because of the fixed 2:1 scaling between source radar and map tiles
 		offset.x = 240 + (107 * 640 / 854 / 2); // original size of 640 scaled up to wide at 854;
 	}
@@ -40,7 +40,7 @@ const radarShift = () => {
 		x: 0,
 		y: 0,
 	};
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		shift.x = 107;
 	}
 	return shift;

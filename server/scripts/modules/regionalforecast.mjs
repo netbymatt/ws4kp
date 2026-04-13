@@ -29,7 +29,7 @@ const scaling = () => {
 		y: 117,
 	};
 
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		mapOffsetXY.x = 320;
 		available.x = 854;
 	}

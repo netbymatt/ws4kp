@@ -18,7 +18,7 @@ const scaling = () => {
 		xTicks: 4,
 	};
 
-	if (settings.wide?.value && settings.enhancedScreens?.value) {
+	if (settings.wide?.value && settings.enhanced?.value) {
 		available.width = available.width + 107 + 107;
 		available.height = 285;
 		dataLength.hours = 48;

@@ -195,7 +195,7 @@ class CurrentWeather extends WeatherDisplay {
 
 		// get location (city name) from StationInfo if available (allows for overrides)
 		// longer name allowed if in wide-enhanced
-		const locationLimit = (settings.wide?.value && settings.enhancedScreens?.value) ? 25 : 20;
+		const locationLimit = (settings.wide?.value && settings.enhanced?.value) ? 25 : 20;
 		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substr(0, locationLimit);
 
 		const fill = {
