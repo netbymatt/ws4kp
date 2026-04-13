@@ -41,7 +41,9 @@ class Setting {
 		this.elemId = `settings-${shortName}-${this.type}`;
 
 		// get value from url
-		const urlValue = parseQueryString()?.[this.elemId];
+		// includes a fallback to the older prefix/suffix version
+		const queryString = parseQueryString();
+		const urlValue = queryString?.[shortName] ?? queryString?.[this.elemId];
 		let urlState;
 		if (this.type === 'checkbox' && urlValue !== undefined) {
 			urlState = urlValue === 'true';
@@ -92,7 +94,7 @@ class Setting {
 
 		const select = document.createElement('select');
 		select.id = `settings-${this.shortName}-select`;
-		select.name = `settings-${this.shortName}-select`;
+		select.name = this.shortName;
 		select.addEventListener('change', (e) => this.selectChange(e));
 
 		this.values.forEach(([value, text]) => {
@@ -125,7 +127,7 @@ class Setting {
 		checkbox.type = 'checkbox';
 		checkbox.value = true;
 		checkbox.id = `settings-${this.shortName}-checkbox`;
-		checkbox.name = `settings-${this.shortName}-checkbox`;
+		checkbox.name = this.shortName;
 		checkbox.checked = this.myValue;
 		checkbox.addEventListener('change', (e) => this.checkboxChange(e));
 		const span = document.createElement('span');
@@ -148,14 +150,14 @@ class Setting {
 		textInput.type = 'text';
 		textInput.value = this.myValue;
 		textInput.id = `settings-${this.shortName}-string`;
-		textInput.name = `settings-${this.shortName}-string`;
+		textInput.name = this.shortName;
 		textInput.placeholder = this.placeholder;
 		// set button
 		const setButton = document.createElement('input');
 		setButton.type = 'button';
 		setButton.value = 'Set';
 		setButton.id = `settings-${this.shortName}-button`;
-		setButton.name = `settings-${this.shortName}-button`;
+		setButton.name = this.shortName;
 		setButton.addEventListener('click', () => {
 			this.stringChange({ target: { value: textInput.value } });
 		});

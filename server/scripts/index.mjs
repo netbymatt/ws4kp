@@ -141,7 +141,7 @@ const init = async () => {
 	}
 
 	// Handle kiosk mode initialization
-	const urlKioskCheckbox = parsedParameters['settings-kiosk-checkbox'];
+	const urlKioskCheckbox = parsedParameters?.kiosk ?? parsedParameters['settings-kiosk-checkbox'];
 
 	// If kiosk=false is specified, disable kiosk mode and clear any stored value
 	if (urlKioskCheckbox === 'false') {

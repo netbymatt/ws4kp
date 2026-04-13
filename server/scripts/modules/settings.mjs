@@ -273,6 +273,7 @@ const init = () => {
 			['medium', 'Medium (2x)'],
 			['thick', 'Thick (3x)'],
 		],
+		visible: false,
 	});
 	settings.units = new Setting('units', {
 		name: 'Units',
@@ -322,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const settingHtml = Object.values(settings).map((setting) => {
 		if (hiddenSettings.includes(setting.shortName)) {
 			// setting is hidden, register it
-			registerHiddenSetting(setting.elemId, setting);
+			registerHiddenSetting(setting.shortName, setting);
 			return false;
 		}
 		// generate HTML for setting
@@ -340,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	} else if (modeSelect) {
 		modeSelect.style.display = 'none';
 	}
-	registerHiddenSetting('settings-scanLineMode-select', settings.scanLineMode);
 });
 
 export default settings;

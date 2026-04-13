@@ -1,6 +1,5 @@
 import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
-import { registerHiddenSetting } from './share.mjs';
 
 let playlist;
 let currentTrack = 0;
@@ -33,9 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// get the playlist
 	getMedia();
-
-	// register the volume setting
-	registerHiddenSetting(mediaVolume.elemId, mediaVolume);
 });
 
 const scanMusicDirectory = async () => {
@@ -246,6 +242,7 @@ const mediaVolume = new Setting('mediaVolume', {
 		[0.25, '25%'],
 	],
 	changeAction: setVolume,
+	visible: false,
 });
 
 const initializePlayer = () => {

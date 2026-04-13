@@ -25,22 +25,28 @@ const createLink = async (e) => {
 	const queryStringElements = {};
 
 	elemForEach('input[type=checkbox]', (elem) => {
-		if (elem?.id) {
-			queryStringElements[elem.id] = elem?.checked ?? false;
+		// use name, and fallback to id (older prefix/suffix permalinks)
+		const key = elem?.name ?? elem?.id;
+		if (key) {
+			queryStringElements[key] = elem?.checked ?? false;
 		}
 	});
 
 	// get all select boxes
 	elemForEach('select', (elem) => {
-		if (elem?.id) {
-			queryStringElements[elem.id] = encodeURIComponent(elem?.value ?? '');
+		// use name, and fallback to id (older prefix/suffix permalinks)
+		const key = elem?.name ?? elem?.id;
+		if (key) {
+			queryStringElements[key] = encodeURIComponent(elem?.value ?? '');
 		}
 	});
 
 	// get all text boxes
 	elemForEach('input[type=text]', ((elem) => {
-		if (elem?.id) {
-			queryStringElements[elem.id] = elem?.value ?? 0;
+		// use name, and fallback to id (older prefix/suffix permalinks)
+		const key = elem?.name ?? elem?.id;
+		if (key && key !== '') {
+			queryStringElements[key] = elem?.value ?? 0;
 		}
 	}));
 
