@@ -183,7 +183,7 @@ class LatestObservations extends WeatherDisplay {
 			const filledRow = this.fillTemplate('observation-row', fill);
 
 			// add the feels like class
-			filledRow.querySelector('.like').classList.add(Like.cssClass);
+			if (Like.cssClass) filledRow.querySelector('.like').classList.add(Like.cssClass);
 
 			return filledRow;
 		});

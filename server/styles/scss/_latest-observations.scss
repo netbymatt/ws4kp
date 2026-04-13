@@ -58,13 +58,15 @@
 
 			.like {
 				left: 380px;
-				display: block;
+				display: hidden;
 
 				&.heat-index {
 					color: c.$heat-index;
+					display: block;
 				}
 
 				&.wind-chill {
+					display: block;
 					color: c.$wind-chill;
 				}
 			}
