@@ -25,7 +25,6 @@
 	.forecast {
 		font-family: 'Star4000';
 		font-size: 24pt;
-		text-transform: uppercase;
 		@include u.text-shadow();
 		min-height: 280px;
 		line-height: 40px;

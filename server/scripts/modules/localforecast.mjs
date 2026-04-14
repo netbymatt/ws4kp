@@ -37,9 +37,9 @@ class LocalForecast extends WeatherDisplay {
 		// read each text
 		this.screenTexts = conditions.map((condition) => {
 			// process the text
-			let text = `${condition.DayName.toUpperCase()}...`;
+			let text = `${condition.DayName}...`;
 			const conditionText = condition.Text;
-			text += conditionText.toUpperCase().replace('...', ' ');
+			text += conditionText.replace('...', ' ');
 
 			return text;
 		});
@@ -257,7 +257,7 @@ const parse = (forecast, forecastUrl) => {
 
 	return activePeriods.slice(0, 6).map((text) => ({
 		// format day and text
-		DayName: text.name.toUpperCase(),
+		DayName: text.name,
 		Text: text.detailedForecast,
 	}));
 };
