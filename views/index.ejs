@@ -174,21 +174,25 @@
     </div>
     <div class="media"></div>
 
-    <div class='heading'>Selected displays</div>
-    <div id='enabledDisplays'>
+    <div class='lower-flex-container'>
+      <div class='item'>
+        <div class='heading'>Selected displays</div>
+        <div id='enabledDisplays'>
 
-    </div>
-
-    <div class='heading'>Settings</div>
-    <div id='settings'>
-    </div>
-
-    <div class='heading'>Sharing</div>
-    <div class='info'>
-      <a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
-      <div id="share-link-instructions">
-        Copy this long URL:
-        <input type='text' id="share-link-url">
+        </div>
+      </div>
+      <div class='item'>
+        <div class='heading'>Settings</div>
+        <div id='settings'>
+          <div class='heading'>Sharing</div>
+        </div>
+        <div class='item'>
+          <a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
+          <div id="share-link-instructions">
+            Copy this long URL:
+            <input type='text' id="share-link-url">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -211,7 +215,6 @@
       <div class="header">Ws4kp Version:</div>
       <div class="header"><span><%- version %></span></div>
     </div>
-  </div>
 
 </body>
 

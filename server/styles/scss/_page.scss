@@ -826,3 +826,18 @@ body.kiosk #loading .instructions {
 	grid-template-columns: 1fr 1fr;
 	max-width: 250px;
 }
+
+.lower-flex-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: flex-start;
+	align-content: stretch;
+	gap: 8px;
+	column-gap: 64px;
+
+	.item {
+		display: inline-block;
+	}
+}

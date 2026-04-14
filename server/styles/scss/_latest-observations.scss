@@ -32,6 +32,12 @@
 					display: inline-block;
 				}
 			}
+
+			.like {
+				display: none;
+			}
+
+
 		}
 
 		.temp {
@@ -58,7 +64,7 @@
 
 			.like {
 				left: 380px;
-				display: hidden;
+				display: block;
 
 				&.heat-index {
 					color: c.$heat-index;
