@@ -103,9 +103,8 @@ class CurrentWeather extends WeatherDisplay {
 				});
 
 				// copy enhanced data and restore the timestamp if it was overwritten by older data from mapclick
-				const { timestamp } = candidateObservation.features[0].properties;
+
 				candidateObservation.features[0].properties = enhancedResult.data;
-				candidateObservation.features[0].properties.timestamp = timestamp;
 
 				const { missingFields } = enhancedResult;
 				const missingRequired = missingFields.filter((fieldName) => {

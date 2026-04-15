@@ -17,7 +17,7 @@ const changeEnable = (newValue) => {
 		// hide the string entry
 		newDisplay = 'none';
 	}
-	const stringEntry = document.getElementById('settings-customText-label');
+	const stringEntry = document.getElementById('settings-customText-string');
 	if (stringEntry) {
 		stringEntry.style.display = newDisplay;
 	}

@@ -112,9 +112,11 @@ const kioskChange = (value) => {
 
 	if (value) {
 		body.classList.add('kiosk');
+		document.querySelector('#divTwc')?.classList.add('no-cursor');
 		window.dispatchEvent(new Event('resize'));
 	} else {
 		body.classList.remove('kiosk');
+		document.querySelector('#divTwc')?.classList.remove('no-cursor');
 		window.dispatchEvent(new Event('resize'));
 	}
 
