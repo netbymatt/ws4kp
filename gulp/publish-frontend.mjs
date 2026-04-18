@@ -17,9 +17,8 @@ import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-clo
 import log from 'fancy-log';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
-import sourceMaps from 'gulp-sourcemaps';
-import OVERRIDES from '../src/overrides.mjs';
 import { DateTime } from 'luxon';
+import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
 import reader from '../src/playlist-reader.mjs';
@@ -98,12 +97,10 @@ const buildJs = () => src(mjsSources)
 const cssSources = [
 	'server/styles/scss/**/*.scss',
 ];
-const buildCss = () => src(cssSources)
-	.pipe(sourceMaps.init())
+const buildCss = () => src(cssSources, { sourcemaps: true })
 	.pipe(sass({ style: 'compressed' }).on('error', sass.logError))
 	.pipe(rename({ suffix: '.min' }))
-	.pipe(sourceMaps.write('./'))
-	.pipe(dest(RESOURCES_PATH));
+	.pipe(dest(RESOURCES_PATH, { sourcemaps: '.' }));
 
 const htmlSources = [
 	'views/*.ejs',
