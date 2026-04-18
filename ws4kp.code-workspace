@@ -12,7 +12,8 @@
 			"**/bower_components": true,
 			"**/node_modules": true,
 			"**/vendor": true,
-			"dist/**": true
+			"dist/**": true,
+			"package-lock.json": true,
 		},
 		"cSpell.enabledFileTypes": {
 			"markdown": true,
@@ -76,7 +77,8 @@
 			"source.fixAll.eslint": "explicit"
 		},
 		"cSpell.words": [
-			"hibyehihi"
+			"hibyehihi",
+			"zakj"
 		]
 	},
 	"extensions": {

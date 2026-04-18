@@ -36,12 +36,55 @@ const RESOURCES_PATH = './dist/resources';
 const webpackOptions = {
 	mode: 'production',
 	output: {
-		filename: 'ws.min.js',
+		filename: '[name].min.js',
 	},
 	resolve: {
 		roots: ['./'],
 	},
 	devtool: 'source-map',
+	entry: {
+		index: {
+			import: './server/scripts/index.mjs',
+			dependOn: 'shared',
+		},
+		displays: {
+			import: [
+				'./server/scripts/modules/hazards.mjs',
+				'./server/scripts/modules/currentweather.mjs',
+				'./server/scripts/modules/almanac.mjs',
+				'./server/scripts/modules/spc-outlook.mjs',
+				'./server/scripts/modules/extendedforecast.mjs',
+				'./server/scripts/modules/hourly.mjs',
+				'./server/scripts/modules/hourly-graph.mjs',
+				'./server/scripts/modules/latestobservations.mjs',
+				'./server/scripts/modules/localforecast.mjs',
+				'./server/scripts/modules/radar.mjs',
+				'./server/scripts/modules/regionalforecast.mjs',
+				'./server/scripts/modules/travelforecast.mjs',
+			],
+			dependOn: 'shared',
+		},
+		features: {
+			import: [
+				'./server/scripts/modules/custom-scroll-text.mjs',
+				'./server/scripts/modules/currentweatherscroll.mjs',
+				'./server/scripts/modules/media.mjs',
+			],
+			dependOn: 'shared',
+		},
+		shared: [
+			'./server/scripts/modules/progress.mjs',
+			'./server/scripts/modules/settings.mjs',
+			'./server/scripts/modules/utils/setting.mjs',
+			'./server/scripts/modules/icons.mjs',
+			'./server/scripts/modules/utils/cache.mjs',
+			'./server/scripts/modules/utils/debug.mjs',
+			'./server/scripts/modules/utils/image.mjs',
+			'./server/scripts/modules/utils/metar.mjs',
+			'./server/scripts/modules/utils/mapclick.mjs',
+			'./server/scripts/modules/utils/units.mjs',
+		],
+	},
 	optimization: {
 		minimize: true,
 		minimizer: [
@@ -59,7 +102,6 @@ const webpackOptions = {
 };
 
 const jsVendorSources = [
-	'server/scripts/vendor/auto/nosleep.js',
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/vendor/auto/suncalc.js',
 ];

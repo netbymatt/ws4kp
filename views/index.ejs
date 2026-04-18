@@ -31,7 +31,10 @@
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
   <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/index.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/displays.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/features.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/shared.min.js?_=<%=production%>"></script>
   <script type="text/javascript">
     const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
   </script>
@@ -41,7 +44,6 @@
   <script type="text/javascript">
     OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
   </script>
-  <script type="text/javascript" src="scripts/vendor/auto/nosleep.js"></script>
   <script type="text/javascript" src="scripts/vendor/auto/swiped-events.js"></script>
   <script type="text/javascript" src="scripts/vendor/auto/suncalc.js"></script>
   <script type="module" src="scripts/modules/hazards.mjs"></script>
