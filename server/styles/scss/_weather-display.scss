@@ -168,6 +168,21 @@
 	// adjust for wide
 	.wide & {
 		left: p.$wide-margin;
+		width: p.$wide-width;
+		margin-left: -1*p.$wide-margin;
+
+		.scroll-container {
+			margin-left: p.$wide-margin;
+		}
+
+	}
+
+	.wide.enhanced & {
+
+		&:has(.scroll-area) .scroll-container {
+			width: p.$wide-width;
+			margin-left: 0px;
+		}
 	}
 
 	&.hazard {
@@ -208,13 +223,4 @@
 
 
 
-}
-
-.wide #container>.scroll {
-	width: p.$wide-width;
-	margin-left: -1*p.$wide-margin;
-
-	.scroll-container {
-		margin-left: p.$wide-margin;
-	}
 }
