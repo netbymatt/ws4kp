@@ -4,6 +4,7 @@
 
 #hazards-html.weather-display {
 	background-image: url('../images/backgrounds/7.png');
+
 }
 
 .weather-display .main.hazards {
@@ -12,6 +13,11 @@
 		height: p.$standard-height;
 		background-color: rgb(112, 35, 35);
 
+		width: p.$standard-width;
+
+		.wide.enhanced & {
+			left: 0px;
+		}
 
 		.hazard-lines {
 			min-height: 400px;
