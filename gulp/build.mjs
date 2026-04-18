@@ -8,16 +8,13 @@ import ejs from 'gulp-ejs';
 import rename from 'gulp-rename';
 import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
-import s3Upload from 'gulp-s3-uploader';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
 import { readFile } from 'fs/promises';
 import file from 'gulp-file';
-import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import log from 'fancy-log';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
-import { DateTime } from 'luxon';
+import log from 'fancy-log';
 import OVERRIDES from '../src/overrides.mjs';
 
 // get cloudfront
@@ -26,8 +23,6 @@ import reader from '../src/playlist-reader.mjs';
 const sass = gulpSass(dartSass);
 
 const clean = () => deleteAsync(['./dist/**/*', '!./dist/readme.txt']);
-
-const cloudfront = new CloudFrontClient({ region: 'us-east-1' });
 
 const RESOURCES_PATH = './dist/resources';
 
@@ -147,25 +142,28 @@ const buildCss = () => src(cssSources, { sourcemaps: true })
 const htmlSources = [
 	'views/*.ejs',
 ];
-const packageJson = await readFile('package.json');
-let { version } = JSON.parse(packageJson);
-const previewVersion = async () => {
-	// generate a unique timestamp for cache invalidation of the preview site
-	const now = DateTime.utc();
-	version = now.toFormat('yyyyLLddHHmm').substring(3);
+
+const getVersion = async () => {
+	const packageJson = await readFile('package.json');
+	const packageVersion = JSON.parse(packageJson).version;
+
+	return process.env.WS4KP_VERSION ?? packageVersion;
 };
 
-const compressHtml = async () => src(htmlSources)
-	.pipe(ejs({
-		production: version,
-		serverAvailable: false,
-		version,
-		OVERRIDES,
-		query: {},
-	}))
-	.pipe(rename({ extname: '.html' }))
-	.pipe(htmlmin({ collapseWhitespace: true }))
-	.pipe(dest('./dist'));
+const compressHtml = async () => {
+	const version = await getVersion();
+	return src(htmlSources)
+		.pipe(ejs({
+			production: version,
+			serverAvailable: false,
+			version,
+			OVERRIDES,
+			query: {},
+		}))
+		.pipe(rename({ extname: '.html' }))
+		.pipe(htmlmin({ collapseWhitespace: true }))
+		.pipe(dest('./dist'));
+};
 
 const otherFiles = [
 	'server/robots.txt',
@@ -182,69 +180,14 @@ const copyDataFiles = () => src([
 	'datagenerators/output/stations.json',
 ]).pipe(dest('./dist/data'));
 
-const s3 = s3Upload({
-	useIAM: true,
-}, {
-	region: 'us-east-1',
-});
-const uploadSources = [
-	'dist/**',
-	'!dist/images/**/*',
-	'!dist/fonts/**/*',
-];
-
-const uploadCreator = (bucket) => () => src(uploadSources, { base: './dist', encoding: false })
-	.pipe(s3({
-		Bucket: bucket,
-		StorageClass: 'STANDARD',
-		maps: {
-			CacheControl: (keyname) => {
-				if (keyname.indexOf('index.html') > -1) return 'max-age=300'; // 10 minutes
-				if (keyname.indexOf('.mp3') > -1) return 'max-age=31536000'; // 1 year for mp3 files
-				return 'max-age=2592000'; // 1 month
-			},
-		},
-	}));
-
 const imageSources = [
 	'server/fonts/**',
 	'server/images/**',
 	'!server/images/gimp/**',
 ];
 
-const upload = uploadCreator(process.env.BUCKET);
-const uploadPreview = uploadCreator(process.env.BUCKET_PREVIEW);
-
-const uploadImagesCreator = (bucket) => () => src(imageSources, { base: './server', encoding: false })
-	.pipe(
-		s3({
-			Bucket: bucket,
-			StorageClass: 'STANDARD',
-			maps: {
-				CacheControl: () => 'max-age=31536000',
-			},
-		}),
-	);
-
-const uploadImages = uploadImagesCreator(process.env.BUCKET);
-const uploadImagesPreview = uploadImagesCreator(process.env.BUCKET_PREVIEW);
-
 const copyImageSources = () => src(imageSources, { base: './server', encoding: false })
 	.pipe(dest('./dist'));
-
-const invalidateCreator = (distributionId) => () => cloudfront.send(new CreateInvalidationCommand({
-	DistributionId: distributionId,
-	InvalidationBatch: {
-		CallerReference: (new Date()).toLocaleString(),
-		Paths: {
-			Quantity: 1,
-			Items: ['/*'],
-		},
-	},
-}));
-
-const invalidate = invalidateCreator(process.env.DISTRIBUTION_ID);
-const invalidatePreview = invalidateCreator(process.env.DISTRIBUTION_ID_PREVIEW);
 
 const buildPlaylist = async () => {
 	const availableFiles = await reader();
@@ -253,20 +196,13 @@ const buildPlaylist = async () => {
 };
 
 const logVersion = async () => {
-	log(`Version Published: ${version}`);
+	log(`Built version: ${await getVersion()}`);
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist));
+const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist), logVersion);
 
-// upload_images could be in parallel with upload, but _images logs a lot and has little changes
-// by running upload last the majority of the changes will be at the bottom of the log for easy viewing
-const publishFrontend = series(buildDist, uploadImages, upload, invalidate, logVersion);
-const stageFrontend = series(previewVersion, buildDist, uploadImagesPreview, uploadPreview, invalidatePreview, logVersion);
-
-export default publishFrontend;
+export default buildDist;
 
 export {
-	buildDist,
-	invalidate,
-	stageFrontend,
+	logVersion,
 };
