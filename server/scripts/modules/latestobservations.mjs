@@ -39,9 +39,10 @@ class LatestObservations extends WeatherDisplay {
 		// We start with the 7 closest stations and only fetch more if some fail,
 		// stopping as soon as we have 7 valid stations with data.
 		const actualConditions = [];
-		let lastStation = Math.min(regionalStations.length, 7);
+		const stationLimit = this.MaximumRegionalStations * ((settings.portrait?.value) ? 2 : 1);
+		let lastStation = Math.min(regionalStations.length, stationLimit);
 		let firstStation = 0;
-		while (actualConditions.length < 7 && (lastStation) <= regionalStations.length) {
+		while (actualConditions.length < stationLimit && (lastStation) <= regionalStations.length) {
 			// Sequential fetching is intentional here - we want to try closest stations first
 			// and only fetch additional batches if needed, rather than hitting all 30 stations at once
 			// eslint-disable-next-line no-await-in-loop
@@ -50,11 +51,11 @@ class LatestObservations extends WeatherDisplay {
 			actualConditions.push(...someStations);
 			// update counters
 			firstStation += lastStation;
-			lastStation = Math.min(regionalStations.length + 1, firstStation + 7 - actualConditions.length);
+			lastStation = Math.min(regionalStations.length + 1, firstStation + stationLimit - actualConditions.length);
 		}
 
-		// cut down to the maximum of 7
-		this.data = actualConditions.slice(0, this.MaximumRegionalStations);
+		// cut down to the maximum that fit on the page
+		this.data = actualConditions.slice(0, stationLimit);
 
 		// test for at least one station
 		if (this.data.length === 0) {

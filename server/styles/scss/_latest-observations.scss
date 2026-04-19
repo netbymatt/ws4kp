@@ -1,10 +1,21 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/_positions'as p;
 
 .weather-display .latest-observations {
 
 	&.main {
 		overflow-y: hidden;
+
+		.container {
+			// adjust for the height of the column headers
+			max-height: calc(p.$standard-scroll-height - 10px);
+			overflow: hidden;
+
+			.portrait.enhanced & {
+				max-height: calc(p.$portrait-scroll-height - 20px);
+			}
+		}
 
 		.column-headers {
 			height: 20px;
@@ -91,6 +102,10 @@
 			min-height: 338px;
 			padding-top: 10px;
 
+			.portrait.enhanced & {
+				padding-top: 40px;
+			}
+
 			.observation-row {
 				font-family: 'Star4000';
 				font-size: 24pt;
@@ -106,6 +121,13 @@
 				.wind {
 					white-space: pre;
 					text-align: right;
+				}
+
+				.portrait.enhanced & {
+					font-family: 'Star4000 Large';
+					font-size: 16pt;
+					height: 48px;
+					font-weight: bold;
 				}
 			}
 		}
