@@ -5,9 +5,33 @@
 .weather-display .main.current-weather {
 	&.main {
 		width: calc(p.$standard-width - (2 * p.$blue-box-margin));
+		@include u.text-shadow();
+
+		.portrait-only {
+			display: none;
+
+			.portrait.enhanced & {
+				display: block;
+			}
+		}
+
+		.standard-only {
+			display: block;
+
+			.portrait.enhanced & {
+				display: none;
+			}
+		}
+
+		.portrait-location {
+			text-align: center;
+			margin-top: 175px;
+			font-family: "Star4000 Large";
+			font-size: 32pt;
+			color: c.$title-color;
+		}
 
 		.col {
-			height: 50px;
 			width: 255px;
 			display: inline-block;
 			margin-top: 10px;
@@ -20,11 +44,32 @@
 				margin-right: 25px;
 			}
 
-			@include u.text-shadow();
+			.portrait.enhanced & {
+				margin-left: 20px;
+				width: calc(p.$blue-box-width - 40px);
+				display: block;
+				position: relative;
+
+				.wind-container {
+					margin-left: 50px;
+					width: calc(p.$blue-box-width - 140px);
+				}
+			}
 
 			&.left {
 				font-family: 'Star4000 Extended';
 				font-size: 24pt;
+
+				.portrait.enhanced & {
+					font-size: 30pt;
+					line-height: 40px;
+
+					.icon {
+						margin-top: 50px;
+						transform: scale(1.5);
+						margin-bottom: 50px;
+					}
+				}
 			}
 
 			&.right {
@@ -33,6 +78,14 @@
 				font-size: 20px;
 				font-weight: bold;
 				line-height: 24px;
+
+				.portrait.enhanced & {
+					font-family: "Star4000 Extended";
+					font-size: 28pt;
+					font-weight: 300;
+					line-height: 36px;
+				}
+
 
 				.row {
 					margin-bottom: 12px;
@@ -48,6 +101,7 @@
 
 					.value {
 						float: right;
+						text-align: right;
 						margin-right: 10px;
 					}
 

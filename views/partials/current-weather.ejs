@@ -1,18 +1,23 @@
 <%- include('header.ejs', {titleDual:{ top: 'Current' , bottom: 'Conditions' }, noaaLogo: true, hasTime: true}) %>
 <div class="main has-scroll has-box current-weather can-enhance">
   <div class="weather template">
+		<div class="portrait-location portrait-only"></div>
     <div class="left col">
       <div class="temp center"></div>
       <div class="condition center"></div>
       <div class="icon center"><img src="" /></div>
-      <div class="wind-container">
+      <div class="wind-container standard-only">
         <div class="wind-label">Wind:</div>
         <div class="wind"></div>
       </div>
       <div class="wind-gusts"></div>
     </div>
     <div class="right col">
-      <div class="location"></div>
+      <div class="location standard-only"></div>
+			<div class="row portrait-only">
+				<div class="label">Wind:</div>
+				<div class="wind-portrait value"></div>
+			</div>
       <div class="row">
         <div class="label">Humidity:</div>
         <div class="humidity value"></div>

@@ -26,8 +26,17 @@
 	/* this method is required to hide blocks so they can be measured while off screen */
 	height: 0px;
 
+	.enhanced.portrait & {
+
+		background-image: url(../images/backgrounds/1-portrait.png);
+	}
+
 	&.show {
 		height: p.$standard-height;
+
+		.enhanced.portrait & {
+			height: p.$portrait-height;
+		}
 	}
 
 	.template {
@@ -133,8 +142,18 @@
 			overflow: hidden;
 
 			&.no-header {
-				height: 400px;
+				height: calc(p.$standard-scroll-height + 90px);
 				margin-top: 0; // Reset for no-header case since the gap issue is header-related
+
+				.portrait.enhanced & {
+					height: calc(p.$portrait-scroll-height + 90px);
+				}
+			}
+
+			.portrait.enhanced & {
+				height: p.$portrait-scroll-height;
+
+
 			}
 		}
 

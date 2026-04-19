@@ -167,6 +167,10 @@ body {
 	.wide & {
 		width: p.$wide-width;
 	}
+
+	.enhanced.portrait & {
+		height: p.$portrait-height;
+	}
 }
 
 .kiosk #divTwc {
@@ -343,6 +347,12 @@ body {
 	background-image: url(../images/backgrounds/1.png);
 	transform-origin: 0 0;
 	background-repeat: no-repeat;
+
+	.portrait.enhanced & {
+		width: p.$portrait-width;
+		height: p.$portrait-height;
+		background-image: url(../images/backgrounds/1-portrait.png);
+	}
 }
 
 .wide #container {

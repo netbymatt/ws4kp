@@ -201,7 +201,9 @@ class CurrentWeather extends WeatherDisplay {
 			temp: this.data.Temperature + String.fromCharCode(176),
 			condition,
 			wind,
+			'wind-portrait': wind,
 			location,
+			'portrait-location': location,
 			humidity: `${this.data.Humidity}%`,
 			dewpoint: this.data.DewPoint + String.fromCharCode(176),
 			ceiling: (this.data.Ceiling === 0 ? 'Unlimited' : this.data.Ceiling + this.data.CeilingUnit),
@@ -210,7 +212,9 @@ class CurrentWeather extends WeatherDisplay {
 			icon: { type: 'img', src: this.data.Icon },
 		};
 
-		if (this.data.WindGust !== '-') fill['wind-gusts'] = `Gusts to ${this.data.WindGust}`;
+		if (this.data.WindGust !== '-') {
+			fill['wind-gusts'] = `Gusts to ${this.data.WindGust}`;
+		}
 
 		if (this.data.observations.heatIndex.value && this.data.HeatIndex !== this.data.Temperature) {
 			fill['heat-index-label'] = 'Heat Index:';

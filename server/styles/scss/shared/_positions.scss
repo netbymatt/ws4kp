@@ -4,11 +4,17 @@ $standard-height: 480px;
 
 // height with scroll
 $standard-scroll-height: 310px;
+$portrait-scroll-height: 967px;
 
 // blue box size
 $blue-box-margin: 64px;
+$blue-box-width: calc($standard-width - 2 * $blue-box-margin);
 
 // wide screen positioning
 $wide-padding: 107px;
 $wide-margin: 107px;
 $wide-width: 854px;
+
+// portrait positioning
+$portrait-width: 640px;
+$portrait-height: 1137px;
