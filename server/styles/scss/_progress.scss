@@ -21,6 +21,11 @@
 		overflow: hidden;
 		line-height: 28px;
 
+		.portrait.enhanced & {
+			// variable height to keep the progress bar visible
+			height: unset;
+		}
+
 		.item {
 			position: relative;
 
@@ -84,6 +89,10 @@
 
 		&.show {
 			display: block;
+		}
+
+		.portrait.enhanced & {
+			margin-top: 40px;
 		}
 
 		.progress-bar {

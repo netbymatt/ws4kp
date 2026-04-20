@@ -213,6 +213,12 @@ body {
 	flex-direction: row;
 	background-color: #000000;
 
+	// stick the nav bar to the bottom of the window in portrait
+	.portrait.enhanced & {
+		position: sticky;
+		bottom: 0px;
+	}
+
 	color: #ffffff;
 	width: p.$standard-width;
 

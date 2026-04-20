@@ -33,7 +33,7 @@ class Progress extends WeatherDisplay {
 		// if no displays provided just draw the backgrounds (above)
 		if (!displays) return;
 		const lines = displays.map((display, index) => {
-			if (display.showOnProgress === false) return false;
+			// all displays are drawn, some are tagged as only showing on the progress page in portrait
 			const fill = {
 				name: display.name,
 			};
@@ -50,6 +50,8 @@ class Progress extends WeatherDisplay {
 			links.classList.remove(...statusClasses);
 			links.classList.add(statusClass);
 			links.dataset.index = index;
+			// hide items not shown unless in portrait
+			if (!display.showOnProgress) line.classList.add('portrait-only');
 			return line;
 		}).filter((d) => d);
 
