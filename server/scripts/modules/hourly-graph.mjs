@@ -7,6 +7,12 @@ import { registerDisplay, timeZone } from './navigation.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import settings from './settings.mjs';
 
+// two chart areas
+const chartAreas = [
+	'.top',
+	'.bottom',
+];
+
 // set up spacing and scales
 const scaling = () => {
 	const available = {
@@ -24,6 +30,11 @@ const scaling = () => {
 		dataLength.hours = 48;
 		dataLength.xTicks = 6;
 	}
+
+	if (settings.portrait?.value && settings.enhanced?.value) {
+		available.height = 450;
+	}
+
 	return {
 		available,
 		dataLength,
@@ -85,10 +96,13 @@ class HourlyGraph extends WeatherDisplay {
 
 		// get the image
 		if (!this.image) this.image = this.elem.querySelector('.chart img');
+		if (!this.portraitImage) this.portraitImage = this.elem.querySelector('.bottom .chart img');
 
-		// set up image
+		// set up images
 		this.image.width = available.width;
 		this.image.height = available.height;
+		this.portraitImage.width = available.width;
+		this.portraitImage.height = available.height;
 
 		// get context
 		const canvas = document.createElement('canvas');
@@ -97,31 +111,57 @@ class HourlyGraph extends WeatherDisplay {
 		const ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 
+		// set the canvas for each graph to the top one by default
+		const contexts = [
+			ctx,
+			ctx,
+			ctx,
+			ctx,
+		];
+
+		// if in portrait-enhanced, change out the second two contexts with a second canvas
+		let portraitCanvas;
+		if (settings.portrait?.value && settings.enhanced?.value) {
+			portraitCanvas = document.createElement('canvas');
+			portraitCanvas.width = available.width;
+			portraitCanvas.height = available.height;
+			const portraitCtx = portraitCanvas.getContext('2d');
+			portraitCtx.imageSmoothingEnabled = false;
+
+			contexts[2] = portraitCtx;
+			contexts[3] = portraitCtx;
+		}
+
 		// calculate time scale
 		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, available.width);
 		const timeStep = this.data.temperature.length / (dataLength.xTicks);
 		const startTime = DateTime.now().startOf('hour');
-		let prevTime = startTime;
-		Array(dataLength.xTicks + 1).fill().forEach((val, idx) => {
-			// track the previous label so a day of week can be added when it changes
-			const label = formatTime(startTime.plus({ hour: idx * timeStep }), prevTime);
-			prevTime = label.ts;
-			// write to page
-			document.querySelector(`.x-axis .l-${idx + 1}`).innerHTML = label.formatted;
+
+		// there are two x axes in portrait
+		chartAreas.forEach((area) => {
+			let prevTime = startTime;
+			const elem = this.elem.querySelector(area);
+			Array(dataLength.xTicks + 1).fill().forEach((val, idx) => {
+				// track the previous label so a day of week can be added when it changes
+				const label = formatTime(startTime.plus({ hour: idx * timeStep }), prevTime);
+				prevTime = label.ts;
+				// write to page
+				elem.querySelector(`.x-axis .l-${idx + 1}`).innerHTML = label.formatted;
+			});
 		});
 
 		// order is important last line drawn is on top
 		// clouds
 		const percentScale = calcScale(0, available.height - 10, 100, 10);
 		const cloud = createPath(this.data.skyCover, timeScale, percentScale);
-		drawPath(cloud, ctx, {
+		drawPath(cloud, contexts[3], {
 			strokeStyle: 'lightgrey',
 			lineWidth: 3,
 		});
 
 		// precip
 		const precip = createPath(this.data.probabilityOfPrecipitation, timeScale, percentScale);
-		drawPath(precip, ctx, {
+		drawPath(precip, contexts[2], {
 			strokeStyle: 'aqua',
 			lineWidth: 3,
 		});
@@ -136,14 +176,14 @@ class HourlyGraph extends WeatherDisplay {
 
 		// dewpoint
 		const dewpointPath = createPath(this.data.dewpoint, timeScale, tempScale);
-		drawPath(dewpointPath, ctx, {
+		drawPath(dewpointPath, contexts[1], {
 			strokeStyle: 'green',
 			lineWidth: 3,
 		});
 
 		// temperature
 		const tempPath = createPath(this.data.temperature, timeScale, tempScale);
-		drawPath(tempPath, ctx, {
+		drawPath(tempPath, contexts[0], {
 			strokeStyle: 'red',
 			lineWidth: 3,
 		});
@@ -151,6 +191,8 @@ class HourlyGraph extends WeatherDisplay {
 		// temperature axis labels
 		// limited to 3 characters, sacraficing degree character
 		const degree = String.fromCharCode(176);
+
+		// only fill the upper chart with temperatures
 		this.elem.querySelector('.y-axis .l-1').innerHTML = (maxScale + degree).substring(0, 3);
 		this.elem.querySelector('.y-axis .l-2').innerHTML = (midScale2 + degree).substring(0, 3);
 		this.elem.querySelector('.y-axis .l-3').innerHTML = (midScale1 + degree).substring(0, 3);
@@ -158,6 +200,11 @@ class HourlyGraph extends WeatherDisplay {
 
 		// set the image source
 		this.image.src = canvas.toDataURL();
+
+		// if a portrait canvas was created set that image as well
+		if (portraitCanvas) {
+			this.portraitImage.src = portraitCanvas.toDataURL();
+		}
 
 		// change the units in the header
 		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${this.data.temperatureUnit}`;

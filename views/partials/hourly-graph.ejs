@@ -1,27 +1,57 @@
 <%- include('header.ejs', {title: 'Hourly Graph' , hasTime: false }) %>
 <div class="main has-scroll hourly-graph can-enhance">
-  <div class="top-right template ">
+  <div class="top-right legend template ">
     <div class="temperature">Temperature</div>
     <div class="dewpoint">Dewpoint</div>
-    <div class="cloud">Cloud %</div>
-    <div class="rain">Precip %</div>
+    <div class="cloud standard-only">Cloud %</div>
+    <div class="rain standard-only">Precip %</div>
   </div>
-  <div class="y-axis">
-    <div class="label l-1">75</div>
-    <div class="label l-2">65</div>
-    <div class="label l-3">55</div>
-    <div class="label l-4">45</div>
-  </div>
-  <div class="chart">
-    <img id="chart-area"></img>
-  </div>
-  <div class="x-axis">
-    <div class="label l-1">12a</div>
-    <div class="label l-2">6a</div>
-    <div class="label l-3">12p</div>
-    <div class="label l-4">6p</div>
-    <div class="label l-5">12a</div>
-    <div class="label l-6">6a</div>
-    <div class="label l-7">12p</div>
-  </div>
+	<div class="top chart-container">
+		<div class="y-axis">
+			<div class="label l-1">75</div>
+			<div class="label l-2">65</div>
+			<div class="label l-3">55</div>
+			<div class="label l-4">45</div>
+		</div>
+		<div class="chart">
+			<img id="chart-area"></img>
+		</div>
+		<div class="x-axis">
+			<div class="label l-1">12a</div>
+			<div class="label l-2">6a</div>
+			<div class="label l-3">12p</div>
+			<div class="label l-4">6p</div>
+			<div class="label l-5">12a</div>
+			<div class="label l-6">6a</div>
+			<div class="label l-7">12p</div>
+		</div>
+	</div>
+	<div class="bottom chart-container portrait-only">
+		<div class="right">
+			<div class="legend portrait-only">
+				<div class="cloud">Cloud %</div>
+				<div class="rain">Precip %</div>
+			</div>
+		</div>
+		<div class="y-axis">
+			<div class="label l-1">100</div>
+			<div class="label l-2">75%</div>
+			<div class="label l-3">50%</div>
+			<div class="label l-4">25%</div>
+			<div class="label l-5">0%</div>
+		</div>
+		<div class="chart">
+			<img id="chart-area"></img>
+		</div>
+		<div class="x-axis">
+			<div class="label l-1">12a</div>
+			<div class="label l-2">6a</div>
+			<div class="label l-3">12p</div>
+			<div class="label l-4">6p</div>
+			<div class="label l-5">12a</div>
+			<div class="label l-6">6a</div>
+			<div class="label l-7">12p</div>
+		</div>
+	</div>
+
 </div>

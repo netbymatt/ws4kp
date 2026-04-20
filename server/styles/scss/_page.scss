@@ -851,3 +851,19 @@ body.kiosk #loading .instructions {
 		display: inline-block;
 	}
 }
+
+.portrait-only {
+	display: none;
+
+	.portrait.enhanced & {
+		display: block;
+	}
+}
+
+.standard-only {
+	display: block;
+
+	.portrait.enhanced & {
+		display: none;
+	}
+}

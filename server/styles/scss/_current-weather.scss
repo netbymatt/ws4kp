@@ -7,22 +7,6 @@
 		width: calc(p.$standard-width - (2 * p.$blue-box-margin));
 		@include u.text-shadow();
 
-		.portrait-only {
-			display: none;
-
-			.portrait.enhanced & {
-				display: block;
-			}
-		}
-
-		.standard-only {
-			display: block;
-
-			.portrait.enhanced & {
-				display: none;
-			}
-		}
-
 		.portrait-location {
 			text-align: center;
 			margin-top: 175px;

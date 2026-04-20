@@ -1,5 +1,6 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
+@use 'shared/_positions'as p;
 
 #hourly-graph-html {
 	background-image: url(../images/backgrounds/1-chart.png);
@@ -10,36 +11,54 @@
 		background-position-x: 0px;
 	}
 
-	.header {
-		.right {
-			position: absolute;
+	// change background for portrait
+	.portrait.enhanced & {
+		background-image: url(../images/backgrounds/1-chart-portrait.png);
+		background-position-x: 0px;
+	}
+
+}
+
+.legend {
+	.right & {
+		position: absolute;
+
+		.header & {
 			top: 35px;
-			right: 60px;
-			width: 360px;
-			font-family: 'Star4000 Small';
-			font-size: 28px;
-			@include u.text-shadow();
-			text-align: right;
+		}
 
-			div {
-				margin-top: -18px;
-			}
+		right: 60px;
+		width: 360px;
+		font-family: 'Star4000 Small';
+		font-size: 28px;
+		@include u.text-shadow();
+		text-align: right;
 
-			.temperature {
-				color: red;
-			}
+		div {
+			margin-top: -18px;
+		}
 
-			.dewpoint {
-				color: green;
-			}
+		.temperature {
+			color: red;
 
-			.cloud {
-				color: lightgrey;
+			// shift down when only 2 legend elements are shown in portrait
+			.header & {
+				.portrait.enhanced & {
+					margin-top: 12px;
+				}
 			}
+		}
 
-			.rain {
-				color: aqua;
-			}
+		.dewpoint {
+			color: green;
+		}
+
+		.cloud {
+			color: lightgrey;
+		}
+
+		.rain {
+			color: aqua;
 		}
 	}
 }
@@ -47,136 +66,216 @@
 .weather-display .main.hourly-graph {
 
 	&.main {
-		>div {
-			position: absolute;
-		}
 
-		.label {
-			font-family: 'Star4000 Small';
-			font-size: 24pt;
-			color: c.$column-header-text;
-			@include u.text-shadow();
-			margin-top: -15px;
-			position: absolute;
-		}
+		.chart-container {
 
-		.x-axis {
-			bottom: 0px;
-			left: 54px;
-			width: 532px;
-			height: 20px;
+			position: absolute;
+			top: 0px;
+			height: p.$standard-scroll-height;
+
+			&.portrait-only {
+				top: 495px;
+			}
+
+			>div {
+				position: absolute;
+			}
+
+			.portrait.enhanced & {
+				height: 470px;
+			}
+
 
 			.label {
-				text-align: center;
-				transform: translateX(-50%);
-				white-space: nowrap;
+				font-family: 'Star4000 Small';
+				font-size: 24pt;
+				color: c.$column-header-text;
+				@include u.text-shadow();
+				margin-top: -15px;
+				position: absolute;
+			}
 
-				&.l-1 {
-					left: 0px;
-				}
+			.x-axis {
+				bottom: 0px;
+				left: 54px;
+				width: 532px;
+				height: 20px;
 
-				&.l-2 {
-					left: calc(532px / 4 * 1);
-				}
-
-				&.l-3 {
-					left: calc(532px / 4 * 2);
-				}
-
-				&.l-4 {
-					left: calc(532px / 4 * 3);
-				}
-
-				&.l-5 {
-					left: calc(532px / 4 * 4);
-				}
-
-				// adjust when enhanced
-				.wide.enhanced & {
+				.label {
+					text-align: center;
+					transform: translateX(-50%);
+					white-space: nowrap;
 
 					&.l-1 {
 						left: 0px;
 					}
 
 					&.l-2 {
-						left: calc(726px / 6 * 1);
+						left: calc(532px / 4 * 1);
 					}
 
 					&.l-3 {
-						left: calc(726px / 6 * 2);
+						left: calc(532px / 4 * 2);
 					}
 
 					&.l-4 {
-						left: calc(726px / 6 * 3);
+						left: calc(532px / 4 * 3);
 					}
 
 					&.l-5 {
-						left: calc(726px / 6 * 4);
+						left: calc(532px / 4 * 4);
 					}
 
-					&.l-6 {
-						left: calc(726px / 6 * 5);
-					}
-
-					&.l-7 {
-						left: calc(726px / 6 * 6);
-					}
-				}
-
-				// only in wide + enhanced
-				&.l-6,
-				&.l-7 {
-					display: none;
-
+					// adjust when enhanced
 					.wide.enhanced & {
-						display: block;
+
+						&.l-1 {
+							left: 0px;
+						}
+
+						&.l-2 {
+							left: calc(726px / 6 * 1);
+						}
+
+						&.l-3 {
+							left: calc(726px / 6 * 2);
+						}
+
+						&.l-4 {
+							left: calc(726px / 6 * 3);
+						}
+
+						&.l-5 {
+							left: calc(726px / 6 * 4);
+						}
+
+						&.l-6 {
+							left: calc(726px / 6 * 5);
+						}
+
+						&.l-7 {
+							left: calc(726px / 6 * 6);
+						}
 					}
+
+					// only in wide + enhanced
+					&.l-6,
+					&.l-7 {
+						display: none;
+
+						.wide.enhanced & {
+							display: block;
+						}
+					}
+
 				}
 
 			}
 
-		}
+			.chart {
+				top: 0px;
+				left: 50px;
 
-		.chart {
-			top: 0px;
-			left: 50px;
+				img {
+					width: 532px;
+					height: 285px;
 
-			img {
-				width: 532px;
+					// wide and enhanced
+					.wide.enhanced & {
+						width: 746px;
+					}
+
+					.portrait.enhanced & {
+						height: 450px;
+					}
+				}
+			}
+
+			.y-axis {
+				top: 0px;
+				left: 0px;
+				width: 50px;
 				height: 285px;
 
-				// wide and enhanced
-				.wide.enhanced & {
-					width: 746px;
+				.portrait.enhanced & {
+					height: 450px;
+				}
+
+				.label {
+					text-align: right;
+					right: 0px;
+
+					&.l-1 {
+						top: 0px;
+					}
+
+					&.l-2 {
+						top: calc(280px / 3);
+					}
+
+					&.l-3 {
+						bottom: calc(280px / 3 - 11px);
+					}
+
+					&.l-4 {
+						bottom: 0px;
+					}
+
+					.portrait.enhanced & {
+						&.l-1 {
+							top: 0px;
+						}
+
+						&.l-2 {
+							top: calc(445px / 3);
+						}
+
+						&.l-3 {
+							bottom: calc(445px / 3 - 11px);
+						}
+
+						&.l-4 {
+							bottom: 0px;
+						}
+					}
+				}
+			}
+
+			&.bottom {
+				.y-axis .label {
+					.portrait.enhanced & {
+						&.l-1 {
+							top: 0px;
+						}
+
+						&.l-2 {
+							top: calc(445px / 4);
+						}
+
+						&.l-3 {
+							top: calc(445px / 2 - 11px);
+						}
+
+						&.l-4 {
+							bottom: calc(445px / 4 - 11px);
+						}
+
+						&.l-5 {
+							bottom: 0px;
+						}
+
+						;
+					}
 				}
 			}
 		}
 
-		.y-axis {
-			top: 0px;
-			left: 0px;
-			width: 50px;
-			height: 285px;
+		.chart-container.bottom {
 
-			.label {
-				text-align: right;
-				right: 0px;
-
-				&.l-1 {
-					top: 0px;
-				}
-
-				&.l-2 {
-					top: calc(280px / 3);
-				}
-
-				&.l-3 {
-					bottom: calc(280px / 3 - 11px);
-				}
-
-				&.l-4 {
-					bottom: 0px;
-				}
+			.right {
+				width: p.$standard-width;
+				position: absolute;
+				top: -25px;
 			}
 		}
 
