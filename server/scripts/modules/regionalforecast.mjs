@@ -21,6 +21,7 @@ const scaling = () => {
 	// available space
 	const available = {
 		x: 640,
+		y: 282,
 	};
 
 	// map offset
@@ -29,9 +30,16 @@ const scaling = () => {
 		y: 117,
 	};
 
-	if (settings.wide?.value && settings.enhanced?.value) {
-		mapOffsetXY.x = 320;
-		available.x = 854;
+	if (settings.enhanced?.value) {
+		if (settings.wide?.value) {
+			mapOffsetXY.x = 320;
+			available.x = 854;
+		}
+
+		if (settings.portrait?.value) {
+			mapOffsetXY.y = 400;
+			available.y = 970;
+		}
 	}
 	return {
 		mapOffsetXY,
@@ -121,7 +129,7 @@ class RegionalForecast extends WeatherDisplay {
 				}
 
 				// get XY on map for city
-				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available - 60);
+				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available.x - 60, available.y);
 
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
