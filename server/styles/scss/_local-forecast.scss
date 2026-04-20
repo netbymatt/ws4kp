@@ -16,6 +16,10 @@
 		box-sizing: border-box;
 		height: 280px;
 		overflow: hidden;
+
+		.portrait.enhanced & {
+			height: 960px;
+		}
 	}
 
 	.forecasts {

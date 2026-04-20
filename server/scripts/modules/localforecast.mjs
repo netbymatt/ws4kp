@@ -44,6 +44,23 @@ class LocalForecast extends WeatherDisplay {
 			return text;
 		});
 
+		// if in portrait combine to 2 days on one screen
+
+		if (settings.portrait?.value && settings.enhanced?.value) {
+			const newScreenTexts = [];
+			this.screenTexts.forEach((text, idx) => {
+				// even is passed through
+				if ((idx % 2) === 0) {
+					newScreenTexts.push(text);
+				} else {
+					// odd is added to the previous index
+					newScreenTexts[Math.floor(idx / 2)] += `<br/><br/>${text}`;
+				}
+			});
+			// reassign the screens
+			this.screenTexts = newScreenTexts;
+		}
+
 		// fill the forecast texts
 		const templates = this.screenTexts.map((text) => this.fillTemplate('forecast', { text }));
 		const forecastsElem = this.elem.querySelector('.forecasts');
@@ -51,7 +68,10 @@ class LocalForecast extends WeatherDisplay {
 		forecastsElem.append(...templates);
 
 		// Get page height for screen calculations
-		this.pageHeight = forecastsElem.parentNode.offsetHeight;
+		this.pageHeight = 280;
+		if (settings.portrait?.value && settings.enhanced?.value) {
+			this.pageHeight = 960;
+		}
 
 		this.calculateContentAwareTiming(templates);
 
@@ -125,11 +145,14 @@ class LocalForecast extends WeatherDisplay {
 
 		// Measure each forecast period to get actual line counts
 		const forecastLineCounts = [];
+
+		const maxLinesPerScreen = this.pageHeight / 40; // page height / 40px line height
+
 		templates.forEach((template, index) => {
 			const currentHeight = template.offsetHeight;
 			const currentLines = Math.round(currentHeight / lineHeight);
 
-			if (currentLines > 7) {
+			if (currentLines > maxLinesPerScreen) {
 				// Multi-page forecasts measure correctly, so use the measurement directly
 				forecastLineCounts.push(currentLines);
 
@@ -141,7 +164,7 @@ class LocalForecast extends WeatherDisplay {
 				// Short forecasts are capped by CSS min-height: 280px (7 lines)
 				// Add 7 <br> tags to force height beyond the minimum, then subtract the padding
 				const originalHTML = template.innerHTML;
-				const paddingBRs = '<br/>'.repeat(7);
+				const paddingBRs = '<br/>'.repeat(maxLinesPerScreen);
 				template.innerHTML = originalHTML + paddingBRs;
 
 				// Measure the padded height
@@ -149,7 +172,7 @@ class LocalForecast extends WeatherDisplay {
 				const paddedLines = Math.round(paddedHeight / lineHeight);
 
 				// Calculate actual content lines by subtracting the 7 BR lines we added
-				const actualLines = Math.max(1, paddedLines - 7);
+				const actualLines = Math.max(1, paddedLines - maxLinesPerScreen);
 
 				// Restore original content
 				template.innerHTML = originalHTML;
@@ -174,7 +197,6 @@ class LocalForecast extends WeatherDisplay {
 		this.timing.totalScreens = Math.round(totalHeight / this.pageHeight);
 
 		// Now calculate timing based on actual measured line counts, ignoring padding
-		const maxLinesPerScreen = 7; // 280px / 40px line height
 		const screenTimings = []; forecastLineCounts.forEach((lines, forecastIndex) => {
 			if (lines <= maxLinesPerScreen) {
 				// Single screen for this forecast
