@@ -4,8 +4,13 @@ const radarFinalSize = () => {
 	const size = {
 		width: 640, height: 367,
 	};
-	if (settings.wide?.value && settings.enhanced?.value) {
-		size.width = 854;
+	if (settings.enhanced?.value) {
+		if (settings.wide?.value) {
+			size.width = 854;
+		}
+		if (settings.portrait?.value) {
+			size.height = 1024;
+		}
 	}
 	return size;
 };
@@ -15,8 +20,13 @@ const radarSourceSize = () => {
 		width: 240,
 		height: 163,
 	};
-	if (settings.wide?.value && settings.enhanced?.value) {
-		size.width = 240 / 640 * 854; // original size of 640 scaled up to wide at 854
+	if (settings.enhanced?.value) {
+		if (settings.wide?.value) {
+			size.width = 240 / 640 * 854; // original size of 640 scaled up to wide at 854
+		}
+		if (settings.portrait?.value) {
+			size.height = 163 / 367 * 1024;// original size of 367 scaled up to portrait at 1024
+		}
 	}
 	return size;
 };
@@ -26,9 +36,15 @@ const radarOffset = () => {
 		x: 240,
 		y: 138,
 	};
-	if (settings.wide?.value && settings.enhanced?.value) {
-		// 107 is the margins shift, 640/854 is the scaling factor normal => wide, /2 is because of the fixed 2:1 scaling between source radar and map tiles
-		offset.x = 240 + (107 * 640 / 854 / 2); // original size of 640 scaled up to wide at 854;
+	if (settings.enhanced?.value) {
+		if (settings.wide?.value) {
+			// 107 is the margins shift, 640/854 is the scaling factor normal => wide, /2 is because of the fixed 2:1 scaling between source radar and map tiles
+			offset.x = 240 + (107 * 640 / 854 / 2); // original size of 640 scaled up to wide at 854;
+		}
+		if (settings.portrait?.value) {
+			// 825 is the margins shift, 367/1024 is the scaling factor normal => portrait, /2 is because of the fixed 2:1 scaling between source radar and map tiles
+			offset.y = 138 + (815 * 367 / 1024 / 2);
+		}
 	}
 
 	return offset;
@@ -40,8 +56,13 @@ const radarShift = () => {
 		x: 0,
 		y: 0,
 	};
-	if (settings.wide?.value && settings.enhanced?.value) {
-		shift.x = 107;
+	if (settings.enhanced?.value) {
+		if (settings.wide?.value) {
+			shift.x = 107;
+		}
+		if (settings.portrait?.value) {
+			shift.y = 328;
+		}
 	}
 	return shift;
 };

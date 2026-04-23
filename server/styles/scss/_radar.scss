@@ -111,6 +111,10 @@
 	height: 367px;
 	width: p.$standard-width;
 
+	.portrait.enhanced & {
+		height: 1024px;
+	}
+
 	.container {
 
 		.tiles {
