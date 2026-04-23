@@ -19,7 +19,7 @@ class ExtendedForecast extends WeatherDisplay {
 		// set timings
 		if (settings.portrait?.value) {
 			this.timing.totalScreens = 1;
-			this.perPage = 4;
+			this.perPage = 6;
 		} else {
 			this.timing.totalScreens = 2;
 			this.perPage = 3;
