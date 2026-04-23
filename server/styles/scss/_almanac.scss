@@ -4,9 +4,14 @@
 #almanac-html.weather-display {
 	background-image: url('../images/backgrounds/3.png');
 
-	// repeat the background if wide-enhanced
+	// change the backgrounds for enhanced modes
 	.wide.enhanced & {
 		background-image: url('../images/backgrounds/3-wide-enhanced.png');
+	}
+
+	// change background for portrait
+	.portrait.enhanced & {
+		background-image: url(../images/backgrounds/3-portrait.png);
 	}
 }
 
@@ -28,6 +33,10 @@
 
 		.wide.enhanced & {
 			grid-template-columns: repeat(4, auto);
+		}
+
+		.portrait.enhanced & {
+			display: none;
 		}
 
 		.grid-item {
@@ -65,6 +74,23 @@
 		}
 	}
 
+	.portrait.enhanced & {
+		font-size: 28pt;
+
+	}
+
+	.sun.sun-portrait {
+		display: none;
+
+		.portrait.enhanced & {
+			display: grid;
+		}
+
+		.grid-item {
+			margin: 8px 0px;
+		}
+	}
+
 	.moon {
 		position: relative;
 		padding: 7px 50px;
@@ -73,6 +99,8 @@
 		.title {
 			color: c.$column-header-text;
 			padding-left: 13px;
+
+
 		}
 
 		.days {
@@ -92,6 +120,14 @@
 			.date {
 				position: relative;
 				top: -10px;
+			}
+
+			&.wide-enhanced {
+				display: none;
+
+				.wide.enhanced & {
+					display: inline-block;
+				}
 			}
 		}
 	}
