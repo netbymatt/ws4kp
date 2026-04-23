@@ -1,14 +1,27 @@
 @use 'shared/_colors'as c;
 @use 'shared/_utils'as u;
 
+$portrait-gap-adder: 20px;
+
 #extended-forecast-html.weather-display {
 	background-image: url('../images/backgrounds/2.png');
+
+	// change background for portrait
+	.portrait.enhanced & {
+		background-image: url(../images/backgrounds/2-portrait.png);
+		background-position-x: 0px;
+	}
 }
 
 .weather-display .main.extended-forecast {
 	.day-container {
 		margin-top: 16px;
 		margin-left: 27px;
+
+		// taller for portrait
+		.portrait.enhanced & {
+			margin-top: 90px;
+		}
 	}
 
 	.day {
@@ -21,6 +34,12 @@
 		font-family: 'Star4000';
 		font-size: 24pt;
 
+		// taller for portrait
+		.portrait.enhanced & {
+			height: 360px;
+			margin-bottom: 75px;
+		}
+
 		.date {
 			text-transform: uppercase;
 			text-align: center;
@@ -31,6 +50,10 @@
 			text-align: center;
 			height: 74px;
 			margin-top: 5px;
+
+			.portrait.enhanced & {
+				margin-top: $portrait-gap-adder;
+			}
 		}
 
 		.icon {
@@ -40,10 +63,18 @@
 			img {
 				max-height: 75px;
 			}
+
+			.portrait.enhanced & {
+				margin-top: $portrait-gap-adder;
+			}
 		}
 
 		.temperatures {
 			width: 100%;
+
+			.portrait.enhanced & {
+				margin-top: $portrait-gap-adder;
+			}
 
 			.temperature-block {
 				display: inline-block;
