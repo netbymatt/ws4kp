@@ -93,6 +93,18 @@ const getSpotifyPlaylistId = (value) => {
 
 const spotifyPlaylistUri = (playlistId) => `spotify:playlist:${playlistId}`;
 const hasYouTubePlayerMethod = (methodName) => Boolean(youtubePlayer && typeof youtubePlayer[methodName] === 'function');
+const syncYouTubeAudioState = () => {
+	if (!hasYouTubePlayerMethod('mute') && !hasYouTubePlayerMethod('unMute')) return;
+	if (mediaMuted || mediaVolume.value <= 0) {
+		if (hasYouTubePlayerMethod('mute')) youtubePlayer.mute();
+		return;
+	}
+	if (hasYouTubePlayerMethod('unMute')) youtubePlayer.unMute();
+	if (hasYouTubePlayerMethod('setVolume')) {
+		youtubePlayer.setVolume(Math.round(mediaVolume.value * 100));
+	}
+};
+
 const youtubeEmbedUrl = (media) => {
 	if (!media) return '';
 	const params = new URLSearchParams({
@@ -153,12 +165,7 @@ const applyYouTubeMedia = (media) => {
 		youtubePlayer.loadVideoById(media.id);
 	}
 
-	if (mediaMuted) {
-		if (hasYouTubePlayerMethod('mute')) youtubePlayer.mute();
-	} else {
-		if (hasYouTubePlayerMethod('unMute')) youtubePlayer.unMute();
-		if (hasYouTubePlayerMethod('setVolume')) youtubePlayer.setVolume(Math.round(mediaVolume.value * 100));
-	}
+	syncYouTubeAudioState();
 
 	if (mediaPlaying.value && hasYouTubePlayerMethod('playVideo')) {
 		youtubePlayer.playVideo();
@@ -168,7 +175,15 @@ const applyYouTubeMedia = (media) => {
 };
 
 const handleYouTubeStateChange = (event) => {
-	if (event?.data !== window.YT?.PlayerState?.ENDED) return;
+	const state = event?.data;
+	if (
+		state === window.YT?.PlayerState?.PLAYING
+		|| state === window.YT?.PlayerState?.BUFFERING
+		|| state === window.YT?.PlayerState?.CUED
+	) {
+		syncYouTubeAudioState();
+	}
+	if (state !== window.YT?.PlayerState?.ENDED) return;
 	if (!hasYouTubePlayerMethod('nextVideo')) return;
 
 	const mode = getCustomMusicMode();
@@ -510,11 +525,12 @@ const updateCustomMusicControls = () => {
 		sourceLabel.style.display = enabled ? '' : 'none';
 	}
 	if (!enabled) {
-		const wasPlaying = mediaPlaying.value;
+		const hasLocalMusic = (playlist?.availableFiles?.length ?? 0) > 0;
 		clearSpotifyPlayer();
 		clearYouTubePlayer();
 		enableMediaPlayer(false);
-		if (wasPlaying) {
+		if (hasLocalMusic) {
+			mediaPlaying.value = true;
 			startMedia();
 		}
 		return;
@@ -763,12 +779,8 @@ const setVolume = (newVolume) => {
 	}
 	if (hasYouTubePlayerMethod('setVolume')) {
 		youtubePlayer.setVolume(Math.round(newVolume * 100));
-		if (newVolume === 0) {
-			if (hasYouTubePlayerMethod('mute')) youtubePlayer.mute();
-		} else if (!mediaMuted) {
-			if (hasYouTubePlayerMethod('unMute')) youtubePlayer.unMute();
-		}
 	}
+	syncYouTubeAudioState();
 };
 
 const toggleMute = () => {
@@ -778,14 +790,7 @@ const toggleMute = () => {
 	if (player) {
 		player.muted = mediaMuted;
 	}
-	if (hasYouTubePlayerMethod('mute') || hasYouTubePlayerMethod('unMute')) {
-		if (mediaMuted) {
-			if (hasYouTubePlayerMethod('mute')) youtubePlayer.mute();
-		} else {
-			if (hasYouTubePlayerMethod('unMute')) youtubePlayer.unMute();
-			if (hasYouTubePlayerMethod('setVolume')) youtubePlayer.setVolume(Math.round(mediaVolume.value * 100));
-		}
-	}
+	syncYouTubeAudioState();
 	if (mode.type === 'spotify') {
 		mediaPlaying.value = !mediaMuted;
 	}

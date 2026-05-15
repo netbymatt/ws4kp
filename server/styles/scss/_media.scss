@@ -95,25 +95,22 @@
 		display: inline-block;
 
 		img.on {
-			display: block;
-		}
-
-		img.off {
 			display: none;
 		}
 
-		&.muted {
-			img.on {
-				display: none;
-			}
+		img.off {
+			display: block;
+		}
 
-			img.off {
+		&.playing {
+			img.on {
 				display: block;
 			}
 
+			img.off {
+				display: none;
+			}
 		}
-
-
 	}
 
 	.volume-slider {
