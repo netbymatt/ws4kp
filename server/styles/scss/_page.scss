@@ -441,6 +441,22 @@ body {
 			}
 		}
 	}
+
+	#settings-customLogoImage-upload {
+		cursor: default;
+
+		input[type="file"] {
+			margin-right: 6px;
+		}
+
+		input[type="button"] {
+			margin-right: 6px;
+		}
+
+		#settings-customLogoImage-status {
+			display: inline-block;
+		}
+	}
 }
 
 #divTwcBottom img {

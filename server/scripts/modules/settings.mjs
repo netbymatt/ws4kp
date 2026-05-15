@@ -6,6 +6,8 @@ const settings = { speed: { value: 1.0 } };
 
 // Track settings that need DOM changes after early initialization
 const deferredDomSettings = new Set();
+const CUSTOM_LOGO_STORAGE_KEY = 'CustomLogoPng';
+const defaultLogoSrc = 'images/logos/logo-corner.svg';
 
 // don't show checkboxes for these settings
 const hiddenSettings = [
@@ -99,6 +101,143 @@ const scanLineModeChange = (_value) => {
 	}
 };
 
+const getStoredCustomLogo = () => {
+	try {
+		const storedLogo = localStorage?.getItem(CUSTOM_LOGO_STORAGE_KEY);
+		return storedLogo && storedLogo.startsWith('data:image/png') ? storedLogo : null;
+	} catch (error) {
+		console.warn(`Failed to read custom logo from localStorage: ${error}`);
+		return null;
+	}
+};
+
+const setCustomLogoStatus = (message, isError = false) => {
+	const status = document.getElementById('settings-customLogoImage-status');
+	if (!status) return;
+	status.textContent = message;
+	status.classList.toggle('failed', isError);
+	status.classList.toggle('loading', !isError && message !== '');
+};
+
+const toggleCustomLogoControls = (enabled) => {
+	const uploadControls = document.getElementById('settings-customLogoImage-upload');
+	if (uploadControls) {
+		uploadControls.style.display = enabled ? 'block' : 'none';
+	}
+};
+
+const applyCustomLogo = () => {
+	const hasStoredLogo = Boolean(getStoredCustomLogo());
+	const enabled = Boolean(settings.customLogoImage?.value) && hasStoredLogo;
+	const container = document.getElementById('container');
+	if (!container) {
+		if (settings.customLogoImage?.value) {
+			deferredDomSettings.add('customLogoImage');
+		}
+		return;
+	}
+
+	container.classList.toggle('custom-logo-image-enabled', enabled);
+	document.querySelectorAll('.logo-corner').forEach((logo) => {
+		const src = enabled ? getStoredCustomLogo() : defaultLogoSrc;
+		logo.src = src;
+		logo.alt = enabled ? 'Custom logo' : 'Weather Star 4000+';
+	});
+
+	toggleCustomLogoControls(settings.customLogoImage?.value ?? false);
+	if (settings.customLogoImage?.value && !hasStoredLogo) {
+		setCustomLogoStatus('Upload a PNG to replace the default logo.');
+	} else if (enabled) {
+		setCustomLogoStatus('Custom PNG logo loaded.');
+	} else {
+		setCustomLogoStatus('');
+	}
+};
+
+const saveCustomLogo = (dataUrl) => {
+	try {
+		localStorage?.setItem(CUSTOM_LOGO_STORAGE_KEY, dataUrl);
+		return true;
+	} catch (error) {
+		console.warn(`Failed to store custom logo: ${error}`);
+		setCustomLogoStatus('PNG is too large to store locally.', true);
+		return false;
+	}
+};
+
+const clearCustomLogo = () => {
+	localStorage?.removeItem(CUSTOM_LOGO_STORAGE_KEY);
+	const input = document.getElementById('settings-customLogoImage-file');
+	if (input) {
+		input.value = '';
+	}
+	settings.customLogoImage.value = false;
+};
+
+const customLogoImageChange = () => {
+	applyCustomLogo();
+};
+
+const createCustomLogoUploadControl = () => {
+	const wrapper = document.createElement('div');
+	wrapper.id = 'settings-customLogoImage-upload';
+
+	const title = document.createElement('span');
+	title.textContent = 'Logo PNG ';
+
+	const fileInput = document.createElement('input');
+	fileInput.type = 'file';
+	fileInput.accept = 'image/png';
+	fileInput.id = 'settings-customLogoImage-file';
+	fileInput.name = 'settings-customLogoImage-file';
+
+	const clearButton = document.createElement('input');
+	clearButton.type = 'button';
+	clearButton.value = 'Clear';
+	clearButton.id = 'settings-customLogoImage-clear';
+	clearButton.name = 'settings-customLogoImage-clear';
+	clearButton.addEventListener('click', clearCustomLogo);
+
+	const status = document.createElement('span');
+	status.id = 'settings-customLogoImage-status';
+
+	fileInput.addEventListener('change', () => {
+		const [file] = fileInput.files ?? [];
+		if (!file) {
+			return;
+		}
+		if (file.type !== 'image/png') {
+			fileInput.value = '';
+			setCustomLogoStatus('Only PNG files are supported.', true);
+			return;
+		}
+		if (file.size > 1024 * 1024) {
+			fileInput.value = '';
+			setCustomLogoStatus('PNG must be 1 MB or smaller.', true);
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.addEventListener('load', () => {
+			const dataUrl = typeof reader.result === 'string' ? reader.result : null;
+			if (!dataUrl) {
+				setCustomLogoStatus('Failed to read PNG file.', true);
+				return;
+			}
+			if (saveCustomLogo(dataUrl)) {
+				settings.customLogoImage.value = true;
+			}
+		});
+		reader.addEventListener('error', () => {
+			setCustomLogoStatus('Failed to read PNG file.', true);
+		});
+		reader.readAsDataURL(file);
+	});
+
+	wrapper.append(title, fileInput, clearButton, status);
+	return wrapper;
+};
+
 // Simple global helper to change scanline mode when remote debugging or in kiosk mode
 window.changeScanlineMode = (mode) => {
 	if (typeof settings === 'undefined' || !settings.scanLineMode) {
@@ -185,6 +324,12 @@ const init = () => {
 			['si', 'Metric'],
 		],
 	});
+	settings.customLogoImage = new Setting('customLogoImage', {
+		name: 'Custom Logo PNG',
+		defaultValue: false,
+		changeAction: customLogoImageChange,
+		sticky: true,
+	});
 	settings.refreshTime = new Setting('refreshTime', {
 		type: 'select',
 		defaultValue: 600_000,
@@ -232,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const settingsSection = document.querySelector('#settings');
 	settingsSection.innerHTML = '';
 	settingsSection.append(...settingHtml);
+	settingsSection.append(createCustomLogoUploadControl());
 
 	// update visibility on some settings
 	const modeSelect = document.getElementById('settings-scanLineMode-label');
@@ -242,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		modeSelect.style.display = 'none';
 	}
 	registerHiddenSetting('settings-scanLineMode-select', settings.scanLineMode);
+	applyCustomLogo();
 });
 
 export default settings;
