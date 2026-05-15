@@ -60,6 +60,12 @@
 			left: 50px;
 			position: absolute;
 			z-index: 10;
+
+			.logo-corner {
+				display: block;
+				width: 85px;
+				height: 67px;
+			}
 		}
 
 		.noaa-logo {
