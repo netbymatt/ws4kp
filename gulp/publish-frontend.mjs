@@ -38,6 +38,11 @@ const webpackOptions = {
 	output: {
 		filename: 'ws.min.js',
 	},
+	performance: {
+		hints: 'warning',
+		maxAssetSize: 300000,
+		maxEntrypointSize: 300000,
+	},
 	resolve: {
 		roots: ['./'],
 	},
