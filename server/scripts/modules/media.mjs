@@ -377,9 +377,7 @@ const mountCustomMusicControls = () => {
 };
 
 const syncCustomMusicSource = (value = getCustomMusicSource()?.value) => {
-	console.log('syncCustomMusicSource', { value });
 	const mode = getCustomMusicMode(value, { ignoreEnabled: true });
-	console.log('custom music mode', mode);
 	if (mode.type === 'spotify') {
 		if (player) player.pause();
 		clearYouTubePlayer();
@@ -445,11 +443,9 @@ const createYouTubePlayer = () => {
 
 const configureYouTubePlayer = (value) => {
 	const media = getYouTubeMedia(value);
-	console.log('configureYouTubePlayer', { value, media });
 	youtubePendingMedia = media;
 
 	if (!media) {
-		console.log('Invalid YouTube media.');
 		if (youtubePanel) youtubePanel.classList.remove('show');
 		if (youtubeFrame) youtubeFrame.removeAttribute('src');
 		if (customMusicMessage) {
@@ -460,7 +456,6 @@ const configureYouTubePlayer = (value) => {
 	}
 
 	const src = youtubeEmbedUrl(media);
-	console.log('Updating iframe source to:', src);
 	if (youtubeFrame && youtubeFrame.src !== src) {
 		youtubeFrame.src = src;
 	}

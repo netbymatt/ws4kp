@@ -264,7 +264,6 @@ const unitChange = () => {
 };
 
 const dispatchCustomMusicChange = () => {
-	console.log('custom-music-change dispatched');
 	window.dispatchEvent(new Event('custom-music-change'));
 };
 
