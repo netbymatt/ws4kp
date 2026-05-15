@@ -1,5 +1,90 @@
-.media {
+#settings-customMusicSource-label,
+.custom-music-source-setting {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	max-width: min(310px, 100%);
+	width: min(310px, 100%);
+
+	input[type="text"] {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: calc(100vw - 16px);
+		flex: 0 1 auto;
+	}
+
+	input[type="button"] {
+		margin-top: 2px;
+	}
+}
+
+.custom-music-source-setting.disabled {
+	color: #808080;
+}
+
+#settings-customText-label {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	max-width: min(310px, 100%);
+	width: min(310px, 100%);
+
+	input[type="text"] {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: calc(100vw - 16px);
+		flex: 0 1 auto;
+	}
+
+	input[type="button"] {
+		margin-top: 2px;
+	}
+}
+
+#SpotifyPlayer {
 	display: none;
+	position: fixed;
+	right: 12px;
+	bottom: 76px;
+	width: min(420px, calc(100vw - 24px));
+	height: 152px;
+	z-index: 200;
+	background: #000;
+
+	&.show {
+		display: block;
+	}
+
+	iframe {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+}
+
+#YouTubePlayer {
+	display: none;
+	position: fixed;
+	right: 12px;
+	bottom: 76px;
+	width: min(420px, calc(100vw - 24px));
+	height: min(236px, calc((100vw - 24px) * 0.562));
+	z-index: 200;
+	background: #000;
+
+	&.show {
+		display: block;
+	}
+
+	iframe {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
 }
 
 #ToggleMediaContainer {
@@ -10,21 +95,20 @@
 		display: inline-block;
 
 		img.on {
-			display: none;
-		}
-
-		img.off {
 			display: block;
 		}
 
-		// icon switch is handled by adding/removing the .playing class
-		&.playing {
+		img.off {
+			display: none;
+		}
+
+		&.muted {
 			img.on {
-				display: block;
+				display: none;
 			}
 
 			img.off {
-				display: none;
+				display: block;
 			}
 
 		}

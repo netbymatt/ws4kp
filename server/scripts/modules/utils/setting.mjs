@@ -11,6 +11,7 @@ const DEFAULTS = {
 	values: [],
 	visible: true,
 	placeholder: '',
+	callChangeActionOnInit: true,
 };
 
 // shorthand mappings for frequently used values
@@ -38,6 +39,7 @@ class Setting {
 		this.visible = options.visible;
 		this.changeAction = options.changeAction;
 		this.placeholder = options.placeholder;
+		this.callChangeActionOnInit = options.callChangeActionOnInit;
 		this.elemId = `settings-${shortName}-${this.type}`;
 
 		// get value from url
@@ -67,16 +69,18 @@ class Setting {
 		}
 
 		// call the change function on startup
-		switch (this.type) {
-			case 'select':
-				this.selectChange({ target: { value: this.myValue } });
-				break;
-			case 'string':
-				this.stringChange({ target: { value: this.myValue } });
-				break;
-			case 'checkbox':
-			default:
-				this.checkboxChange({ target: { checked: this.myValue } });
+		if (this.callChangeActionOnInit) {
+			switch (this.type) {
+				case 'select':
+					this.selectChange({ target: { value: this.myValue } });
+					break;
+				case 'string':
+					this.stringChange({ target: { value: this.myValue } });
+					break;
+				case 'checkbox':
+				default:
+					this.checkboxChange({ target: { checked: this.myValue } });
+			}
 		}
 	}
 

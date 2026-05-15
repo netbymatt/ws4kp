@@ -273,6 +273,12 @@ If you're looking for the original music that played during forecasts [TWCClassi
 
 WeatherStar 4000+ supports background music during forecast playback. The music behavior depends on how you deploy the application:
 
+#### Spotify playlist import
+
+Enable **Custom Music** in Settings, then paste a public Spotify playlist link into the **Spotify Playlist** field and click **Set**. The volume icon will open Spotify's embedded player for that playlist. Spotify playback uses Spotify's own player, so the user may need to click play or sign in depending on browser and Spotify account behavior.
+
+You can also paste a YouTube or YouTube Music video/playlist link into **YouTube URL** and click **Set**. YouTube playback uses the YouTube IFrame Player API, so the WeatherStar volume slider controls YouTube volume.
+
 #### Express server modes (`npm start`, `DIST=1 npm start`, or `Dockerfile.server`)
 
 When running with Node.js, the server generates a `playlist.json` file by scanning the `./server/music` directory for `.mp3` files. If no files are found in `./server/music`, it falls back to scanning `./server/music/default/`. The playlist is served dynamically at the `/playlist.json` endpoint.

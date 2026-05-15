@@ -124,6 +124,23 @@ const unitChange = () => {
 	unitChange.firstRunDone = true;
 };
 
+const dispatchCustomMusicChange = () => {
+	console.log('custom-music-change dispatched');
+	window.dispatchEvent(new Event('custom-music-change'));
+};
+
+const getLegacyCustomMusicSource = () => {
+	try {
+		const stored = JSON.parse(localStorage?.getItem('Settings') ?? '{}');
+		return stored.customMusicSource
+			?? stored.youtubeUrl
+			?? stored.spotifyPlaylist
+			?? '';
+	} catch (_e) {
+		return '';
+	}
+};
+
 const init = () => {
 	// create settings see setting.mjs for defaults
 	settings.wide = new Setting('wide', {
@@ -184,6 +201,22 @@ const init = () => {
 			['us', 'US'],
 			['si', 'Metric'],
 		],
+	});
+	settings.customMusicEnabled = new Setting('customMusicEnabled', {
+		name: 'Enable Custom Music',
+		type: 'checkbox',
+		defaultValue: Boolean(getLegacyCustomMusicSource()),
+		sticky: true,
+		changeAction: dispatchCustomMusicChange,
+	});
+	settings.customMusicSource = new Setting('customMusicSource', {
+		name: 'Music Source',
+		type: 'string',
+		defaultValue: getLegacyCustomMusicSource(),
+		sticky: true,
+		placeholder: 'Paste a Spotify playlist, YouTube link, or MP3 path',
+		callChangeActionOnInit: false,
+		changeAction: dispatchCustomMusicChange,
 	});
 	settings.refreshTime = new Setting('refreshTime', {
 		type: 'select',
