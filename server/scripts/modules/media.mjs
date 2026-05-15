@@ -220,21 +220,6 @@ const loadSpotifyApi = () => {
 	document.body.append(script);
 };
 
-const resolveAudioSource = (value) => {
-	const cleanValue = value?.trim?.() ?? '';
-	if (cleanValue.length === 0) return '';
-
-	if (!/\.(mp3|wav|ogg|m4a)(?:[?#].*)?$/i.test(cleanValue)) return '';
-
-	if (/^https?:\/\//i.test(cleanValue) || cleanValue.startsWith('/')) {
-		return cleanValue;
-	}
-
-	if (cleanValue.startsWith('music/')) return cleanValue;
-
-	return `music/${cleanValue}`;
-};
-
 const getYouTubeMedia = (value) => {
 	const cleanValue = value?.trim?.() ?? '';
 	if (cleanValue.length === 0) return null;
@@ -312,15 +297,6 @@ const getCustomMusicMode = (value = getCustomMusicSource()?.value, { ignoreEnabl
 		};
 	}
 
-	const audioSource = resolveAudioSource(cleanValue);
-	if (audioSource.length > 0) {
-		return {
-			type: 'audio',
-			audioSource,
-			trackName: cleanValue,
-		};
-	}
-
 	return {
 		type: 'invalid',
 	};
@@ -331,7 +307,6 @@ const activeProvider = () => {
 	const mode = getCustomMusicMode();
 	if (mode.type === 'youtube') return 'youtube';
 	if (mode.type === 'spotify') return 'spotify';
-	if (mode.type === 'audio') return 'audio';
 	return 'local';
 };
 
@@ -352,7 +327,7 @@ const setIcon = () => {
 
 const enableMediaPlayer = (autoStart = true) => {
 	const mode = getCustomMusicMode();
-	const hasMedia = playlist?.availableFiles?.length > 0 || ['spotify', 'youtube', 'audio'].includes(mode.type);
+	const hasMedia = playlist?.availableFiles?.length > 0 || ['spotify', 'youtube'].includes(mode.type);
 	const icon = document.getElementById('ToggleMediaContainer');
 	if (!icon) return;
 
@@ -430,24 +405,13 @@ const syncCustomMusicSource = (value = getCustomMusicSource()?.value) => {
 		setIcon();
 		return;
 	}
-	if (mode.type === 'audio') {
-		if (player) player.pause();
-		clearSpotifyPlayer();
-		clearYouTubePlayer();
-		if (customMusicMessage) {
-			customMusicMessage.textContent = `Using ${mode.trackName}.`;
-		}
-		enableMediaPlayer(false);
-		if (mediaPlaying.value && activeProvider() === 'audio') startMedia();
-		return;
-	}
 	if (player) player.pause();
 	clearSpotifyPlayer();
 	clearYouTubePlayer();
 	if (customMusicMessage) {
 		customMusicMessage.textContent = value?.trim?.()
-			? 'That does not look like a Spotify, YouTube, or MP3 source.'
-			: 'Paste a Spotify playlist, YouTube link, or MP3 path.';
+			? 'That does not look like a Spotify or YouTube source.'
+			: 'Paste a Spotify playlist or YouTube link.';
 	}
 	enableMediaPlayer(false);
 };
@@ -683,27 +647,6 @@ const startMedia = async () => {
 		return;
 	}
 
-	if (provider === 'audio') {
-		const mode = getCustomMusicMode();
-		if (!player) {
-			initializePlayer();
-			return;
-		}
-		try {
-			player.src = mode.audioSource;
-			player.currentTime = 0;
-			await player.play();
-			setTrackName(mode.trackName ?? 'Audio source');
-		} catch (e) {
-			console.error('Couldn\'t play custom audio source');
-			console.error(e);
-			mediaPlaying.value = false;
-			stateChanged();
-			setTrackName('Not playing');
-		}
-		return;
-	}
-
 	if (!player) {
 		initializePlayer();
 	} else {
@@ -884,8 +827,7 @@ const mediaVolume = new Setting('mediaVolume', {
 });
 
 const initializePlayer = () => {
-	const mode = getCustomMusicMode();
-	if (mode.type !== 'audio' && (!playlist.availableFiles || playlist?.availableFiles.length === 0)) {
+	if (!playlist.availableFiles || playlist?.availableFiles.length === 0) {
 		throw new Error('No playlist available');
 	}
 	if (player) {
@@ -898,13 +840,8 @@ const initializePlayer = () => {
 	player.addEventListener('canplay', playerCanPlay);
 	player.addEventListener('ended', playerEnded);
 
-	if (mode.type === 'audio') {
-		player.src = mode.audioSource;
-		setTrackName(mode.trackName);
-	} else {
-		player.src = `music/${playlist.availableFiles[currentTrack]}`;
-		setTrackName(playlist.availableFiles[currentTrack]);
-	}
+	player.src = `music/${playlist.availableFiles[currentTrack]}`;
+	setTrackName(playlist.availableFiles[currentTrack]);
 	player.type = 'audio/mpeg';
 	setVolume(mediaVolume.value);
 	volumeSliderInput.value = Math.round(mediaVolume.value * 100);
@@ -916,16 +853,6 @@ const playerCanPlay = async () => {
 };
 
 const playerEnded = () => {
-	if (getCustomMusicMode().type === 'audio') {
-		player.currentTime = 0;
-		if (mediaPlaying.value) {
-			player.play().catch((e) => {
-				console.error('Couldn\'t replay custom audio source');
-				console.error(e);
-			});
-		}
-		return;
-	}
 	currentTrack += 1;
 	if (currentTrack >= playlist.availableFiles.length) {
 		randomizePlaylist();
