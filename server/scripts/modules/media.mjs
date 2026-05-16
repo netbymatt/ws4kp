@@ -185,7 +185,6 @@ const handleYouTubeStateChange = (event) => {
 		syncYouTubeAudioState();
 	}
 	if (state !== window.YT?.PlayerState?.ENDED) return;
-	if (!hasYouTubePlayerMethod('nextVideo')) return;
 
 	const mode = getCustomMusicMode();
 	if (mode.type !== 'youtube') return;
@@ -199,11 +198,19 @@ const handleYouTubeStateChange = (event) => {
 				&& currentIndex >= playlistItems.length - 1;
 			if (isLastItem) {
 				youtubePlayer.playVideoAt(0);
-			} else {
+			} else if (hasYouTubePlayerMethod('nextVideo')) {
 				youtubePlayer.nextVideo();
 			}
-		} else {
-			youtubePlayer.nextVideo();
+		} else if (hasYouTubePlayerMethod('loadPlaylist')) {
+			const playlistId = mode.mediaType === 'playlist' ? mode.id : mode.list;
+			if (playlistId) {
+				youtubePlayer.loadPlaylist({
+					list: playlistId,
+					listType: 'playlist',
+					index: 0,
+					startSeconds: 0,
+				});
+			}
 		}
 		if (mediaPlaying.value && hasYouTubePlayerMethod('playVideo')) {
 			youtubePlayer.playVideo();
