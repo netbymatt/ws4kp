@@ -17,6 +17,7 @@ let youtubePlayer = null;
 let youtubeApiRequested = false;
 let youtubeApiReady = false;
 let youtubePendingMedia = null;
+let spotifyLastPlaybackState = null;
 let sliderTimeout = null;
 let volumeSlider = null;
 let volumeSliderInput = null;
@@ -190,7 +191,20 @@ const handleYouTubeStateChange = (event) => {
 	if (mode.type !== 'youtube') return;
 
 	if (mode.mediaType === 'playlist' || mode.list) {
-		youtubePlayer.nextVideo();
+		if (hasYouTubePlayerMethod('getPlaylist') && hasYouTubePlayerMethod('getPlaylistIndex') && hasYouTubePlayerMethod('playVideoAt')) {
+			const playlistItems = youtubePlayer.getPlaylist() ?? [];
+			const currentIndex = youtubePlayer.getPlaylistIndex();
+			const isLastItem = Array.isArray(playlistItems)
+				&& playlistItems.length > 0
+				&& currentIndex >= playlistItems.length - 1;
+			if (isLastItem) {
+				youtubePlayer.playVideoAt(0);
+			} else {
+				youtubePlayer.nextVideo();
+			}
+		} else {
+			youtubePlayer.nextVideo();
+		}
 		if (mediaPlaying.value && hasYouTubePlayerMethod('playVideo')) {
 			youtubePlayer.playVideo();
 		}
@@ -205,6 +219,34 @@ const ensureSpotifyController = (uri) => {
 
 	spotifyIFrameApi.createController(element, { uri: spotifyPlaylistUri(playlistId) }, (controller) => {
 		spotifyController = controller;
+		spotifyLastPlaybackState = null;
+		if (typeof spotifyController.addListener === 'function') {
+			spotifyController.addListener('playback_update', (event) => {
+				const data = event?.data;
+				if (!data) return;
+				const was = spotifyLastPlaybackState;
+				spotifyLastPlaybackState = {
+					isPaused: data.isPaused,
+					position: data.position,
+					duration: data.duration,
+				};
+
+				// Spotify embed pauses at playlist end after wrapping to first track.
+				// Detect that transition and immediately resume so playback restarts.
+				const wrappedToStartPaused = Boolean(
+					was
+					&& was.isPaused === false
+					&& was.duration > 0
+					&& was.position >= Math.max(0, was.duration - 1500)
+					&& data.isPaused === true
+					&& data.position === 0
+					&& data.duration > 0,
+				);
+				if (wrappedToStartPaused && activeProvider() === 'spotify' && mediaPlaying.value && !mediaMuted) {
+					spotifyController.resume();
+				}
+			});
+		}
 		if (activeProvider() === 'spotify' && !mediaMuted) {
 			spotifyController.resume();
 		} else {
