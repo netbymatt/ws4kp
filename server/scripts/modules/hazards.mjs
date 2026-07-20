@@ -18,6 +18,10 @@ const hazardModifiers = {
 	'Severe Thunderstorm Warning': 1,
 };
 
+// A cheap, stable signature of the content about to be rendered. Alert ids alone are not enough:
+// an alert can be reissued under the same id with updated text, which changes the rendered height.
+const contentSignature = (alerts) => alerts.map((alert) => `${alert.id}|${alert.properties.event}|${alert.properties.description ?? ''}`).join('\u0000');
+
 class Hazards extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
@@ -47,6 +51,10 @@ class Hazards extends WeatherDisplay {
 			maxOffset: 0,
 			hazardLines: null,
 		};
+
+		// signature of the content currently rendered into the DOM, so a refresh that returns
+		// identical alerts can skip the rebuild entirely
+		this.lastContentSignature = null;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -128,10 +136,22 @@ class Hazards extends WeatherDisplay {
 	async drawLongCanvas() {
 		// get the list element and populate
 		const list = this.elem.querySelector('.hazard-lines');
-		list.innerHTML = '';
 
 		// filter viewed alerts
 		const unViewed = this.data.filter((data) => !this.viewedAlerts.has(data.id));
+
+		// If the content is identical to what is already rendered, leave the DOM and the scroll
+		// position alone. Hazards refresh every 60 seconds but a long multi-alert scroll can run for
+		// several minutes, so rebuilding on every refresh would restart it from the top and it would
+		// never reach the end. The populated-list check means an empty list is always rebuilt.
+		const signature = contentSignature(unViewed);
+		if (signature === this.lastContentSignature && list.children.length > 0) {
+			this.setStatus(STATUS.loaded);
+			return;
+		}
+		this.lastContentSignature = signature;
+
+		list.innerHTML = '';
 
 		const lines = unViewed.map((data) => {
 			const fillValues = {};
@@ -146,6 +166,18 @@ class Hazards extends WeatherDisplay {
 		});
 
 		list.append(...lines);
+
+		// The scroll cache is invalidated by comparing element identity, but .hazard-lines is
+		// persistent - only its children are replaced above - and displayHeight is a fixed value
+		// from css. Both conditions in baseCountChange() therefore stay false after the first
+		// measurement, so maxOffset keeps the height of whatever content was measured first and
+		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
+		// explicitly so the next base count re-measures.
+		this.scrollCache.displayHeight = 0;
+		this.scrollCache.hazardLines = null;
+
+		// new content scrolls from the top
+		this.navBaseCount = 0;
 
 		// no alerts, skip this display by setting timing to zero
 		if (lines.length === 0) {

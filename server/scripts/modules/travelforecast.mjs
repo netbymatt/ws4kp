@@ -9,6 +9,13 @@ import settings from './settings.mjs';
 import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
+// A cheap, stable signature of the content about to be rendered. Only the fields that reach the DOM
+// are included. Rows for cities whose forecast failed are dropped from the rendered list, so the row
+// count - and therefore the rendered height - changes as individual cities come and go.
+const contentSignature = (cities) => cities.map((city) => (city.error
+	? `${city.name}|error`
+	: `${city.name}|${city.high}|${city.low}|${city.icon}`)).join('\u0000');
+
 class TravelForecast extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
@@ -29,6 +36,10 @@ class TravelForecast extends WeatherDisplay {
 			maxOffset: 0,
 			travelLines: null,
 		};
+
+		// signature of the content currently rendered into the DOM, so a refresh that returns
+		// identical cities can skip the rebuild entirely
+		this.lastContentSignature = null;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -101,10 +112,17 @@ class TravelForecast extends WeatherDisplay {
 	async drawLongCanvas() {
 		// get the element and populate
 		const list = this.elem.querySelector('.travel-lines');
-		list.innerHTML = '';
 
 		// set up variables
 		const cities = this.data;
+
+		// if the content is identical to what is already rendered, leave the DOM and the scroll
+		// position alone rather than rebuilding and restarting an in-progress scroll
+		const signature = contentSignature(cities);
+		if (signature === this.lastContentSignature && list.children.length > 0) return;
+		this.lastContentSignature = signature;
+
+		list.innerHTML = '';
 
 		const lines = cities.map((city) => {
 			if (city.error) return false;
@@ -133,6 +151,18 @@ class TravelForecast extends WeatherDisplay {
 			return this.fillTemplate('travel-row', fillValues);
 		}).filter((d) => d);
 		list.append(...lines);
+
+		// The scroll cache is invalidated by comparing element identity, but .travel-lines is
+		// persistent - only its children are replaced above - and displayHeight is a fixed value
+		// from css. Both conditions in baseCountChange() therefore stay false after the first
+		// measurement, so maxOffset keeps the height of whatever content was measured first and
+		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
+		// explicitly so the next base count re-measures.
+		this.scrollCache.displayHeight = 0;
+		this.scrollCache.travelLines = null;
+
+		// new content scrolls from the top
+		this.navBaseCount = 0;
 
 		// update timing based on actual content
 		this.setTiming(list);
