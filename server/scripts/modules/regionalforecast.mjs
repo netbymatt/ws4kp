@@ -47,6 +47,31 @@ const scaling = () => {
 	};
 };
 
+// AABB overlap test algorithm
+// x1 < x2, and y1 < y2 must be observed in input data
+const boxOverlaps = (a, b) => {
+	const separated = a.x2 < b.x1 // a is left of b
+		|| a.x1 > b.x2 // a is right of b
+		|| a.y2 < b.y1 // a is above b
+		|| a.y1 > b.y2; // a is below b
+	return !separated;
+};
+
+// helper function to create city "boxes"
+const makeCityBox = (city) => ({
+	x1: parseFloat(city.lon),
+	y1: parseFloat(city.lat),
+	x2: parseFloat(city.lon) + 2.0,
+	y2: parseFloat(city.lat) + 0.9,
+});
+
+const cityLatLonBoundingBox = (city, minMaxLatLon) => (
+	city.lat > minMaxLatLon.minLat
+	&& city.lat < minMaxLatLon.maxLat
+	&& city.lon > minMaxLatLon.minLon
+	&& city.lon < minMaxLatLon.maxLon
+);
+
 class RegionalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Regional Forecast', true);
@@ -77,29 +102,48 @@ class RegionalForecast extends WeatherDisplay {
 		// get latitude and longitude limits
 		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, mapOffsetXY.x, mapOffsetXY.y, this.weatherParameters.state);
 
-		// get a target distance
-		let targetDistance = 10;
-		if (this.weatherParameters.state === 'HI') targetDistance = 1;
+		const regionalCitiesNearby = RegionalCities.filter((city) => cityLatLonBoundingBox(city, minMaxLatLon));
 
-		// make station info into an array
-		const stationInfoArray = Object.values(StationInfo).map((station) => ({ ...station, targetDistance }));
-		// combine regional cities with station info for additional stations
-		// stations are intentionally after cities to allow cities priority when drawing the map
-		const combinedCities = [...RegionalCities, ...stationInfoArray];
+		const regionalCitiesDistance = regionalCitiesNearby.map((city) => ({
+			...city,
+			distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
+		}));
 
-		// Determine which cities are within the max/min latitude/longitude.
+		const sortedRegionalCities = regionalCitiesDistance.sort((a, b) => a.distance - b.distance);
+
 		const regionalCities = [];
-		combinedCities.forEach((city) => {
-			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat
-				&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
-				// default to 1 for cities loaded from RegionalCities, use value calculate above for remaining stations
-				const targetDist = city.targetDistance || 1.5;
-				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
-				const okToAddCity = regionalCities.reduce((acc, testCity) => {
-					const distance = calcDistance(city.lon, city.lat, testCity.lon, testCity.lat);
-					return acc && distance >= targetDist;
-				}, true);
-				if (okToAddCity) regionalCities.push(city);
+
+		// Determine which cities do not overlap each other, starting with the closest city
+		sortedRegionalCities.forEach((city) => {
+			const cityBox = makeCityBox(city);
+			const overlaps = regionalCities.reduce((prev, cur) => prev || boxOverlaps(cityBox, cur.box), false);
+			if (!overlaps) {
+				regionalCities.push({
+					...city,
+					box: cityBox,
+				});
+			}
+		});
+
+		// now do the same for the list of stations (back fills empty areas on the map)
+		const stationsNearby = Object.values(StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLon));
+
+		const stationsDistance = stationsNearby.map((city) => ({
+			...city,
+			distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
+		}));
+
+		const sortedStations = stationsDistance.sort((a, b) => a.distance - b.distance);
+
+		// Determine which cities do not overlap each other, starting with the closest city
+		sortedStations.forEach((city) => {
+			const cityBox = makeCityBox(city);
+			const overlaps = regionalCities.reduce((prev, cur) => prev || boxOverlaps(cityBox, cur.box), false);
+			if (!overlaps) {
+				regionalCities.push({
+					...city,
+					box: cityBox,
+				});
 			}
 		});
 
