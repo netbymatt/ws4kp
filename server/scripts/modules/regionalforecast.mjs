@@ -78,7 +78,7 @@ class RegionalForecast extends WeatherDisplay {
 		const minMaxLatLon = utils.getMinMaxLatitudeLongitude(sourceXY.x, sourceXY.y, mapOffsetXY.x, mapOffsetXY.y, this.weatherParameters.state);
 
 		// get a target distance
-		let targetDistance = 2.4;
+		let targetDistance = 10;
 		if (this.weatherParameters.state === 'HI') targetDistance = 1;
 
 		// make station info into an array
@@ -93,7 +93,7 @@ class RegionalForecast extends WeatherDisplay {
 			if (city.lat > minMaxLatLon.minLat && city.lat < minMaxLatLon.maxLat
 				&& city.lon > minMaxLatLon.minLon && city.lon < minMaxLatLon.maxLon - 1) {
 				// default to 1 for cities loaded from RegionalCities, use value calculate above for remaining stations
-				const targetDist = city.targetDistance || 1;
+				const targetDist = city.targetDistance || 1.5;
 				// Only add the city as long as it isn't within set distance degree of any other city already in the array.
 				const okToAddCity = regionalCities.reduce((acc, testCity) => {
 					const distance = calcDistance(city.lon, city.lat, testCity.lon, testCity.lat);

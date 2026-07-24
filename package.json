@@ -34,6 +34,7 @@
 		"eslint": "^9.0.0",
 		"eslint-config-airbnb-base": "15.0.0",
 		"eslint-plugin-import": "^2.10.0",
+		"fancy-log": "^2.0.0",
 		"gulp": "^5.0.0",
 		"gulp-concat": "^2.6.1",
 		"gulp-ejs": "^5.1.0",
@@ -44,17 +45,20 @@
 		"gulp-terser": "^2.0.0",
 		"luxon": "^3.0.0",
 		"metar-taf-parser": "^9.0.0",
+		"p-limit": "^7.3.1",
 		"sass": "^1.54.0",
 		"suncalc": "^1.8.0",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
-		"webpack-stream": "^7.0.0",
-		"fancy-log": "^2.0.0"
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"dotenv": "^17.0.1",
 		"ejs": "^5.0.1",
 		"express": "^5.1.0"
+	},
+	"allowScripts": {
+		"@parcel/watcher@2.5.6": true
 	}
 }
