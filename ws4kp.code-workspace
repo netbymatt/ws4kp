@@ -47,7 +47,8 @@
 			"dumpio",
 			"mesonet",
 			"metar",
-			"Unmute"
+			"Unmute",
+			"AABB"
 		],
 		"cSpell.ignorePaths": [
 			"**/package-lock.json",

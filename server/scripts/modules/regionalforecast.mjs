@@ -57,12 +57,12 @@ const boxOverlaps = (a, b) => {
 	return !separated;
 };
 
-// helper function to create city "boxes"
-const makeCityBox = (city) => ({
-	x1: parseFloat(city.lon),
-	y1: parseFloat(city.lat),
-	x2: parseFloat(city.lon) + 2.0,
-	y2: parseFloat(city.lat) + 0.9,
+// helper function to create city "boxes", factor is used to increase the size of the box (used with stations to de-emphasize them)
+const makeCityBox = (city, factor = 1.0) => ({
+	x1: city.xy.x,
+	y1: city.xy.y,
+	x2: city.xy.x + 105 * factor,
+	y2: city.xy.y + 50 * factor,
 });
 
 const cityLatLonBoundingBox = (city, minMaxLatLon) => (
@@ -104,10 +104,15 @@ class RegionalForecast extends WeatherDisplay {
 
 		const regionalCitiesNearby = RegionalCities.filter((city) => cityLatLonBoundingBox(city, minMaxLatLon));
 
-		const regionalCitiesDistance = regionalCitiesNearby.map((city) => ({
-			...city,
-			distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
-		}));
+		const regionalCitiesDistance = regionalCitiesNearby.map((city) => {
+			const xy = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available.x - 60, available.y);
+			if (!xy) return undefined;
+			return {
+				...city,
+				distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
+				xy,
+			};
+		}).filter((d) => d);
 
 		const sortedRegionalCities = regionalCitiesDistance.sort((a, b) => a.distance - b.distance);
 
@@ -128,16 +133,20 @@ class RegionalForecast extends WeatherDisplay {
 		// now do the same for the list of stations (back fills empty areas on the map)
 		const stationsNearby = Object.values(StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLon));
 
-		const stationsDistance = stationsNearby.map((city) => ({
-			...city,
-			distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
-		}));
-
+		const stationsDistance = stationsNearby.map((city) => {
+			const xy = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available.x - 60, available.y);
+			if (!xy) return undefined;
+			return {
+				...city,
+				distance: calcDistance(city.lon, city.lat, this.weatherParameters.longitude, this.weatherParameters.latitude),
+				xy,
+			};
+		}).filter((d) => d);
 		const sortedStations = stationsDistance.sort((a, b) => a.distance - b.distance);
 
-		// Determine which cities do not overlap each other, starting with the closest city
+		// Determine which stations do not overlap each other, starting with the closest city
 		sortedStations.forEach((city) => {
-			const cityBox = makeCityBox(city);
+			const cityBox = makeCityBox(city, 1.7);
 			const overlaps = regionalCities.reduce((prev, cur) => prev || boxOverlaps(cityBox, cur.box), false);
 			if (!overlaps) {
 				regionalCities.push({
@@ -172,9 +181,6 @@ class RegionalForecast extends WeatherDisplay {
 					return false;
 				}
 
-				// get XY on map for city
-				const cityXY = utils.getXYForCity(city, minMaxLatLon.maxLat, minMaxLatLon.minLon, this.weatherParameters.state, available.x - 60, available.y);
-
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
 
@@ -186,8 +192,8 @@ class RegionalForecast extends WeatherDisplay {
 					temperature: temperatureConverter(observation.temperature.value),
 					name: utils.formatCity(city.city),
 					icon: observation.icon,
-					x: cityXY.x,
-					y: cityXY.y,
+					x: city.xy.x,
+					y: city.xy.y,
 				};
 
 				// preload the icon
@@ -205,8 +211,8 @@ class RegionalForecast extends WeatherDisplay {
 				// group together the current observation and next two periods
 				return [
 					regionalObservation,
-					utils.buildForecast(activePeriods[1], city, cityXY),
-					utils.buildForecast(activePeriods[2], city, cityXY),
+					utils.buildForecast(activePeriods[1], city, city.xy),
+					utils.buildForecast(activePeriods[2], city, city.xy),
 				];
 			} catch (error) {
 				console.error(`Unexpected error getting Regional Forecast data for '${city.name ?? city.city}': ${error.message}`);
