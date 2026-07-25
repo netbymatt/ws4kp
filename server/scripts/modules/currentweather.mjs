@@ -225,6 +225,10 @@ class CurrentWeather extends WeatherDisplay {
 			fill['heat-index'] = this.data.WindChill + String.fromCharCode(176);
 		}
 
+		if (!Number.isNaN(Number(this.data.Pressure))) {
+			filledTemplate.querySelector('.row.pressure-row').classList.remove('hidden');
+		}
+
 		const area = this.elem.querySelector('.main');
 
 		area.innerHTML = '';
