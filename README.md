@@ -336,7 +336,7 @@ Thanks to the WeatherStar+ community for providing these discussions to further 
 
 ## Customization
 
-A hook is provided as `server/scripts/custom.js` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. A sample file is provided at `server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it.
+A hooks are provided as `server/scripts/custom.js` and `server/scripts/custom.mjs` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. A sample file is provided at `server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it. Recommended naming for additional files is `custom-file.json` which are also part of gitignore.
 
 When using Docker:
 

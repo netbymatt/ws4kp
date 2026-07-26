@@ -1,6 +1,6 @@
 node_modules
 **/debug.log
-server/scripts/custom.js
+server/scripts/custom*.*
 
 #music folder
 server/music/*

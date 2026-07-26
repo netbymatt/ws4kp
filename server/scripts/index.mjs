@@ -515,6 +515,16 @@ const getCustomCode = async () => {
 		customElem.type = 'text/javascript';
 		document.body.append(customElem);
 	}
+
+	// fetch the custom file and see if it returns a 200 status
+	const responseMjs = await fetch('scripts/custom.mjs', { method: 'HEAD' });
+	if (responseMjs.ok) {
+		// add the script element to the page
+		const customElem = document.createElement('script');
+		customElem.src = 'scripts/custom.mjs';
+		customElem.type = 'module';
+		document.body.append(customElem);
+	}
 };
 
 // expose functions for external use
