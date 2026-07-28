@@ -302,10 +302,21 @@ const getAndFormatPoint = async (lat, lon) => {
 		if (!point) {
 			return null;
 		}
+		const { gridX, gridY, gridId } = point.properties ?? {};
+		// api.weather.gov returns 200 with gridId/gridX/gridY all null for offshore
+		// marine stations (forecastOffice NH2), which have no land grid. Returning the
+		// object anyway is truthy, so the caller's `if (!point)` check passes and the
+		// request becomes gridpoints/null/null,null/forecast, which 404s. Treat a
+		// missing grid the same as a missing point so the city is skipped.
+		if (gridX === null || gridX === undefined
+			|| gridY === null || gridY === undefined
+			|| gridId === null || gridId === undefined) {
+			return null;
+		}
 		return {
-			x: point.properties.gridX,
-			y: point.properties.gridY,
-			wfo: point.properties.gridId,
+			x: gridX,
+			y: gridY,
+			wfo: gridId,
 		};
 	} catch (error) {
 		throw new Error(`Unexpected error getting point for ${lat},${lon}: ${error.message}`);
