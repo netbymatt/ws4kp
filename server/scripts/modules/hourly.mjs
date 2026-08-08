@@ -12,6 +12,14 @@ import getSun from './almanac.mjs';
 import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
+// A cheap, stable signature of the content about to be rendered. The starting hour is included
+// because the row labels are derived from the current time, so an hour rollover changes the display
+// even when every forecast value is unchanged.
+const contentSignature = (startingHour, rows) => [
+	startingHour.startOf('hour').toISO(),
+	...rows.map((row) => `${row.temperature}|${row.apparentTemperature}|${row.windSpeed}|${row.windDirection}|${row.icon}`),
+].join('\u0000');
+
 class Hourly extends WeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
@@ -28,6 +36,10 @@ class Hourly extends WeatherDisplay {
 			maxOffset: 0,
 			hourlyLines: null,
 		};
+
+		// signature of the content currently rendered into the DOM, so a refresh that returns
+		// identical rows can skip the rebuild entirely
+		this.lastContentSignature = null;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -71,12 +83,19 @@ class Hourly extends WeatherDisplay {
 	async drawLongCanvas() {
 		// get the list element and populate
 		const list = this.elem.querySelector('.hourly-lines');
-		list.innerHTML = '';
 
 		const startingHour = DateTime.local().setZone(timeZone());
 
 		// shorten to 24 hours
 		const shortData = this.data.slice(0, 24);
+
+		// if the content is identical to what is already rendered, leave the DOM and the scroll
+		// position alone rather than rebuilding and restarting an in-progress scroll
+		const signature = contentSignature(startingHour, shortData);
+		if (signature === this.lastContentSignature && list.children.length > 0) return;
+		this.lastContentSignature = signature;
+
+		list.innerHTML = '';
 
 		const lines = shortData.map((data, index) => {
 			const fillValues = {};
@@ -115,6 +134,18 @@ class Hourly extends WeatherDisplay {
 		});
 
 		list.append(...lines);
+
+		// The scroll cache is invalidated by comparing element identity, but .hourly-lines is
+		// persistent - only its children are replaced above - and displayHeight is a fixed value
+		// from css. Both conditions in baseCountChange() therefore stay false after the first
+		// measurement, so maxOffset keeps the height of whatever content was measured first and
+		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
+		// explicitly so the next base count re-measures.
+		this.scrollCache.displayHeight = 0;
+		this.scrollCache.hourlyLines = null;
+
+		// new content scrolls from the top
+		this.navBaseCount = 0;
 
 		// update timing based on actual content
 		this.setTiming(list);
