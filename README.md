@@ -367,7 +367,7 @@ An Android app is in a closed beta test. It's nothing too special, just a wrappe
 
 You can get this functionality without an app on both Andriod and iOS by using the install or add to home screen feature of your browser.
 
-iOS native app? No. I own zero Apple devices and thus have no way to develop, test, compile or verify myself to the app store. That application will have to come from the community.
+iOS native app? No. I own zero Apple devices and thus have no way to develop, test, compile or verify myself to the app store. This app has been created by the [community](#community-notes).
 
 ## Related Projects
 
