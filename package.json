@@ -10,11 +10,9 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:travelcities": "node datagenerators/travelcities.mjs",
 		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
-		"build": "gulp buildDist",
-		"lint": "eslint ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs",
-		"lint:fix": "eslint --fix ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs",
-		"lintall": "eslint ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs ./datagenerators/**/*.mjs ./gulp/**/*.mjs ./tests/**/*.mjs",
-		"lintall:fix": "eslint --fix ./server/scripts/**/*.mjs ./proxy/**/*.mjs ./src/**/*.mjs *.mjs ./datagenerators/**/*.mjs ./gulp/**/*.mjs ./tests/**/*.mjs"
+		"build": "npx gulp buildDist",
+		"lint": "npx eslint .",
+		"lint:fix": "npx eslint --fix ."
 	},
 	"repository": {
 		"type": "git",
@@ -27,13 +25,12 @@
 	},
 	"homepage": "https://github.com/netbymatt/ws4kp#readme",
 	"devDependencies": {
-		"@eslint/eslintrc": "^3.3.1",
+		"@eslint/config-helpers": "^0.7.0",
+		"@eslint/js": "^9.39.5",
 		"@zakj/no-sleep": "^0.13.6",
-		"ajv": "^8.17.1",
 		"del": "^8.0.0",
-		"eslint": "^10.8.0",
-		"eslint-config-airbnb-base": "15.0.0",
-		"eslint-plugin-import": "^2.10.0",
+		"eslint": "^9.39.5",
+		"eslint-config-airbnb-extended": "^3.1.1",
 		"fancy-log": "^2.0.0",
 		"gulp": "^5.0.0",
 		"gulp-concat": "^2.6.1",
@@ -47,10 +44,10 @@
 		"metar-taf-parser": "^9.0.0",
 		"p-limit": "^7.3.1",
 		"sass": "^1.54.0",
-		"suncalc": "^1.8.0",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
+		"suncalc": "^2.0.2",
 		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {

@@ -197,7 +197,8 @@ class LocalForecast extends WeatherDisplay {
 		this.timing.totalScreens = Math.round(totalHeight / this.pageHeight);
 
 		// Now calculate timing based on actual measured line counts, ignoring padding
-		const screenTimings = []; forecastLineCounts.forEach((lines, forecastIndex) => {
+		const screenTimings = [];
+		forecastLineCounts.forEach((lines, forecastIndex) => {
 			if (lines <= maxLinesPerScreen) {
 				// Single screen for this forecast
 				screenTimings.push({ forecastIndex, lines, type: 'single' });
@@ -264,7 +265,7 @@ class LocalForecast extends WeatherDisplay {
 
 		if (debugFlag('localforecast')) {
 			console.log(`LocalForecast: Final screen count - calculated: ${screenTimings.length}, actual: ${this.timing.totalScreens}, timing array: ${screenDelays.length}`);
-			const multipliers = screenDelays.map((counts) => counts * this.timing.baseDelay / originalBaseDuration);
+			const multipliers = screenDelays.map((counts) => (counts * this.timing.baseDelay) / originalBaseDuration);
 			console.log('LocalForecast: Screen multipliers:', multipliers);
 			console.log('LocalForecast: Expected durations (ms):', screenDelays.map((counts) => counts * this.timing.baseDelay));
 		}

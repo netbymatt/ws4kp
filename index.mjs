@@ -1,11 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
-import fs from 'fs';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import {
 	weatherProxy, radarProxy, outlookProxy, mesonetProxy, forecastProxy,
 } from './proxy/handlers.mjs';
-import playlist from './src/playlist.mjs';
+import playlistGenerator from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
 import cache from './proxy/cache.mjs';
 import devTools from './src/com.chrome.devtools.mjs';
@@ -27,7 +26,7 @@ app.use((req, res, next) => {
 app.set('view engine', 'ejs');
 
 // version
-const { version } = JSON.parse(fs.readFileSync('package.json'));
+const { version } = JSON.parse(await readFile('package.json'));
 
 // read and parse environment variables to append to the query string
 // use the permalink (share) button on the web app to generate a starting point for your configuration
@@ -133,7 +132,7 @@ if (!process.env?.STATIC) {
 	app.use('/forecast/', forecastProxy);
 
 	// Playlist route is available in server mode (not in static mode)
-	app.get('/playlist.json', playlist);
+	app.get('/playlist.json', playlistGenerator);
 }
 
 // Data endpoints - serve JSON data with long-term caching
@@ -161,7 +160,9 @@ if (process.env?.DIST === '1') {
 	app.use('/music', express.static('./server/music', staticOptions));
 
 	// render the EJS template in production mode (serve compressed files from dist directory)
-	app.get('/', (req, res) => { renderIndex(req, res, true); });
+	app.get('/', (req, res) => {
+		renderIndex(req, res, true);
+	});
 
 	app.use('/', express.static('./dist', staticOptions));
 } else {
@@ -182,6 +183,7 @@ const server = app.listen(port, () => {
 const gracefulShutdown = () => {
 	server.close(() => {
 		console.log('Server closed');
+		// eslint-disable-next-line n/no-process-exit
 		process.exit(0);
 	});
 };

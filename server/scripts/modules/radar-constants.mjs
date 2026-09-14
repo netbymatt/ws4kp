@@ -22,10 +22,10 @@ const radarSourceSize = () => {
 	};
 	if (settings.enhanced?.value) {
 		if (settings.wide?.value) {
-			size.width = 240 / 640 * 854; // original size of 640 scaled up to wide at 854
+			size.width = (240 / 640) * 854; // original size of 640 scaled up to wide at 854
 		}
 		if (settings.portrait?.value) {
-			size.height = 163 / 367 * 1024;// original size of 367 scaled up to portrait at 1024
+			size.height = (163 / 367) * 1024;// original size of 367 scaled up to portrait at 1024
 		}
 	}
 	return size;
@@ -39,11 +39,11 @@ const radarOffset = () => {
 	if (settings.enhanced?.value) {
 		if (settings.wide?.value) {
 			// 107 is the margins shift, 640/854 is the scaling factor normal => wide, /2 is because of the fixed 2:1 scaling between source radar and map tiles
-			offset.x = 240 + (107 * 640 / 854 / 2); // original size of 640 scaled up to wide at 854;
+			offset.x = 240 + ((107 * 640) / 854 / 2); // original size of 640 scaled up to wide at 854;
 		}
 		if (settings.portrait?.value) {
 			// 825 is the margins shift, 367/1024 is the scaling factor normal => portrait, /2 is because of the fixed 2:1 scaling between source radar and map tiles
-			offset.y = 138 + (815 * 367 / 1024 / 2);
+			offset.y = 138 + ((815 * 367) / 1024 / 2);
 		}
 	}
 

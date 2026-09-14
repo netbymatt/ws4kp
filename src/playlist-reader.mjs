@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 const mp3Filter = (file) => file.match(/\.mp3$/);
 

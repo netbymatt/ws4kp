@@ -22,7 +22,7 @@ const calculateScrollTiming = (list, container, options = {}) => {
 	} = options;
 
 	// timing conversion helper
-	const secondsToTimingCounts = (seconds) => Math.ceil(seconds * 1000 / baseDelay);
+	const secondsToTimingCounts = (seconds) => Math.ceil((seconds * 1000) / baseDelay);
 
 	// calculate actual scroll distance needed
 	const displayHeight = container.offsetHeight;

@@ -2,8 +2,8 @@
 // list all stations in a single file
 // only find stations with 4 letter codes
 
-import { writeFileSync } from 'fs';
-import https from './https.mjs';
+import { writeFile } from 'node:fs/promises';
+import getHttps from './https.mjs';
 import states from './stations-states.mjs';
 import chunk from './chunk.mjs';
 import overrides from './stations-overrides.mjs';
@@ -37,7 +37,7 @@ if (!USE_CACHE) {
 					console.log(`Getting: ${state}-${round}`);
 					// get list and parse the JSON
 					// eslint-disable-next-line no-await-in-loop
-					const stationsRaw = await https(next);
+					const stationsRaw = await getHttps(next);
 					stations = JSON.parse(stationsRaw);
 					// filter against starting letter
 					const stationsFiltered = stations.filter(stationFilter);
@@ -59,7 +59,8 @@ if (!USE_CACHE) {
 					next = stations?.pagination?.next;
 					round += 1;
 					// write the output
-					writeFileSync('./datagenerators/output/stations-raw.json', JSON.stringify(output, null, 2));
+					// eslint-disable-next-line no-await-in-loop
+					await writeFile('./datagenerators/output/stations-raw.json', JSON.stringify(output, null, 2));
 				}
 				while (next && stations.features.length > 0);
 				completed += 1;
@@ -75,7 +76,7 @@ if (!USE_CACHE) {
 
 // run the post processor
 // data is passed through the file stations-raw.json
-const postProcessed = postProcessor();
+const postProcessed = await postProcessor();
 
 // apply any overrides
 Object.entries(overrides).forEach(([id, values]) => {
@@ -90,4 +91,4 @@ Object.entries(overrides).forEach(([id, values]) => {
 });
 
 // write final file to disk
-writeFileSync('./datagenerators/output/stations.json', JSON.stringify(postProcessed, null, 2));
+await writeFile('./datagenerators/output/stations.json', JSON.stringify(postProcessed, null, 2));

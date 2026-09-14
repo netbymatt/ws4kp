@@ -8,7 +8,7 @@ const vendorFiles = [
 	'./node_modules/luxon/build/es6/luxon.mjs',
 	'./node_modules/luxon/build/es6/luxon.mjs.map',
 	'./node_modules/@zakj/no-sleep/dist/no-sleep.js',
-	'./node_modules/suncalc/suncalc.js',
+	'./node_modules/suncalc/index.js',
 	'./node_modules/swiped-events/src/swiped-events.js',
 	'./node_modules/proj4/dist/proj4.js',
 ];
@@ -20,10 +20,11 @@ const metarFiles = [
 ];
 
 const copy = () => src(vendorFiles)
-	.pipe(rename((path) => {
+	.pipe(rename((path, file) => {
 		path.dirname = path.dirname.toLowerCase();
 		path.basename = path.basename.toLowerCase();
 		path.extname = path.extname.toLowerCase();
+		if (file.base.includes('suncalc')) path.basename = 'suncalc';
 	}))
 	.pipe(dest('./server/scripts/vendor/auto'));
 

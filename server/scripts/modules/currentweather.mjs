@@ -1,6 +1,6 @@
 // current weather conditions display
 import STATUS from './status.mjs';
-import { preloadImg } from './utils/image.mjs';
+import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
@@ -368,4 +368,6 @@ const backfillProperty = (data, key) => data.reduce(
 const display = new CurrentWeather(1, 'current-weather');
 registerDisplay(display);
 
-export default display.getCurrentWeather.bind(display);
+const getCurrentWeather = display.getCurrentWeather.bind(display);
+
+export default getCurrentWeather;

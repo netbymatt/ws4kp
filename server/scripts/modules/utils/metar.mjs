@@ -1,6 +1,5 @@
 // METAR parsing utilities using metar-taf-parser library
 import { parseMetar } from '../../vendor/auto/metar-taf-parser.mjs';
-// eslint-disable-next-line import/extensions
 import en from '../../vendor/auto/locale/en.js';
 
 // metar-taf-parser requires regex lookbehind

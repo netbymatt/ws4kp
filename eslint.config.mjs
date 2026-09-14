@@ -1,129 +1,119 @@
-import { FlatCompat } from '@eslint/eslintrc';
+import path from 'node:path';
 
-const compat = new FlatCompat({
-});
+import { includeIgnoreFile } from '@eslint/config-helpers';
+import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import { configs, plugins } from 'eslint-config-airbnb-extended';
+import globals from 'globals';
 
-export default [{
-	ignores: [
-		'*.min.*',
-		'server/scripts/vendor/*',
-		'dist/**/*',
-	],
-},
-...compat.config({
-	env: {
-		browser: true,
-		es6: true,
-		node: true,
+const gitignorePath = path.resolve('.', '.gitignore');
+
+const jsConfig = defineConfig([
+	// ESLint recommended config
+	{
+		name: 'js/config',
+		...js.configs.recommended,
 	},
-	extends: [
-		'airbnb-base',
+	// Stylistic plugin
+	plugins.stylistic,
+	// Import X plugin
+	plugins.importX,
+	// Airbnb base recommended config
+	...configs.base.recommended,
+]);
+
+const nodeConfig = defineConfig([
+	// Node plugin
+	plugins.node,
+	// Airbnb Node recommended config
+	...configs.node.recommended,
+]).map((config) => ({
+	...config,
+	ignores: [...(config.ignores ?? []), 'server/**'],
+}));
+
+const rules = {
+	'@stylistic/indent': ['error', 'tab', { SwitchCase: 1 }],
+	'@stylistic/no-tabs': 0,
+	'no-param-reassign': [
+		'error',
+		{
+			props: false,
+		},
 	],
-	globals: {
-		TravelCities: 'readonly',
-		RegionalCities: 'readonly',
-		StationInfo: 'readonly',
-		SunCalc: 'readonly',
-		NoSleep: 'readonly',
-		OVERRIDES: 'readonly',
-		proj4: 'readonly',
-	},
+	'@stylistic/max-len': 0,
+	'import-x/extensions': [
+		'error',
+		'ignorePackages',
+		{
+			js: 'always',
+			mjs: 'always',
+			json: 'always',
+		},
+	],
+	'no-console': 'off',
+	'no-use-before-define': [
+		'error',
+		{
+			variables: false,
+		},
+	],
+};
+
+const languageOptions = {
+	ecmaVersion: 'latest',
 	parserOptions: {
 		ecmaVersion: 'latest',
-		sourceType: 'module',
 	},
-	plugins: [],
-	rules: {
-		indent: [
-			'error',
-			'tab',
-			{
-				SwitchCase: 1,
-			},
-		],
-		'no-tabs': 0,
-		'no-console': 0,
-		'max-len': 0,
-		'no-use-before-define': [
-			'error',
-			{
-				variables: false,
-			},
-		],
-		'no-param-reassign': [
-			'error',
-			{
-				props: false,
-			},
-		],
-		'no-mixed-operators': [
-			'error',
-			{
-				groups: [
-					[
-						'&',
-						'|',
-						'^',
-						'~',
-						'<<',
-						'>>',
-						'>>>',
-					],
-					[
-						'==',
-						'!=',
-						'===',
-						'!==',
-						'>',
-						'>=',
-						'<',
-						'<=',
-					],
-					[
-						'&&',
-						'||',
-					],
-					[
-						'in',
-						'instanceof',
-					],
-				],
-				allowSamePrecedence: true,
-			},
-		],
-		'no-unused-vars': [
-			'error',
-			{
-				argsIgnorePattern: '^_',
-				varsIgnorePattern: '^_',
-				caughtErrorsIgnorePattern: '^_',
-			},
-		],
-		'import/extensions': [
-			'error',
-			{
-				mjs: 'always',
-				json: 'always',
-			},
-		],
-		'import/no-extraneous-dependencies': [
-			'error',
-			{
-				devDependencies: [
-					'eslint.config.*',
-					'**/*.config.*',
-					'**/*.test.*',
-					'**/*.spec.*',
-					'gulpfile.*',
-					'tests/**/*',
-					'gulp/**/*',
-					'datagenerators/**/*',
-				],
-			},
-		],
-	},
-	ignorePatterns: [
-		'*.min.js',
-	],
-}),
+};
+
+const ignores = [
+	'*.min.*',
+	'server/scripts/vendor/*',
+	'dist/**/*',
 ];
+
+const htmlSpecial = {
+	files: ['server/**/*.{js,mjs,cjs}'],
+	languageOptions: {
+		globals: {
+			...globals.browser,
+			OVERRIDES: 'readonly',
+			StationInfo: 'readonly',
+			RegionalCities: 'readonly',
+			TravelCities: 'readonly',
+			proj4: 'readonly',
+		},
+	},
+};
+
+// files that rely on devDependencies
+const extraneousDependencies = {
+	files: [
+		'gulp/**/*',
+		'gulpfile.mjs',
+		'eslint.config.mjs',
+		'datagenerators/**/*',
+	],
+	rules: {
+		'import-x/no-extraneous-dependencies': 'off',
+	},
+};
+
+export default defineConfig([
+	{
+		ignores,
+	},
+	// Ignore files and folders listed in .gitignore
+	includeIgnoreFile(gitignorePath),
+	// JavaScript config
+	...jsConfig,
+	// Node config
+	...nodeConfig,
+	{
+		languageOptions,
+		rules,
+	},
+	htmlSpecial,
+	extraneousDependencies,
+]);

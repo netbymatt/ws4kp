@@ -13,7 +13,7 @@ const colors = {
 	INF: chalk.cyan,
 };
 
-const formatter = async (message) => {
+const messageFormatter = async (message) => {
 	const args = await Promise.all(message.args().map((arg) => describe(arg)));
 	// make ability to paint different console[types]
 	const type = message.type().substr(0, 3).toUpperCase();
@@ -26,4 +26,4 @@ const formatter = async (message) => {
 	console.log(color(`CONSOLE.${type}: ${message.text()}\n${text} `));
 };
 
-export default formatter;
+export default messageFormatter;

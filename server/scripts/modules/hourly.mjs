@@ -234,7 +234,7 @@ const parseForecast = async (data) => {
 	const windDirection = expand(data.windDirection.values);
 	const skyCover = expand(data.skyCover.values);	// cloud icon
 	const weather = expand(data.weather.values);	// fog icon
-	const iceAccumulation = expand(data.iceAccumulation.values); 	// ice icon
+	const iceAccumulation = expand(data.iceAccumulation.values); // ice icon
 	const probabilityOfPrecipitation = expand(data.probabilityOfPrecipitation.values);	// rain icon
 	const snowfallAmount = expand(data.snowfallAmount.values);	// snow icon
 	const dewpoint = expand(data.dewpoint.values);
@@ -294,4 +294,6 @@ const expand = (data, maxHours = 48) => {
 const display = new Hourly(3, 'hourly', false);
 registerDisplay(display);
 
-export default display.getHourlyData.bind(display);
+const getHourlyData = display.getHourlyData.bind(display);
+
+export default getHourlyData;

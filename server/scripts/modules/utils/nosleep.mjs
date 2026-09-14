@@ -1,6 +1,6 @@
 // track state of nosleep locally to avoid a null case error
 // when nosleep.disable is called without first calling .enable
-// eslint-disable-next-line import/extensions
+// eslint-disable-next-line import-x/no-rename-default
 import NoSleep from '../../vendor/auto/no-sleep.js';
 
 let wakeLock = false;

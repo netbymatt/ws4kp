@@ -52,7 +52,4 @@ const rewriteUrl = (_url) => {
 	return url;
 };
 
-export {
-	// eslint-disable-next-line import/prefer-default-export
-	rewriteUrl,
-};
+export default rewriteUrl;

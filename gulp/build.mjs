@@ -10,7 +10,7 @@ import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import file from 'gulp-file';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
@@ -74,7 +74,7 @@ const webpackOptions = {
 			'./server/scripts/modules/icons.mjs',
 			'./server/scripts/modules/utils/cache.mjs',
 			'./server/scripts/modules/utils/debug.mjs',
-			'./server/scripts/modules/utils/image.mjs',
+			'./server/scripts/modules/utils/preload-image.mjs',
 			'./server/scripts/modules/utils/metar.mjs',
 			'./server/scripts/modules/utils/mapclick.mjs',
 			'./server/scripts/modules/utils/units.mjs',

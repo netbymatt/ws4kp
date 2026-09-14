@@ -1,4 +1,4 @@
-import { elemForEach } from './utils/elem.mjs';
+import elemForEach from './utils/elem-for-each.mjs';
 import Setting from './utils/setting.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());

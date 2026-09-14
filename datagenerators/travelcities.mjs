@@ -1,7 +1,7 @@
 // look up points for each travel city
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import chunk from './chunk.mjs';
-import https from './https.mjs';
+import getHttps from './https.mjs';
 
 // source data
 const travelCities = JSON.parse(await readFile('./datagenerators/travelcities-raw.json'));
@@ -17,7 +17,7 @@ for (let i = 0; i < dataChunks.length; i += 1) {
 	// eslint-disable-next-line no-await-in-loop
 	const chunkResult = await Promise.all(cityChunk.map(async (city) => {
 		try {
-			const data = await https(`https://api.weather.gov/points/${city.Latitude},${city.Longitude}`);
+			const data = await getHttps(`https://api.weather.gov/points/${city.Latitude},${city.Longitude}`);
 			const point = JSON.parse(data);
 			return {
 				...city,

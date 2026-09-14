@@ -1,4 +1,4 @@
-import { rewriteUrl } from './url-rewrite.mjs';
+import rewriteUrl from './url-rewrite.mjs';
 
 // Clear cache utility for client-side use
 const clearCacheEntry = async (url, baseUrl = '') => {

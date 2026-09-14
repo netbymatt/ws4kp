@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import { setTimeout } from 'node:timers/promises';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import messageFormatter from './messageformatter.mjs';
 
 const browser = await puppeteer.launch({

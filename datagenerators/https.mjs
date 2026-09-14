@@ -1,7 +1,7 @@
 // async https wrapper
-import https from 'https';
+import https from 'node:https';
 
-const get = (url) => new Promise((resolve, reject) => {
+const getHttps = (url) => new Promise((resolve, reject) => {
 	const headers = {};
 	headers['user-agent'] = '(WeatherStar 4000+ data generator, ws4000@netbymatt.com)';
 
@@ -22,4 +22,4 @@ const get = (url) => new Promise((resolve, reject) => {
 	});
 });
 
-export default get;
+export default getHttps;
