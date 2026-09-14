@@ -4,6 +4,7 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
+import { getMoonIllumination, getTimes, getMoonTimes } from '../vendor/auto/suncalc.js';
 
 class Almanac extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -49,21 +50,21 @@ class Almanac extends WeatherDisplay {
 
 	calcSunMoonData(weatherParameters) {
 		const dayOffsets = [0, 1, 2, 3, 4, 5, 6];
-		const sun = dayOffsets.map((days) => SunCalc.getTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
-		const moonTransit = dayOffsets.map((days) => SunCalc.getMoonTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
+		const sun = dayOffsets.map((days) => getTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
+		const moonTransit = dayOffsets.map((days) => getMoonTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
 
 		// brute force the moon phases by scanning the next 30 days
 		const moon = [];
 		// start with yesterday
 		let moonDate = DateTime.local().minus({ days: 1 });
-		let { phase } = SunCalc.getMoonIllumination(moonDate.toJSDate());
+		let { phase } = getMoonIllumination(moonDate.toJSDate());
 		let iterations = 0;
 		do {
 			// get yesterday's moon info
 			const lastPhase = phase;
 			// calculate new values
 			moonDate = moonDate.plus({ days: 1 });
-			phase = SunCalc.getMoonIllumination(moonDate.toJSDate()).phase;
+			phase = getMoonIllumination(moonDate.toJSDate()).phase;
 			// check for 4 cases
 			if (lastPhase < 0.25 && phase >= 0.25) moon.push(this.getMoonTransition(0.25, 'First', moonDate));
 			if (lastPhase < 0.50 && phase >= 0.50) moon.push(this.getMoonTransition(0.50, 'Full', moonDate));
@@ -84,7 +85,7 @@ class Almanac extends WeatherDisplay {
 	// get moon transition from one phase to the next by drilling down by hours, minutes and seconds
 	getMoonTransition(threshold, phaseName, start, iteration = 0) {
 		let moonDate = start;
-		let { phase } = SunCalc.getMoonIllumination(moonDate.toJSDate());
+		let { phase } = getMoonIllumination(moonDate.toJSDate());
 		let iterations = 0;
 		const step = {
 			hours: iteration === 0 ? -1 : 0,
@@ -103,7 +104,7 @@ class Almanac extends WeatherDisplay {
 			const lastPhase = phase;
 			// calculate new phase after step
 			moonDate = moonDate.plus(step);
-			phase = SunCalc.getMoonIllumination(moonDate.toJSDate()).phase;
+			phase = getMoonIllumination(moonDate.toJSDate()).phase;
 			// wrap phases > 0.9 to -0.1 for ease of detection
 			if (phase > 0.9) phase -= 1.0;
 			// compare

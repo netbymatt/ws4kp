@@ -27,9 +27,13 @@
 	},
 	"homepage": "https://github.com/netbymatt/ws4kp#readme",
 	"devDependencies": {
+		"@eslint/config-helpers": "^0.7.0",
+		"@eslint/js": "^9.39.5",
 		"@zakj/no-sleep": "^0.13.6",
 		"ajv": "^8.17.1",
 		"del": "^8.0.0",
+		"eslint": "^9.39.5",
+		"eslint-config-airbnb-extended": "^3.1.1",
 		"fancy-log": "^2.0.0",
 		"gulp": "^5.0.0",
 		"gulp-concat": "^2.6.1",
@@ -43,15 +47,11 @@
 		"metar-taf-parser": "^9.0.0",
 		"p-limit": "^7.3.1",
 		"sass": "^1.54.0",
-		"suncalc": "^1.8.0",
+		"suncalc": "^2.0.2",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
-		"webpack-stream": "^7.0.0",
-		"@eslint/js": "^9.39.5",
-		"eslint": "^9.39.5",
-		"eslint-config-airbnb-extended": "^3.1.1",
-		"@eslint/config-helpers": "^0.7.0"
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"dotenv": "^17.0.1",
