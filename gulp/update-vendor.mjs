@@ -10,6 +10,7 @@ const vendorFiles = [
 	'./node_modules/@zakj/no-sleep/dist/no-sleep.js',
 	'./node_modules/suncalc/suncalc.js',
 	'./node_modules/swiped-events/src/swiped-events.js',
+	'./node_modules/proj4/dist/proj4.js',
 ];
 
 // Special handling for metar-taf-parser - only copy main file and English locale

@@ -26,6 +26,7 @@ export default [{
 		SunCalc: 'readonly',
 		NoSleep: 'readonly',
 		OVERRIDES: 'readonly',
+		proj4: 'readonly',
 	},
 	parserOptions: {
 		ecmaVersion: 'latest',

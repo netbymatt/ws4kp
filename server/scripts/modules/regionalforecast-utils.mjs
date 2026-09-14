@@ -14,8 +14,8 @@ const buildForecast = (forecast, city, cityXY) => {
 		temperature: temperatureConverter(forecast.temperature || 0),
 		name: formatCity(city.city),
 		icon: forecast.icon,
-		x: cityXY.x,
-		y: cityXY.y,
+		x: cityXY[0],
+		y: cityXY[1],
 		time: forecast.startTime,
 	};
 };
@@ -90,173 +90,11 @@ const getRegionalObservation = async (point, city) => {
 	}
 };
 
-// utility latitude/pixel conversions
-const getXYFromLatitudeLongitude = (Latitude, Longitude, OffsetX, OffsetY, state) => {
-	if (state === 'AK') return getXYFromLatitudeLongitudeAK(Latitude, Longitude, OffsetX, OffsetY);
-	if (state === 'HI') return getXYFromLatitudeLongitudeHI(Latitude, Longitude, OffsetX, OffsetY);
-	let y = 0;
-	let x = 0;
-	const ImgHeight = 1600;
-	const ImgWidth = 2550;
-
-	y = (50.5 - Latitude) * 55.2;
-	y -= OffsetY; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (y > (ImgHeight - (OffsetY * 2))) {
-		y = ImgHeight - (OffsetY * 2);
-	} else if (y < 0) {
-		y = 0;
-	}
-
-	x = ((-127.5 - Longitude) * 41.775) * -1;
-	x -= OffsetX; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (x > (ImgWidth - (OffsetX * 2))) {
-		x = ImgWidth - (OffsetX * 2);
-	} else if (x < 0) {
-		x = 0;
-	}
-
-	return { x, y };
-};
-
-const getXYFromLatitudeLongitudeAK = (Latitude, Longitude, OffsetX, OffsetY) => {
-	let y = 0;
-	let x = 0;
-	const ImgHeight = 1142;
-	const ImgWidth = 1200;
-
-	y = (73.0 - Latitude) * 56;
-	y -= OffsetY; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (y > (ImgHeight - (OffsetY * 2))) {
-		y = ImgHeight - (OffsetY * 2);
-	} else if (y < 0) {
-		y = 0;
-	}
-
-	x = ((-175.0 - Longitude) * 25.0) * -1;
-	x -= OffsetX; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (x > (ImgWidth - (OffsetX * 2))) {
-		x = ImgWidth - (OffsetX * 2);
-	} else if (x < 0) {
-		x = 0;
-	}
-
-	return { x, y };
-};
-
-const getXYFromLatitudeLongitudeHI = (Latitude, Longitude, OffsetX, OffsetY) => {
-	let y = 0;
-	let x = 0;
-	const ImgHeight = 571;
-	const ImgWidth = 600;
-
-	y = (25 - Latitude) * 55.2;
-	y -= OffsetY; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (y > (ImgHeight - (OffsetY * 2))) {
-		y = ImgHeight - (OffsetY * 2);
-	} else if (y < 0) {
-		y = 0;
-	}
-
-	x = ((-164.5 - Longitude) * 41.775) * -1;
-	x -= OffsetX; // Centers map.
-	// Do not allow the map to exceed the max/min coordinates.
-	if (x > (ImgWidth - (OffsetX * 2))) {
-		x = ImgWidth - (OffsetX * 2);
-	} else if (x < 0) {
-		x = 0;
-	}
-
-	return { x, y };
-};
-
-const getMinMaxLatitudeLongitude = (X, Y, OffsetX, OffsetY, state) => {
-	if (state === 'AK') return getMinMaxLatitudeLongitudeAK(X, Y, OffsetX, OffsetY);
-	if (state === 'HI') return getMinMaxLatitudeLongitudeHI(X, Y, OffsetX, OffsetY);
-	const maxLat = ((Y / 55.2) - 50.5) * -1;
-	const minLat = (((Y + (OffsetY * 2)) / 55.2) - 50.5) * -1;
-	const minLon = (((X * -1) / 41.775) + 127.5) * -1;
-	const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 127.5) * -1;
-
-	return {
-		minLat, maxLat, minLon, maxLon,
-	};
-};
-
-const getMinMaxLatitudeLongitudeAK = (X, Y, OffsetX, OffsetY) => {
-	const maxLat = ((Y / 56) - 73.0) * -1;
-	const minLat = (((Y + (OffsetY * 2)) / 56) - 73.0) * -1;
-	const minLon = (((X * -1) / 25) + 175.0) * -1;
-	const maxLon = ((((X + (OffsetX * 2)) * -1) / 25) + 175.0) * -1;
-
-	return {
-		minLat, maxLat, minLon, maxLon,
-	};
-};
-
-const getMinMaxLatitudeLongitudeHI = (X, Y, OffsetX, OffsetY) => {
-	const maxLat = ((Y / 55.2) - 25) * -1;
-	const minLat = (((Y + (OffsetY * 2)) / 55.2) - 25) * -1;
-	const minLon = (((X * -1) / 41.775) + 164.5) * -1;
-	const maxLon = ((((X + (OffsetX * 2)) * -1) / 41.775) + 164.5) * -1;
-
-	return {
-		minLat, maxLat, minLon, maxLon,
-	};
-};
-
-const getXYForCity = (City, MaxLatitude, MinLongitude, state, maxX = 580, maxY = 282) => {
-	if (state === 'AK') getXYForCityAK(City, MaxLatitude, MinLongitude);
-	if (state === 'HI') getXYForCityHI(City, MaxLatitude, MinLongitude);
-	const x = (City.lon - MinLongitude) * 57;
-	const y = (MaxLatitude - City.lat) * 70;
-
-	if (y < 28) return undefined;
-	if (y > maxY) return undefined;
-
-	if (x < 33) return undefined;
-	if (x > maxX) return undefined;
-
-	return { x, y };
-};
-
-const getXYForCityAK = (City, MaxLatitude, MinLongitude) => {
-	const x = (City.lon - MinLongitude) * 37;
-	const y = (MaxLatitude - City.lat) * 70;
-
-	if (y < 30) return undefined;
-	if (y > 282) return undefined;
-
-	if (x < 40) return undefined;
-	if (x > 580) return undefined;
-	return { x, y };
-};
-
-const getXYForCityHI = (City, MaxLatitude, MinLongitude) => {
-	const x = (City.lon - MinLongitude) * 57;
-	const y = (MaxLatitude - City.lat) * 70;
-
-	if (y < 30) return undefined;
-	if (y > 282) return undefined;
-
-	if (x < 40) return undefined;
-	if (x > 580) return undefined;
-
-	return { x, y };
-};
-
 // to fit on the map, remove anything after punctuation and then limit to 15 characters
 const formatCity = (city) => city.match(/[^,/;\\-]*/)[0].substr(0, 12);
 
 export {
 	buildForecast,
 	getRegionalObservation,
-	getXYFromLatitudeLongitude,
-	getMinMaxLatitudeLongitude,
-	getXYForCity,
 	formatCity,
 };

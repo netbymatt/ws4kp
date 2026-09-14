@@ -11,20 +11,22 @@
 		transform-origin: 0 0;
 	}
 
-	.location {
+	// used for measuring the text width for collision box calculation
+	.render-test {
+		visibility: hidden;
+	}
+
+	.location,
+	.render-test {
 		position: absolute;
-		width: 140px;
-		margin-left: -40px;
-		margin-top: -35px;
 
 		>div {
-			position: absolute;
 			@include u.text-shadow();
 		}
 
 		.icon {
+			display: inline-block;
 			top: 26px;
-			left: 44px;
 
 			img {
 				max-height: 32px;
@@ -32,13 +34,12 @@
 		}
 
 		.temp {
+			display: inline-block;
 			font-family: 'Star4000 Large';
 			font-size: 28px;
 			padding-top: 2px;
 			color: c.$title-color;
 			top: 28px;
-			text-align: right;
-			width: 40px;
 		}
 
 		.city {
@@ -46,4 +47,6 @@
 			font-size: 20px;
 		}
 	}
+
+
 }

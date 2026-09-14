@@ -56,7 +56,8 @@
 	"dependencies": {
 		"dotenv": "^17.0.1",
 		"ejs": "^6.0.1",
-		"express": "^5.1.0"
+		"express": "^5.1.0",
+		"proj4": "^2.22.0"
 	},
 	"allowScripts": {
 		"@parcel/watcher@2.6.0": true

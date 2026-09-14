@@ -99,6 +99,7 @@ const webpackOptions = {
 const jsVendorSources = [
 	'server/scripts/vendor/auto/swiped-events.js',
 	'server/scripts/vendor/auto/suncalc.js',
+	'server/scripts/vendor/auto/proj4.js',
 ];
 
 const compressJsVendor = () => src(jsVendorSources)
