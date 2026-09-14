@@ -1,5 +1,5 @@
 import { RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT } from './radar-constants.mjs';
-import { elemForEach } from './utils/elem.mjs';
+import elemForEach from './utils/elem-for-each.mjs';
 
 // convert a pixel location to a file/tile combination
 const pixelToFile = (xPixel, yPixel) => {

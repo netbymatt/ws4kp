@@ -5,7 +5,7 @@ import STATUS from './status.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import { getLargeIcon } from './icons.mjs';
-import { preloadImg } from './utils/image.mjs';
+import preloadImg from './utils/preload-image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';

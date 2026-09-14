@@ -1,5 +1,5 @@
 import { getSmallIcon } from './icons.mjs';
-import { preloadImg } from './utils/image.mjs';
+import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';

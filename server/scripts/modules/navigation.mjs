@@ -3,7 +3,7 @@ import noSleep from './utils/nosleep.mjs';
 import STATUS from './status.mjs';
 import { wrap } from './utils/calc.mjs';
 import { safeJson } from './utils/fetch.mjs';
-import { getPoint } from './utils/weather.mjs';
+import getPoint from './utils/get-point.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import settings from './settings.mjs';
 import { stationFilter } from './utils/string.mjs';

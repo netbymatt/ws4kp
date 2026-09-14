@@ -1,5 +1,5 @@
 // display sun and moon data
-import { preloadImg } from './utils/image.mjs';
+import preloadImg from './utils/preload-image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';

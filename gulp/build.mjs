@@ -74,7 +74,7 @@ const webpackOptions = {
 			'./server/scripts/modules/icons.mjs',
 			'./server/scripts/modules/utils/cache.mjs',
 			'./server/scripts/modules/utils/debug.mjs',
-			'./server/scripts/modules/utils/image.mjs',
+			'./server/scripts/modules/utils/preload-image.mjs',
 			'./server/scripts/modules/utils/metar.mjs',
 			'./server/scripts/modules/utils/mapclick.mjs',
 			'./server/scripts/modules/utils/units.mjs',

@@ -7,7 +7,7 @@ import {
 } from './navigation.mjs';
 import { parseQueryString } from './utils/setting.mjs';
 import settings from './settings.mjs';
-import { elemForEach } from './utils/elem.mjs';
+import elemForEach from './utils/elem-for-each.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
 class WeatherDisplay {

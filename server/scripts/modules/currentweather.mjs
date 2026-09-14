@@ -1,6 +1,6 @@
 // current weather conditions display
 import STATUS from './status.mjs';
-import { preloadImg } from './utils/image.mjs';
+import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';

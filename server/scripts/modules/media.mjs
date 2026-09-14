@@ -18,7 +18,7 @@ const mediaPlaying = new Setting('mediaPlaying', {
 
 document.addEventListener('DOMContentLoaded', () => {
 	// add the event handler to the page
-	document.getElementById('ToggleMedia').addEventListener('click', handleClick);
+	document.getElementById('ToggleMedia').addEventListener('click', handleMediaClick);
 	// get the slider elements
 	volumeSlider = document.querySelector('#ToggleMediaContainer .volume-slider');
 	volumeSliderInput = volumeSlider.querySelector('input');
@@ -114,7 +114,7 @@ const setIcon = () => {
 	}
 };
 
-const handleClick = () => {
+const handleMediaClick = () => {
 	// if media is off, start it
 	if (mediaPlaying.value === false) {
 		mediaPlaying.value = true;
@@ -303,7 +303,4 @@ const setTrackName = (fileName) => {
 	document.getElementById('musicTrack').innerHTML = trackName;
 };
 
-export {
-	// eslint-disable-next-line import-x/prefer-default-export
-	handleClick,
-};
+export default handleMediaClick;
