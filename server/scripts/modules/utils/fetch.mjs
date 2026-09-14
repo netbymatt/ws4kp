@@ -1,4 +1,4 @@
-import { rewriteUrl } from './url-rewrite.mjs';
+import rewriteUrl from './url-rewrite.mjs';
 
 const DEFAULT_REQUEST_TIMEOUT = 15000; // For example, with 3 retries: 15s+1s+15s+2s+15s+5s+15s = 68s
 
@@ -12,7 +12,7 @@ const safeJson = async (url, params) => {
 		}
 		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
-	} catch (_error) {
+	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"
 		return null;
 	}
@@ -27,7 +27,7 @@ const safeText = async (url, params) => {
 		}
 		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
-	} catch (_error) {
+	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"
 		return null;
 	}
@@ -42,7 +42,7 @@ const safeBlob = async (url, params) => {
 		}
 		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
-	} catch (_error) {
+	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"
 		return null;
 	}
@@ -156,7 +156,8 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 			// Most likely causes include background tab throttling, user navigation, or client timeout
 			console.log(`🛑 Fetch aborted for ${_url} (background tab throttling?)`);
 			return null; // Always return null for AbortError instead of throwing
-		} if (error.name === 'TimeoutError') {
+		}
+		if (error.name === 'TimeoutError') {
 			console.warn(`⏱️  Request timeout for ${_url} (${error.message})`);
 		} else if (error.message.includes('502')) {
 			console.warn(`🚪 Bad Gateway error for ${_url}`);

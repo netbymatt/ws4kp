@@ -1,11 +1,9 @@
-#!/usr/bin/env node
-
-import { readFileSync, writeFileSync } from 'fs';
+import { readFile, writeFile } from 'node:fs/promises';
 
 import * as url from 'node:url';
 
 // Load station data
-const stationInfo = JSON.parse(readFileSync('./datagenerators/output/stations-raw.json', 'utf8'));
+const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations-raw.json', 'utf8'));
 // const regionalCities = JSON.parse(readFileSync('./datagenerators/output/regionalcities.json', 'utf8'));
 
 // Airport exceptions for stations that require external knowledge NOT present in the original name
@@ -1133,7 +1131,7 @@ const DEFAULT_OPTIONS = {
 	writeFile: false,
 };
 
-const postProcessor = (_options) => {
+const postProcessor = async (_options) => {
 	// combine default and provided options
 	const options = { ...DEFAULT_OPTIONS, ..._options };
 
@@ -1259,7 +1257,7 @@ const postProcessor = (_options) => {
 	}) => rest);
 
 	if (options.writeFile) {
-		writeFileSync('./datagenerators/output/stations.json', compactStringifyToObject(fileResults));
+		await writeFile('./datagenerators/output/stations.json', compactStringifyToObject(fileResults));
 		console.log(`Wrote ${fileResults.length} processed stations to datagenerators/output/stations.json`);
 	} else {
 		console.log(compactStringifyToArray(outputResult));
@@ -1288,7 +1286,7 @@ const commandLine = (() => {
 
 // run post processor if called from command line
 if (commandLine) {
-	postProcessor(readArguments());
+	await postProcessor(readArguments());
 }
 
 export default postProcessor;

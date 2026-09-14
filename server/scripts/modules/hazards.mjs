@@ -287,4 +287,6 @@ const calcSeverity = (severity, event) => {
 const display = new Hazards(0, 'hazards', true);
 registerDisplay(display);
 
-export default display.getHazards.bind(display);
+const getHazards = display.getHazards.bind(display);
+
+export default getHazards;

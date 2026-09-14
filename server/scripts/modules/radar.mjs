@@ -141,7 +141,9 @@ class Radar extends WeatherDisplay {
 
 		// reset the "used" flag on pre-processed radars
 		// items that were not used during this process are deleted (either expired via time or change of location)
-		processedRadars.forEach((radar) => { radar.used = false; });
+		processedRadars.forEach((radar) => {
+			radar.used = false;
+		});
 
 		try {
 			const radarInfo = await Promise.all(urls.map(async (url) => {
@@ -204,7 +206,7 @@ class Radar extends WeatherDisplay {
 
 			// clean up any unused stored radars
 			processedRadars = processedRadars.filter((radar) => radar.used);
-		} catch (_error) {
+		} catch {
 			// Radar fetch failed - skip this display in animation by setting totalScreens = 0
 			this.timing.totalScreens = 0;
 			if (this.isEnabled) this.setStatus(STATUS.failed);

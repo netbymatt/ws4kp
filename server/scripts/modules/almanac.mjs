@@ -239,4 +239,6 @@ const formatTimeForColumn = (time) => {
 const display = new Almanac(9, 'almanac');
 registerDisplay(display);
 
-export default display.getSun.bind(display);
+const getSun = display.getSun.bind(display);
+
+export default getSun;

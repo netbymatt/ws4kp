@@ -18,7 +18,7 @@
  * @class HttpCache
  */
 
-import https from 'https';
+import https from 'node:https';
 
 // Default timeout for upstream requests (matches client-side default)
 const DEFAULT_REQUEST_TIMEOUT = 15000;
@@ -131,7 +131,7 @@ class HttpCache {
 
 				// Fallthrough to make request if cache miss (shouldn't happen but safety net)
 				console.warn(`⚠️ Redo     | Cache miss after waiting for in-flight request: ${fullUrl}`);
-			} catch (_error) {
+			} catch {
 				// If the in-flight request failed, we'll make our own request
 				console.warn(`⚠️ Redo     | In-flight request failed, making new request: ${fullUrl}`);
 			}
@@ -417,7 +417,7 @@ class HttpCache {
 			const maxAge = 4 * 60 * 60; // 4 hours
 
 			return Math.max(minAge, Math.min(maxAge, heuristicAge));
-		} catch (_error) {
+		} catch {
 			return 0; // Invalid date format
 		}
 	}

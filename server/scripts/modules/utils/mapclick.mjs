@@ -184,7 +184,7 @@ const convertMapClickIcon = (weatherImage) => {
 /**
  * Convert MapClick observation data to match the standard API format
  *
- * This is NOT intended to be a full replacment process, but rather a minimal
+ * This is NOT intended to be a full replacement process, but rather a minimal
  * fallback for the data used in WS4KP.
  *
  * @param {Object} mapClickObs - MapClick observation data
@@ -193,10 +193,10 @@ const convertMapClickIcon = (weatherImage) => {
 export const convertMapClickObservationsToApiFormat = (mapClickObs) => {
 	// Convert temperature from Fahrenheit to Celsius (only if valid)
 	const tempF = parseFloat(mapClickObs.Temp);
-	const tempC = !Number.isNaN(tempF) ? (tempF - 32) * 5 / 9 : null;
+	const tempC = !Number.isNaN(tempF) ? ((tempF - 32) * 5) / 9 : null;
 
 	const dewpF = parseFloat(mapClickObs.Dewp);
-	const dewpC = !Number.isNaN(dewpF) ? (dewpF - 32) * 5 / 9 : null;
+	const dewpC = !Number.isNaN(dewpF) ? ((dewpF - 32) * 5) / 9 : null;
 
 	// Convert wind speed from mph to km/h (only if valid)
 	const windMph = parseFloat(mapClickObs.Winds);
@@ -224,7 +224,7 @@ export const convertMapClickObservationsToApiFormat = (mapClickObs) => {
 
 	// Convert wind chill from Fahrenheit to Celsius (only if valid and not "NA")
 	const windChillF = mapClickObs.WindChill !== 'NA' ? parseFloat(mapClickObs.WindChill) : NaN;
-	const windChill = !Number.isNaN(windChillF) ? (windChillF - 32) * 5 / 9 : null;
+	const windChill = !Number.isNaN(windChillF) ? ((windChillF - 32) * 5) / 9 : null;
 
 	// Convert MapClick weather image to weather.gov API icon format
 	const iconUrl = convertMapClickIcon(mapClickObs.Weatherimage);

@@ -200,9 +200,9 @@ const isPlaying = () => playing;
 // navigation message constants
 const msg = {
 	response: {	// display to navigation
-		previous: Symbol('previous'),		// already at first frame, calling function should switch to previous canvas
+		previous: Symbol('previous'), // already at first frame, calling function should switch to previous canvas
 		inProgress: Symbol('inProgress'),	// have data to display, calling function should do nothing
-		next: Symbol('next'),				// end of frames reached, calling function should switch to next canvas
+		next: Symbol('next'), // end of frames reached, calling function should switch to next canvas
 	},
 	command: {	// navigation to display
 		firstFrame: Symbol('firstFrame'),
@@ -623,7 +623,9 @@ const resize = (force = false) => {
 
 // reset all statuses to loading on all displays, used to keep the progress bar accurate during refresh
 const resetStatuses = () => {
-	displays.forEach((display) => { display.status = STATUS.loading; });
+	displays.forEach((display) => {
+		display.status = STATUS.loading;
+	});
 };
 
 // Apply scanline scaling to try and prevent banding by avoiding fractional scaling

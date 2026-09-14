@@ -232,7 +232,9 @@ class WeatherDisplay {
 
 	hideCanvas() {
 		this.resetNavBaseCount();
-		if (this.elem.classList.contains('show')) { this.sendRenderStart(); }
+		if (this.elem.classList.contains('show')) {
+			this.sendRenderStart();
+		}
 		this.elem.classList.remove('show');
 		// used to change backgrounds for widescreen
 		document.querySelector('#divTwc').classList.remove(this.elemId);

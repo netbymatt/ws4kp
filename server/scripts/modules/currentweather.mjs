@@ -368,4 +368,6 @@ const backfillProperty = (data, key) => data.reduce(
 const display = new CurrentWeather(1, 'current-weather');
 registerDisplay(display);
 
-export default display.getCurrentWeather.bind(display);
+const getCurrentWeather = display.getCurrentWeather.bind(display);
+
+export default getCurrentWeather;

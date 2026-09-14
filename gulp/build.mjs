@@ -10,7 +10,7 @@ import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import file from 'gulp-file';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';

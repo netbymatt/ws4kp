@@ -82,7 +82,9 @@ const init = async () => {
 	document.querySelector('#btnGetLatLng').addEventListener('click', () => autoComplete.directFormSubmit());
 
 	document.addEventListener('keydown', documentKeydown);
-	document.addEventListener('touchmove', (e) => { if (document.fullscreenElement) e.preventDefault(); });
+	document.addEventListener('touchmove', (e) => {
+		if (document.fullscreenElement) e.preventDefault();
+	});
 
 	const autoComplete = new AutoComplete(document.querySelector(TXT_ADDRESS_SELECTOR), {
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
@@ -104,7 +106,9 @@ const init = async () => {
 		minChars: 3,
 		showNoSuggestionNotice: true,
 		noSuggestionNotice: 'No results found. Please try a different search string.',
-		onSelect(suggestion) { autocompleteOnSelect(suggestion); },
+		onSelect(suggestion) {
+			autocompleteOnSelect(suggestion);
+		},
 		width: 490,
 	});
 	window.autoComplete = autoComplete;

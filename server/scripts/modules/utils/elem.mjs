@@ -3,6 +3,6 @@ const elemForEach = (selector, callback) => {
 };
 
 export {
-	// eslint-disable-next-line import/prefer-default-export
+	// eslint-disable-next-line import-x/prefer-default-export
 	elemForEach,
 };

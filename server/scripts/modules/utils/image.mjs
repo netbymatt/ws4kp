@@ -17,6 +17,6 @@ const preloadImg = (src) => {
 };
 
 export {
-	// eslint-disable-next-line import/prefer-default-export
+	// eslint-disable-next-line import-x/prefer-default-export
 	preloadImg,
 };

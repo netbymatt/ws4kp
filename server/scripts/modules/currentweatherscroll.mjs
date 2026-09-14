@@ -103,7 +103,9 @@ const drawScreen = async () => {
 	const thisScreen = workingScreens[screenIndex](scrollData, parameters);
 
 	// update classes on the scroll area
-	mainScroll.classList.forEach((cls) => { if (cls !== 'scroll') mainScroll.classList.remove(cls); });
+	mainScroll.classList.forEach((cls) => {
+		if (cls !== 'scroll') mainScroll.classList.remove(cls);
+	});
 	thisScreen?.classes?.forEach((cls) => mainScroll.classList.add(cls));
 
 	if (typeof thisScreen === 'string') {
@@ -231,7 +233,7 @@ const drawScrollCondition = (screen) => {
 	// calculate the scroll distance and set a minimum scroll
 	const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
 	// calculate the scroll time (scaled by global speed setting), minimum 2s (4s when added to start and end delays)
-	const scrollTime = Math.max(scrollDistance / SCROLL_SPEED * settings.speed.value, 2);
+	const scrollTime = Math.max((scrollDistance / SCROLL_SPEED) * settings.speed.value, 2);
 	// add 1 second pause at the end of the scroll animation
 	const endPauseTime = 1.0;
 	const totalAnimationTime = scrollTime + endPauseTime;

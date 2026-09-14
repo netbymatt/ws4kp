@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 // get values for devtools json
 const uuid = 'd2bd1130-560f-4c8e-b2c5-e91073784964';

@@ -5,7 +5,7 @@ COPY package.json .
 COPY package-lock.json .
 COPY . .
 
-RUN npm install
+RUN npm ci
 RUN npm run build
 RUN rm dist/playlist.json
 

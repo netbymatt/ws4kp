@@ -15,50 +15,6 @@
 			"dist/**": true,
 			"package-lock.json": true,
 		},
-		"cSpell.enabledFileTypes": {
-			"markdown": true,
-			"JavaScript": true
-		},
-		"cSpell.enabled": true,
-		"cSpell.ignoreWords": [
-			"'storm",
-			"arcgis",
-			"Battaglia",
-			"devbridge",
-			"gifs",
-			"ltrim",
-			"mbar",
-			"Noaa",
-			"nosleep",
-			"Pngs",
-			"PRECIP",
-			"rtrim",
-			"sonarjs",
-			"T",
-			"T'storm",
-			"uscomp",
-			"Visib",
-			"Waukegan",
-			"WSQS",
-			"Tucsan",
-			"Malek",
-			"mwood",
-			"unmuted",
-			"dumpio",
-			"mesonet",
-			"metar",
-			"Unmute",
-			"AABB"
-		],
-		"cSpell.ignorePaths": [
-			"**/package-lock.json",
-			"**/node_modules/**",
-			"**/vscode-extension/**",
-			"**/.git/objects/**",
-			".vscode",
-			".vscode-insiders",
-			"**/vendor/auto/**",
-		],
 		"editor.tabSize": 2,
 		"editor.insertSpaces": false, // .eslintrc wants tabs instead of spaces
 		"emmet.includeLanguages": {
@@ -77,10 +33,6 @@
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": "explicit"
 		},
-		"cSpell.words": [
-			"hibyehihi",
-			"zakj"
-		]
 	},
 	"extensions": {
 		"recommendations": [

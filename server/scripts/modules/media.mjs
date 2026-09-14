@@ -71,7 +71,7 @@ const getMedia = async () => {
 			playlist = { availableFiles: [] };
 			playlistSource = `failed (${response.status} ${response.statusText})`;
 		}
-	} catch (_e) {
+	} catch {
 		// Network error or other fetch failure - fall back to directory scanning
 		playlist = await scanMusicDirectory();
 		playlistSource = 'via directory scan (after fetch failed)';
@@ -304,6 +304,6 @@ const setTrackName = (fileName) => {
 };
 
 export {
-	// eslint-disable-next-line import/prefer-default-export
+	// eslint-disable-next-line import-x/prefer-default-export
 	handleClick,
 };
