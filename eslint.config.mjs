@@ -42,14 +42,6 @@ const rules = {
 		},
 	],
 	'@stylistic/max-len': 0,
-	'no-underscore-dangle': [
-		'error',
-		{
-			allowAfterThis: true,
-		},
-	],
-	'import-x/no-useless-path-segments': 0,
-	'no-bitwise': 0,
 	'import-x/extensions': [
 		'error',
 		'ignorePackages',
