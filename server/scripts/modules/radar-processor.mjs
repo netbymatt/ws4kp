@@ -1,64 +1,89 @@
-import { removeDopplerRadarImageNoise } from './radar-utils.mjs';
-import { RADAR_FULL_SIZE, RADAR_FINAL_SIZE, RADAR_SOURCE_SIZE } from './radar-constants.mjs';
+import { removeDopplerRadarImageNoise, radarSourceXyFromLonLat, shiftPixelForUser } from './radar-utils.mjs';
+import {
+	RADAR_FULL_SIZE, RADAR_FINAL_SIZE, PX, PY,
+} from './radar-constants.mjs';
 
 // process a single radar image and place it on the provided canvas
 const processRadar = async (data) => {
 	const {
-		url, RADAR_HOST, OVERRIDES, radarSourceXY,
+		url,
+		RADAR_HOST,
+		user,
+		projection,
 	} = data;
 
 	// get the image
 	const modifiedRadarUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
 	const radarResponsePromise = fetch(modifiedRadarUrl);
 
-	// calculate offsets and sizes
-	const radarSource = {
-		width: RADAR_SOURCE_SIZE().width,
-		height: RADAR_SOURCE_SIZE().height,
-		x: Math.round(radarSourceXY.x / 2),
-		y: Math.round(radarSourceXY.y / 2),
-	};
-
-	// create radar context for manipulation
-	const radarCanvas = document.createElement('canvas');
-	radarCanvas.width = RADAR_FULL_SIZE.width;
-	radarCanvas.height = RADAR_FULL_SIZE.height;
-	const radarContext = radarCanvas.getContext('2d');
-	radarContext.imageSmoothingEnabled = false;
+	// create radar context for destination image
+	const sourceCanvas = document.createElement('canvas');
+	sourceCanvas.width = RADAR_FULL_SIZE.width;
+	sourceCanvas.height = RADAR_FULL_SIZE.height;
+	const sourceCtx = sourceCanvas.getContext('2d');
+	sourceCtx.imageSmoothingEnabled = false;
 
 	// test response
 	const radarResponse = await radarResponsePromise;
 	if (!radarResponse.ok) throw new Error(`Unable to fetch radar error ${radarResponse.status} ${radarResponse.statusText} from ${radarResponse.url}`);
 
 	// get the blob
-	const radarImgBlob = await radarResponse.blob();
+	const radarSourceBlob = await radarResponse.blob();
 
 	// assign to an html image element
-	const radarImgElement = await createImageBitmap(radarImgBlob);
+	const radarSourceBitmap = await createImageBitmap(radarSourceBlob);
 	// draw the entire image
-	radarContext.clearRect(0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
-	radarContext.drawImage(radarImgElement, 0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
+	sourceCtx.clearRect(0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
+	sourceCtx.drawImage(radarSourceBitmap, 0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
+	const sourceData = sourceCtx.getImageData(0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
 
-	// crop the radar image without scaling
-	const croppedRadarCanvas = document.createElement('canvas');
-	croppedRadarCanvas.width = radarSource.width;
-	croppedRadarCanvas.height = radarSource.height;
-	const croppedRadarContext = croppedRadarCanvas.getContext('2d');
-	croppedRadarContext.imageSmoothingEnabled = false;
-	croppedRadarContext.drawImage(radarCanvas, radarSource.x, radarSource.y, croppedRadarCanvas.width, croppedRadarCanvas.height, 0, 0, croppedRadarCanvas.width, croppedRadarCanvas.height);
+	const radarFinalSize = RADAR_FINAL_SIZE();
 
-	// clean the image
-	removeDopplerRadarImageNoise(croppedRadarContext);
+	// create the destination canvas
+	const destCanvas = document.createElement('canvas');
+	destCanvas.width = radarFinalSize.width;
+	destCanvas.height = radarFinalSize.height;
+	const destCtx = destCanvas.getContext('2d');
+	destCtx.imageSmoothingEnabled = false;
+	const destData = destCtx.createImageData(radarFinalSize.width, radarFinalSize.height);
 
-	// stretch the radar image
-	const stretchCanvas = document.createElement('canvas');
-	stretchCanvas.width = RADAR_FINAL_SIZE().width;
-	stretchCanvas.height = RADAR_FINAL_SIZE().height;
-	const stretchContext = stretchCanvas.getContext('2d', { willReadFrequently: true });
-	stretchContext.imageSmoothingEnabled = false;
-	stretchContext.drawImage(croppedRadarCanvas, 0, 0, radarSource.width, radarSource.height, 0, 0, RADAR_FINAL_SIZE().width, RADAR_FINAL_SIZE().height);
+	// loop through all destination pixels and lookup and get the inverse projected source data pixel
+	for (let y = 0; y < radarFinalSize.height; y += 1) {
+		for (let x = 0; x < radarFinalSize.width; x += 1) {
+			// project the dest pixel location to the source location
+			const lonLat = projection.inverse(shiftPixelForUser([x, y], user));
+			const sourcePx = radarSourceXyFromLonLat(lonLat);
 
-	return stretchCanvas.toDataURL();
+			// eslint-disable-next-line no-bitwise
+			const sourceRow = sourcePx[PY] | 0; // faster than Math.floor();
+			// eslint-disable-next-line no-bitwise
+			const sourceCol = sourcePx[PX] | 0;
+
+			const sourceIndex = ((sourceRow * RADAR_FULL_SIZE.width) + sourceCol) * 4;
+			const destIndex = ((y * radarFinalSize.width) + x) * 4;
+
+			// pass through the noise removal function which also makes black transparent
+			const {
+				R, G, B, A,
+			} = removeDopplerRadarImageNoise(
+				sourceData.data[sourceIndex],
+				sourceData.data[sourceIndex + 1],
+				sourceData.data[sourceIndex + 2],
+				sourceData.data[sourceIndex + 2],
+			);
+
+			// copy 4 data points [r,g,b,a]
+			destData.data[destIndex] = R;
+			destData.data[destIndex + 1] = G;
+			destData.data[destIndex + 2] = B;
+			destData.data[destIndex + 3] = A;
+		}
+	}
+
+	// final copy to dest canvas
+	destCtx.putImageData(destData, 0, 0);
+
+	return destCanvas.toDataURL();
 };
 
 export default processRadar;

@@ -1,4 +1,5 @@
 import settings from './settings.mjs';
+import createProjection, { OUTPUTSIZES } from './utils/map-projection.mjs';
 
 const radarFinalSize = () => {
 	const size = {
@@ -10,22 +11,6 @@ const radarFinalSize = () => {
 		}
 		if (settings.portrait?.value) {
 			size.height = 1024;
-		}
-	}
-	return size;
-};
-
-const radarSourceSize = () => {
-	const size = {
-		width: 240,
-		height: 163,
-	};
-	if (settings.enhanced?.value) {
-		if (settings.wide?.value) {
-			size.width = (240 / 640) * 854; // original size of 640 scaled up to wide at 854
-		}
-		if (settings.portrait?.value) {
-			size.height = (163 / 367) * 1024;// original size of 367 scaled up to portrait at 1024
 		}
 	}
 	return size;
@@ -67,11 +52,26 @@ const radarShift = () => {
 	return shift;
 };
 
-export const TILE_SIZE = { x: 680, y: 387 };
-export const TILE_COUNT = { x: 10, y: 11 };
-export const TILE_FULL_SIZE = { x: 6800, y: 4255 };
-export const RADAR_FULL_SIZE = { width: 2550, height: 1600 };
+// from https://mesonet.agron.iastate.edu/archive/data/yyyy/mm/dd/GIS/uscomp/n0r_yyyymmddhhmm.wld
+export const WORLD_TRANSFORM = {
+	A: 0.01,
+	D: 0.0,
+	B: 0.0,
+	E: -0.01,
+	C: -126.0,
+	F: 50,
+};
+
+// array indices for reference
+export const PX = 0;
+export const PY = 1;
+export const LAT = 1;
+export const LON = 0;
+
+export const TILE_SIZE = { x: 510, y: 320 };
+export const TILE_COUNT = { x: 10, y: 10 };
+export const TILE_FULL_SIZE = OUTPUTSIZES;
+export const RADAR_FULL_SIZE = { width: 6000, height: 2600 };
 export const RADAR_FINAL_SIZE = radarFinalSize;
-export const RADAR_SOURCE_SIZE = radarSourceSize;
 export const RADAR_OFFSET = radarOffset;
 export const RADAR_SHIFT = radarShift;

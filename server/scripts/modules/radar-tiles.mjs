@@ -1,12 +1,15 @@
-import { RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT } from './radar-constants.mjs';
+import {
+	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY,
+} from './radar-constants.mjs';
 import elemForEach from './utils/elem-for-each.mjs';
+import { shiftPixelForUser } from './radar-utils.mjs';
 
 // convert a pixel location to a file/tile combination
 const pixelToFile = (xPixel, yPixel) => {
 	const xTile = Math.floor(xPixel / TILE_SIZE.x);
 	const yTile = Math.floor(yPixel / TILE_SIZE.y);
 	if (xTile < 0 || xTile > TILE_COUNT.x || yTile < 0 || yTile > TILE_COUNT.y) return false;
-	return `${yTile}-${xTile}`;
+	return `${xTile.toString().padStart(2, '0')}-${yTile.toString().padStart(2, '0')}`;
 };
 
 // convert a pixel location in the overall map to a pixel location on the tile set
@@ -24,25 +27,28 @@ const modTile = (xPixel, yPixel) => {
 // the main thread pushes these ImageBitmaps into the image placeholders on the page
 const setTiles = (data) => {
 	const {
-		sourceXY,
+		user,
 		elemId,
 	} = data;
 	const elemIdFull = `${elemId}-html`;
 
+	// shift the working location to the top-left corner to center the resulting map on the user
+	const topLeft = shiftPixelForUser([0, 0], user);
+
 	// determine the basemap images needed
 	const baseMapTiles = [
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 0, sourceXY.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 1, sourceXY.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 2, sourceXY.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 0, sourceXY.y + TILE_SIZE.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 1, sourceXY.y + TILE_SIZE.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 2, sourceXY.y + TILE_SIZE.y),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 0, sourceXY.y + TILE_SIZE.y * 2),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 1, sourceXY.y + TILE_SIZE.y * 2),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 2, sourceXY.y + TILE_SIZE.y * 2),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 0, sourceXY.y + TILE_SIZE.y * 3),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 1, sourceXY.y + TILE_SIZE.y * 3),
-		pixelToFile(sourceXY.x + TILE_SIZE.x * 2, sourceXY.y + TILE_SIZE.y * 3),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY]),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY]),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY]),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 2),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 2),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 2),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 3),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 3),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 3),
 	];
 
 	// do some calculations
@@ -51,7 +57,7 @@ const setTiles = (data) => {
 	// T[3] T[4] T[5]
 
 	// calculate the shift of tile 0 (upper left)
-	const tileShift = modTile(sourceXY.x, sourceXY.y);
+	const tileShift = modTile(topLeft[PX], topLeft[PY]);
 
 	// determine which tiles are used
 	const secondRow = TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE().height;
@@ -81,14 +87,14 @@ const setTiles = (data) => {
 		}
 
 		// set the image source and size
-		const newSource = `/images/maps/radar/${tileName}-${baseMapTiles[index]}.webp`;
+		const newSource = `/images/maps/radar-conus/${tileName}/${baseMapTiles[index]}.webp`;
 		if (elem.src === newSource) return;
 		elem.src = newSource;
 	};
 
 	// populate the map and overlay tiles
 	// fill the tiles with the map
-	elemForEach(`#${elemIdFull} .map-tiles img`, populateTile('map'));
+	elemForEach(`#${elemIdFull} .map-tiles img`, populateTile('base'));
 	elemForEach(`#${elemIdFull} .overlay-tiles img`, populateTile('overlay'));
 
 	// fill the tiles with the overlay
@@ -96,7 +102,7 @@ const setTiles = (data) => {
 	const mapTileContainer = document.querySelector(`#${elemIdFull} .map-tiles`);
 	mapTileContainer.style.top = `${-tileShift.y}px`;
 	mapTileContainer.style.left = `${-tileShift.x}px`;
-	// and the same for the overlay
+	// // and the same for the overlay
 	const overlayTileContainer = document.querySelector(`#${elemIdFull} .overlay-tiles`);
 	overlayTileContainer.style.top = `${-tileShift.y}px`;
 	overlayTileContainer.style.left = `${-tileShift.x}px`;

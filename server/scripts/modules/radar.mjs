@@ -4,9 +4,13 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import { safeText } from './utils/fetch.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
-import * as utils from './radar-utils.mjs';
+import { radarSourceXyFromLonLat } from './radar-utils.mjs';
 import setTiles from './radar-tiles.mjs';
 import processRadar from './radar-processor.mjs';
+import createProjection from './utils/map-projection.mjs';
+import {
+	RADAR_FINAL_SIZE, TILE_FULL_SIZE, PX, PY,
+} from './radar-constants.mjs';
 
 // store processed radar as dataURLs to avoid re-processing frames as they slide backwards in time
 // this is cleared upon changing the location displayed
@@ -128,16 +132,33 @@ class Radar extends WeatherDisplay {
 		const urls = sortedPngs.slice(-(this.dopplerRadarImageMax));
 
 		// calculate offsets and sizes
-		const sourceXY = utils.getXYFromLatitudeLongitudeMap(this.weatherParameters);
-		const radarSourceXY = utils.getXYFromLatitudeLongitudeDoppler(this.weatherParameters);
+		const radarFinalSize = RADAR_FINAL_SIZE();
+		const projection = createProjection('radar-conus', radarFinalSize);
+		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
+
+		// adjust the user's location to not run off the map
+		if (user[PX] < (radarFinalSize.width / 2)) {
+			user[PX] = radarFinalSize.width / 2;
+		}
+		if (user[PX] > (TILE_FULL_SIZE.width - (radarFinalSize.width / 2))) {
+			user[PX] = TILE_FULL_SIZE.width - (radarFinalSize.width / 2);
+		}
+		if (user[PY] < (radarFinalSize.height / 2)) {
+			user[PY] = radarFinalSize.height / 2;
+		}
+		if (user[PY] > (TILE_FULL_SIZE.height - (radarFinalSize.height / 2))) {
+			user[PY] = TILE_FULL_SIZE.height - (radarFinalSize.height / 2);
+		}
+
+		const radarSourceXY = radarSourceXyFromLonLat([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// set up the base map and overlay tiles
 		setTiles({
-			sourceXY,
+			user,
 			elemId: this.elemId,
 		});
 
-		const radarKey = `${radarSourceXY.x.toFixed(0)}-${radarSourceXY.y.toFixed(0)}`;
+		const radarKey = `${radarSourceXY[PX].toFixed(0)}-${radarSourceXY[PY].toFixed(0)}`;
 
 		// reset the "used" flag on pre-processed radars
 		// items that were not used during this process are deleted (either expired via time or change of location)
@@ -160,8 +181,8 @@ class Radar extends WeatherDisplay {
 				const processedRadar = preProcessed?.dataURL ?? await processRadar({
 					url,
 					RADAR_HOST,
-					OVERRIDES,
-					radarSourceXY,
+					user,
+					projection,
 				});
 
 				// store the radar
