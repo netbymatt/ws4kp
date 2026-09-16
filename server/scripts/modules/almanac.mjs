@@ -19,10 +19,7 @@ class Almanac extends WeatherDisplay {
 		};
 
 		// preload the moon images
-		preloadImg(this.iconPaths.Full);
-		preloadImg(this.iconPaths.Last);
-		preloadImg(this.iconPaths.New);
-		preloadImg(this.iconPaths.First);
+		Object.values(this.iconPaths).forEach(preloadImg);
 
 		this.timing.totalScreens = 1;
 	}
@@ -53,7 +50,7 @@ class Almanac extends WeatherDisplay {
 		const sun = dayOffsets.map((days) => getTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
 		const moonTransit = dayOffsets.map((days) => getMoonTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
 
-		// brute force the moon phases by scanning the next 30 days
+		// brute force the moon phases by scanning the next 45 days
 		const moon = [];
 		// start with yesterday
 		let moonDate = DateTime.local().minus({ days: 1 });
@@ -89,9 +86,6 @@ class Almanac extends WeatherDisplay {
 		let iterations = 0;
 		const step = {
 			hours: iteration === 0 ? -1 : 0,
-			minutes: iteration === 1 ? 1 : 0,
-			seconds: iteration === 2 ? -1 : 0,
-			milliseconds: iteration === 3 ? 1 : 0,
 		};
 
 		// increasing test
@@ -115,7 +109,7 @@ class Almanac extends WeatherDisplay {
 				return this.getMoonTransition(threshold, phaseName, moonDate, iteration + 1);
 			}
 			iterations += 1;
-		} while (iterations < 1000);
+		} while (iterations < 100);
 
 		return { phase: phaseName, date: moonDate };
 	}
