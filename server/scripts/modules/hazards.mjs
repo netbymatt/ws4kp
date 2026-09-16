@@ -89,11 +89,10 @@ class Hazards extends WeatherDisplay {
 				this.data = [];
 			} else {
 				const allUnsortedAlerts = alerts.features ?? [];
-				const unsortedAlerts = allUnsortedAlerts.slice(0, 5);
-				const hasImmediate = unsortedAlerts.reduce((acc, hazard) => acc || hazard.properties.urgency === 'Immediate', false);
-				const sortedAlerts = unsortedAlerts.sort((a, b) => (calcSeverity(b.properties.severity, b.properties.event)) - (calcSeverity(a.properties.severity, a.properties.event)));
+				const hasImmediate = allUnsortedAlerts.reduce((acc, hazard) => acc || hazard.properties.urgency === 'Immediate', false);
+				const sortedAlerts = allUnsortedAlerts.sort((a, b) => (calcSeverity(b.properties.severity, b.properties.event)) - (calcSeverity(a.properties.severity, a.properties.event)));
 				const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown' && (!hasImmediate || (hazard.properties.urgency === 'Immediate')));
-				this.data = filteredAlerts;
+				this.data = filteredAlerts.slice(0, 5);
 			}
 
 			// every 10 times through the get process (10 minutes), reset the viewed messages

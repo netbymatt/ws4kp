@@ -91,9 +91,9 @@ const drawScreen = async () => {
 
 	// add the hazards if on screen 0
 	if (screenIndex === 0) {
-		const hazards = await getHazards();
-		if (hazards && hazards.length > 0) {
-			scrollData.hazards = hazards;
+		const hazardsData = await getHazards();
+		if (hazardsData && hazardsData.length > 0) {
+			scrollData.hazards = hazardsData;
 		}
 	}
 
@@ -103,7 +103,7 @@ const drawScreen = async () => {
 	const thisScreen = workingScreens[screenIndex](scrollData, parameters);
 
 	// update classes on the scroll area
-	mainScroll.classList.forEach((cls) => {
+	Array.from(mainScroll.classList).forEach((cls) => {
 		if (cls !== 'scroll') mainScroll.classList.remove(cls);
 	});
 	thisScreen?.classes?.forEach((cls) => mainScroll.classList.add(cls));
@@ -225,10 +225,12 @@ const drawScrollCondition = (screen) => {
 	const scrollElement = document.createElement('div');
 	scrollElement.classList.add('scroll-area');
 	scrollElement.innerHTML = screen.text;
-	// add it to the page to get the width
-	fixedScroll.innerHTML = scrollElement.outerHTML;
-	// grab the width
-	const { scrollWidth, clientWidth } = document.querySelector('#container>.scroll .fixed .scroll-area');
+
+	// empty and attach the new element
+	fixedScroll.innerHTML = '';
+	fixedScroll.append(scrollElement);
+
+	const { scrollWidth, clientWidth } = scrollElement;
 
 	// calculate the scroll distance and set a minimum scroll
 	const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
@@ -249,13 +251,10 @@ const drawScrollCondition = (screen) => {
 	scrollElement.style.backfaceVisibility = 'hidden'; // Force hardware acceleration
 	scrollElement.style.perspective = '1000px'; // Enable 3D rendering context
 
-	fixedScroll.innerHTML = '';
-	fixedScroll.append(scrollElement.cloneNode(true));
-
 	// start the scroll after the specified delay
 	setTimeout(() => {
 		// change the transform to trigger the scroll
-		document.querySelector('#container>.scroll .fixed .scroll-area').style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
+		scrollElement.style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
 	}, startDelayTime * 1000);
 };
 

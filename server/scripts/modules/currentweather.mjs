@@ -34,6 +34,30 @@ class CurrentWeather extends WeatherDisplay {
 		let observations;
 		let station;
 
+		const metarFields = [
+			{ name: 'temperature', check: (orig, metar) => orig.temperature?.value === null && metar.temperature?.value !== null },
+			{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed?.value === null && metar.windSpeed?.value !== null },
+			{ name: 'windDirection', check: (orig, metar) => orig.windDirection?.value === null && metar.windDirection?.value !== null },
+			{ name: 'windGust', check: (orig, metar) => orig.windGust?.value === null && metar.windGust?.value !== null },
+			{ name: 'dewpoint', check: (orig, metar) => orig.dewpoint?.value === null && metar.dewpoint?.value !== null },
+			{ name: 'barometricPressure', check: (orig, metar) => orig.barometricPressure?.value === null && metar.barometricPressure?.value !== null },
+			{ name: 'relativeHumidity', check: (orig, metar) => orig.relativeHumidity?.value === null && metar.relativeHumidity?.value !== null },
+			{ name: 'visibility', check: (orig, metar) => orig.visibility?.value === null && metar.visibility?.value !== null },
+			{ name: 'ceiling', check: (orig, metar) => orig.cloudLayers?.[0]?.base?.value === null && metar.cloudLayers?.[0]?.base?.value !== null },
+		];
+
+		// test data quality - check required fields and allow one optional field to be missing
+		const requiredFields = [
+			{ name: 'temperature', check: (props) => props.temperature?.value === null, required: true },
+			{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '', required: true },
+			{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null, required: false },
+			{ name: 'dewpoint', check: (props) => props.dewpoint?.value === null, required: false },
+			{ name: 'barometricPressure', check: (props) => props.barometricPressure?.value === null, required: false },
+			{ name: 'visibility', check: (props) => props.visibility?.value === null, required: false },
+			{ name: 'relativeHumidity', check: (props) => props.relativeHumidity?.value === null, required: false },
+			{ name: 'ceiling', check: (props) => props.cloudLayers?.[0]?.base?.value === null, required: false },
+		];
+
 		// station number counter
 		let stationNum = 0;
 		while (!observations && stationNum < stations.length) {
@@ -63,34 +87,11 @@ class CurrentWeather extends WeatherDisplay {
 				// Attempt making observation data usable with METAR data
 				const originalData = { ...candidateObservation.features[0].properties };
 				candidateObservation.features[0].properties = augmentObservationWithMetar(candidateObservation.features[0].properties);
-				const metarFields = [
-					{ name: 'temperature', check: (orig, metar) => orig.temperature?.value === null && metar.temperature?.value !== null },
-					{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed?.value === null && metar.windSpeed?.value !== null },
-					{ name: 'windDirection', check: (orig, metar) => orig.windDirection?.value === null && metar.windDirection?.value !== null },
-					{ name: 'windGust', check: (orig, metar) => orig.windGust?.value === null && metar.windGust?.value !== null },
-					{ name: 'dewpoint', check: (orig, metar) => orig.dewpoint?.value === null && metar.dewpoint?.value !== null },
-					{ name: 'barometricPressure', check: (orig, metar) => orig.barometricPressure?.value === null && metar.barometricPressure?.value !== null },
-					{ name: 'relativeHumidity', check: (orig, metar) => orig.relativeHumidity?.value === null && metar.relativeHumidity?.value !== null },
-					{ name: 'visibility', check: (orig, metar) => orig.visibility?.value === null && metar.visibility?.value !== null },
-					{ name: 'ceiling', check: (orig, metar) => orig.cloudLayers?.[0]?.base?.value === null && metar.cloudLayers?.[0]?.base?.value !== null },
-				];
 				const augmentedData = candidateObservation.features[0].properties;
 				const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
 				if (debugFlag('currentweather') && metarReplacements.length > 0) {
 					console.log(`Current Conditions for station ${stationId} were augmented with METAR data for ${metarReplacements.join(', ')}`);
 				}
-
-				// test data quality - check required fields and allow one optional field to be missing
-				const requiredFields = [
-					{ name: 'temperature', check: (props) => props.temperature?.value === null, required: true },
-					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '', required: true },
-					{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null, required: false },
-					{ name: 'dewpoint', check: (props) => props.dewpoint?.value === null, required: false },
-					{ name: 'barometricPressure', check: (props) => props.barometricPressure?.value === null, required: false },
-					{ name: 'visibility', check: (props) => props.visibility?.value === null, required: false },
-					{ name: 'relativeHumidity', check: (props) => props.relativeHumidity?.value === null, required: false },
-					{ name: 'ceiling', check: (props) => props.cloudLayers?.[0]?.base?.value === null, required: false },
-				];
 
 				// Use enhanced observation with MapClick fallback
 				// eslint-disable-next-line no-await-in-loop
@@ -106,15 +107,7 @@ class CurrentWeather extends WeatherDisplay {
 
 				candidateObservation.features[0].properties = enhancedResult.data;
 
-				const { missingFields } = enhancedResult;
-				const missingRequired = missingFields.filter((fieldName) => {
-					const field = requiredFields.find((f) => f.name === fieldName && f.required);
-					return !!field;
-				});
-				const missingOptional = missingFields.filter((fieldName) => {
-					const field = requiredFields.find((f) => f.name === fieldName && !f.required);
-					return !!field;
-				});
+				const { missingRequired, missingOptional } = enhancedResult;
 				const missingOptionalCount = missingOptional.length;
 
 				// Check final data quality
@@ -195,7 +188,7 @@ class CurrentWeather extends WeatherDisplay {
 		// get location (city name) from StationInfo if available (allows for overrides)
 		// longer name allowed if in wide-enhanced
 		const locationLimit = (settings.wide?.value && settings.enhanced?.value) ? 25 : 20;
-		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substr(0, locationLimit);
+		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substring(0, locationLimit);
 
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),

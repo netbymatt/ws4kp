@@ -6,11 +6,6 @@ const DEFAULT_REQUEST_TIMEOUT = 15000; // For example, with 3 retries: 15s+1s+15
 const safeJson = async (url, params) => {
 	try {
 		const result = await json(url, params);
-		// Return an object with both data and url if params.returnUrl is true
-		if (params?.returnUrl) {
-			return result;
-		}
-		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
 	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"
@@ -21,11 +16,6 @@ const safeJson = async (url, params) => {
 const safeText = async (url, params) => {
 	try {
 		const result = await text(url, params);
-		// Return an object with both data and url if params.returnUrl is true
-		if (params?.returnUrl) {
-			return result;
-		}
-		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
 	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"
@@ -36,11 +26,6 @@ const safeText = async (url, params) => {
 const safeBlob = async (url, params) => {
 	try {
 		const result = await blob(url, params);
-		// Return an object with both data and url if params.returnUrl is true
-		if (params?.returnUrl) {
-			return result;
-		}
-		// If caller didn't specify returnUrl, result is the raw API response
 		return result;
 	} catch {
 		// Error already logged in fetchAsync; return null to be "safe"

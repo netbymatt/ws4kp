@@ -67,6 +67,19 @@ class LatestObservations extends WeatherDisplay {
 
 	// This is a class method because it needs access to the instance's `stillWaiting` method
 	async getStations(stations) {
+		// test data quality
+		const requiredFields = [
+			{ name: 'temperature', check: (props) => props.temperature?.value === null },
+			{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null },
+			{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
+			{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
+		];
+
+		const metarFields = [
+			{ name: 'temperature', check: (orig, metar) => orig.temperature.value === null && metar.temperature.value !== null },
+			{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed.value === null && metar.windSpeed.value !== null },
+			{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
+		];
 		// Use centralized safe Promise handling to avoid unhandled AbortError rejections
 		const stationData = await safePromiseAll(stations.map(async (station) => {
 			try {
@@ -85,24 +98,12 @@ class LatestObservations extends WeatherDisplay {
 				// Enhance observation data with METAR parsing for missing fields
 				const originalData = { ...data.properties };
 				data.properties = augmentObservationWithMetar(data.properties);
-				const metarFields = [
-					{ name: 'temperature', check: (orig, metar) => orig.temperature.value === null && metar.temperature.value !== null },
-					{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed.value === null && metar.windSpeed.value !== null },
-					{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
-				];
+
 				const augmentedData = data.properties;
 				const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
 				if (debugFlag('latestobservations') && metarReplacements.length > 0) {
 					console.log(`Latest Observations for station ${station.id} were augmented with METAR data for ${metarReplacements.join(', ')}`);
 				}
-
-				// test data quality
-				const requiredFields = [
-					{ name: 'temperature', check: (props) => props.temperature?.value === null },
-					{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null },
-					{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
-					{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
-				];
 
 				// Use enhanced observation with MapClick fallback
 				const enhancedResult = await enhanceObservationWithMapClick(data.properties, {
@@ -113,12 +114,12 @@ class LatestObservations extends WeatherDisplay {
 				});
 
 				data.properties = enhancedResult.data;
-				const { missingFields } = enhancedResult;
+				const { missingRequired, missingOptional } = enhancedResult;
 
 				// Check final data quality
-				if (missingFields.length > 0) {
+				if ((missingRequired.length + missingOptional.length) > 0) {
 					if (debugFlag('latestobservations')) {
-						console.log(`Latest Observations for station ${station.id} is missing fields: ${missingFields.join(', ')}`);
+						console.log(`Latest Observations for station ${station.id} is missing fields: ${[...missingRequired, ...missingOptional].join(', ')}`);
 					}
 					return false;
 				}

@@ -67,12 +67,12 @@ const getRegionalObservation = async (point, city) => {
 		});
 
 		augmentedObservation = enhancedResult.data;
-		const { missingFields } = enhancedResult;
+		const { missingRequired, missingOptional } = enhancedResult;
 
 		// Check final data quality
-		if (missingFields.length > 0) {
+		if ((missingRequired.length + missingOptional.length) > 0) {
 			if (debugFlag('regionalforecast')) {
-				console.log(`Regional Observations for station ${stationId} is missing fields: ${missingFields.join(', ')} (skipping)`);
+				console.log(`Regional Observations for station ${stationId} is missing fields: ${[...missingRequired, ...missingOptional].join(', ')} (skipping)`);
 			}
 			return false;
 		}
