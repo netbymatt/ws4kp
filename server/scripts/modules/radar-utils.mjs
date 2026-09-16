@@ -1,109 +1,95 @@
+/* eslint-disable no-bitwise */
 import {
-	TILE_SIZE, TILE_FULL_SIZE, RADAR_OFFSET, RADAR_SHIFT, WORLD_TRANSFORM, RADAR_FINAL_SIZE, PX, PY,
+	WORLD_TRANSFORM, RADAR_FINAL_SIZE, PX, PY,
 } from './radar-constants.mjs';
 
-// limit a value to within a range
-const coerce = (low, value, high) => Math.max(Math.min(value, high), low);
+// pre-computed radar noise map to eliminate long comparison chain
+// keyed with packed RGB values
 
-const getXYFromLatitudeLongitudeMap = (pos) => {
-	// source values for conversion
-	// px		py		lon						lat
-	// 589	466		-122.3615246	47.63177832
-	// 5288	3638	-80.18297384	25.77018996
+const removeNoiseLookup = {
+	// Transparent
+	0: // ( 0 ,  0 ,  0)
+	{
+		R: 0, G: 0, B: 0, A: 0,
+	},
+	60652: // ( 0 ,  236 ,  236)
+	{
+		R: 0, G: 0, B: 0, A: 0,
+	},
+	106742: // ( 1 ,  160 ,  246)
+	{
+		R: 0, G: 0, B: 0, A: 0,
+	},
+	246: // ( 0 ,  0 ,  246)
+	{
+		R: 0, G: 0, B: 0, A: 0,
+	},
 
-	// map position is calculated as a regresion from the above values (+/- a manual adjustment factor) and shifting for enhanced views
-	// then shifted by half of the tile size (to center the map)
-	// then they are limited to values between 0 and the width or height of the map
-	const y = coerce(0, (-145.095 * pos.latitude + 7377.117) - 27 - (TILE_SIZE.y / 2) - RADAR_SHIFT().y, TILE_FULL_SIZE.y - (TILE_SIZE.y));
-	const x = coerce(0, (111.407 * pos.longitude + 14220.972) + 4 - (TILE_SIZE.x / 2) - RADAR_SHIFT().x, TILE_FULL_SIZE.x - (TILE_SIZE.x));
+	// Light Green 1
+	65280: // ( 0 ,  255 ,  0)
+	{
+		R: 49, G: 210, B: 22, A: 255,
+	},
 
-	return { x, y };
+	// Light Green 2
+	51200: // ( 0 ,  200 ,  0)
+	{
+		R: 0, G: 142, B: 0, A: 255,
+	},
+
+	// Dark Green 1
+	36864: // ( 0 ,  144 ,  0)
+	{
+		R: 20, G: 90, B: 15, A: 255,
+	},
+
+	// Dark Green 2
+	16776960: // ( 255 ,  255 ,  0)
+	{
+		R: 10, G: 40, B: 10, A: 255,
+	},
+
+	// Yellow
+	15187968: // ( 231 ,  192 ,  0)
+	{
+		R: 196, G: 179, B: 70, A: 255,
+	},
+
+	// Orange
+	16748544: // ( 255 ,  144 ,  0)
+	{
+		R: 190, G: 72, B: 19, A: 255,
+	},
+
+	// Red
+	14024704: // ( 214 ,  0 ,  0)
+	{
+		R: 171, G: 14, B: 14, A: 255,
+	},
+	16711680: // ( 255 ,  0 ,  0)
+	{
+		R: 171, G: 14, B: 14, A: 255,
+	},
+	12582912: // ( 192 ,  0 ,  0)
+	{
+		R: 115, G: 31, B: 4, A: 255,
+	},
+
+	// Brown
+	16711935: // ( 255 ,  0 ,  255)
+	{
+		R: 115, G: 31, B: 4, A: 255,
+	},
 };
 
-const getXYFromLatitudeLongitudeDoppler = (pos) => {
-	const imgHeight = 6000;
-	const imgWidth = 2800;
+const filterRadarNoise = (R, G, B) => {
+	// bit pack the provided color for lookup
+	const packedColor = (R << 16) | (G << 8) | B;
 
-	// map position is calculated as a regresion
-	// then shifted by half of the tile size (to center the map)
-	// then they are limited to values between 0 and the width or height of the map
-
-	const y = coerce(0, (51 - pos.latitude) * 61.4481 - RADAR_OFFSET().y, imgHeight);
-	const x = coerce(0, ((-129.138 - pos.longitude) * 42.1768) * -1 - RADAR_OFFSET().x, imgWidth);
-
-	return { x: x * 2, y: y * 2 };
-};
-
-/* eslint-disable no-param-reassign */
-const removeDopplerRadarImageNoise = (R, G, B, A) => {
-	// is this pixel the old rgb?
-	if ((R === 0 && G === 0 && B === 0)
-		|| (R === 0 && G === 236 && B === 236)
-		|| (R === 1 && G === 160 && B === 246)
-		|| (R === 0 && G === 0 && B === 246)) {
-		// change to your new rgb
-
-		// Transparent
-		R = 0;
-		G = 0;
-		B = 0;
-		A = 0;
-	} else if ((R === 0 && G === 255 && B === 0)) {
-		// Light Green 1
-		R = 49;
-		G = 210;
-		B = 22;
-		A = 255;
-	} else if ((R === 0 && G === 200 && B === 0)) {
-		// Light Green 2
-		R = 0;
-		G = 142;
-		B = 0;
-		A = 255;
-	} else if ((R === 0 && G === 144 && B === 0)) {
-		// Dark Green 1
-		R = 20;
-		G = 90;
-		B = 15;
-		A = 255;
-	} else if ((R === 255 && G === 255 && B === 0)) {
-		// Dark Green 2
-		R = 10;
-		G = 40;
-		B = 10;
-		A = 255;
-	} else if ((R === 231 && G === 192 && B === 0)) {
-		// Yellow
-		R = 196;
-		G = 179;
-		B = 70;
-		A = 255;
-	} else if ((R === 255 && G === 144 && B === 0)) {
-		// Orange
-		R = 190;
-		G = 72;
-		B = 19;
-		A = 255;
-	} else if ((R === 214 && G === 0 && B === 0)
-		|| (R === 255 && G === 0 && B === 0)) {
-		// Red
-		R = 171;
-		G = 14;
-		B = 14;
-		A = 255;
-	} else if ((R === 192 && G === 0 && B === 0)
-		|| (R === 255 && G === 0 && B === 255)) {
-		// Brown
-		R = 115;
-		G = 31;
-		B = 4;
-		A = 255;
-	}
-
-	return {
-		R, G, B, A,
+	// return the looked up color, or what was provided
+	return removeNoiseLookup[packedColor] ?? {
+		R, G, B, A: 255,
 	};
-	/* eslint-enable no-param-reassign */
 };
 
 const radarSourceGenerator = ({
@@ -119,14 +105,17 @@ const radarSourceGenerator = ({
 
 const radarSourceXyFromLonLat = radarSourceGenerator(WORLD_TRANSFORM);
 
-const shiftPixelForUser = ([px, py], user) => [
-	px + user[PX] - (RADAR_FINAL_SIZE().width / 2),
-	py + user[PY] - (RADAR_FINAL_SIZE().height / 2),
-];
+const shiftPixelForUserGenerator = (user) => {
+	const radarFinalSize = RADAR_FINAL_SIZE();
+	const shiftPixelForUser = ([px, py]) => [
+		px + user[PX] - (radarFinalSize.width / 2),
+		py + user[PY] - (radarFinalSize.height / 2),
+	];
+	return shiftPixelForUser;
+};
 
 export {
 	radarSourceXyFromLonLat,
-	getXYFromLatitudeLongitudeMap,
-	removeDopplerRadarImageNoise,
-	shiftPixelForUser,
+	filterRadarNoise,
+	shiftPixelForUserGenerator,
 };

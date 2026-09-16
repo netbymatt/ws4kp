@@ -2,7 +2,7 @@ import {
 	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY,
 } from './radar-constants.mjs';
 import elemForEach from './utils/elem-for-each.mjs';
-import { shiftPixelForUser } from './radar-utils.mjs';
+import { shiftPixelForUserGenerator } from './radar-utils.mjs';
 
 // convert a pixel location to a file/tile combination
 const pixelToFile = (xPixel, yPixel) => {
@@ -33,7 +33,8 @@ const setTiles = (data) => {
 	const elemIdFull = `${elemId}-html`;
 
 	// shift the working location to the top-left corner to center the resulting map on the user
-	const topLeft = shiftPixelForUser([0, 0], user);
+	const shiftPixelForUser = shiftPixelForUserGenerator(user);
+	const topLeft = shiftPixelForUser([0, 0]);
 
 	// determine the basemap images needed
 	const baseMapTiles = [
