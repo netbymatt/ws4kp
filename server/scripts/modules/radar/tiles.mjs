@@ -1,14 +1,14 @@
 import {
 	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY,
-} from './radar-constants.mjs';
-import elemForEach from './utils/elem-for-each.mjs';
-import { shiftPixelForUserGenerator } from './radar-utils.mjs';
+} from './constants.mjs';
+import elemForEach from '../utils/elem-for-each.mjs';
+import { shiftPixelForUserGenerator } from './positions.mjs';
 
 // convert a pixel location to a file/tile combination
 const pixelToFile = (xPixel, yPixel) => {
 	const xTile = Math.floor(xPixel / TILE_SIZE.x);
 	const yTile = Math.floor(yPixel / TILE_SIZE.y);
-	if (xTile < 0 || xTile > TILE_COUNT.x || yTile < 0 || yTile > TILE_COUNT.y) return false;
+	if (xTile < 0 || xTile >= TILE_COUNT.x || yTile < 0 || yTile >= TILE_COUNT.y) return false;
 	return `${xTile.toString().padStart(2, '0')}-${yTile.toString().padStart(2, '0')}`;
 };
 

@@ -1,5 +1,5 @@
-import settings from './settings.mjs';
-import { OUTPUTSIZES } from './utils/map-projection.mjs';
+import settings from '../settings.mjs';
+import { OUTPUTSIZES } from '../utils/map-projection.mjs';
 
 const radarFinalSize = () => {
 	const size = {
@@ -25,6 +25,9 @@ export const WORLD_TRANSFORM = {
 	C: -126.0,
 	F: 50,
 };
+
+// overridable radar host
+export const RADAR_HOST = 'mesonet.agron.iastate.edu';
 
 // array indices for reference
 export const PX = 0;

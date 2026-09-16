@@ -1,11 +1,5 @@
-/* eslint-disable no-bitwise */
-import {
-	WORLD_TRANSFORM, RADAR_FINAL_SIZE, PX, PY,
-} from './radar-constants.mjs';
-
-// pre-computed radar noise map to eliminate long comparison chain
+// pre-computed radar noise map to eliminate long comparison if chain
 // keyed with packed RGB values
-
 const removeNoiseLookup = {
 	// Transparent
 	0: // ( 0 ,  0 ,  0)
@@ -84,6 +78,7 @@ const removeNoiseLookup = {
 
 const filterRadarNoise = (R, G, B) => {
 	// bit pack the provided color for lookup
+	// eslint-disable-next-line no-bitwise
 	const packedColor = (R << 16) | (G << 8) | B;
 
 	// return the looked up color, or what was provided
@@ -92,30 +87,4 @@ const filterRadarNoise = (R, G, B) => {
 	};
 };
 
-const radarSourceGenerator = ({
-	A, D, B, E, C, F,
-}) => {
-	const det = A * E - B * D;
-	return ([lon, lat]) => {
-		const col = (E * (lon - C) - B * (lat - F)) / det;
-		const row = (A * (lat - F) - D * (lon - C)) / det;
-		return [col, row];
-	};
-};
-
-const radarSourceXyFromLonLat = radarSourceGenerator(WORLD_TRANSFORM);
-
-const shiftPixelForUserGenerator = (user) => {
-	const radarFinalSize = RADAR_FINAL_SIZE();
-	const shiftPixelForUser = ([px, py]) => [
-		px + user[PX] - (radarFinalSize.width / 2),
-		py + user[PY] - (radarFinalSize.height / 2),
-	];
-	return shiftPixelForUser;
-};
-
-export {
-	radarSourceXyFromLonLat,
-	filterRadarNoise,
-	shiftPixelForUserGenerator,
-};
+export default filterRadarNoise;

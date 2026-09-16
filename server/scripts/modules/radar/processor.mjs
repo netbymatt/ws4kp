@@ -1,76 +1,43 @@
-import { filterRadarNoise, radarSourceXyFromLonLat, shiftPixelForUserGenerator } from './radar-utils.mjs';
+import projectRadar from './projector.mjs';
+import filterRadarNoise from './filter-noise.mjs';
 import {
 	RADAR_FULL_SIZE, RADAR_FINAL_SIZE, PX, PY,
-} from './radar-constants.mjs';
-import fetchImageBlob from './utils/fetch-image-blob.mjs';
+} from './constants.mjs';
 
 const projectionCache = {
 	key: null,
 	rows: [],
 };
 
-// pre-compute the projection by providing pixel locations for each row
-// and a y=mx+b regression for each column in the source row
-// this removes the need to call proj4 for every pixel in the destination image
-const projectRadar = (projection, user) => {
-	const radarFinalSize = RADAR_FINAL_SIZE();
-	const rows = [];
+const createCanvas = (size) => {
+	const canvas = document.createElement('canvas');
+	canvas.width = size.width;
+	canvas.height = size.height;
+	const context = canvas.getContext('2d');
+	context.imageSmoothingEnabled = false;
 
-	const shiftPixelForUser = shiftPixelForUserGenerator(user);
-
-	for (let y = 0; y < radarFinalSize.height; y += 1) {
-		const lonLatLeft = projection.inverse(shiftPixelForUser([0, y]));
-		const lonLatRight = projection.inverse(shiftPixelForUser([radarFinalSize.width - 1, y]));
-		const sourcePxLeft = radarSourceXyFromLonLat(lonLatLeft);
-		const sourcePxRight = radarSourceXyFromLonLat(lonLatRight);
-
-		// calculate m, b for regression
-		const m = (sourcePxRight[PX] - sourcePxLeft[PX]) / ((radarFinalSize.width - 1) - 0);
-		const b = sourcePxRight[PX] - (m * (radarFinalSize.width - 1));
-
-		// store the regression for this row
-		// eslint-disable-next-line no-bitwise
-		const xRegression = ((xSource) => (xSource * m) + b | 0);// faster than Math.floor();
-
-		rows.push({
-			// eslint-disable-next-line no-bitwise
-			sourceY: sourcePxLeft[PY] | 0, // faster than Math.floor();
-			xRegression,
-			m,
-			b,
-		});
-	}
-
-	return rows;
+	return [
+		canvas,
+		context,
+	];
 };
 
 // process a single radar image and place it on the provided canvas
 const processRadar = async (data) => {
 	const {
-		url,
-		RADAR_HOST,
 		user,
 		projection,
+		radarBlob,
 	} = data;
 	const radarFinalSize = RADAR_FINAL_SIZE();
 
 	// get the image
-	const modifiedRadarUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
-	const radarBlobPromise = fetchImageBlob(modifiedRadarUrl);
 
 	// create radar context for destination image
-	const sourceCanvas = document.createElement('canvas');
-	sourceCanvas.width = RADAR_FULL_SIZE.width;
-	sourceCanvas.height = RADAR_FULL_SIZE.height;
-	const sourceCtx = sourceCanvas.getContext('2d');
-	sourceCtx.imageSmoothingEnabled = false;
+	const [, sourceCtx] = createCanvas(RADAR_FULL_SIZE);
 
 	// create the destination canvas
-	const destCanvas = document.createElement('canvas');
-	destCanvas.width = radarFinalSize.width;
-	destCanvas.height = radarFinalSize.height;
-	const destCtx = destCanvas.getContext('2d');
-	destCtx.imageSmoothingEnabled = false;
+	const [destCanvas, destCtx] = createCanvas(radarFinalSize);
 	const destData = destCtx.createImageData(radarFinalSize.width, radarFinalSize.height);
 
 	// calculate the cache key from unique values for how the radar is drawn
@@ -82,11 +49,8 @@ const processRadar = async (data) => {
 		projectionCache.rows = projectRadar(projection, user);
 	}
 
-	// get the blob
-	const radarSourceBlob = await radarBlobPromise;
-
 	// load radar into source canvas
-	const radarSourceBitmap = await createImageBitmap(radarSourceBlob);
+	const radarSourceBitmap = await createImageBitmap(radarBlob);
 	// draw the entire image
 	sourceCtx.drawImage(radarSourceBitmap, 0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
 	const sourceData = sourceCtx.getImageData(0, 0, RADAR_FULL_SIZE.width, RADAR_FULL_SIZE.height);
