@@ -91,7 +91,7 @@ class Radar extends WeatherDisplay {
 		}
 
 		const radarInfo = images.map((radar) => {
-			const elem = this.fillTemplate('frame', { map: { type: 'img', src: radar.dataUrl } });
+			const elem = this.fillTemplate('frame', { map: { type: 'canvas', canvas: radar.canvas } });
 			const time = radar.timestamp.setZone(timeZone());
 			return {
 				time,

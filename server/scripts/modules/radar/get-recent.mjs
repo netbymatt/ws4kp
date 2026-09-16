@@ -50,17 +50,19 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 	try {
 		const radarBlob = await fetchImageBlob(modifiedRadarUrl);
 
-		const dataUrl = await processRadar({
+		console.time(`process radar ${path}`);
+		const canvas = await processRadar({
 			user,
 			projection,
 			radarBlob,
 		});
+		console.timeEnd(`process radar ${path}`);
 
 		// store the processed radar
 		processedRadars.push({
 			key,
 			timestamp: myTimestamp,
-			dataUrl,
+			canvas,
 			used: true,
 		});
 
@@ -68,7 +70,7 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 		return {
 			key,
 			timestamp: myTimestamp,
-			dataUrl,
+			canvas,
 		};
 	} catch {
 		// usually a 404 and expected as some images may not be ready yet

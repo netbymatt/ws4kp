@@ -86,7 +86,7 @@ const processRadar = async (data) => {
 	// final copy to dest canvas
 	destCtx.putImageData(destData, 0, 0);
 
-	return destCanvas.toDataURL();
+	return destCanvas;
 };
 
 export default processRadar;
