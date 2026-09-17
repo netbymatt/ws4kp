@@ -205,7 +205,7 @@
 	}
 
 	&.hazard {
-		background-color: rgb(112, 35, 35);
+		background-color: c.$hazard-background;
 	}
 
 	.scroll-container {

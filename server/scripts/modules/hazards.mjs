@@ -1,4 +1,4 @@
-// hourly forecast list
+// hazards (alerts, warnings, etc)
 
 import STATUS from './status.mjs';
 import { safeJson } from './utils/fetch.mjs';
@@ -39,19 +39,6 @@ class Hazards extends WeatherDisplay {
 		this.viewedAlerts = new Set();
 		this.viewedGetCount = 0;
 
-		// cache for scroll calculations
-		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
-		// during scrolling. Hazard scrolls can vary greatly in length depending on active alerts, but
-		// without caching we'd perform hundreds of expensive DOM layout queries during each scroll cycle.
-		// The cache reduces this to one calculation when content changes, then reuses cached values to try
-		// and get smoother scrolling.
-		this.scrollCache = {
-			displayHeight: 0,
-			contentHeight: 0,
-			maxOffset: 0,
-			hazardLines: null,
-		};
-
 		// signature of the content currently rendered into the DOM, so a refresh that returns
 		// identical alerts can skip the rebuild entirely
 		this.lastContentSignature = null;
@@ -66,16 +53,16 @@ class Hazards extends WeatherDisplay {
 		// auto reload must be set up specifically for hazards in case it is disabled via checkbox (for the bottom line scroll)
 		if (this.autoRefreshHandle === null) this.setAutoReload();
 
-		const alert = this.checkbox.querySelector('.alert');
-		alert.classList.remove('show');
-
-		// if not a refresh (new site), all alerts are new
-		if (!refresh) {
-			this.viewedGetCount = 0;
-			this.viewedAlerts.clear();
-		}
-
 		try {
+			const alert = this.checkbox.querySelector('.alert');
+			alert.classList.remove('show');
+
+			// if not a refresh (new site), all alerts are new
+			if (!refresh) {
+				this.viewedGetCount = 0;
+				this.viewedAlerts.clear();
+			}
+
 			// get the forecast using centralized safe handling
 			const url = new URL('https://api.weather.gov/alerts/active');
 			url.searchParams.append('point', `${this.weatherParameters.latitude},${this.weatherParameters.longitude}`);
@@ -110,11 +97,6 @@ class Hazards extends WeatherDisplay {
 
 			// show alert indicator
 			if (unViewed > 0) alert.classList.add('show');
-			// draw the canvas to calculate the new timings and activate hazards in the slide deck again
-			// unless this has been disabled
-			if (this.isEnabled) {
-				this.drawLongCanvas();
-			}
 		} catch (error) {
 			console.error(`Unexpected Active Alerts error: ${error.message}`);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
@@ -153,6 +135,8 @@ class Hazards extends WeatherDisplay {
 		list.innerHTML = '';
 
 		const lines = unViewed.map((data) => {
+			// protect against a null description
+			if (!data.properties.description) return false;
 			const fillValues = {};
 			const description = data.properties.description
 				.replaceAll('\n\n', '<br/><br/>')
@@ -162,18 +146,9 @@ class Hazards extends WeatherDisplay {
 			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${description}<br/><br/><br/><br/>`; // Add some padding to scroll off the bottom a bit
 
 			return this.fillTemplate('hazard', fillValues);
-		});
+		}).filter((d) => d);
 
 		list.append(...lines);
-
-		// The scroll cache is invalidated by comparing element identity, but .hazard-lines is
-		// persistent - only its children are replaced above - and displayHeight is a fixed value
-		// from css. Both conditions in baseCountChange() therefore stay false after the first
-		// measurement, so maxOffset keeps the height of whatever content was measured first and
-		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
-		// explicitly so the next base count re-measures.
-		this.scrollCache.displayHeight = 0;
-		this.scrollCache.hazardLines = null;
 
 		// new content scrolls from the top
 		this.navBaseCount = 0;
@@ -223,27 +198,14 @@ class Hazards extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
-		// get the hazard lines element and cache measurements if needed
+		// get the hazard lines element
 		const hazardLines = this.elem.querySelector('.hazard-lines');
 		if (!hazardLines) return;
 
-		// update cache if needed (when content changes or first run)
-		if (this.scrollCache.hazardLines !== hazardLines || this.scrollCache.displayHeight === 0) {
-			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
-			this.scrollCache.contentHeight = hazardLines.offsetHeight;
-			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
-			this.scrollCache.hazardLines = hazardLines;
-
-			// Set up hardware acceleration on the hazard lines element
-			hazardLines.style.willChange = 'transform';
-			hazardLines.style.backfaceVisibility = 'hidden';
-		}
-
-		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
-
-		// don't let offset go negative
-		if (offsetY < 0) offsetY = 0;
+		const offsetY = Math.max(0, Math.min(
+			this.scrollTiming.maxOffset,
+			(count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount,
+		));
 
 		// use transform instead of scrollTo for hardware acceleration
 		hazardLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;

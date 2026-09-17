@@ -25,18 +25,6 @@ class Hourly extends WeatherDisplay {
 		// special height and width for scrolling
 		super(navId, elemId, 'Hourly Forecast', defaultActive);
 
-		// cache for scroll calculations
-		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
-		// during scrolling. Without caching, we'd perform hundreds of expensive DOM layout queries during
-		// the full scroll cycle. The cache reduces this to one calculation when content changes, then
-		// reuses cached values to try and get smoother scrolling.
-		this.scrollCache = {
-			displayHeight: 0,
-			contentHeight: 0,
-			maxOffset: 0,
-			hourlyLines: null,
-		};
-
 		// signature of the content currently rendered into the DOM, so a refresh that returns
 		// identical rows can skip the rebuild entirely
 		this.lastContentSignature = null;
@@ -135,15 +123,6 @@ class Hourly extends WeatherDisplay {
 
 		list.append(...lines);
 
-		// The scroll cache is invalidated by comparing element identity, but .hourly-lines is
-		// persistent - only its children are replaced above - and displayHeight is a fixed value
-		// from css. Both conditions in baseCountChange() therefore stay false after the first
-		// measurement, so maxOffset keeps the height of whatever content was measured first and
-		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
-		// explicitly so the next base count re-measures.
-		this.scrollCache.displayHeight = 0;
-		this.scrollCache.hourlyLines = null;
-
 		// new content scrolls from the top
 		this.navBaseCount = 0;
 
@@ -169,27 +148,14 @@ class Hourly extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
-		// get the hourly lines element and cache measurements if needed
+		// get the hourly lines element
 		const hourlyLines = this.elem.querySelector('.hourly-lines');
 		if (!hourlyLines) return;
 
-		// update cache if needed (when content changes or first run)
-		if (this.scrollCache.hourlyLines !== hourlyLines || this.scrollCache.displayHeight === 0) {
-			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
-			this.scrollCache.contentHeight = hourlyLines.offsetHeight;
-			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
-			this.scrollCache.hourlyLines = hourlyLines;
-
-			// Set up hardware acceleration on the hourly lines element
-			hourlyLines.style.willChange = 'transform';
-			hourlyLines.style.backfaceVisibility = 'hidden';
-		}
-
-		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
-
-		// don't let offset go negative
-		if (offsetY < 0) offsetY = 0;
+		const offsetY = Math.max(0, Math.min(
+			this.scrollTiming.maxOffset,
+			(count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount,
+		));
 
 		// use transform instead of scrollTo for hardware acceleration
 		hourlyLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;

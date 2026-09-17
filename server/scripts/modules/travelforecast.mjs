@@ -24,19 +24,6 @@ class TravelForecast extends WeatherDisplay {
 		// add previous data cache
 		this.previousData = [];
 
-		// cache for scroll calculations
-		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
-		// during scrolling. Travel forecast scroll duration varies based on the number of cities configured.
-		// Without caching, we'd perform hundreds of expensive DOM layout queries during each scroll cycle.
-		// The cache reduces this to one calculation when content changes, then reuses cached values to try
-		// and get smoother scrolling.
-		this.scrollCache = {
-			displayHeight: 0,
-			contentHeight: 0,
-			maxOffset: 0,
-			travelLines: null,
-		};
-
 		// signature of the content currently rendered into the DOM, so a refresh that returns
 		// identical cities can skip the rebuild entirely
 		this.lastContentSignature = null;
@@ -146,15 +133,6 @@ class TravelForecast extends WeatherDisplay {
 		}).filter((d) => d);
 		list.append(...lines);
 
-		// The scroll cache is invalidated by comparing element identity, but .travel-lines is
-		// persistent - only its children are replaced above - and displayHeight is a fixed value
-		// from css. Both conditions in baseCountChange() therefore stay false after the first
-		// measurement, so maxOffset keeps the height of whatever content was measured first and
-		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
-		// explicitly so the next base count re-measures.
-		this.scrollCache.displayHeight = 0;
-		this.scrollCache.travelLines = null;
-
 		// new content scrolls from the top
 		this.navBaseCount = 0;
 
@@ -188,27 +166,14 @@ class TravelForecast extends WeatherDisplay {
 
 	// base count change callback
 	baseCountChange(count) {
-		// get the travel lines element and cache measurements if needed
+		// get the travel lines element
 		const travelLines = this.elem.querySelector('.travel-lines');
 		if (!travelLines) return;
 
-		// update cache if needed (when content changes or first run)
-		if (this.scrollCache.travelLines !== travelLines || this.scrollCache.displayHeight === 0) {
-			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
-			this.scrollCache.contentHeight = travelLines.offsetHeight;
-			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
-			this.scrollCache.travelLines = travelLines;
-
-			// Set up hardware acceleration on the travel lines element
-			travelLines.style.willChange = 'transform';
-			travelLines.style.backfaceVisibility = 'hidden';
-		}
-
-		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
-
-		// don't let offset go negative
-		if (offsetY < 0) offsetY = 0;
+		const offsetY = Math.max(0, Math.min(
+			this.scrollTiming.maxOffset,
+			(count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount,
+		));
 
 		// use transform instead of scrollTo for hardware acceleration
 		travelLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;

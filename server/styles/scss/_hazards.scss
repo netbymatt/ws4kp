@@ -11,7 +11,7 @@
 	&.main {
 		overflow-y: hidden;
 		height: p.$standard-height;
-		background-color: rgb(112, 35, 35);
+		background-color: c.$hazard-background;
 
 		width: p.$standard-width;
 
@@ -26,6 +26,8 @@
 		.hazard-lines {
 			min-height: 400px;
 			padding-top: 10px;
+			will-change: transform;
+			backface-visibility: hidden;
 
 			.hazard {
 				font-family: 'Star4000';
