@@ -4,7 +4,7 @@ import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
-import { getLargeIcon } from './icons.mjs';
+import largeIcon from './icons/large.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
@@ -161,7 +161,7 @@ class CurrentWeather extends WeatherDisplay {
 
 		// preload the icon if available
 		if (observations.features[0].properties.icon) {
-			const iconResult = getLargeIcon(observations.features[0].properties.icon);
+			const iconResult = largeIcon(observations.features[0].properties.icon);
 			if (iconResult) {
 				preloadImg(iconResult);
 			}
@@ -299,7 +299,7 @@ const parseData = (data) => {
 	data.Humidity = Math.round(observations.relativeHumidity.value);
 
 	// Get the large icon, but provide a fallback if it returns false
-	const iconResult = getLargeIcon(observations.icon);
+	const iconResult = largeIcon(observations.icon);
 	data.Icon = iconResult || observations.icon; // Use original icon if getLargeIcon returns false
 
 	data.PressureDirection = '';

@@ -1,4 +1,4 @@
-import { getSmallIcon } from './icons.mjs';
+import smallIcon from './icons/small.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
@@ -79,7 +79,7 @@ const getRegionalObservation = async (point, city) => {
 
 		// preload the image
 		if (!augmentedObservation.icon) return false;
-		const icon = getSmallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
+		const icon = smallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
 		if (!icon) return false;
 		preloadImg(icon);
 		// return the observation

@@ -4,7 +4,7 @@ import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit, windSpeed as windUnit } from './utils/units.mjs';
-import { getHourlyIcon } from './icons.mjs';
+import hourlyIcon from './icons/hourly.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import ScrollWeatherDisplay from './scroll-weather-display.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
@@ -172,7 +172,7 @@ const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPr
 	return skyCover.map((val, idx) => {
 		const hour = startOfHour.plus({ hours: idx });
 		const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-		return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
+		return hourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
 	});
 };
 

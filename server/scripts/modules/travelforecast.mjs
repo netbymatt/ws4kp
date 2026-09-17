@@ -1,7 +1,7 @@
 // travel forecast display
 import STATUS from './status.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
-import { getSmallIcon } from './icons.mjs';
+import smallIcon from './icons/small.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import ScrollWeatherDisplay from './scroll-weather-display.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -72,7 +72,7 @@ class TravelForecast extends ScrollWeatherDisplay {
 					high: forecast.properties.periods[todayShift].temperature,
 					low: forecast.properties.periods[todayShift + 1].temperature,
 					name: city.Name,
-					icon: getSmallIcon(forecast.properties.periods[todayShift].icon),
+					icon: smallIcon(forecast.properties.periods[todayShift].icon),
 				};
 			} catch (error) {
 				console.error(`Unexpected error getting Travel Forecast for ${city.Name}: ${error.message}`);

@@ -4,7 +4,7 @@
 import STATUS from './status.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { getLargeIcon } from './icons.mjs';
+import largeIcon from './icons/large.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -145,7 +145,7 @@ const parse = (fullForecast, forecastUrl) => {
 		if (period.isDaytime) {
 			// day time is the high temperature
 			fDay.high = period.temperature;
-			fDay.icon = getLargeIcon(period.icon);
+			fDay.icon = largeIcon(period.icon);
 			fDay.text = shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = DateTime.fromISO(period.startTime).startOf('day').toLocaleString({ weekday: 'short' });
 			// preload the icon
