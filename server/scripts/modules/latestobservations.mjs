@@ -1,4 +1,4 @@
-// current weather conditions display
+// latest nearby observations display
 import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
@@ -11,12 +11,11 @@ import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 
+const MAX_REGIONAL_STATIONS = 7;
+
 class LatestObservations extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Latest Observations', true);
-
-		// constants
-		this.MaximumRegionalStations = 7;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -32,30 +31,23 @@ class LatestObservations extends WeatherDisplay {
 
 		// sort the stations by distance
 		const sortedStations = stationsByDistance.sort((a, b) => a.distance - b.distance);
+
 		// try up to 30 regional stations
-		const regionalStations = sortedStations.slice(0, 30);
+		// store the stations to be processed by the recursive loop
+		const queue = { stations: sortedStations.slice(0, 30), index: 0 };
+		// helper to grab the next station in line
+		// eslint-disable-next-line no-plusplus
+		const nextStation = () => queue.stations[queue.index++];
 
-		// Fetch stations sequentially in batches to avoid unnecessary API calls.
-		// We start with the 7 closest stations and only fetch more if some fail,
-		// stopping as soon as we have 7 valid stations with data.
-		const actualConditions = [];
-		const stationLimit = this.MaximumRegionalStations * ((settings.portrait?.value) ? 2 : 1);
-		let lastStation = Math.min(regionalStations.length, stationLimit);
-		let firstStation = 0;
-		while (actualConditions.length < stationLimit && (lastStation) <= regionalStations.length) {
-			// Sequential fetching is intentional here - we want to try closest stations first
-			// and only fetch additional batches if needed, rather than hitting all 30 stations at once
-			// eslint-disable-next-line no-await-in-loop
-			const someStations = await this.getStations(regionalStations.slice(firstStation, lastStation));
+		// get stations via the recurrent getStation function and the length of queue.stations
+		const stationLimit = MAX_REGIONAL_STATIONS * ((settings.portrait?.value) ? 2 : 1);
+		const workerCount = Math.min(queue.stations.length, stationLimit);
 
-			actualConditions.push(...someStations);
-			// update counters
-			firstStation += lastStation;
-			lastStation = Math.min(regionalStations.length + 1, firstStation + stationLimit - actualConditions.length);
-		}
+		// run the loop (and filter out empty responses)
+		const actualConditions = (await safePromiseAll(Array.from({ length: workerCount }).map(() => this.getStation(nextStation)))).filter((d) => d);
 
-		// cut down to the maximum that fit on the page
-		this.data = actualConditions.slice(0, stationLimit);
+		// sort by distance is added in case a mid-station fails and a further one is inserted in its place
+		this.data = actualConditions.sort((a, b) => a.distance - b.distance);
 
 		// test for at least one station
 		if (this.data.length === 0) {
@@ -65,86 +57,80 @@ class LatestObservations extends WeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
+	// self recurring station data get function to ensure a call to it returns some data before the end-of-bound check
+	async getStation(nextStation) {
+		// see if there are any stations available
+		const station = nextStation();
+		if (!station) return false;
+		// fire up a station worker
+		const stationData = await this.getStationWorker(station);
+
+		// if data was returned use this, otherwise recur
+		if (stationData) return stationData;
+		// recur (loop is ended when nextStation is exhausted with the length of regional stations)
+		return this.getStation(nextStation);
+	}
+
 	// This is a class method because it needs access to the instance's `stillWaiting` method
-	async getStations(stations) {
-		// test data quality
-		const requiredFields = [
-			{ name: 'temperature', check: (props) => props.temperature?.value === null },
-			{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null },
-			{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
-			{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
-		];
+	async getStationWorker(station) {
+		try {
+			const data = await safeJson(`https://api.weather.gov/stations/${station.id}/observations/latest`, {
+				retryCount: 0, // there are other stations in the list that can take this place
+				stillWaiting: () => this.stillWaiting(),
+			});
 
-		const metarFields = [
-			{ name: 'temperature', check: (orig, metar) => orig.temperature.value === null && metar.temperature.value !== null },
-			{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed.value === null && metar.windSpeed.value !== null },
-			{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
-		];
-		// Use centralized safe Promise handling to avoid unhandled AbortError rejections
-		const stationData = await safePromiseAll(stations.map(async (station) => {
-			try {
-				const data = await safeJson(`https://api.weather.gov/stations/${station.id}/observations/latest`, {
-					retryCount: 1,
-					stillWaiting: () => this.stillWaiting(),
-				});
-
-				if (!data) {
-					if (debugFlag('verbose-failures')) {
-						console.log(`Failed to get Latest Observations for station ${station.id}`);
-					}
-					return false;
+			if (!data) {
+				if (debugFlag('verbose-failures')) {
+					console.log(`Failed to get Latest Observations for station ${station.id}`);
 				}
-
-				// Enhance observation data with METAR parsing for missing fields
-				const originalData = { ...data.properties };
-				data.properties = augmentObservationWithMetar(data.properties);
-
-				const augmentedData = data.properties;
-				const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
-				if (debugFlag('latestobservations') && metarReplacements.length > 0) {
-					console.log(`Latest Observations for station ${station.id} were augmented with METAR data for ${metarReplacements.join(', ')}`);
-				}
-
-				// Use enhanced observation with MapClick fallback
-				const enhancedResult = await enhanceObservationWithMapClick(data.properties, {
-					requiredFields,
-					stationId: station.id,
-					stillWaiting: () => this.stillWaiting(),
-					debugContext: 'latestobservations',
-				});
-
-				data.properties = enhancedResult.data;
-				const { missingRequired, missingOptional } = enhancedResult;
-
-				// Check final data quality
-				if ((missingRequired.length + missingOptional.length) > 0) {
-					if (debugFlag('latestobservations')) {
-						console.log(`Latest Observations for station ${station.id} is missing fields: ${[...missingRequired, ...missingOptional].join(', ')}`);
-					}
-					return false;
-				}
-
-				// format the return values
-				return {
-					...data.properties,
-					StationId: station.id,
-					city: station.city,
-				};
-			} catch (error) {
-				console.error(`Unexpected error getting latest observations for station ${station.id}: ${error.message}`);
 				return false;
 			}
-		}));
-		// filter false (no data or other error)
-		return stationData.filter((d) => d);
+
+			// Enhance observation data with METAR parsing for missing fields
+			const originalData = { ...data.properties };
+			data.properties = augmentObservationWithMetar(data.properties);
+
+			const augmentedData = data.properties;
+			const metarReplacements = metarFields.filter((field) => field.check(originalData, augmentedData)).map((field) => field.name);
+			if (debugFlag('latestobservations') && metarReplacements.length > 0) {
+				console.log(`Latest Observations for station ${station.id} were augmented with METAR data for ${metarReplacements.join(', ')}`);
+			}
+
+			// Use enhanced observation with MapClick fallback
+			const enhancedResult = await enhanceObservationWithMapClick(data.properties, {
+				requiredFields,
+				stationId: station.id,
+				stillWaiting: () => this.stillWaiting(),
+				debugContext: 'latestobservations',
+			});
+
+			data.properties = enhancedResult.data;
+			const { missingRequired, missingOptional } = enhancedResult;
+
+			// Check final data quality
+			if ((missingRequired.length + missingOptional.length) > 0) {
+				if (debugFlag('latestobservations')) {
+					console.log(`Latest Observations for station ${station.id} is missing fields: ${[...missingRequired, ...missingOptional].join(', ')}`);
+				}
+				return false;
+			}
+
+			// format the return values
+			return {
+				...data.properties,
+				StationId: station.id,
+				city: station.city,
+				distance: station.distance,
+			};
+		} catch (error) {
+			console.error(`Unexpected error getting latest observations for station ${station.id}: ${error.message}`);
+			return false;
+		}
 	}
 
 	async drawCanvas() {
 		super.drawCanvas();
 		const conditions = this.data;
-
-		// sort array by station name
-		const sortedConditions = conditions.sort((a, b) => ((a.Name < b.Name) ? -1 : 1));
 
 		if (settings.units.value === 'us') {
 			this.elem.querySelector('.column-headers .temp.english').classList.add('show');
@@ -157,7 +143,7 @@ class LatestObservations extends WeatherDisplay {
 		const windConverter = windSpeed();
 		const temperatureConverter = temperature();
 
-		const lines = sortedConditions.map((condition) => {
+		const lines = conditions.map((condition) => {
 			const windDirection = directionToNSEW(condition.windDirection.value);
 
 			const Temperature = temperatureConverter(condition.temperature.value);
@@ -168,15 +154,15 @@ class LatestObservations extends WeatherDisplay {
 			const weatherLimit = (settings.wide?.value && settings.enhanced?.value) ? 10 : 9;
 
 			const fill = {
-				location: locationCleanup(condition.city).substr(0, locationLimit),
+				location: locationCleanup(condition.city).substring(0, locationLimit),
 				temp: Temperature,
 				like: Like.value,
-				weather: shortenCurrentConditions(condition.textDescription).substr(0, weatherLimit),
+				weather: shortenCurrentConditions(condition.textDescription).substring(0, weatherLimit),
 			};
 
 			if (WindSpeed > 0) {
-				fill.wind = windDirection + (Array(6 - windDirection.length - WindSpeed.toString().length).join(' ')) + WindSpeed.toString();
-			} else if (WindSpeed === 'NA') {
+				fill.wind = windDirection.padEnd(3, ' ') + WindSpeed.toString().padStart(2, ' ');
+			} else if (WindSpeed === '-') {
 				fill.wind = 'NA';
 			} else {
 				fill.wind = 'Calm';
@@ -201,9 +187,13 @@ class LatestObservations extends WeatherDisplay {
 // generate a "feels like" temperature from heat index and wind chill.
 const likeTemperature = (heat, wind, actual, converter) => {
 	// figure out the feels like value
+	// wind chill wins, not that both can happen at the same time
 	let value = '';
-	if (heat) value = converter(heat);
-	if (wind) value = converter(wind);
+	if (wind !== null && wind !== undefined) {
+		value = converter(wind);
+	} else if (heat !== null && heat !== undefined) {
+		value = converter(heat);
+	}
 
 	// determine if there's a red/blue color class to add
 	let cssClass;
@@ -217,22 +207,35 @@ const likeTemperature = (heat, wind, actual, converter) => {
 	};
 };
 
+// test data quality
+const requiredFields = [
+	{ name: 'temperature', check: (props) => props.temperature?.value === null },
+	{ name: 'windSpeed', check: (props) => props.windSpeed?.value === null },
+	{ name: 'windDirection', check: (props) => props.windDirection?.value === null },
+	{ name: 'textDescription', check: (props) => props.textDescription === null || props.textDescription === '' },
+];
+const metarFields = [
+	{ name: 'temperature', check: (orig, metar) => orig.temperature.value === null && metar.temperature.value !== null },
+	{ name: 'windSpeed', check: (orig, metar) => orig.windSpeed.value === null && metar.windSpeed.value !== null },
+	{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
+];
+
 const shortenCurrentConditions = (_condition) => {
 	let condition = _condition;
-	condition = condition.replace(/Light/, 'L');
-	condition = condition.replace(/Heavy/, 'H');
-	condition = condition.replace(/Partly/, 'P');
-	condition = condition.replace(/Mostly/, 'M');
-	condition = condition.replace(/Few/, 'F');
-	condition = condition.replace(/Thunderstorm/, 'T\'storm');
-	condition = condition.replace(/ in /, '');
-	condition = condition.replace(/Vicinity/, '');
-	condition = condition.replace(/ and /, ' ');
-	condition = condition.replace(/Freezing Rain/, 'Frz Rn');
-	condition = condition.replace(/Freezing/, 'Frz');
-	condition = condition.replace(/Unknown Precip/, '');
-	condition = condition.replace(/L Snow Fog/, 'L Snw/Fog');
-	condition = condition.replace(/ with /, '/');
+	condition = condition.replace(/Light/g, 'L');
+	condition = condition.replace(/Heavy/g, 'H');
+	condition = condition.replace(/Partly/g, 'P');
+	condition = condition.replace(/Mostly/g, 'M');
+	condition = condition.replace(/Few/g, 'F');
+	condition = condition.replace(/Thunderstorm/g, 'T\'storm');
+	condition = condition.replace(/ in /g, '');
+	condition = condition.replace(/Vicinity/g, '');
+	condition = condition.replace(/ and /g, ' ');
+	condition = condition.replace(/Freezing Rain/g, 'Frz Rn');
+	condition = condition.replace(/Freezing/g, 'Frz');
+	condition = condition.replace(/Unknown Precip/g, '');
+	condition = condition.replace(/L Snow Fog/g, 'L Snw/Fog');
+	condition = condition.replace(/ with /g, '/');
 	return condition;
 };
 // register display
