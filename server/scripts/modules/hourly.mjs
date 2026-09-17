@@ -115,7 +115,7 @@ class Hourly extends WeatherDisplay {
 			fillValues.wind = 'Calm';
 			if (data.windSpeed > 0) {
 				const windSpeed = Math.round(data.windSpeed).toString();
-				fillValues.wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
+				fillValues.wind = data.windDirection.padEnd(3, ' ') + windSpeed.padStart(3, ' ');
 			}
 
 			// image
@@ -126,7 +126,7 @@ class Hourly extends WeatherDisplay {
 			// alter the color of the feels like column to reflect wind chill or heat index
 			if (data.apparentTemperature < data.temperature) {
 				filledRow.querySelector('.like').classList.add('wind-chill');
-			} else if (feelsLike > temperature) {
+			} else if (data.apparentTemperature > data.temperature) {
 				filledRow.querySelector('.like').classList.add('heat-index');
 			}
 
@@ -257,7 +257,7 @@ const parseForecast = async (data) => {
 
 // given forecast paramaters determine a suitable icon
 const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) => {
-	const startOfHour = DateTime.local().startOf('hour');
+	const startOfHour = DateTime.local().setZone(timeZone()).startOf('hour');
 	const sunTimes = (await getSun()).sun;
 	const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
 	const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);

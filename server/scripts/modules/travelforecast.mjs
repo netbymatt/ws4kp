@@ -55,8 +55,7 @@ class TravelForecast extends WeatherDisplay {
 			try {
 				// get point then forecast
 				if (!city.point) throw new Error('No pre-loaded point');
-				let forecast;
-				forecast = await safeJson(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
+				let forecast = await safeJson(`https://api.weather.gov/gridpoints/${city.point.wfo}/${city.point.x},${city.point.y}/forecast`, {
 					data: {
 						units: settings.units.value,
 					},
@@ -99,7 +98,7 @@ class TravelForecast extends WeatherDisplay {
 		this.data = forecasts;
 
 		// test for some data available in at least one forecast
-		const hasData = this.data.some((forecast) => forecast.high);
+		const hasData = this.data.some((forecast) => !forecast.error);
 		if (!hasData) {
 			this.setStatus(STATUS.noData);
 			return;
@@ -126,28 +125,23 @@ class TravelForecast extends WeatherDisplay {
 
 		const lines = cities.map((city) => {
 			if (city.error) return false;
-			const fillValues = {
-				city,
-			};
+			const fillValues = {};
 
-			// check for forecast data
-			if (city.icon) {
-				fillValues.city = city.name;
-				// get temperatures and convert if necessary
-				const { low, high } = city;
+			// fill forecast data
+			fillValues.city = city.name;
+			// get temperatures and convert if necessary
+			const { low, high } = city;
 
-				// convert to strings with no decimal
-				const lowString = Math.round(low).toString();
-				const highString = Math.round(high).toString();
+			// convert to strings with no decimal
+			const lowString = Math.round(low).toString();
+			const highString = Math.round(high).toString();
 
-				fillValues.low = lowString;
-				fillValues.high = highString;
-				const { icon } = city;
+			fillValues.low = lowString;
+			fillValues.high = highString;
+			const { icon } = city;
 
-				fillValues.icon = { type: 'img', src: icon };
-			} else {
-				fillValues.error = 'NO TRAVEL DATA AVAILABLE';
-			}
+			fillValues.icon = { type: 'img', src: icon };
+
 			return this.fillTemplate('travel-row', fillValues);
 		}).filter((d) => d);
 		list.append(...lines);
@@ -175,8 +169,8 @@ class TravelForecast extends WeatherDisplay {
 
 		// set up variables
 		const cities = this.data;
-
-		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${getTravelCitiesDayName(cities)}`;
+		const dayName = getTravelCitiesDayName(cities);
+		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${dayName}`;
 
 		this.finishDraw();
 	}
@@ -220,11 +214,6 @@ class TravelForecast extends WeatherDisplay {
 		travelLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
 	}
 
-	// necessary to get the lastest long canvas when scrolling
-	getLongCanvas() {
-		return this.longCanvas;
-	}
-
 	setTiming(list) {
 		const container = this.elem.querySelector('.main');
 		const timingConfig = calculateScrollTiming(list, container, {
@@ -240,16 +229,18 @@ class TravelForecast extends WeatherDisplay {
 	}
 }
 
-// effectively returns early on the first found date
-const getTravelCitiesDayName = (cities) => cities.reduce((dayName, city) => {
-	if (city && dayName === '') {
+// returns early on the first found date
+const getTravelCitiesDayName = (cities) => {
+	const firstCity = cities.find((city) => city && !city.error);
+	if (firstCity) {
 		// today or tomorrow
-		const day = DateTime.local().plus({ days: (city.today) ? 0 : 1 });
+		const day = DateTime.local().plus({ days: (firstCity.today) ? 0 : 1 });
 		// return the day
 		return day.toLocaleString({ weekday: 'long' });
 	}
-	return dayName;
-}, '');
+
+	return '';
+};
 
 // register display, not active by default
 registerDisplay(new TravelForecast(5, 'travel', false));
