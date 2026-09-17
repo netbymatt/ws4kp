@@ -2,9 +2,8 @@
 
 import STATUS from './status.mjs';
 import { safeJson } from './utils/fetch.mjs';
-import WeatherDisplay from './weatherdisplay.mjs';
+import ScrollWeatherDisplay from './scroll-weather-display.mjs';
 import { registerDisplay } from './navigation.mjs';
-import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
 const hazardLevels = {
@@ -20,12 +19,17 @@ const hazardModifiers = {
 
 // A cheap, stable signature of the content about to be rendered. Alert ids alone are not enough:
 // an alert can be reissued under the same id with updated text, which changes the rendered height.
-const contentSignature = (alerts) => alerts.map((alert) => `${alert.id}|${alert.properties.event}|${alert.properties.description ?? ''}`).join('\u0000');
+const rowsSignature = (alerts) => alerts.map((alert) => `${alert.id}|${alert.properties.event}|${alert.properties.description ?? ''}`).join('\u0000');
 
-class Hazards extends WeatherDisplay {
+class Hazards extends ScrollWeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Hazards', defaultActive);
+		super(navId, elemId, 'Hazards', defaultActive, {
+			linesSelector: '.hazard-lines',
+			scrollTiming: {
+				finalPause: 2.0, // shorter final pause for hazards
+			},
+		});
 		this.showOnProgress = false;
 		this.okToDrawCurrentConditions = false;
 
@@ -38,10 +42,6 @@ class Hazards extends WeatherDisplay {
 		// take note of the already-shown alert ids
 		this.viewedAlerts = new Set();
 		this.viewedGetCount = 0;
-
-		// signature of the content currently rendered into the DOM, so a refresh that returns
-		// identical alerts can skip the rebuild entirely
-		this.lastContentSignature = null;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -112,103 +112,35 @@ class Hazards extends WeatherDisplay {
 			return;
 		}
 		this.drawLongCanvas();
-	}
-
-	async drawLongCanvas() {
-		// get the list element and populate
-		const list = this.elem.querySelector('.hazard-lines');
-
-		// filter viewed alerts
-		const unViewed = this.data.filter((data) => !this.viewedAlerts.has(data.id));
-
-		// If the content is identical to what is already rendered, leave the DOM and the scroll
-		// position alone. Hazards refresh every 60 seconds but a long multi-alert scroll can run for
-		// several minutes, so rebuilding on every refresh would restart it from the top and it would
-		// never reach the end. The populated-list check means an empty list is always rebuilt.
-		const signature = contentSignature(unViewed);
-		if (signature === this.lastContentSignature && list.children.length > 0) {
-			this.setStatus(STATUS.loaded);
-			return;
-		}
-		this.lastContentSignature = signature;
-
-		list.innerHTML = '';
-
-		const lines = unViewed.map((data) => {
-			// protect against a null description
-			if (!data.properties.description) return false;
-			const fillValues = {};
-			const description = data.properties.description
-				.replaceAll('\n\n', '<br/><br/>')
-				.replaceAll('\n', ' ')
-				.replace(/(\S)\.\.\.(\S)/g, '$1... $2'); // Add space after ... when surrounded by non-whitespace to improve text-wrappability
-
-			fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${description}<br/><br/><br/><br/>`; // Add some padding to scroll off the bottom a bit
-
-			return this.fillTemplate('hazard', fillValues);
-		}).filter((d) => d);
-
-		list.append(...lines);
-
-		// new content scrolls from the top
-		this.navBaseCount = 0;
-
-		// no alerts, skip this display by setting timing to zero
-		if (lines.length === 0) {
-			this.setStatus(STATUS.loaded);
-			this.timing.totalScreens = 0;
-			this.setStatus(STATUS.loaded);
-			return;
-		}
-
-		// update timing
-		this.setTiming(list);
 		this.setStatus(STATUS.loaded);
 	}
 
-	setTiming(list) {
-		const container = this.elem.querySelector('.main');
-		const timingConfig = calculateScrollTiming(list, container, {
-			finalPause: 2.0, // shorter final pause for hazards
-		});
-
-		// Apply the calculated timing
-		this.timing.baseDelay = timingConfig.baseDelay;
-		this.timing.delay = timingConfig.delay;
-		this.scrollTiming = timingConfig.scrollTiming;
-
-		this.calcNavTiming();
+	// alerts that have already been scrolled through are not shown again until the next reset
+	scrollRows() {
+		return this.data.filter((data) => !this.viewedAlerts.has(data.id));
 	}
 
-	drawCanvas() {
-		super.drawCanvas();
-		this.finishDraw();
+	// Alert ids alone are not enough: an alert can be reissued under the same id with updated
+	// text, which changes the rendered height. Hazards refresh every 60 seconds but a long
+	// multi-alert scroll can run for several minutes, so rebuilding on every refresh would
+	// restart it from the top and it would never reach the end.
+	// eslint-disable-next-line class-methods-use-this
+	contentSignature(alerts) {
+		return rowsSignature(alerts);
 	}
 
-	showCanvas() {
-		// special to hourly to draw the remainder of the canvas
-		this.drawCanvas();
-		super.showCanvas();
-	}
+	buildRow(data) {
+		// protect against a null description
+		if (!data.properties.description) return false;
+		const fillValues = {};
+		const description = data.properties.description
+			.replaceAll('\n\n', '<br/><br/>')
+			.replaceAll('\n', ' ')
+			.replace(/(\S)\.\.\.(\S)/g, '$1... $2'); // Add space after ... when surrounded by non-whitespace to improve text-wrappability
 
-	// screen index change callback just runs the base count callback
-	screenIndexChange() {
-		this.baseCountChange(this.navBaseCount);
-	}
+		fillValues['hazard-text'] = `${data.properties.event}<br/><br/>${description}<br/><br/><br/><br/>`; // Add some padding to scroll off the bottom a bit
 
-	// base count change callback
-	baseCountChange(count) {
-		// get the hazard lines element
-		const hazardLines = this.elem.querySelector('.hazard-lines');
-		if (!hazardLines) return;
-
-		const offsetY = Math.max(0, Math.min(
-			this.scrollTiming.maxOffset,
-			(count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount,
-		));
-
-		// use transform instead of scrollTo for hardware acceleration
-		hazardLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
+		return this.fillTemplate('hazard', fillValues);
 	}
 
 	// after we roll through the hazards once, don't display again until the next refresh (10 minutes)

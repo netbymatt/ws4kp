@@ -3,30 +3,30 @@ import STATUS from './status.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { getSmallIcon } from './icons.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import WeatherDisplay from './weatherdisplay.mjs';
+import ScrollWeatherDisplay from './scroll-weather-display.mjs';
 import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';
-import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
 // A cheap, stable signature of the content about to be rendered. Only the fields that reach the DOM
 // are included. Rows for cities whose forecast failed are dropped from the rendered list, so the row
 // count - and therefore the rendered height - changes as individual cities come and go.
-const contentSignature = (cities) => cities.map((city) => (city.error
+const rowsSignature = (cities) => cities.map((city) => (city.error
 	? `${city.name}|error`
 	: `${city.name}|${city.high}|${city.low}|${city.icon}`)).join('\u0000');
 
-class TravelForecast extends WeatherDisplay {
+class TravelForecast extends ScrollWeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Travel Forecast', defaultActive);
+		super(navId, elemId, 'Travel Forecast', defaultActive, {
+			linesSelector: '.travel-lines',
+			scrollTiming: {
+				staticDisplay: 5.0, // special static display time for travel forecast
+			},
+		});
 
 		// add previous data cache
 		this.previousData = [];
-
-		// signature of the content currently rendered into the DOM, so a refresh that returns
-		// identical cities can skip the rebuild entirely
-		this.lastContentSignature = null;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -95,102 +95,42 @@ class TravelForecast extends WeatherDisplay {
 		this.drawLongCanvas();
 	}
 
-	async drawLongCanvas() {
-		// get the element and populate
-		const list = this.elem.querySelector('.travel-lines');
-
-		// set up variables
-		const cities = this.data;
-
-		// if the content is identical to what is already rendered, leave the DOM and the scroll
-		// position alone rather than rebuilding and restarting an in-progress scroll
-		const signature = contentSignature(cities);
-		if (signature === this.lastContentSignature && list.children.length > 0) return;
-		this.lastContentSignature = signature;
-
-		list.innerHTML = '';
-
-		const lines = cities.map((city) => {
-			if (city.error) return false;
-			const fillValues = {};
-
-			// fill forecast data
-			fillValues.city = city.name;
-			// get temperatures and convert if necessary
-			const { low, high } = city;
-
-			// convert to strings with no decimal
-			const lowString = Math.round(low).toString();
-			const highString = Math.round(high).toString();
-
-			fillValues.low = lowString;
-			fillValues.high = highString;
-			const { icon } = city;
-
-			fillValues.icon = { type: 'img', src: icon };
-
-			return this.fillTemplate('travel-row', fillValues);
-		}).filter((d) => d);
-		list.append(...lines);
-
-		// new content scrolls from the top
-		this.navBaseCount = 0;
-
-		// update timing based on actual content
-		this.setTiming(list);
+	scrollRows() {
+		return this.data;
 	}
 
-	async drawCanvas() {
-		// there are technically 2 canvases: the standard canvas and the extra-long canvas that contains the complete
-		// list of cities. The second canvas is copied into the standard canvas to create the scroll
-		super.drawCanvas();
+	// eslint-disable-next-line class-methods-use-this
+	contentSignature(cities) {
+		return rowsSignature(cities);
+	}
 
-		// set up variables
-		const cities = this.data;
-		const dayName = getTravelCitiesDayName(cities);
+	buildRow(city) {
+		// cities whose forecast failed are dropped from the rendered list
+		if (city.error) return false;
+		const fillValues = {};
+
+		// fill forecast data
+		fillValues.city = city.name;
+		// get temperatures and convert if necessary
+		const { low, high } = city;
+
+		// convert to strings with no decimal
+		const lowString = Math.round(low).toString();
+		const highString = Math.round(high).toString();
+
+		fillValues.low = lowString;
+		fillValues.high = highString;
+		const { icon } = city;
+
+		fillValues.icon = { type: 'img', src: icon };
+
+		return this.fillTemplate('travel-row', fillValues);
+	}
+
+	// the header carries the day the forecast is for
+	drawScreenContent() {
+		const dayName = getTravelCitiesDayName(this.data);
 		this.elem.querySelector('.header .title.dual .bottom').innerHTML = `For ${dayName}`;
-
-		this.finishDraw();
-	}
-
-	async showCanvas() {
-		// special to travel forecast to draw the remainder of the canvas
-		await this.drawCanvas();
-		super.showCanvas();
-	}
-
-	// screen index change callback just runs the base count callback
-	screenIndexChange() {
-		this.baseCountChange(this.navBaseCount);
-	}
-
-	// base count change callback
-	baseCountChange(count) {
-		// get the travel lines element
-		const travelLines = this.elem.querySelector('.travel-lines');
-		if (!travelLines) return;
-
-		const offsetY = Math.max(0, Math.min(
-			this.scrollTiming.maxOffset,
-			(count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount,
-		));
-
-		// use transform instead of scrollTo for hardware acceleration
-		travelLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
-	}
-
-	setTiming(list) {
-		const container = this.elem.querySelector('.main');
-		const timingConfig = calculateScrollTiming(list, container, {
-			staticDisplay: 5.0, // special static display time for travel forecast
-		});
-
-		// Apply the calculated timing
-		this.timing.baseDelay = timingConfig.baseDelay;
-		this.timing.delay = timingConfig.delay;
-		this.scrollTiming = timingConfig.scrollTiming;
-
-		this.calcNavTiming();
 	}
 }
 
