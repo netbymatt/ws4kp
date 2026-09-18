@@ -17,38 +17,22 @@ const init = () => {
 	}
 };
 
-const createLink = async (e) => {
+const createLink = (e) => {
 	// cancel default event (click on hyperlink)
 	e.preventDefault();
 
 	// list to receive checkbox statuses
 	const queryStringElements = {};
 
-	elemForEach('input[type=checkbox]', (elem) => {
-		// use name, and fallback to id (older prefix/suffix permalinks)
-		const key = elem?.name ?? elem?.id;
-		if (key) {
-			queryStringElements[key] = elem?.checked ?? false;
-		}
-	});
-
-	// get all select boxes
-	elemForEach('select', (elem) => {
-		// use name, and fallback to id (older prefix/suffix permalinks)
-		const key = elem?.name ?? elem?.id;
-		if (key) {
-			queryStringElements[key] = encodeURIComponent(elem?.value ?? '');
-		}
-	});
-
-	// get all text boxes
-	elemForEach('input[type=text]', ((elem) => {
-		// use name, and fallback to id (older prefix/suffix permalinks)
-		const key = elem?.name ?? elem?.id;
-		if (key && key !== '') {
-			queryStringElements[key] = elem?.value ?? 0;
-		}
-	}));
+	const captureField = (selector, getValue) => {
+		elemForEach(selector, (elem) => {
+			const key = elem?.name ?? elem?.id;
+			if (key) queryStringElements[key] = getValue(elem);
+		});
+	};
+	captureField('input[type=checkbox]', (elem) => elem?.checked ?? false);
+	captureField('select', (elem) => elem?.value ?? '');
+	captureField('input[type=text]', (elem) => elem?.value ?? '');
 
 	// get any hidden settings
 	hiddenSettings.forEach((setting) => {
@@ -86,6 +70,7 @@ const copyToClipboard = async (url) => {
 		}, 5000);
 	} catch (error) {
 		console.error(error);
+		writeLinkToPage(url);
 	}
 };
 
@@ -102,7 +87,6 @@ const writeLinkToPage = (url) => {
 };
 
 const registerHiddenSetting = (name, value) => {
-	// name is the id of the element
 	// value can be a function that returns the current value of the setting
 	// or an instance of Setting
 	hiddenSettings.push({
