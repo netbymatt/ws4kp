@@ -10,11 +10,13 @@ import settings from './settings.mjs';
 import elemForEach from './utils/elem-for-each.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
+let drawStartedAt = null;
+
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
 		// navId is used in messaging and sort order
 		this.navId = navId;
-		this.elemId = undefined;
+		this.elemId = elemId;
 		this.data = undefined;
 		this.loadingStatus = STATUS.loading;
 		this.name = name ?? elemId;
@@ -35,9 +37,6 @@ class WeatherDisplay {
 		};
 		this.navBaseCount = 0;
 		this.screenIndex = -1;	// special starting condition
-
-		// store elemId once
-		this.storeElemId(elemId);
 
 		if (this.isEnabled) {
 			this.setStatus(STATUS.loading);
@@ -127,12 +126,6 @@ class WeatherDisplay {
 		this.loadingStatus = state;
 	}
 
-	storeElemId(elemId) {
-		// only create it once
-		if (this.elemId) return;
-		this.elemId = elemId;
-	}
-
 	// get necessary data for this display
 	getData(weatherParameters, refresh) {
 		// refresh doesn't delete existing data, and is reused if the silent refresh fails
@@ -150,6 +143,7 @@ class WeatherDisplay {
 			this.setStatus(STATUS.loading);
 		} else {
 			this.setStatus(STATUS.disabled);
+			// returns false when disabled; displays that publish data to other modules should continue fetching anyway
 			return false;
 		}
 
@@ -173,10 +167,13 @@ class WeatherDisplay {
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;
 		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
-		if (this.okToDrawCurrentConditions) postMessage({ type: 'current-weather-scroll', method: 'start' });
-		if (!this.okToDrawCurrentConditions) postMessage({ type: 'current-weather-scroll', method: 'non-display' });
-		if (this.okToDrawCurrentConditions === false) postMessage({ type: 'current-weather-scroll', method: 'hide' });
-		this.sendRenderStart();
+		if (this.okToDrawCurrentConditions) {
+			postMessage({ type: 'current-weather-scroll', method: 'start' });
+		} else {
+			postMessage({ type: 'current-weather-scroll', method: 'non-display' });
+			postMessage({ type: 'current-weather-scroll', method: 'hide' });
+		}
+		WeatherDisplay.sendRenderStart();
 	}
 
 	finishDraw() {
@@ -189,7 +186,7 @@ class WeatherDisplay {
 				this.dateTimeInterval = setInterval(() => this.active && this.drawCurrentDateTime(), 100);
 			}
 		}
-		this.sendRenderEnd();
+		WeatherDisplay.sendRenderEnd();
 	}
 
 	drawCurrentDateTime() {
@@ -233,7 +230,7 @@ class WeatherDisplay {
 	hideCanvas() {
 		this.resetNavBaseCount();
 		if (this.elem.classList.contains('show')) {
-			this.sendRenderStart();
+			WeatherDisplay.sendRenderStart();
 		}
 		this.elem.classList.remove('show');
 		// used to change backgrounds for widescreen
@@ -327,13 +324,20 @@ class WeatherDisplay {
 		// test for -1 (no screen displayed yet)
 		this.screenIndex = nextScreenIndex === -1 ? 0 : nextScreenIndex;
 
-		// call the appropriate screen index change method
+		// Optional hook. Defining this REPLACES the automatic drawCanvas() call on screen
+		// transitions - implementors are responsible for drawing (typically from showCanvas).
 		if (this.screenIndexChange) {
-			this.screenIndexChange(this.screenIndex);
+			this.screenIndexChange();
 		} else {
 			await this.drawCanvas();
 		}
 		this.showCanvas();
+	}
+
+	// Optional hook, called on every base count tick while this display is active.
+	// eslint-disable-next-line class-methods-use-this
+	baseCountChange() {
+		return false;
 	}
 
 	// take the three timing formats shown above and break them into arrays for consistent usage in navigation functions
@@ -522,22 +526,23 @@ class WeatherDisplay {
 		this.autoRefreshHandle = this.autoRefreshHandle ?? setInterval(() => this.getData(this.weatherParameters, true), refreshTime);
 	}
 
-	sendRenderStart() {
-		if (!this.drawStartedAt) {
-			this.drawStartedAt = Date.now();
+	// these hooks work with ws4channels to suppress grabbing a frame mid-change
+	static sendRenderStart() {
+		if (!drawStartedAt) {
+			drawStartedAt = Date.now();
 		}
 		document.dispatchEvent(new Event('ws4kp-render-start'));
 	}
 
-	sendRenderEnd() {
+	static sendRenderEnd() {
 		requestAnimationFrame(() => requestAnimationFrame(() => {
 			document.dispatchEvent(new CustomEvent('ws4kp-render-end', {
 				detail: {
-					startedAt: this.drawStartedAt,
+					startedAt: drawStartedAt,
 					endedAt: Date.now(),
 				},
 			}));
-			this.drawStartedAt = null;
+			drawStartedAt = null;
 		}));
 	}
 }

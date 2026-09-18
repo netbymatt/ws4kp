@@ -346,13 +346,17 @@ const handleNavButton = (button) => {
 		case 'menu':
 			setPlaying(false);
 			postMessage({ type: 'current-weather-scroll', method: 'hide' });
+			hideAllCanvases();
 			if (progress) {
 				progress.showCanvas();
+				// close the render-start hideAllCanvases() just triggered, instead of leaving it
+				// to whichever display's status happens to change next
+				progress.drawCanvas(displays, countLoadedDisplays());
 			} else if (settings?.kiosk?.value) {
 				// In kiosk mode without progress, show the loading screen
 				document.querySelector('#loading').style.display = 'flex';
 			}
-			hideAllCanvases();
+
 			break;
 		default:
 			console.error(`Unknown navButton ${button}`);
@@ -790,9 +794,6 @@ window.applyScanlineScaling = applyScanlineScaling;
 const registerDisplay = (display) => {
 	if (displays[display.navId]) console.warn(`Display nav ID ${display.navId} already in use`);
 	displays[display.navId] = display;
-
-	// generate checkboxes
-	generateCheckboxes();
 };
 
 const generateCheckboxes = () => {
