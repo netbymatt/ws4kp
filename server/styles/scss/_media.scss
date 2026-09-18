@@ -9,6 +9,7 @@
 	&.available {
 		display: inline-block;
 
+		// #ToggleMedia is a pure play/stop toggle; icon switch is handled by adding/removing the .playing class
 		img.on {
 			display: none;
 		}
@@ -17,7 +18,6 @@
 			display: block;
 		}
 
-		// icon switch is handled by adding/removing the .playing class
 		&.playing {
 			img.on {
 				display: block;
@@ -27,17 +27,40 @@
 				display: none;
 			}
 
+			// full strength once something is actually playing
+			#ToggleMediaVolume,
+			.volume-slider {
+				opacity: 1;
+			}
 		}
 
 
+	}
+
+	#ToggleMedia,
+	#ToggleMediaVolume {
+		display: inline-block;
+	}
+
+	// #ToggleMediaVolume opens/closes the volume popup, independent of the play/pause toggle.
+	// it (and the slider it reveals) read as inactive until something is playing, but stay
+	// fully clickable/draggable - interacting with the slider while stopped starts playback.
+	#ToggleMediaVolume {
+		margin-left: 4px;
+	}
+
+	#ToggleMediaVolume,
+	.volume-slider {
+		opacity: 0.4;
+		transition: opacity 0.2s ease;
 	}
 
 	.volume-slider {
 		display: none;
 		position: absolute;
 		top: 0px;
-		transform: translateY(-100%);
-		width: 100%;
+		transform: translateY(-100%) translateX(100%);
+		width: 50%;
 		background-color: #000;
 		text-align: center;
 		z-index: 100;
