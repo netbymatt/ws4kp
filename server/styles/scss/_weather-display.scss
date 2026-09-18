@@ -205,7 +205,7 @@
 	}
 
 	&.hazard {
-		background-color: rgb(112, 35, 35);
+		background-color: c.$hazard-background;
 	}
 
 	.scroll-container {
@@ -229,6 +229,8 @@
 		.fixed {
 			font-family: 'Star4000';
 			font-size: 32px;
+			overflow: hidden;
+			white-space: nowrap;
 
 			.scroll-area {
 				text-wrap: nowrap;
@@ -238,7 +240,24 @@
 				// left: calc((elem width) - p.$standard-width);
 			}
 		}
+
+		.reveal {
+			overflow: hidden;
+			width: 0;
+			animation:
+				typing 0.2s steps(21, end) forwards;
+		}
+
+		@keyframes typing {
+			to {
+				width: 100%
+			}
+		}
+
+
 	}
+
+
 
 
 

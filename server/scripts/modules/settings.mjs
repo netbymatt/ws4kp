@@ -7,8 +7,10 @@ const settings = { speed: { value: 1.0 } };
 // Track settings that need DOM changes after early initialization
 const deferredDomSettings = new Set();
 
+let unitChangefirstRunDone = false;
+
 // don't show checkboxes for these settings
-const hiddenSettings = [
+const hiddenSettingNames = [
 	'scanLines',
 
 	// wide, portrait and enhanced are handled by a dropdown which sets these individual settings accordingly
@@ -71,7 +73,7 @@ const enhancedChange = (value) => {
 	} else {
 		container.classList.remove('enhanced');
 	}
-	// Trigger resize to recalculate scaling for new width, on next event loop to allow settings to propigate
+	// Trigger resize to recalculate scaling for new width, on next event loop to allow settings to propagate
 	setTimeout(() => window.dispatchEvent(new Event('redraw')), 0);
 };
 
@@ -113,12 +115,11 @@ const kioskChange = (value) => {
 	if (value) {
 		body.classList.add('kiosk');
 		document.querySelector('#divTwc')?.classList.add('no-cursor');
-		window.dispatchEvent(new Event('resize'));
 	} else {
 		body.classList.remove('kiosk');
 		document.querySelector('#divTwc')?.classList.remove('no-cursor');
-		window.dispatchEvent(new Event('resize'));
 	}
+	window.dispatchEvent(new Event('resize'));
 
 	// Conditionally store the kiosk setting based on the "Sticky Kiosk" setting
 	// (Need to check if the method exists to handle initialization race condition)
@@ -186,10 +187,10 @@ window.changeScanlineMode = (mode) => {
 const unitChange = () => {
 	// reload the data at the top level to refresh units
 	// after the initial load
-	if (unitChange.firstRunDone) {
+	if (unitChangefirstRunDone) {
 		window.location.reload();
 	}
-	unitChange.firstRunDone = true;
+	unitChangefirstRunDone = true;
 };
 
 const init = () => {
@@ -323,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Then generate the settings UI
 	const settingHtml = Object.values(settings).map((setting) => {
-		if (hiddenSettings.includes(setting.shortName)) {
+		if (hiddenSettingNames.includes(setting.shortName)) {
 			// setting is hidden, register it
 			registerHiddenSetting(setting.shortName, setting);
 			return false;

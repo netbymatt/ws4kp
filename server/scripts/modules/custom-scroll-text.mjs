@@ -5,6 +5,7 @@ let firstRun = true;
 
 // change of enable handler
 const changeEnable = (newValue) => {
+	if (firstRun) return;
 	let newDisplay;
 	if (newValue) {
 		// add the text to the scroll
@@ -17,7 +18,7 @@ const changeEnable = (newValue) => {
 		// hide the string entry
 		newDisplay = 'none';
 	}
-	const stringEntry = document.getElementById('settings-customText-string');
+	const stringEntry = customText.element;
 	if (stringEntry) {
 		stringEntry.style.display = newDisplay;
 	}
@@ -31,6 +32,7 @@ const parseText = (textInput) => {
 	// test validity
 	if (textInput === undefined || textInput === '') {
 		resetScroll();
+		return;
 	}
 
 	// split the text at pipe characters

@@ -59,6 +59,7 @@ const calculateScrollTiming = (list, container, options = {}) => {
 		scrollTiming: {
 			initialCounts,
 			pixelsPerCount,
+			maxOffset: scrollableHeight,
 		},
 	};
 };

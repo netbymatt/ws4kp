@@ -7,6 +7,7 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
 import testPolygon from './utils/polygon.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import settings from './settings.mjs';
 
 // list of interesting files ordered [0] = today, [1] = tomorrow...
 const urlPattern = (day, type) => `https://www.spc.noaa.gov/products/outlook/day${day}otlk_${type}.nolyr.geojson`;
@@ -77,7 +78,7 @@ class SpcOutlook extends WeatherDisplay {
 
 				// store the data
 				rawOutlookData.forEach((outlookDay, index) => {
-					this.data[index].categorical = outlookDay.features;
+					this.data[index].categorical = outlookDay?.features;
 				});
 
 				// check for at least one day of data
@@ -103,10 +104,13 @@ class SpcOutlook extends WeatherDisplay {
 		// see if we're inside any of the polygons
 		const daysToGet = this.testAllPoints([this.weatherParameters.longitude, this.weatherParameters.latitude], 'categorical');
 
-		// determine if all detail data is present
-		const allDataPresent = this.data.every((day, dayIndex) => (!daysToGet[dayIndex] || Object.values(day).every((cur) => (cur !== undefined))));
-		if (!allDataPresent) {
-			await this.getRemainingData(daysToGet);
+		// only get detailed data if in portrait
+		if (settings.portrait?.value) {
+			// determine if all detail data is present
+			const allDataPresent = this.data.every((day, dayIndex) => (!daysToGet[dayIndex]?.categorical || Object.values(day).every((cur) => (cur !== undefined))));
+			if (!allDataPresent) {
+				await this.getRemainingData(daysToGet);
+			}
 		}
 
 		this.filteredData = this.testAllPoints([this.weatherParameters.longitude, this.weatherParameters.latitude]);
@@ -155,34 +159,35 @@ class SpcOutlook extends WeatherDisplay {
 		dayContainer.innerHTML = '';
 		dayContainer.append(...days);
 
-		// add details for portrait
-		// header first
-		this.data.forEach((day, index) => {
-			if (index > 1) return;
-			const header = this.elem.querySelector(`.header.day-${index}`);
-			const dayName = DateTime.now().plus({ days: index }).toLocaleString({ weekday: 'long' });
-			header.innerHTML = dayName;
-		});
+		// add details for portrait if in portrait
+		if (settings.portrait?.value) { // header first
+			this.data.forEach((day, index) => {
+				if (index > 1) return;
+				const header = this.elem.querySelector(`.header.day-${index}`);
+				const dayName = DateTime.now().plus({ days: index }).toLocaleString({ weekday: 'long' });
+				header.innerHTML = dayName;
+			});
 
-		// first column labels
-		const rowLabels = ['Tornado', 'Wind', 'Hail'];
+			// first column labels
+			const rowLabels = ['Tornado', 'Wind', 'Hail'];
 
-		const detailLines = rowLabels.map((label) => {
-			const row = [];
-			// type of phenomena
-			row.push(this.fillTemplate('type', { 'grid-item': label }));
-			const phenomena = label.toLowerCase();
-			// probability
-			row.push(this.fillTemplate('day-0', { 'grid-item': formatProbability(this.filteredData[0]?.[phenomena]?.DN) }));
-			row.push(this.fillTemplate('day-1', { 'grid-item': formatProbability(this.filteredData[1]?.[phenomena]?.DN) }));
-			return row;
-		}).flat(1);
+			const detailLines = rowLabels.map((label) => {
+				const row = [];
+				// type of phenomena
+				row.push(this.fillTemplate('type', { 'grid-item': label }));
+				const phenomena = label.toLowerCase();
+				// probability
+				row.push(this.fillTemplate('day-0', { 'grid-item': formatProbability(this.filteredData[0]?.[phenomena]?.DN) }));
+				row.push(this.fillTemplate('day-1', { 'grid-item': formatProbability(this.filteredData[1]?.[phenomena]?.DN) }));
+				return row;
+			}).flat(1);
 
-		// add the lines to the page
-		const details = this.elem.querySelector('.container-details .table');
-		const replaceable = details.querySelectorAll('.replaceable');
-		replaceable.forEach((elem) => elem.remove());
-		details.append(...detailLines);
+			// add the lines to the page
+			const details = this.elem.querySelector('.container-details .table');
+			const replaceable = details.querySelectorAll('.replaceable');
+			replaceable.forEach((elem) => elem.remove());
+			details.append(...detailLines);
+		}
 
 		// finish drawing
 		this.finishDraw();
@@ -190,7 +195,7 @@ class SpcOutlook extends WeatherDisplay {
 
 	async getRemainingData(daysToGet) {
 		await Promise.allSettled(this.data.map(async (day, index) => {
-			if (!daysToGet[index]) return;
+			if (!daysToGet[index]?.categorical) return;
 			const dayPromises = Object.entries(day).map(async ([key, value]) => {
 				// if data is already present, no work to do
 				if (value) return true;
@@ -212,7 +217,6 @@ class SpcOutlook extends WeatherDisplay {
 
 		// types can be specificed as a string, array of strings or defaults to all types
 		let types = Object.keys(phenomenonTypes);
-		if (Array.isArray(_types)) types = +types;
 		if (typeof _types === 'string') types = [_types];
 
 		const result = [];

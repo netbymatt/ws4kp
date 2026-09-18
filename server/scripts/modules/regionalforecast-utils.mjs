@@ -1,4 +1,4 @@
-import { getSmallIcon } from './icons.mjs';
+import smallIcon from './icons/small.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
@@ -67,19 +67,19 @@ const getRegionalObservation = async (point, city) => {
 		});
 
 		augmentedObservation = enhancedResult.data;
-		const { missingFields } = enhancedResult;
+		const { missingRequired, missingOptional } = enhancedResult;
 
 		// Check final data quality
-		if (missingFields.length > 0) {
+		if ((missingRequired.length + missingOptional.length) > 0) {
 			if (debugFlag('regionalforecast')) {
-				console.log(`Regional Observations for station ${stationId} is missing fields: ${missingFields.join(', ')} (skipping)`);
+				console.log(`Regional Observations for station ${stationId} is missing fields: ${[...missingRequired, ...missingOptional].join(', ')} (skipping)`);
 			}
 			return false;
 		}
 
 		// preload the image
 		if (!augmentedObservation.icon) return false;
-		const icon = getSmallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
+		const icon = smallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
 		if (!icon) return false;
 		preloadImg(icon);
 		// return the observation

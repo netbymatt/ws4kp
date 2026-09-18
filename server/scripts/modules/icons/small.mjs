@@ -1,4 +1,4 @@
-import parseIconUrl from './icons-parse.mjs';
+import parseIconUrl from './parse.mjs';
 
 const addPath = (icon) => `images/icons/regional-maps/${icon}`;
 

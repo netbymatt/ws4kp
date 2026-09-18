@@ -33,7 +33,7 @@ const categories = [
 const category = categories.join(',');
 const TXT_ADDRESS_SELECTOR = '#txtLocation';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
-const BNT_GET_GPS_SELECTOR = '#btnGetGps';
+const BTN_GET_GPS_SELECTOR = '#btnGetGps';
 
 const init = async () => {
 	// Load core data first - app cannot function without it
@@ -71,7 +71,7 @@ const init = async () => {
 		fullscreenButton.addEventListener('click', btnFullScreenClick);
 	}
 
-	const btnGetGps = document.querySelector(BNT_GET_GPS_SELECTOR);
+	const btnGetGps = document.querySelector(BTN_GET_GPS_SELECTOR);
 	btnGetGps.addEventListener('click', btnGetGpsClick);
 	if (!navigator.geolocation) btnGetGps.style.display = 'none';
 
@@ -163,7 +163,7 @@ const init = async () => {
 
 	// Auto-play logic: also play immediately if kiosk mode is enabled
 	const play = settings.kiosk.value || urlKioskCheckbox === 'true' ? 'true' : localStorage.getItem('play');
-	if (play === null || play === 'true') postMessage('navButton', 'play');
+	if (play === null || play === 'true') sendNavButtonMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
 		document.querySelector('#spanCity').innerHTML = '';
@@ -175,12 +175,12 @@ const init = async () => {
 		document.querySelector('#spanGridPoint').innerHTML = '';
 
 		localStorage.removeItem('play');
-		postMessage('navButton', 'play');
+		sendNavButtonMessage('navButton', 'play');
 
 		localStorage.removeItem('latLonQuery');
 		localStorage.removeItem('latLon');
 		localStorage.removeItem('latLonFromGPS');
-		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');
+		document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
 	});
 
 	// swipe functionality
@@ -225,7 +225,7 @@ const autocompleteOnSelect = async (suggestion) => {
 	const loc = data.locations[0];
 	if (loc) {
 		localStorage.removeItem('latLonFromGPS');
-		document.querySelector(BNT_GET_GPS_SELECTOR).classList.remove('active');
+		document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
 		doRedirectToGeometry(loc.feature.geometry);
 	} else {
 		console.error('An unexpected error occurred. Please try a different search string.');
@@ -329,20 +329,21 @@ const exitFullScreenVisibilityChanges = () => {
 };
 
 const btnNavigateMenuClick = () => {
-	postMessage('navButton', 'menu');
+	sendNavButtonMessage('navButton', 'menu');
 	return false;
 };
 
+let currentLatLon;
+
 const loadData = (_latLon, haveDataCallback) => {
 	// if latlon is provided store it locally
-	if (_latLon) loadData.latLon = _latLon;
+	if (_latLon) currentLatLon = _latLon;
 	// get the data
-	const { latLon } = loadData;
 	// if there's no data stop
-	if (!latLon) return;
+	if (!currentLatLon) return;
 
 	document.querySelector(TXT_ADDRESS_SELECTOR).blur();
-	latLonReceived(latLon, haveDataCallback);
+	latLonReceived(currentLatLon, haveDataCallback);
 };
 
 const swipeCallBack = (direction) => {
@@ -366,13 +367,13 @@ const btnNavigateRefreshClick = () => {
 };
 
 const btnNavigateNextClick = () => {
-	postMessage('navButton', 'next');
+	sendNavButtonMessage('navButton', 'next');
 
 	return false;
 };
 
 const btnNavigatePreviousClick = () => {
-	postMessage('navButton', 'previous');
+	sendNavButtonMessage('navButton', 'previous');
 
 	return false;
 };
@@ -458,7 +459,7 @@ const documentKeydown = (e) => {
 };
 
 const btnNavigatePlayClick = () => {
-	postMessage('navButton', 'playToggle');
+	sendNavButtonMessage('navButton', 'playToggle');
 
 	return false;
 };
@@ -469,17 +470,17 @@ const btnNavigateToggleScanlines = () => {
 };
 
 // post a message to the iframe
-const postMessage = (type, myMessage = {}) => {
+const sendNavButtonMessage = (type, myMessage = {}) => {
 	navMessage({ type, message: myMessage });
 };
 
-const getPosition = async () => new Promise((resolve) => {
-	navigator.geolocation.getCurrentPosition(resolve);
+const getPosition = async () => new Promise((resolve, reject) => {
+	navigator.geolocation.getCurrentPosition(resolve, reject);
 });
 
 const btnGetGpsClick = async () => {
 	if (!navigator.geolocation) return;
-	const btn = document.querySelector(BNT_GET_GPS_SELECTOR);
+	const btn = document.querySelector(BTN_GET_GPS_SELECTOR);
 
 	// toggle first
 	if (btn.classList.contains('active')) {
@@ -492,10 +493,14 @@ const btnGetGpsClick = async () => {
 	btn.classList.add('active');
 
 	// get position
-	const position = await getPosition();
-	const { latitude, longitude } = position.coords;
-
-	getForecastFromLatLon(latitude, longitude, true);
+	try {
+		const position = await getPosition();
+		const { latitude, longitude } = position.coords;
+		getForecastFromLatLon(latitude, longitude, true);
+	} catch (error) {
+		btn.classList.remove('active');
+		console.error('Unable to get GPS location:', error.message);
+	}
 };
 
 const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {

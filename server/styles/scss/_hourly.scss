@@ -44,6 +44,8 @@
 		.hourly-lines {
 			min-height: 338px;
 			padding-top: 10px;
+			will-change: transform;
+			backface-visibility: hidden;
 
 			background: repeating-linear-gradient(0deg, c.$gradient-main-background-2 0px,
 					c.$gradient-main-background-1 136px,

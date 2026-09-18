@@ -91,9 +91,9 @@ const drawScreen = async () => {
 
 	// add the hazards if on screen 0
 	if (screenIndex === 0) {
-		const hazards = await getHazards();
-		if (hazards && hazards.length > 0) {
-			scrollData.hazards = hazards;
+		const hazardsData = await getHazards();
+		if (hazardsData && hazardsData.length > 0) {
+			scrollData.hazards = hazardsData;
 		}
 	}
 
@@ -103,7 +103,7 @@ const drawScreen = async () => {
 	const thisScreen = workingScreens[screenIndex](scrollData, parameters);
 
 	// update classes on the scroll area
-	mainScroll.classList.forEach((cls) => {
+	Array.from(mainScroll.classList).forEach((cls) => {
 		if (cls !== 'scroll') mainScroll.classList.remove(cls);
 	});
 	thisScreen?.classes?.forEach((cls) => mainScroll.classList.add(cls));
@@ -198,7 +198,13 @@ let workingScreens = [...baseScreens, ...additionalScreens];
 
 // internal draw function with preset parameters
 const drawCondition = (text) => {
+	// re-apply the "typing" effect
+	fixedScroll.classList.remove('reveal');
 	fixedScroll.innerHTML = text;
+	// force the reflow of the element
+	// eslint-disable-next-line no-void
+	void fixedScroll.offsetWidth;
+	fixedScroll.classList.add('reveal');
 	setHeader('');
 };
 
@@ -221,41 +227,45 @@ const addScreen = (screen, keepBase = true) => {
 };
 
 const drawScrollCondition = (screen) => {
+	// remove the reveal class
+	fixedScroll.classList.remove('reveal');
 	// create the scroll element
 	const scrollElement = document.createElement('div');
 	scrollElement.classList.add('scroll-area');
 	scrollElement.innerHTML = screen.text;
-	// add it to the page to get the width
-	fixedScroll.innerHTML = scrollElement.outerHTML;
-	// grab the width
-	const { scrollWidth, clientWidth } = document.querySelector('#container>.scroll .fixed .scroll-area');
+	scrollElement.classList.add('reveal');
 
-	// calculate the scroll distance and set a minimum scroll
-	const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
-	// calculate the scroll time (scaled by global speed setting), minimum 2s (4s when added to start and end delays)
-	const scrollTime = Math.max((scrollDistance / SCROLL_SPEED) * settings.speed.value, 2);
-	// add 1 second pause at the end of the scroll animation
-	const endPauseTime = 1.0;
-	const totalAnimationTime = scrollTime + endPauseTime;
-	// calculate total on-screen time: animation time + start delay + end pause
-	const startDelayTime = 1.0; // setTimeout delay below
-	const totalDisplayTime = totalAnimationTime + startDelayTime;
-	nextUpdate = secondsToTicks(totalDisplayTime);
-
-	// update the element with initial position and transition
-	scrollElement.style.transform = 'translateX(0px)';
-	scrollElement.style.transition = `transform ${scrollTime.toFixed(1)}s linear`;
-	scrollElement.style.willChange = 'transform'; // Hint to browser for hardware acceleration
-	scrollElement.style.backfaceVisibility = 'hidden'; // Force hardware acceleration
-	scrollElement.style.perspective = '1000px'; // Enable 3D rendering context
-
+	// empty and attach the new element
 	fixedScroll.innerHTML = '';
-	fixedScroll.append(scrollElement.cloneNode(true));
+	fixedScroll.append(scrollElement);
 
 	// start the scroll after the specified delay
+	const startDelayTime = 1.0 * settings.speed.value; // setTimeout delay below
 	setTimeout(() => {
+		// this must be calculated after the delay because the .reveal class collapses width to 0 temporarily
+		scrollElement.classList.remove('reveal');
+		const { scrollWidth, clientWidth } = scrollElement;
+
+		// calculate the scroll distance and set a minimum scroll
+		const scrollDistance = Math.max(scrollWidth - clientWidth, 0);
+		// calculate the scroll time (scaled by global speed setting), minimum 2s (4s when added to start and end delays)
+		const scrollTime = Math.max((scrollDistance / SCROLL_SPEED) * settings.speed.value, 2);
+		// add 1 second pause at the end of the scroll animation
+		const endPauseTime = 1.0;
+		const totalAnimationTime = scrollTime + endPauseTime;
+		// calculate total on-screen time: animation time + start delay + end pause
+		const totalDisplayTime = totalAnimationTime + startDelayTime;
+		nextUpdate = secondsToTicks(totalDisplayTime);
+
+		// update the element with initial position and transition
+		scrollElement.style.transform = 'translateX(0px)';
+		scrollElement.style.transition = `transform ${scrollTime.toFixed(1)}s linear`;
+		scrollElement.style.willChange = 'transform'; // Hint to browser for hardware acceleration
+		scrollElement.style.backfaceVisibility = 'hidden'; // Force hardware acceleration
+		scrollElement.style.perspective = '1000px'; // Enable 3D rendering context
+
 		// change the transform to trigger the scroll
-		document.querySelector('#container>.scroll .fixed .scroll-area').style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
+		scrollElement.style.transform = `translateX(-${scrollDistance.toFixed(0)}px)`;
 	}, startDelayTime * 1000);
 };
 

@@ -1,5 +1,5 @@
 /* spell-checker: disable */
-import parseIconUrl from './icons-parse.mjs';
+import parseIconUrl from './parse.mjs';
 
 const addPath = (icon) => `images/icons/current-conditions/${icon}`;
 

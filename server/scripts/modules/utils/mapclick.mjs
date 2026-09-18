@@ -506,7 +506,8 @@ export const enhanceObservationWithMapClick = async (observationData, options = 
 			data: observationData,
 			wasImproved: false,
 			improvements: [],
-			missingFields: [...missingRequired, ...missingOptional],
+			missingRequired,
+			missingOptional,
 		};
 	};
 
@@ -653,7 +654,8 @@ export const enhanceObservationWithMapClick = async (observationData, options = 
 		data: { ...mapClickProps, timestamp: observationData.timestamp },
 		wasImproved: true,
 		improvements,
-		missingFields: [...mapClickMissingRequired, ...mapClickMissingOptional],
+		missingRequired: mapClickMissingRequired,
+		missingOptional: mapClickMissingOptional,
 	};
 };
 

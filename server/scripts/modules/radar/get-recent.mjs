@@ -50,13 +50,11 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 	try {
 		const radarBlob = await fetchImageBlob(modifiedRadarUrl);
 
-		console.time(`process radar ${path}`);
 		const canvas = await processRadar({
 			user,
 			projection,
 			radarBlob,
 		});
-		console.timeEnd(`process radar ${path}`);
 
 		// store the processed radar
 		processedRadars.push({

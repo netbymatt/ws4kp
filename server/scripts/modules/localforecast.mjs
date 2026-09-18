@@ -8,14 +8,26 @@ import settings from './settings.mjs';
 import filterExpiredPeriods from './utils/forecast-utils.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
-class LocalForecast extends WeatherDisplay {
-	static BASE_FORECAST_DURATION_MS = 5000; // Base duration (in ms) for a standard 3-5 line forecast page
+// Screen durations below are seconds at normal speed. WeatherDisplay multiplies the base count
+// interval by the user's speed setting, so nothing here applies that factor a second time.
+const SECONDS_PER_LINE = 1.5; // hold each screen in proportion to how much text it carries
+const MIN_SCREEN_SECONDS = 5; // floor so a one or two line screen does not flash past
+const BASE_DELAY_MS = 250; // milliseconds per base count, fine enough to express the above
+// only used when the forecast container cannot be measured
+const FALLBACK_PAGE_LINES = 7;
 
+// convert a normal-speed duration to base counts
+const secondsToCounts = (seconds) => Math.round((seconds * 1000) / BASE_DELAY_MS);
+
+// how long a screen holding the given number of text lines should remain up, at normal speed
+const screenSeconds = (lines) => Math.max(MIN_SCREEN_SECONDS, lines * SECONDS_PER_LINE);
+
+class LocalForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
 		super(navId, elemId, 'Local Forecast', true);
 
 		// set timings
-		this.timing.baseDelay = LocalForecast.BASE_FORECAST_DURATION_MS;
+		this.timing.baseDelay = BASE_DELAY_MS;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -39,7 +51,7 @@ class LocalForecast extends WeatherDisplay {
 			// process the text
 			let text = `${condition.DayName}...`;
 			const conditionText = condition.Text;
-			text += conditionText.replace('...', ' ');
+			text += conditionText.replaceAll('...', ' ');
 
 			return text;
 		});
@@ -67,12 +79,7 @@ class LocalForecast extends WeatherDisplay {
 		forecastsElem.innerHTML = '';
 		forecastsElem.append(...templates);
 
-		// Get page height for screen calculations
-		this.pageHeight = 280;
-		if (settings.portrait?.value && settings.enhanced?.value) {
-			this.pageHeight = 950;
-		}
-
+		// measures the rendered page, sets this.pageHeight, and builds the timing array
 		this.calculateContentAwareTiming(templates);
 
 		this.calcNavTiming();
@@ -80,22 +87,17 @@ class LocalForecast extends WeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
-	// get the unformatted data (also used by extended forecast)
+	// get the unformatted data
 	async getRawData(weatherParameters) {
 		// request us or si units using centralized safe handling
-		const data = await safeJson(weatherParameters.forecast, {
+		// safeJson resolves to null on failure
+		return safeJson(weatherParameters.forecast, {
 			data: {
 				units: settings.units.value,
 			},
 			retryCount: 3,
 			stillWaiting: () => this.stillWaiting(),
 		});
-
-		if (!data) {
-			return false;
-		}
-
-		return data;
 	}
 
 	async drawCanvas() {
@@ -109,44 +111,36 @@ class LocalForecast extends WeatherDisplay {
 
 	// calculate dynamic timing based on height measurement template approach
 	calculateContentAwareTiming(templates) {
+		const forecastContainer = this.elem.querySelector('.local-forecast .container');
+
 		if (!templates || templates.length === 0) {
-			this.timing.delay = 1; // fallback to single delay if no templates
+			// nothing to measure or paginate, hold one minimum-length screen
+			this.pageHeight = forecastContainer?.offsetHeight ?? 0;
+			this.timing.delay = secondsToCounts(MIN_SCREEN_SECONDS);
 			return;
 		}
-
-		// Use the original base duration constant for timing calculations
-		const originalBaseDuration = LocalForecast.BASE_FORECAST_DURATION_MS;
-		this.timing.baseDelay = 250; // use 250ms per count for precise timing control
 
 		// Get line height from CSS for accurate calculations
 		const sampleForecast = templates[0];
 		const computedStyle = window.getComputedStyle(sampleForecast);
 		const lineHeight = parseInt(computedStyle.lineHeight, 10);
 
-		// Calculate the actual width that forecast text uses
-		// Use the forecast container that's already been set up
-		const forecastContainer = this.elem.querySelector('.local-forecast .container');
-		let effectiveWidth;
+		// Page geometry is measured from the rendered container so it cannot drift from the
+		// stylesheet, then snapped down to a whole number of lines. A page height that is not an
+		// exact multiple of the line height puts the page boundary partway through a wrapped line.
+		let maxLinesPerScreen = Math.floor((forecastContainer?.offsetHeight ?? 0) / lineHeight);
+		if (!Number.isFinite(maxLinesPerScreen) || maxLinesPerScreen < 1) {
+			console.error(`LocalForecast: could not measure the forecast container, falling back to ${FALLBACK_PAGE_LINES} lines per page`);
+			maxLinesPerScreen = FALLBACK_PAGE_LINES;
+		}
+		this.pageHeight = maxLinesPerScreen * lineHeight;
 
-		if (!forecastContainer) {
-			console.error('LocalForecast: Could not find forecast container for width calculation, using fallback width');
-			effectiveWidth = 492; // "magic number" from manual calculations as fallback
-		} else {
-			const containerStyle = window.getComputedStyle(forecastContainer);
-			const containerWidth = forecastContainer.offsetWidth;
-			const paddingLeft = parseInt(containerStyle.paddingLeft, 10) || 0;
-			const paddingRight = parseInt(containerStyle.paddingRight, 10) || 0;
-			effectiveWidth = containerWidth - paddingLeft - paddingRight;
-
-			if (debugFlag('localforecast')) {
-				console.log(`LocalForecast: Using measurement width of ${effectiveWidth}px (container=${containerWidth}px, padding=${paddingLeft}+${paddingRight}px)`);
-			}
+		if (debugFlag('localforecast')) {
+			console.log(`LocalForecast: page holds ${maxLinesPerScreen} lines (${this.pageHeight}px at ${lineHeight}px line-height)`);
 		}
 
 		// Measure each forecast period to get actual line counts
 		const forecastLineCounts = [];
-
-		const maxLinesPerScreen = Math.floor(this.pageHeight / 40); // page height / 40px line height
 
 		templates.forEach((template, index) => {
 			const currentHeight = template.offsetHeight;
@@ -160,9 +154,9 @@ class LocalForecast extends WeatherDisplay {
 					console.log(`LocalForecast: Forecast ${index} measured ${currentLines} lines (${currentHeight}px direct measurement, ${lineHeight}px line-height)`);
 				}
 			} else {
-				// If may be 7 lines or less, we need to pad the content to ensure proper height measurement
-				// Short forecasts are capped by CSS min-height: 280px (7 lines)
-				// Add 7 <br> tags to force height beyond the minimum, then subtract the padding
+				// Short forecasts are floored by the css min-height, so a two line and a full page
+				// forecast measure the same. Pad past that floor with one <br/> per page line,
+				// measure, then subtract the padding to recover the real line count.
 				const originalHTML = template.innerHTML;
 				const paddingBRs = '<br/>'.repeat(maxLinesPerScreen);
 				template.innerHTML = originalHTML + paddingBRs;
@@ -171,7 +165,7 @@ class LocalForecast extends WeatherDisplay {
 				const paddedHeight = template.offsetHeight;
 				const paddedLines = Math.round(paddedHeight / lineHeight);
 
-				// Calculate actual content lines by subtracting the 7 BR lines we added
+				// Calculate actual content lines by subtracting the padding lines we added
 				const actualLines = Math.max(1, paddedLines - maxLinesPerScreen);
 
 				// Restore original content
@@ -180,7 +174,7 @@ class LocalForecast extends WeatherDisplay {
 				forecastLineCounts.push(actualLines);
 
 				if (debugFlag('localforecast')) {
-					console.log(`LocalForecast: Forecast ${index} measured ${actualLines} lines (${paddedHeight}px with padding - ${7 * lineHeight}px = ${actualLines * lineHeight}px actual, ${lineHeight}px line-height)`);
+					console.log(`LocalForecast: Forecast ${index} measured ${actualLines} lines (${paddedHeight}px with padding - ${maxLinesPerScreen * lineHeight}px = ${actualLines * lineHeight}px actual, ${lineHeight}px line-height)`);
 				}
 			}
 		});
@@ -219,45 +213,35 @@ class LocalForecast extends WeatherDisplay {
 			}
 		});
 
-		// Create timing array based on measured line counts
+		// Hold each screen in proportion to how much text it carries so the reading rate is the same
+		// on a sparse standard page and a dense portrait one. These are normal-speed durations; the
+		// user's speed setting is applied downstream when the base count interval is scheduled.
 		const screenDelays = screenTimings.map((screenInfo, screenIndex) => {
-			const screenLines = screenInfo.lines;
-
-			// Apply timing rules based on actual screen content lines
-			let timingMultiplier;
-			if (screenLines === 1) {
-				timingMultiplier = 0.6; // 1 line = shortest (3.0s at normal speed)
-			} else if (screenLines === 2) {
-				timingMultiplier = 0.8; // 2 lines = shorter (4.0s at normal speed)
-			} else if (screenLines >= 6) {
-				timingMultiplier = 1.4; // 6+ lines = longer (7.0s at normal speed)
-			} else {
-				timingMultiplier = 1.0; // 3-5 lines = normal (5.0s at normal speed)
-			}
-
-			// Convert to base counts
-			const desiredDurationMs = timingMultiplier * originalBaseDuration;
-			const baseCounts = Math.round(desiredDurationMs / this.timing.baseDelay);
+			const seconds = screenSeconds(screenInfo.lines);
+			const baseCounts = secondsToCounts(seconds);
 
 			if (debugFlag('localforecast')) {
-				console.log(`LocalForecast: Screen ${screenIndex}: ${screenLines} lines, ${timingMultiplier.toFixed(2)}x multiplier, ${desiredDurationMs}ms desired, ${baseCounts} counts (forecast ${screenInfo.forecastIndex}, ${screenInfo.type})`);
+				console.log(`LocalForecast: Screen ${screenIndex}: ${screenInfo.lines} lines, ${seconds.toFixed(1)}s at normal speed, ${baseCounts} counts (forecast ${screenInfo.forecastIndex}, ${screenInfo.type})`);
 			}
 
 			return baseCounts;
 		});
 
-		// Adjust timing array to match actual screen count if needed
+		// Reconcile against the screen count the padded heights produced. The two agree whenever the
+		// page height is a whole number of lines, so a mismatch means the geometry changed underneath.
 		while (screenDelays.length < this.timing.totalScreens) {
-			// Add fallback timing for extra screens
-			const fallbackCounts = Math.round(originalBaseDuration / this.timing.baseDelay);
-			screenDelays.push(fallbackCounts);
-			console.warn(`LocalForecast: using fallback timing for Screen ${screenDelays.length - 1}: 5 lines, 1.00x multiplier, ${fallbackCounts} counts`);
+			screenDelays.push(secondsToCounts(MIN_SCREEN_SECONDS));
+			if (debugFlag('localforecast')) {
+				console.warn(`LocalForecast: using fallback timing for screen ${screenDelays.length - 1}`);
+			}
 		}
 
 		// Truncate if we have too many calculated screens
 		if (screenDelays.length > this.timing.totalScreens) {
 			const removed = screenDelays.splice(this.timing.totalScreens);
-			console.warn(`LocalForecast: Truncated ${removed.length} excess screen timings`);
+			if (debugFlag('localforecast')) {
+				console.warn(`LocalForecast: truncated ${removed.length} excess screen timings`);
+			}
 		}
 
 		// Set the timing array based on screen content
@@ -265,9 +249,7 @@ class LocalForecast extends WeatherDisplay {
 
 		if (debugFlag('localforecast')) {
 			console.log(`LocalForecast: Final screen count - calculated: ${screenTimings.length}, actual: ${this.timing.totalScreens}, timing array: ${screenDelays.length}`);
-			const multipliers = screenDelays.map((counts) => (counts * this.timing.baseDelay) / originalBaseDuration);
-			console.log('LocalForecast: Screen multipliers:', multipliers);
-			console.log('LocalForecast: Expected durations (ms):', screenDelays.map((counts) => counts * this.timing.baseDelay));
+			console.log('LocalForecast: Screen durations (s at normal speed):', screenDelays.map((counts) => (counts * BASE_DELAY_MS) / 1000));
 		}
 	}
 }

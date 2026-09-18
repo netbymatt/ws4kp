@@ -5,7 +5,7 @@ import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
-import { getSmallIcon } from './icons.mjs';
+import smallIcon from './icons/small.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -250,7 +250,7 @@ class RegionalForecast extends WeatherDisplay {
 				};
 
 				// preload the icon
-				preloadImg(getSmallIcon(regionalObservation.icon, !regionalObservation.daytime));
+				preloadImg(smallIcon(regionalObservation.icon, !regionalObservation.daytime));
 
 				// filter out expired periods first, then use the next two periods for forecast
 				const activePeriods = filterExpiredPeriods(forecast.properties.periods);
@@ -355,7 +355,7 @@ class RegionalForecast extends WeatherDisplay {
 			const fill = {};
 			const period = city[this.screenIndex];
 
-			fill.icon = { type: 'img', src: getSmallIcon(period.icon, !period.daytime) };
+			fill.icon = { type: 'img', src: smallIcon(period.icon, !period.daytime) };
 			fill.city = period.name;
 			const { temperature } = period;
 			fill.temp = temperature;

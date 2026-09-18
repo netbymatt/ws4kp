@@ -4,42 +4,26 @@ import STATUS from './status.mjs';
 import { DateTime, Interval, Duration } from '../vendor/auto/luxon.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { temperature as temperatureUnit, windSpeed as windUnit } from './utils/units.mjs';
-import { getHourlyIcon } from './icons.mjs';
+import hourlyIcon from './icons/hourly.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
-import WeatherDisplay from './weatherdisplay.mjs';
+import ScrollWeatherDisplay from './scroll-weather-display.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import getSun from './almanac.mjs';
-import calculateScrollTiming from './utils/scroll-timing.mjs';
 import { debugFlag } from './utils/debug.mjs';
 
-// A cheap, stable signature of the content about to be rendered. The starting hour is included
-// because the row labels are derived from the current time, so an hour rollover changes the display
-// even when every forecast value is unchanged.
-const contentSignature = (startingHour, rows) => [
-	startingHour.startOf('hour').toISO(),
-	...rows.map((row) => `${row.temperature}|${row.apparentTemperature}|${row.windSpeed}|${row.windDirection}|${row.icon}`),
+// A cheap, stable signature of the content about to be rendered. The hour is included per row
+// because the row labels are derived from the current time, so an hour rollover changes the
+// display even when every forecast value is unchanged.
+const rowsSignature = (rows) => [
+	...rows.map((row) => `${row.hour.toISO()}|${row.temperature}|${row.apparentTemperature}|${row.windSpeed}|${row.windDirection}|${row.icon}`),
 ].join('\u0000');
 
-class Hourly extends WeatherDisplay {
+class Hourly extends ScrollWeatherDisplay {
 	constructor(navId, elemId, defaultActive) {
 		// special height and width for scrolling
-		super(navId, elemId, 'Hourly Forecast', defaultActive);
-
-		// cache for scroll calculations
-		// This cache is essential because baseCountChange() is called 25 times per second (every 40ms)
-		// during scrolling. Without caching, we'd perform hundreds of expensive DOM layout queries during
-		// the full scroll cycle. The cache reduces this to one calculation when content changes, then
-		// reuses cached values to try and get smoother scrolling.
-		this.scrollCache = {
-			displayHeight: 0,
-			contentHeight: 0,
-			maxOffset: 0,
-			hourlyLines: null,
-		};
-
-		// signature of the content currently rendered into the DOM, so a refresh that returns
-		// identical rows can skip the rebuild entirely
-		this.lastContentSignature = null;
+		super(navId, elemId, 'Hourly Forecast', defaultActive, {
+			linesSelector: '.hourly-lines',
+		});
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -80,119 +64,55 @@ class Hourly extends WeatherDisplay {
 		}
 	}
 
-	async drawLongCanvas() {
-		// get the list element and populate
-		const list = this.elem.querySelector('.hourly-lines');
-
-		const startingHour = DateTime.local().setZone(timeZone());
-
-		// shorten to 24 hours
-		const shortData = this.data.slice(0, 24);
-
-		// if the content is identical to what is already rendered, leave the DOM and the scroll
-		// position alone rather than rebuilding and restarting an in-progress scroll
-		const signature = contentSignature(startingHour, shortData);
-		if (signature === this.lastContentSignature && list.children.length > 0) return;
-		this.lastContentSignature = signature;
-
-		list.innerHTML = '';
-
-		const lines = shortData.map((data, index) => {
-			const fillValues = {};
-			// hour
-			const hour = startingHour.plus({ hours: index });
-			fillValues.hour = hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
-
-			// temperatures, convert to strings with no decimal
-			const temperature = data.temperature.toString().padStart(3);
-			const feelsLike = data.apparentTemperature.toString().padStart(3);
-			fillValues.temp = temperature;
-
-			// apparent temperature is color coded if different from actual temperature (after fill is applied)
-			fillValues.like = feelsLike;
-
-			// wind
-			fillValues.wind = 'Calm';
-			if (data.windSpeed > 0) {
-				const windSpeed = Math.round(data.windSpeed).toString();
-				fillValues.wind = data.windDirection + (Array(6 - data.windDirection.length - windSpeed.length).join(' ')) + windSpeed;
-			}
-
-			// image
-			fillValues.icon = { type: 'img', src: data.icon };
-
-			const filledRow = this.fillTemplate('hourly-row', fillValues);
-
-			// alter the color of the feels like column to reflect wind chill or heat index
-			if (data.apparentTemperature < data.temperature) {
-				filledRow.querySelector('.like').classList.add('wind-chill');
-			} else if (feelsLike > temperature) {
-				filledRow.querySelector('.like').classList.add('heat-index');
-			}
-
-			return filledRow;
-		});
-
-		list.append(...lines);
-
-		// The scroll cache is invalidated by comparing element identity, but .hourly-lines is
-		// persistent - only its children are replaced above - and displayHeight is a fixed value
-		// from css. Both conditions in baseCountChange() therefore stay false after the first
-		// measurement, so maxOffset keeps the height of whatever content was measured first and
-		// clamps the scroll partway through anything taller, leaving it frozen there. Invalidate
-		// explicitly so the next base count re-measures.
-		this.scrollCache.displayHeight = 0;
-		this.scrollCache.hourlyLines = null;
-
-		// new content scrolls from the top
-		this.navBaseCount = 0;
-
-		// update timing based on actual content
-		this.setTiming(list);
+	// shorten to 24 hours, and attach the hour each row represents so the label and the
+	// signature stay in agreement. truncating to the hour keeps the signature stable between
+	// refreshes within the same hour; the label only renders the weekday and hour anyway.
+	scrollRows() {
+		const startingHour = DateTime.local().setZone(timeZone()).startOf('hour');
+		return this.data.slice(0, 24).map((data, index) => ({
+			...data,
+			hour: startingHour.plus({ hours: index }),
+		}));
 	}
 
-	drawCanvas() {
-		super.drawCanvas();
-		this.finishDraw();
+	// eslint-disable-next-line class-methods-use-this
+	contentSignature(rows) {
+		return rowsSignature(rows);
 	}
 
-	showCanvas() {
-		// special to hourly to draw the remainder of the canvas
-		this.drawCanvas();
-		super.showCanvas();
-	}
+	buildRow(data) {
+		const fillValues = {};
+		// hour
+		fillValues.hour = data.hour.toLocaleString({ weekday: 'short', hour: 'numeric' });
 
-	// screen index change callback just runs the base count callback
-	screenIndexChange() {
-		this.baseCountChange(this.navBaseCount);
-	}
+		// temperatures, convert to strings with no decimal
+		const temperature = data.temperature.toString().padStart(3);
+		const feelsLike = data.apparentTemperature.toString().padStart(3);
+		fillValues.temp = temperature;
 
-	// base count change callback
-	baseCountChange(count) {
-		// get the hourly lines element and cache measurements if needed
-		const hourlyLines = this.elem.querySelector('.hourly-lines');
-		if (!hourlyLines) return;
+		// apparent temperature is color coded if different from actual temperature (after fill is applied)
+		fillValues.like = feelsLike;
 
-		// update cache if needed (when content changes or first run)
-		if (this.scrollCache.hourlyLines !== hourlyLines || this.scrollCache.displayHeight === 0) {
-			this.scrollCache.displayHeight = this.elem.querySelector('.main').offsetHeight;
-			this.scrollCache.contentHeight = hourlyLines.offsetHeight;
-			this.scrollCache.maxOffset = Math.max(0, this.scrollCache.contentHeight - this.scrollCache.displayHeight);
-			this.scrollCache.hourlyLines = hourlyLines;
-
-			// Set up hardware acceleration on the hourly lines element
-			hourlyLines.style.willChange = 'transform';
-			hourlyLines.style.backfaceVisibility = 'hidden';
+		// wind
+		fillValues.wind = 'Calm';
+		if (data.windSpeed > 0) {
+			const windSpeed = Math.round(data.windSpeed).toString();
+			fillValues.wind = data.windDirection.padEnd(3, ' ') + windSpeed.padStart(3, ' ');
 		}
 
-		// calculate scroll offset and don't go past end
-		let offsetY = Math.min(this.scrollCache.maxOffset, (count - this.scrollTiming.initialCounts) * this.scrollTiming.pixelsPerCount);
+		// image
+		fillValues.icon = { type: 'img', src: data.icon };
 
-		// don't let offset go negative
-		if (offsetY < 0) offsetY = 0;
+		const filledRow = this.fillTemplate('hourly-row', fillValues);
 
-		// use transform instead of scrollTo for hardware acceleration
-		hourlyLines.style.transform = `translateY(-${Math.round(offsetY)}px)`;
+		// alter the color of the feels like column to reflect wind chill or heat index
+		if (data.apparentTemperature < data.temperature) {
+			filledRow.querySelector('.like').classList.add('wind-chill');
+		} else if (data.apparentTemperature > data.temperature) {
+			filledRow.querySelector('.like').classList.add('heat-index');
+		}
+
+		return filledRow;
 	}
 
 	// make data available outside this class
@@ -206,18 +126,6 @@ class Hourly extends WeatherDisplay {
 			// data not available, put it into the data callback queue
 			this.getDataCallbacks.push(() => resolve(this.data));
 		});
-	}
-
-	setTiming(list) {
-		const container = this.elem.querySelector('.main');
-		const timingConfig = calculateScrollTiming(list, container);
-
-		// Apply the calculated timing
-		this.timing.baseDelay = timingConfig.baseDelay;
-		this.timing.delay = timingConfig.delay;
-		this.scrollTiming = timingConfig.scrollTiming;
-
-		this.calcNavTiming();
 	}
 }
 
@@ -257,14 +165,14 @@ const parseForecast = async (data) => {
 
 // given forecast paramaters determine a suitable icon
 const determineIcon = async (skyCover, weather, iceAccumulation, probabilityOfPrecipitation, snowfallAmount, windSpeed) => {
-	const startOfHour = DateTime.local().startOf('hour');
+	const startOfHour = DateTime.local().setZone(timeZone()).startOf('hour');
 	const sunTimes = (await getSun()).sun;
 	const overnight = Interval.fromDateTimes(DateTime.fromJSDate(sunTimes[0].sunset), DateTime.fromJSDate(sunTimes[1].sunrise));
 	const tomorrowOvernight = DateTime.fromJSDate(sunTimes[1].sunset);
 	return skyCover.map((val, idx) => {
 		const hour = startOfHour.plus({ hours: idx });
 		const isNight = overnight.contains(hour) || (hour > tomorrowOvernight);
-		return getHourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
+		return hourlyIcon(skyCover[idx], weather[idx], iceAccumulation[idx], probabilityOfPrecipitation[idx], snowfallAmount[idx], windSpeed[idx], isNight);
 	});
 };
 

@@ -17,7 +17,7 @@
 			],
 			"runtimeArgs": [
 				"--autoplay-policy=no-user-gesture-required"
-			]
+			],
 		},
 		{
 			"name": "Data:stations",

@@ -4,7 +4,7 @@
 import STATUS from './status.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
-import { getLargeIcon } from './icons.mjs';
+import largeIcon from './icons/large.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -36,7 +36,7 @@ class ExtendedForecast extends WeatherDisplay {
 
 		try {
 			// request us or si units using centralized safe handling
-			this.data = await safeJson(this.weatherParameters.forecast, {
+			const data = await safeJson(this.weatherParameters.forecast, {
 				data: {
 					units: settings.units.value,
 				},
@@ -45,11 +45,14 @@ class ExtendedForecast extends WeatherDisplay {
 			});
 
 			// if there's no new data and no previous data, fail
-			if (!this.data) {
-				// console.warn(`Unable to get extended forecast for ${this.weatherParameters.latitude},${this.weatherParameters.longitude} in ${this.weatherParameters.state}`);
+			if (!data) {
+				console.warn(`Unable to get extended forecast for ${this.weatherParameters.latitude},${this.weatherParameters.longitude} in ${this.weatherParameters.state}`);
 				if (this.isEnabled) this.setStatus(STATUS.failed);
 				return;
 			}
+
+			// parse the data
+			this.data = parse(data.properties.periods, this.weatherParameters.forecast);
 
 			// we only get here if there was data (new or existing)
 			this.screenIndex = 0;
@@ -68,7 +71,7 @@ class ExtendedForecast extends WeatherDisplay {
 
 		// determine bounds
 		// grab the first three or second set of three array elements
-		const forecast = parse(this.data.properties.periods, this.weatherParameters.forecast).slice(0 + this.perPage * this.screenIndex, this.perPage + this.screenIndex * this.perPage);
+		const forecast = this.data.slice(0 + this.perPage * this.screenIndex, this.perPage + this.screenIndex * this.perPage);
 
 		// create each day template
 		const days = forecast.map((Day) => {
@@ -142,7 +145,7 @@ const parse = (fullForecast, forecastUrl) => {
 		if (period.isDaytime) {
 			// day time is the high temperature
 			fDay.high = period.temperature;
-			fDay.icon = getLargeIcon(period.icon);
+			fDay.icon = largeIcon(period.icon);
 			fDay.text = shortenExtendedForecastText(period.shortForecast);
 			fDay.dayName = DateTime.fromISO(period.startTime).startOf('day').toLocaleString({ weekday: 'short' });
 			// preload the icon
@@ -182,18 +185,18 @@ const shortenExtendedForecastText = (long) => {
 	const short = regexList.reduce((working, [regex, replace]) => working.replace(regex, replace), long);
 
 	let conditions = short.split(' ');
-	if (short.indexOf('then') !== -1) {
+	if (short.indexOf(' then ') !== -1) {
 		conditions = short.split(' then ');
 		conditions = conditions[1].split(' ');
 	}
 
-	let short1 = conditions[0].substr(0, 10);
+	let short1 = conditions[0].substring(0, 10);
 	let short2 = '';
 	if (conditions[1]) {
 		if (short1.endsWith('.')) {
 			short1 = short1.replace(/\./, '');
 		} else {
-			short2 = conditions[1].substr(0, 10);
+			short2 = conditions[1].substring(0, 10);
 		}
 
 		if (short2 === 'Blowing') {

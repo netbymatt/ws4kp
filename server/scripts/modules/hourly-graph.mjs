@@ -59,6 +59,7 @@ class HourlyGraph extends WeatherDisplay {
 	}
 
 	async getData(weatherParameters, refresh) {
+		// called deliberately with undefined because hourly.mjs is the source of data
 		if (!super.getData(undefined, refresh)) return;
 
 		const data = await getHourlyData(() => this.stillWaiting());
@@ -91,12 +92,13 @@ class HourlyGraph extends WeatherDisplay {
 	}
 
 	drawCanvas() {
+		super.drawCanvas();
 		// get scaling parameters
 		const { dataLength, available } = scaling();
 
 		// get the image
-		if (!this.image) this.image = this.elem.querySelector('.chart img');
-		if (!this.portraitImage) this.portraitImage = this.elem.querySelector('.bottom .chart img');
+		if (!this.image) this.image = this.elem.querySelector('.chart canvas');
+		if (!this.portraitImage) this.portraitImage = this.elem.querySelector('.bottom .chart canvas');
 
 		// set up images
 		this.image.width = available.width;
@@ -105,10 +107,9 @@ class HourlyGraph extends WeatherDisplay {
 		this.portraitImage.height = available.height;
 
 		// get context
-		const canvas = document.createElement('canvas');
-		canvas.width = available.width;
-		canvas.height = available.height;
-		const ctx = canvas.getContext('2d');
+		this.image.width = available.width;
+		this.image.height = available.height;
+		const ctx = this.image.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 
 		// set the canvas for each graph to the top one by default
@@ -120,12 +121,10 @@ class HourlyGraph extends WeatherDisplay {
 		];
 
 		// if in portrait-enhanced, change out the second two contexts with a second canvas
-		let portraitCanvas;
 		if (settings.portrait?.value && settings.enhanced?.value) {
-			portraitCanvas = document.createElement('canvas');
-			portraitCanvas.width = available.width;
-			portraitCanvas.height = available.height;
-			const portraitCtx = portraitCanvas.getContext('2d');
+			this.portraitImage.width = available.width;
+			this.portraitImage.height = available.height;
+			const portraitCtx = this.portraitImage.getContext('2d');
 			portraitCtx.imageSmoothingEnabled = false;
 
 			contexts[2] = portraitCtx;
@@ -135,7 +134,7 @@ class HourlyGraph extends WeatherDisplay {
 		// calculate time scale
 		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, available.width);
 		const timeStep = this.data.temperature.length / (dataLength.xTicks);
-		const startTime = DateTime.now().startOf('hour');
+		const startTime = DateTime.now().setZone(timeZone()).startOf('hour');
 
 		// there are two x axes in portrait
 		chartAreas.forEach((area) => {
@@ -198,19 +197,10 @@ class HourlyGraph extends WeatherDisplay {
 		this.elem.querySelector('.y-axis .l-3').innerHTML = (midScale1 + degree).substring(0, 3);
 		this.elem.querySelector('.y-axis .l-4').innerHTML = (minScale + degree).substring(0, 3);
 
-		// set the image source
-		this.image.src = canvas.toDataURL();
-
-		// if a portrait canvas was created set that image as well
-		if (portraitCanvas) {
-			this.portraitImage.src = portraitCanvas.toDataURL();
-		}
-
 		// change the units in the header
 		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
 		this.elem.querySelector('.dewpoint').innerHTML = `Dewpoint ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
 
-		super.drawCanvas();
 		this.finishDraw();
 	}
 }
@@ -231,7 +221,7 @@ const drawPath = (path, ctx, options) => {
 	ctx.beginPath();
 	ctx.strokeStyle = 'black';
 	ctx.lineWidth = (options?.lineWidth ?? 2) + 2;
-	ctx.moveTo(path[0][0], path[0][1]);
+	ctx.moveTo(path[0][0], path[0][1] + 2);
 	path.slice(1).forEach((point) => ctx.lineTo(point[0], point[1] + 2));
 	ctx.stroke();
 
@@ -246,11 +236,12 @@ const drawPath = (path, ctx, options) => {
 
 // format as 1p, 12a, etc.
 const formatTime = (time, prev) => {
+	// apply the time zone
+	const ts = time.setZone(timeZone());
+
 	// if the day of the week changes, show the day of the week in the label
 	let format = 'ha';
 	if (prev.weekday !== time.weekday) format = 'ccc ha';
-
-	const ts = time.setZone(timeZone());
 
 	return {
 		ts,
