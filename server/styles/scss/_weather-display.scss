@@ -229,16 +229,33 @@
 		.fixed {
 			font-family: 'Star4000';
 			font-size: 32px;
+			overflow: hidden;
+			white-space: nowrap;
+
+			&.reveal {
+				width: 0;
+				animation: typing 0.2s steps(42, end) forwards;
+			}
+
+			@keyframes typing {
+				to {
+					width: 100%
+				}
+
+			}
 
 			.scroll-area {
 				text-wrap: nowrap;
 				position: relative;
+				overflow: unset;
 				// the following added by js code as it is dependent on the content of the element
 				// transition: left (x)s;
 				// left: calc((elem width) - p.$standard-width);
 			}
 		}
 	}
+
+
 
 
 

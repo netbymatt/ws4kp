@@ -198,7 +198,13 @@ let workingScreens = [...baseScreens, ...additionalScreens];
 
 // internal draw function with preset parameters
 const drawCondition = (text) => {
+	// re-apply the "typing" effect
+	fixedScroll.classList.remove('reveal');
 	fixedScroll.innerHTML = text;
+	// force the reflow of the element
+	// eslint-disable-next-line no-void
+	void fixedScroll.offsetWidth;
+	fixedScroll.classList.add('reveal');
 	setHeader('');
 };
 
@@ -221,10 +227,13 @@ const addScreen = (screen, keepBase = true) => {
 };
 
 const drawScrollCondition = (screen) => {
+	// remove the reveal class
+	fixedScroll.classList.remove('reveal');
 	// create the scroll element
 	const scrollElement = document.createElement('div');
 	scrollElement.classList.add('scroll-area');
 	scrollElement.innerHTML = screen.text;
+	scrollElement.classList.add('reveal');
 
 	// empty and attach the new element
 	fixedScroll.innerHTML = '';
