@@ -27,7 +27,7 @@ const getRegionalObservation = async (city) => {
 	if (!stationId) return false;
 	try {
 		// get the observation data using centralized safe handling
-		const observation = await safeJson(`https://api.weather.gov/stations/${stationId}/observations/latest`);
+		const observation = await safeJson(`https://api.weather.gov/stations/${stationId}/observations/latest`, { retryCount: 1, timeout: 5000 });
 
 		if (!observation) {
 			if (debugFlag('verbose-failures')) {

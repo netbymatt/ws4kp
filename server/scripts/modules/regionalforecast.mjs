@@ -229,7 +229,7 @@ class RegionalForecast extends WeatherDisplay {
 				// start off the observation task
 				const observationPromise = getRegionalObservation(city);
 
-				const forecast = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
+				const forecast = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`, { retryCount: 1, timeout: 5000 });
 				if (!forecast) {
 					if (debugFlag('verbose-failures')) {
 						console.warn(`Regional Forecast request for ${city.city} failed`);
