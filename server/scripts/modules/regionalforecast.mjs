@@ -22,6 +22,9 @@ const PY = 1;
 const LAT = 1;
 const LON = 0;
 
+// draw a few less stations in portrait mode to be nice to the api
+const PORTRAIT_ROW_PADDING = 26;
+
 // set up spacing and scales
 const scaling = (mapName) => {
 	// available space
@@ -46,10 +49,13 @@ const scaling = (mapName) => {
 	// get the full size of the map
 	const mapSize = OUTPUTSIZES[mapName];
 
+	const boxPadY = (settings.enhanced?.value && settings.portrait?.value) ? PORTRAIT_ROW_PADDING : 0;
+
 	return {
 		available,
 		projection,
 		mapSize,
+		boxPadY,
 	};
 };
 
@@ -76,13 +82,13 @@ const boxOffset = [
 ];
 
 // helper function to create city "boxes", factor is used to increase the size of the box (used with stations to de-emphasize them)
-const makeCityBox = (city) => ({
+const makeCityBox = (city, padY = 0) => ({
 	x1: city.pxy[PX] - boxOffset[PX],
 	y1: city.pxy[PY] - boxOffset[PY],
 	// x2 is the max of 100 (max icon width) and the computed text width
 	// note: icon is not measured deliberately as it could change cities displayed for the same user location as the conditions/forecast changes
 	x2: city.pxy[PX] - boxOffset[PX] + Math.max(city.textWidth, 100),
-	y2: city.pxy[PY] - boxOffset[PY] + CITYBOX[PY],
+	y2: city.pxy[PY] - boxOffset[PY] + CITYBOX[PY] + padY,
 });
 
 const cityLatLonBoundingBox = (city, minMaxLatLon) => (
@@ -116,7 +122,9 @@ class RegionalForecast extends WeatherDisplay {
 		this.elem.querySelector('.map img').src = baseMap;
 
 		// get user's location in x/y
-		const { available, mapSize, projection } = scaling('forecast-conus');
+		const {
+			available, mapSize, projection, boxPadY,
+		} = scaling('forecast-conus');
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// adjust the user's location to not run off the map
@@ -184,7 +192,7 @@ class RegionalForecast extends WeatherDisplay {
 
 		// Determine which cities do not overlap each other, starting with the closest city
 		sortedRegionalCities.forEach((city) => {
-			const cityBox = makeCityBox(city);
+			const cityBox = makeCityBox(city, boxPadY);
 			const overlaps = regionalCities.some((test) => boxOverlaps(cityBox, test.box), false);
 			if (!overlaps) {
 				regionalCities.push({
@@ -202,7 +210,7 @@ class RegionalForecast extends WeatherDisplay {
 
 		// Determine which stations do not overlap each other, starting with the closest city
 		sortedStations.forEach((city) => {
-			const cityBox = makeCityBox(city);
+			const cityBox = makeCityBox(city, boxPadY);
 			const overlaps = regionalCities.some((test) => boxOverlaps(cityBox, test.box));
 			if (!overlaps) {
 				regionalCities.push({
