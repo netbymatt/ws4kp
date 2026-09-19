@@ -11,13 +11,7 @@
 		transform-origin: 0 0;
 	}
 
-	// used for measuring the text width for collision box calculation
-	.render-test {
-		visibility: hidden;
-	}
-
-	.location,
-	.render-test {
+	.location {
 		position: absolute;
 
 		>div {

@@ -34,9 +34,10 @@ const getRegionalObservation = async (point, city) => {
 
 		// get the first station with a 4-letter id (generally has appropriate data)
 		const station4Letter = stations.features.find((station) => {
-			if (station.properties.stationIdentifier.length === 4) return station.properties;
+			if (station?.properties?.stationIdentifier?.length === 4) return station.properties;
 			return false;
 		});
+		if (!station4Letter) return false;
 		const station = station4Letter.id;
 		const stationId = station4Letter.properties.stationIdentifier;
 		// get the observation data using centralized safe handling
