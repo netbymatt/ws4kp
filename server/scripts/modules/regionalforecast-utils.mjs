@@ -6,7 +6,7 @@ import augmentObservationWithMetar from './utils/metar.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 
-const buildForecast = (forecast, city, cityXY) => {
+const buildForecast = (forecast, city) => {
 	// get a unit converter
 	const temperatureConverter = temperatureUnit('us');
 	const icon = smallIcon(forecast.icon, !forecast.isDaytime);
@@ -16,9 +16,10 @@ const buildForecast = (forecast, city, cityXY) => {
 		temperature: temperatureConverter(forecast.temperature || 0),
 		name: formatCity(city.city),
 		icon,
-		x: cityXY[0],
-		y: cityXY[1],
+		x: city.pxy[0],
+		y: city.pxy[1],
 		time: forecast.startTime,
+		coercedRight: city.coercedRight,
 	};
 };
 
@@ -71,6 +72,7 @@ const getRegionalObservation = async (city) => {
 
 		// add the icon url to the dataset
 		augmentedObservation.ws4icon = icon;
+		augmentedObservation.coercedRight = city.coercedRight;
 
 		// return the observation
 		return augmentedObservation;

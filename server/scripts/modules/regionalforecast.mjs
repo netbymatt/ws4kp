@@ -2,7 +2,7 @@
 // type 0 = observations, 1 = first forecast, 2 = second forecast
 
 import STATUS from './status.mjs';
-import { distance as calcDistance } from './utils/calc.mjs';
+import { coerce, distance as calcDistance } from './utils/calc.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
 import preloadImg from './utils/preload-image.mjs';
@@ -128,18 +128,8 @@ class RegionalForecast extends WeatherDisplay {
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// adjust the user's location to not run off the map
-		if (user[PX] < (available.width / 2)) {
-			user[PX] = available.width / 2;
-		}
-		if (user[PX] > (mapSize.width - (available.width / 2))) {
-			user[PX] = mapSize.width - (available.width / 2);
-		}
-		if (user[PY] < (available.height / 2)) {
-			user[PY] = available.height / 2;
-		}
-		if (user[PY] > (mapSize.height - (available.height / 2))) {
-			user[PY] = mapSize.height - (available.height / 2);
-		}
+		user[PX] = coerce(user[PX], available.width / 2, mapSize.width - (available.width / 2));
+		user[PY] = coerce(user[PY], available.height / 2, mapSize.height - (available.height / 2));
 
 		const minLatLon = projection.inverse([
 			user[PX] - (available.width / 2),
@@ -178,12 +168,18 @@ class RegionalForecast extends WeatherDisplay {
 
 		// bring the cities within the actual available space (left sloppy above to favor regional cities over stations)
 		// and copy the city so we don't mutate the original RegionalCities array
-		const regionalCitiesNearbyCoerced = regionalCitiesNearby.map((city) => ({
-			...city,
-			lat: Math.min(Math.max(parseFloat(city.lat), minMaxLatLonStations.minLat), minMaxLatLonStations.maxLat),
-			lon: Math.min(Math.max(parseFloat(city.lon), minMaxLatLonStations.minLon), minMaxLatLonStations.maxLon),
-		}));
-
+		const regionalCitiesNearbyCoerced = regionalCitiesNearby.map((city) => {
+			const lon = coerce(parseFloat(city.lon), minMaxLatLonStations.minLon, minMaxLatLonStations.maxLon);
+			// were interested if a city is coerced at the right edge of the map
+			// this creates an ugly column of stations and can be adjusted by right-aligning this station's box
+			const coercedRight = parseFloat(city.lon) !== lon && Math.abs(lon - minMaxLatLonStations.maxLon) < 0.00001;
+			return {
+				...city,
+				lat: coerce(parseFloat(city.lat), minMaxLatLonStations.minLat, minMaxLatLonStations.maxLat),
+				lon,
+				coercedRight,
+			};
+		});
 		const regionalCitiesDistance = regionalCitiesNearbyCoerced.map((city) => calcDistPxyBBox(city, projection, user));
 
 		const sortedRegionalCities = regionalCitiesDistance.sort((a, b) => a.distance - b.distance);
@@ -258,6 +254,7 @@ class RegionalForecast extends WeatherDisplay {
 					icon: observation.ws4icon,
 					x: city.pxy[PX],
 					y: city.pxy[PY],
+					coercedRight: city.coercedRight,
 				};
 
 				// preload the icon
@@ -275,8 +272,8 @@ class RegionalForecast extends WeatherDisplay {
 				// group together the current observation and next two periods
 				return [
 					regionalObservation,
-					buildForecast(activePeriods[1], city, city.pxy),
-					buildForecast(activePeriods[2], city, city.pxy),
+					buildForecast(activePeriods[1], city),
+					buildForecast(activePeriods[2], city),
 				];
 			} catch (error) {
 				console.error(`Unexpected error getting Regional Forecast data for '${city.city}': ${error.message}`);
@@ -347,11 +344,20 @@ class RegionalForecast extends WeatherDisplay {
 			const { temperature } = period;
 			fill.temp = temperature;
 
-			const { x, y } = period;
+			const { x, y, coercedRight } = period;
 
 			const elem = this.fillTemplate('location', fill);
-			elem.style.left = `${x - offset[PX] - boxOffset[PX]}px`;
 			elem.style.top = `${y - offset[PY] - boxOffset[PY]}px`;
+			// stations coerced on the right edge get placed at the right edge
+			if (!coercedRight) {
+				elem.style.left = `${x - offset[PX] - boxOffset[PX]}px`;
+			} else {
+				elem.style.right = 0;
+			}
+
+			if (coercedRight) {
+				elem.classList.add('coerced-right');
+			}
 
 			return elem;
 		});

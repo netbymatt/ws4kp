@@ -14,7 +14,11 @@ const distance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 // wrap a number to 0-m
 const wrap = (x, m) => ((x % m) + m) % m;
 
+// coerce a number into the range min-max
+const coerce = (value, min, max) => Math.min(Math.max(value, min), max);
+
 export {
+	coerce,
 	directionToNSEW,
 	distance,
 	wrap,

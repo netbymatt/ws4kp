@@ -5,6 +5,7 @@ import getRecentRadars from './radar/get-recent.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay, timeZone } from './navigation.mjs';
 import setTiles from './radar/tiles.mjs';
+import { coerce } from './utils/calc.mjs';
 import createProjection from './utils/map-projection.mjs';
 import {
 	RADAR_FINAL_SIZE, TILE_FULL_SIZE, PX, PY,
@@ -59,18 +60,9 @@ class Radar extends WeatherDisplay {
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// adjust the user's location to not run off the map
-		if (user[PX] < (radarFinalSize.width / 2)) {
-			user[PX] = radarFinalSize.width / 2;
-		}
-		if (user[PX] > (TILE_FULL_SIZE.width - (radarFinalSize.width / 2))) {
-			user[PX] = TILE_FULL_SIZE.width - (radarFinalSize.width / 2);
-		}
-		if (user[PY] < (radarFinalSize.height / 2)) {
-			user[PY] = radarFinalSize.height / 2;
-		}
-		if (user[PY] > (TILE_FULL_SIZE.height - (radarFinalSize.height / 2))) {
-			user[PY] = TILE_FULL_SIZE.height - (radarFinalSize.height / 2);
-		}
+		// adjust the user's location to not run off the map
+		user[PX] = coerce(user[PX], radarFinalSize.width / 2, TILE_FULL_SIZE.width - (radarFinalSize.width / 2));
+		user[PY] = coerce(user[PY], radarFinalSize.height / 2, TILE_FULL_SIZE.height - (radarFinalSize.height / 2));
 
 		const imagePromise = getRecentRadars(6, user, projection);
 
