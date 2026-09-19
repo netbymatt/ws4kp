@@ -1,5 +1,6 @@
 // look up points for each regional city
 import fs from 'node:fs/promises';
+import { setTimeout } from 'node:timers/promises';
 import pLimit from 'p-limit';
 
 import getHttps from './https.mjs';
@@ -14,7 +15,12 @@ const pointLookup = async (city) => {
 	try {
 		const data = await getHttps(`https://api.weather.gov/points/${city.lon.toFixed(4)},${city.lat.toFixed(4)}`);
 		const point = JSON.parse(data);
-		return {
+		// also get the first station to speed up regional cities page
+		const stationsRaw = await getHttps(`${point.properties.observationStations}?limit=10`);
+		const stations = JSON.parse(stationsRaw);
+		const station = stations?.features?.find((s) => s?.properties?.stationIdentifier?.length === 4);
+		const id = station?.properties?.stationIdentifier;
+		const result = {
 			city: city.city,
 			lat: city.lon.toFixed(4),
 			lon: city.lat.toFixed(4),
@@ -24,6 +30,11 @@ const pointLookup = async (city) => {
 				wfo: point.properties.gridId,
 			},
 		};
+		// add the id if it was found
+		if (id) result.id = id;
+		// be nice to the api
+		await setTimeout(500);
+		return result;
 	} catch (e) {
 		console.error(e);
 		return {

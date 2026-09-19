@@ -7,7 +7,8 @@
 			"x": 71,
 			"y": 97,
 			"wfo": "TBW"
-		}
+		},
+		"id": "KTPF"
 	},
 	{
 		"city": "Orlando",
@@ -17,7 +18,8 @@
 			"x": 26,
 			"y": 68,
 			"wfo": "MLB"
-		}
+		},
+		"id": "KORL"
 	},
 	{
 		"city": "Daytona Beach",
@@ -27,7 +29,8 @@
 			"x": 36,
 			"y": 99,
 			"wfo": "MLB"
-		}
+		},
+		"id": "KDAB"
 	},
 	{
 		"city": "San Diego",
@@ -37,7 +40,8 @@
 			"x": 57,
 			"y": 14,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KSAN"
 	},
 	{
 		"city": "Santa Ana",
@@ -47,7 +51,8 @@
 			"x": 38,
 			"y": 63,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KSNA"
 	},
 	{
 		"city": "Los Angeles",
@@ -57,7 +62,8 @@
 			"x": 155,
 			"y": 45,
 			"wfo": "LOX"
-		}
+		},
+		"id": "KHHR"
 	},
 	{
 		"city": "San Francisco",
@@ -67,7 +73,8 @@
 			"x": 85,
 			"y": 105,
 			"wfo": "MTR"
-		}
+		},
+		"id": "KSFO"
 	},
 	{
 		"city": "Sacramento",
@@ -77,7 +84,8 @@
 			"x": 41,
 			"y": 68,
 			"wfo": "STO"
-		}
+		},
+		"id": "KSAC"
 	},
 	{
 		"city": "Redding",
@@ -87,7 +95,8 @@
 			"x": 28,
 			"y": 164,
 			"wfo": "STO"
-		}
+		},
+		"id": "KRDD"
 	},
 	{
 		"city": "Mt. Shasta City",
@@ -97,7 +106,8 @@
 			"x": 114,
 			"y": 23,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KMHS"
 	},
 	{
 		"city": "Weed",
@@ -107,7 +117,8 @@
 			"x": 113,
 			"y": 29,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KMHS"
 	},
 	{
 		"city": "Yreka",
@@ -117,7 +128,8 @@
 			"x": 107,
 			"y": 44,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KSIY"
 	},
 	{
 		"city": "Ashland",
@@ -127,7 +139,8 @@
 			"x": 109,
 			"y": 66,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KMFR"
 	},
 	{
 		"city": "Medford",
@@ -137,7 +150,8 @@
 			"x": 105,
 			"y": 73,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KMFR"
 	},
 	{
 		"city": "Grants Pass",
@@ -147,7 +161,8 @@
 			"x": 91,
 			"y": 81,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KMFR"
 	},
 	{
 		"city": "Roseburg",
@@ -157,7 +172,8 @@
 			"x": 98,
 			"y": 116,
 			"wfo": "MFR"
-		}
+		},
+		"id": "KRBG"
 	},
 	{
 		"city": "Eugene",
@@ -167,7 +183,8 @@
 			"x": 85,
 			"y": 39,
 			"wfo": "PQR"
-		}
+		},
+		"id": "KEUG"
 	},
 	{
 		"city": "Salem",
@@ -177,7 +194,8 @@
 			"x": 95,
 			"y": 79,
 			"wfo": "PQR"
-		}
+		},
+		"id": "KSLE"
 	},
 	{
 		"city": "Portland",
@@ -187,7 +205,8 @@
 			"x": 113,
 			"y": 103,
 			"wfo": "PQR"
-		}
+		},
+		"id": "KPDX"
 	},
 	{
 		"city": "Seattle",
@@ -197,7 +216,8 @@
 			"x": 125,
 			"y": 68,
 			"wfo": "SEW"
-		}
+		},
+		"id": "KBFI"
 	},
 	{
 		"city": "El Centro",
@@ -207,7 +227,8 @@
 			"x": 27,
 			"y": 47,
 			"wfo": "PSR"
-		}
+		},
+		"id": "KIPL"
 	},
 	{
 		"city": "Tucson",
@@ -217,7 +238,8 @@
 			"x": 91,
 			"y": 49,
 			"wfo": "TWC"
-		}
+		},
+		"id": "KTUS"
 	},
 	{
 		"city": "Phoenix",
@@ -227,7 +249,8 @@
 			"x": 159,
 			"y": 58,
 			"wfo": "PSR"
-		}
+		},
+		"id": "KPHX"
 	},
 	{
 		"city": "Santa Monica",
@@ -237,7 +260,8 @@
 			"x": 146,
 			"y": 45,
 			"wfo": "LOX"
-		}
+		},
+		"id": "KSMO"
 	},
 	{
 		"city": "San Bernadina",
@@ -247,7 +271,8 @@
 			"x": 62,
 			"y": 75,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KSBD"
 	},
 	{
 		"city": "Riverside",
@@ -257,7 +282,8 @@
 			"x": 58,
 			"y": 70,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KRAL"
 	},
 	{
 		"city": "Indio",
@@ -267,7 +293,8 @@
 			"x": 98,
 			"y": 52,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KTRM"
 	},
 	{
 		"city": "Blythe",
@@ -277,7 +304,8 @@
 			"x": 68,
 			"y": 77,
 			"wfo": "PSR"
-		}
+		},
+		"id": "KBLH"
 	},
 	{
 		"city": "Lordsburg",
@@ -287,7 +315,8 @@
 			"x": 20,
 			"y": 89,
 			"wfo": "EPZ"
-		}
+		},
+		"id": "KLSB"
 	},
 	{
 		"city": "Deming",
@@ -297,7 +326,8 @@
 			"x": 54,
 			"y": 82,
 			"wfo": "EPZ"
-		}
+		},
+		"id": "KDMN"
 	},
 	{
 		"city": "Las Cruces",
@@ -307,7 +337,8 @@
 			"x": 91,
 			"y": 81,
 			"wfo": "EPZ"
-		}
+		},
+		"id": "KLRU"
 	},
 	{
 		"city": "El Paso",
@@ -317,7 +348,8 @@
 			"x": 100,
 			"y": 56,
 			"wfo": "EPZ"
-		}
+		},
+		"id": "KELP"
 	},
 	{
 		"city": "Van Horn",
@@ -327,7 +359,8 @@
 			"x": 17,
 			"y": 97,
 			"wfo": "MAF"
-		}
+		},
+		"id": "KVHN"
 	},
 	{
 		"city": "San Antonio",
@@ -337,7 +370,8 @@
 			"x": 126,
 			"y": 55,
 			"wfo": "EWX"
-		}
+		},
+		"id": "KSKF"
 	},
 	{
 		"city": "Houston",
@@ -347,7 +381,8 @@
 			"x": 63,
 			"y": 95,
 			"wfo": "HGX"
-		}
+		},
+		"id": "KHOU"
 	},
 	{
 		"city": "Beaumont",
@@ -357,7 +392,8 @@
 			"x": 26,
 			"y": 88,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KBPT"
 	},
 	{
 		"city": "Lake Charles",
@@ -367,7 +403,8 @@
 			"x": 60,
 			"y": 94,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KLCH"
 	},
 	{
 		"city": "Lafayette",
@@ -377,7 +414,8 @@
 			"x": 105,
 			"y": 95,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KLFT"
 	},
 	{
 		"city": "Baton Rouge",
@@ -387,7 +425,8 @@
 			"x": 25,
 			"y": 109,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KBTR"
 	},
 	{
 		"city": "New Orleans",
@@ -397,7 +436,8 @@
 			"x": 67,
 			"y": 88,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KNEW"
 	},
 	{
 		"city": "Bay St. Louis",
@@ -407,7 +447,8 @@
 			"x": 94,
 			"y": 105,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KGPT"
 	},
 	{
 		"city": "Pascagoula",
@@ -417,7 +458,8 @@
 			"x": 124,
 			"y": 109,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KPQL"
 	},
 	{
 		"city": "Mobile",
@@ -427,7 +469,8 @@
 			"x": 52,
 			"y": 67,
 			"wfo": "MOB"
-		}
+		},
+		"id": "KBFM"
 	},
 	{
 		"city": "Pensacola",
@@ -437,7 +480,8 @@
 			"x": 84,
 			"y": 57,
 			"wfo": "MOB"
-		}
+		},
+		"id": "KPNS"
 	},
 	{
 		"city": "Tallahassee",
@@ -447,7 +491,8 @@
 			"x": 84,
 			"y": 86,
 			"wfo": "TAE"
-		}
+		},
+		"id": "KTLH"
 	},
 	{
 		"city": "Lake City",
@@ -457,7 +502,8 @@
 			"x": 29,
 			"y": 55,
 			"wfo": "JAX"
-		}
+		},
+		"id": "KLCQ"
 	},
 	{
 		"city": "Jacksonville",
@@ -467,7 +513,8 @@
 			"x": 66,
 			"y": 65,
 			"wfo": "JAX"
-		}
+		},
+		"id": "KNIP"
 	},
 	{
 		"city": "Hammond",
@@ -477,7 +524,8 @@
 			"x": 52,
 			"y": 112,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KHDC"
 	},
 	{
 		"city": "Slidell",
@@ -487,7 +535,8 @@
 			"x": 78,
 			"y": 103,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KASD"
 	},
 	{
 		"city": "Barstow",
@@ -497,7 +546,8 @@
 			"x": 46,
 			"y": 52,
 			"wfo": "VEF"
-		}
+		},
+		"id": "KDAG"
 	},
 	{
 		"city": "Las Vegas",
@@ -507,7 +557,8 @@
 			"x": 123,
 			"y": 98,
 			"wfo": "VEF"
-		}
+		},
+		"id": "KVGT"
 	},
 	{
 		"city": "Salt Lake City",
@@ -517,7 +568,8 @@
 			"x": 100,
 			"y": 175,
 			"wfo": "SLC"
-		}
+		},
+		"id": "KSLC"
 	},
 	{
 		"city": "Ogden",
@@ -527,7 +579,8 @@
 			"x": 100,
 			"y": 197,
 			"wfo": "SLC"
-		}
+		},
+		"id": "KOGD"
 	},
 	{
 		"city": "Pocatello",
@@ -537,7 +590,8 @@
 			"x": 107,
 			"y": 48,
 			"wfo": "PIH"
-		}
+		},
+		"id": "KPIH"
 	},
 	{
 		"city": "Idaho Falls",
@@ -547,7 +601,8 @@
 			"x": 124,
 			"y": 75,
 			"wfo": "PIH"
-		}
+		},
+		"id": "KIDA"
 	},
 	{
 		"city": "Butte",
@@ -557,7 +612,8 @@
 			"x": 147,
 			"y": 84,
 			"wfo": "MSO"
-		}
+		},
+		"id": "KBTM"
 	},
 	{
 		"city": "Helena",
@@ -567,7 +623,8 @@
 			"x": 70,
 			"y": 104,
 			"wfo": "TFX"
-		}
+		},
+		"id": "KHLN"
 	},
 	{
 		"city": "Great Falls",
@@ -577,7 +634,8 @@
 			"x": 98,
 			"y": 145,
 			"wfo": "TFX"
-		}
+		},
+		"id": "KGTF"
 	},
 	{
 		"city": "Macon",
@@ -587,7 +645,8 @@
 			"x": 82,
 			"y": 49,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KMCN"
 	},
 	{
 		"city": "Savannah",
@@ -597,7 +656,8 @@
 			"x": 47,
 			"y": 41,
 			"wfo": "CHS"
-		}
+		},
+		"id": "KSVN"
 	},
 	{
 		"city": "Flagstaff",
@@ -607,7 +667,8 @@
 			"x": 74,
 			"y": 89,
 			"wfo": "FGZ"
-		}
+		},
+		"id": "KFLG"
 	},
 	{
 		"city": "Nogales",
@@ -617,7 +678,8 @@
 			"x": 88,
 			"y": 10,
 			"wfo": "TWC"
-		}
+		},
+		"id": "KOLS"
 	},
 	{
 		"city": "Abilene",
@@ -627,7 +689,8 @@
 			"x": 103,
 			"y": 98,
 			"wfo": "SJT"
-		}
+		},
+		"id": "KABI"
 	},
 	{
 		"city": "Fort Worth",
@@ -637,7 +700,8 @@
 			"x": 69,
 			"y": 103,
 			"wfo": "FWD"
-		}
+		},
+		"id": "KFTW"
 	},
 	{
 		"city": "Dallas",
@@ -647,7 +711,8 @@
 			"x": 89,
 			"y": 104,
 			"wfo": "FWD"
-		}
+		},
+		"id": "KDAL"
 	},
 	{
 		"city": "Shreveport",
@@ -657,7 +722,8 @@
 			"x": 74,
 			"y": 68,
 			"wfo": "SHV"
-		}
+		},
+		"id": "KDTN"
 	},
 	{
 		"city": "Monroe",
@@ -667,7 +733,8 @@
 			"x": 134,
 			"y": 69,
 			"wfo": "SHV"
-		}
+		},
+		"id": "KMLU"
 	},
 	{
 		"city": "Vicksburg",
@@ -677,7 +744,8 @@
 			"x": 50,
 			"y": 64,
 			"wfo": "JAN"
-		}
+		},
+		"id": "KVKS"
 	},
 	{
 		"city": "Jackson",
@@ -687,7 +755,8 @@
 			"x": 76,
 			"y": 63,
 			"wfo": "JAN"
-		}
+		},
+		"id": "KHKS"
 	},
 	{
 		"city": "Meridian",
@@ -697,7 +766,8 @@
 			"x": 131,
 			"y": 68,
 			"wfo": "JAN"
-		}
+		},
+		"id": "KMEI"
 	},
 	{
 		"city": "Tuscaloosa",
@@ -707,7 +777,8 @@
 			"x": 32,
 			"y": 69,
 			"wfo": "BMX"
-		}
+		},
+		"id": "KTCL"
 	},
 	{
 		"city": "Birmingham",
@@ -717,7 +788,8 @@
 			"x": 59,
 			"y": 84,
 			"wfo": "BMX"
-		}
+		},
+		"id": "KBHM"
 	},
 	{
 		"city": "Atlanta",
@@ -727,7 +799,8 @@
 			"x": 50,
 			"y": 87,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KFTY"
 	},
 	{
 		"city": "Augusta",
@@ -737,7 +810,8 @@
 			"x": 32,
 			"y": 35,
 			"wfo": "CAE"
-		}
+		},
+		"id": "KDNL"
 	},
 	{
 		"city": "Columbia",
@@ -747,7 +821,8 @@
 			"x": 64,
 			"y": 61,
 			"wfo": "CAE"
-		}
+		},
+		"id": "KCUB"
 	},
 	{
 		"city": "Florence",
@@ -757,7 +832,8 @@
 			"x": 23,
 			"y": 66,
 			"wfo": "ILM"
-		}
+		},
+		"id": "KFLO"
 	},
 	{
 		"city": "Memphis",
@@ -767,7 +843,8 @@
 			"x": 42,
 			"y": 67,
 			"wfo": "MEG"
-		}
+		},
+		"id": "KMEM"
 	},
 	{
 		"city": "Tupelo",
@@ -777,7 +854,8 @@
 			"x": 93,
 			"y": 29,
 			"wfo": "MEG"
-		}
+		},
+		"id": "KTUP"
 	},
 	{
 		"city": "Paducah",
@@ -787,7 +865,8 @@
 			"x": 132,
 			"y": 55,
 			"wfo": "PAH"
-		}
+		},
+		"id": "KPAH"
 	},
 	{
 		"city": "Nashville",
@@ -797,7 +876,8 @@
 			"x": 50,
 			"y": 57,
 			"wfo": "OHX"
-		}
+		},
+		"id": "KBNA"
 	},
 	{
 		"city": "Chattanooga",
@@ -807,7 +887,8 @@
 			"x": 24,
 			"y": 7,
 			"wfo": "MRX"
-		}
+		},
+		"id": "KCHA"
 	},
 	{
 		"city": "Clarksville",
@@ -817,7 +898,8 @@
 			"x": 28,
 			"y": 72,
 			"wfo": "OHX"
-		}
+		},
+		"id": "KCKV"
 	},
 	{
 		"city": "Albuquerque",
@@ -827,7 +909,8 @@
 			"x": 98,
 			"y": 121,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KABQ"
 	},
 	{
 		"city": "Santa Fe",
@@ -837,7 +920,8 @@
 			"x": 126,
 			"y": 146,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KSAF"
 	},
 	{
 		"city": "Las Vegas",
@@ -847,7 +931,8 @@
 			"x": 152,
 			"y": 139,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KLVS"
 	},
 	{
 		"city": "Raton",
@@ -857,7 +942,8 @@
 			"x": 184,
 			"y": 196,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KRTN"
 	},
 	{
 		"city": "Pueblo",
@@ -867,7 +953,8 @@
 			"x": 95,
 			"y": 65,
 			"wfo": "PUB"
-		}
+		},
+		"id": "KPUB"
 	},
 	{
 		"city": "Colorado Springs",
@@ -877,7 +964,8 @@
 			"x": 90,
 			"y": 91,
 			"wfo": "PUB"
-		}
+		},
+		"id": "KCOS"
 	},
 	{
 		"city": "Denver",
@@ -887,7 +975,8 @@
 			"x": 63,
 			"y": 62,
 			"wfo": "BOU"
-		}
+		},
+		"id": "KBJC"
 	},
 	{
 		"city": "Ft. Collins",
@@ -897,7 +986,8 @@
 			"x": 63,
 			"y": 100,
 			"wfo": "BOU"
-		}
+		},
+		"id": "KFNL"
 	},
 	{
 		"city": "Cheyenne",
@@ -907,7 +997,8 @@
 			"x": 109,
 			"y": 13,
 			"wfo": "CYS"
-		}
+		},
+		"id": "KCYS"
 	},
 	{
 		"city": "Casper",
@@ -917,7 +1008,8 @@
 			"x": 187,
 			"y": 95,
 			"wfo": "RIW"
-		}
+		},
+		"id": "KCPR"
 	},
 	{
 		"city": "Sheridan",
@@ -927,7 +1019,8 @@
 			"x": 149,
 			"y": 41,
 			"wfo": "BYZ"
-		}
+		},
+		"id": "KSHR"
 	},
 	{
 		"city": "Asheville",
@@ -937,7 +1030,8 @@
 			"x": 55,
 			"y": 75,
 			"wfo": "GSP"
-		}
+		},
+		"id": "KAVL"
 	},
 	{
 		"city": "Spartanburg",
@@ -947,7 +1041,8 @@
 			"x": 81,
 			"y": 49,
 			"wfo": "GSP"
-		}
+		},
+		"id": "KSPA"
 	},
 	{
 		"city": "Charleston",
@@ -957,7 +1052,8 @@
 			"x": 87,
 			"y": 77,
 			"wfo": "CHS"
-		}
+		},
+		"id": "KJZI"
 	},
 	{
 		"city": "Lubbock",
@@ -967,7 +1063,8 @@
 			"x": 50,
 			"y": 34,
 			"wfo": "LUB"
-		}
+		},
+		"id": "KLBB"
 	},
 	{
 		"city": "Amarillo",
@@ -977,7 +1074,8 @@
 			"x": 48,
 			"y": 25,
 			"wfo": "AMA"
-		}
+		},
+		"id": "KAMA"
 	},
 	{
 		"city": "Kansas City",
@@ -987,7 +1085,8 @@
 			"x": 44,
 			"y": 51,
 			"wfo": "EAX"
-		}
+		},
+		"id": "KMKC"
 	},
 	{
 		"city": "St. Joseph",
@@ -997,7 +1096,8 @@
 			"x": 34,
 			"y": 81,
 			"wfo": "EAX"
-		}
+		},
+		"id": "KSTJ"
 	},
 	{
 		"city": "Mound City",
@@ -1007,7 +1107,8 @@
 			"x": 21,
 			"y": 97,
 			"wfo": "EAX"
-		}
+		},
+		"id": "KFNB"
 	},
 	{
 		"city": "Council Bluffs",
@@ -1017,7 +1118,8 @@
 			"x": 86,
 			"y": 60,
 			"wfo": "OAX"
-		}
+		},
+		"id": "KCBF"
 	},
 	{
 		"city": "Sioux City",
@@ -1027,7 +1129,8 @@
 			"x": 108,
 			"y": 16,
 			"wfo": "FSD"
-		}
+		},
+		"id": "KSUX"
 	},
 	{
 		"city": "Sioux Falls",
@@ -1037,7 +1140,8 @@
 			"x": 98,
 			"y": 64,
 			"wfo": "FSD"
-		}
+		},
+		"id": "KFSD"
 	},
 	{
 		"city": "Fargo",
@@ -1047,7 +1151,8 @@
 			"x": 100,
 			"y": 56,
 			"wfo": "FGF"
-		}
+		},
+		"id": "KFAR"
 	},
 	{
 		"city": "Grand Forks",
@@ -1057,7 +1162,8 @@
 			"x": 93,
 			"y": 107,
 			"wfo": "FGF"
-		}
+		},
+		"id": "KGFK"
 	},
 	{
 		"city": "Texarkana",
@@ -1067,7 +1173,8 @@
 			"x": 62,
 			"y": 108,
 			"wfo": "SHV"
-		}
+		},
+		"id": "KTXK"
 	},
 	{
 		"city": "Little Rock",
@@ -1077,7 +1184,8 @@
 			"x": 83,
 			"y": 73,
 			"wfo": "LZK"
-		}
+		},
+		"id": "KLIT"
 	},
 	{
 		"city": "Laredo",
@@ -1087,7 +1195,8 @@
 			"x": 28,
 			"y": 25,
 			"wfo": "CRP"
-		}
+		},
+		"id": "KLRD"
 	},
 	{
 		"city": "Austin",
@@ -1097,7 +1206,8 @@
 			"x": 156,
 			"y": 91,
 			"wfo": "EWX"
-		}
+		},
+		"id": "KATT"
 	},
 	{
 		"city": "Waco",
@@ -1107,7 +1217,8 @@
 			"x": 75,
 			"y": 51,
 			"wfo": "FWD"
-		}
+		},
+		"id": "KACT"
 	},
 	{
 		"city": "Oklahoma City",
@@ -1117,7 +1228,8 @@
 			"x": 97,
 			"y": 94,
 			"wfo": "OUN"
-		}
+		},
+		"id": "KOKC"
 	},
 	{
 		"city": "Wichita",
@@ -1127,7 +1239,8 @@
 			"x": 62,
 			"y": 34,
 			"wfo": "ICT"
-		}
+		},
+		"id": "KICT"
 	},
 	{
 		"city": "Des Moines",
@@ -1137,7 +1250,8 @@
 			"x": 73,
 			"y": 49,
 			"wfo": "DMX"
-		}
+		},
+		"id": "KDSM"
 	},
 	{
 		"city": "Ames",
@@ -1147,7 +1261,8 @@
 			"x": 73,
 			"y": 69,
 			"wfo": "DMX"
-		}
+		},
+		"id": "KAMW"
 	},
 	{
 		"city": "Mason City",
@@ -1157,7 +1272,8 @@
 			"x": 87,
 			"y": 121,
 			"wfo": "DMX"
-		}
+		},
+		"id": "KMCW"
 	},
 	{
 		"city": "Albert Lea",
@@ -1167,7 +1283,8 @@
 			"x": 106,
 			"y": 10,
 			"wfo": "MPX"
-		}
+		},
+		"id": "KAEL"
 	},
 	{
 		"city": "St. Paul",
@@ -1177,7 +1294,8 @@
 			"x": 114,
 			"y": 71,
 			"wfo": "MPX"
-		}
+		},
+		"id": "KSTP"
 	},
 	{
 		"city": "Minneapolis",
@@ -1187,7 +1305,8 @@
 			"x": 108,
 			"y": 72,
 			"wfo": "MPX"
-		}
+		},
+		"id": "KMSP"
 	},
 	{
 		"city": "Duluth",
@@ -1197,7 +1316,8 @@
 			"x": 91,
 			"y": 69,
 			"wfo": "DLH"
-		}
+		},
+		"id": "KDYT"
 	},
 	{
 		"city": "Corpus Christi",
@@ -1207,7 +1327,8 @@
 			"x": 110,
 			"y": 34,
 			"wfo": "CRP"
-		}
+		},
+		"id": "KCRP"
 	},
 	{
 		"city": "Rockford",
@@ -1217,7 +1338,8 @@
 			"x": 25,
 			"y": 88,
 			"wfo": "LOT"
-		}
+		},
+		"id": "KRFD"
 	},
 	{
 		"city": "Bloomington-Normal",
@@ -1227,7 +1349,8 @@
 			"x": 69,
 			"y": 88,
 			"wfo": "ILX"
-		}
+		},
+		"id": "KBMI"
 	},
 	{
 		"city": "Needles",
@@ -1237,7 +1360,8 @@
 			"x": 133,
 			"y": 36,
 			"wfo": "VEF"
-		}
+		},
+		"id": "KEED"
 	},
 	{
 		"city": "Kingman",
@@ -1247,7 +1371,8 @@
 			"x": 155,
 			"y": 49,
 			"wfo": "VEF"
-		}
+		},
+		"id": "KIGM"
 	},
 	{
 		"city": "Gallup",
@@ -1257,7 +1382,8 @@
 			"x": 24,
 			"y": 148,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KGUP"
 	},
 	{
 		"city": "Santa Rosa",
@@ -1267,7 +1393,8 @@
 			"x": 169,
 			"y": 109,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KSXU"
 	},
 	{
 		"city": "Tucumcari",
@@ -1277,7 +1404,8 @@
 			"x": 205,
 			"y": 117,
 			"wfo": "ABQ"
-		}
+		},
+		"id": "KTCC"
 	},
 	{
 		"city": "Fort Smith",
@@ -1287,7 +1415,8 @@
 			"x": 98,
 			"y": 70,
 			"wfo": "TSA"
-		}
+		},
+		"id": "KFSM"
 	},
 	{
 		"city": "Knoxville",
@@ -1297,7 +1426,8 @@
 			"x": 71,
 			"y": 51,
 			"wfo": "MRX"
-		}
+		},
+		"id": "KTYS"
 	},
 	{
 		"city": "Statesville",
@@ -1307,7 +1437,8 @@
 			"x": 115,
 			"y": 90,
 			"wfo": "GSP"
-		}
+		},
+		"id": "KSVH"
 	},
 	{
 		"city": "Winston-Salem",
@@ -1317,7 +1448,8 @@
 			"x": 15,
 			"y": 65,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KINT"
 	},
 	{
 		"city": "Greensboro",
@@ -1327,7 +1459,8 @@
 			"x": 32,
 			"y": 65,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KGSO"
 	},
 	{
 		"city": "Durham",
@@ -1337,7 +1470,8 @@
 			"x": 64,
 			"y": 66,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KRDU"
 	},
 	{
 		"city": "Raleigh",
@@ -1347,7 +1481,8 @@
 			"x": 74,
 			"y": 58,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KRDU"
 	},
 	{
 		"city": "Benson",
@@ -1357,7 +1492,8 @@
 			"x": 80,
 			"y": 40,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KHRJ"
 	},
 	{
 		"city": "Wilmington",
@@ -1367,7 +1503,8 @@
 			"x": 89,
 			"y": 75,
 			"wfo": "ILM"
-		}
+		},
+		"id": "KILM"
 	},
 	{
 		"city": "Beloit",
@@ -1377,7 +1514,8 @@
 			"x": 51,
 			"y": 39,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KJVL"
 	},
 	{
 		"city": "Milwaukee",
@@ -1387,7 +1525,8 @@
 			"x": 88,
 			"y": 65,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KMKE"
 	},
 	{
 		"city": "Sheboygan",
@@ -1397,7 +1536,8 @@
 			"x": 93,
 			"y": 98,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KSBM"
 	},
 	{
 		"city": "Green Bay",
@@ -1407,7 +1547,8 @@
 			"x": 79,
 			"y": 32,
 			"wfo": "GRB"
-		}
+		},
+		"id": "KGRB"
 	},
 	{
 		"city": "Wichita Falls",
@@ -1417,7 +1558,8 @@
 			"x": 60,
 			"y": 25,
 			"wfo": "OUN"
-		}
+		},
+		"id": "KSPS"
 	},
 	{
 		"city": "Lawton",
@@ -1427,7 +1569,8 @@
 			"x": 65,
 			"y": 56,
 			"wfo": "OUN"
-		}
+		},
+		"id": "KLAW"
 	},
 	{
 		"city": "Tulsa",
@@ -1437,7 +1580,8 @@
 			"x": 41,
 			"y": 104,
 			"wfo": "TSA"
-		}
+		},
+		"id": "KRVS"
 	},
 	{
 		"city": "Joplin",
@@ -1447,7 +1591,8 @@
 			"x": 23,
 			"y": 29,
 			"wfo": "SGF"
-		}
+		},
+		"id": "KJLN"
 	},
 	{
 		"city": "Springfield",
@@ -1457,7 +1602,8 @@
 			"x": 67,
 			"y": 35,
 			"wfo": "SGF"
-		}
+		},
+		"id": "KSGF"
 	},
 	{
 		"city": "Rolla",
@@ -1467,7 +1613,8 @@
 			"x": 121,
 			"y": 69,
 			"wfo": "SGF"
-		}
+		},
+		"id": "KVIH"
 	},
 	{
 		"city": "St. Louis",
@@ -1477,7 +1624,8 @@
 			"x": 95,
 			"y": 74,
 			"wfo": "LSX"
-		}
+		},
+		"id": "KCPS"
 	},
 	{
 		"city": "Galveston",
@@ -1487,7 +1635,8 @@
 			"x": 84,
 			"y": 74,
 			"wfo": "HGX"
-		}
+		},
+		"id": "KGLS"
 	},
 	{
 		"city": "LaFayette",
@@ -1497,7 +1646,8 @@
 			"x": 105,
 			"y": 95,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KLFT"
 	},
 	{
 		"city": "Opelousas",
@@ -1507,7 +1657,8 @@
 			"x": 103,
 			"y": 109,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KLFT"
 	},
 	{
 		"city": "Alexandria",
@@ -1517,7 +1668,8 @@
 			"x": 88,
 			"y": 143,
 			"wfo": "LCH"
-		}
+		},
+		"id": "KAEX"
 	},
 	{
 		"city": "McComb",
@@ -1527,7 +1679,8 @@
 			"x": 51,
 			"y": 145,
 			"wfo": "LIX"
-		}
+		},
+		"id": "KMCB"
 	},
 	{
 		"city": "Grenada",
@@ -1537,7 +1690,8 @@
 			"x": 87,
 			"y": 129,
 			"wfo": "JAN"
-		}
+		},
+		"id": "K5A6"
 	},
 	{
 		"city": "Blytheville",
@@ -1547,7 +1701,8 @@
 			"x": 46,
 			"y": 102,
 			"wfo": "MEG"
-		}
+		},
+		"id": "KHKA"
 	},
 	{
 		"city": "Sikeston",
@@ -1557,7 +1712,8 @@
 			"x": 97,
 			"y": 45,
 			"wfo": "PAH"
-		}
+		},
+		"id": "KCGI"
 	},
 	{
 		"city": "Cape Girardeau",
@@ -1567,7 +1723,8 @@
 			"x": 98,
 			"y": 64,
 			"wfo": "PAH"
-		}
+		},
+		"id": "KCGI"
 	},
 	{
 		"city": "Chicago",
@@ -1577,7 +1734,8 @@
 			"x": 75,
 			"y": 73,
 			"wfo": "LOT"
-		}
+		},
+		"id": "KMDW"
 	},
 	{
 		"city": "Charleston",
@@ -1587,7 +1745,8 @@
 			"x": 105,
 			"y": 47,
 			"wfo": "PAH"
-		}
+		},
+		"id": "KCGI"
 	},
 	{
 		"city": "Cairo",
@@ -1597,7 +1756,8 @@
 			"x": 111,
 			"y": 51,
 			"wfo": "PAH"
-		}
+		},
+		"id": "KPAH"
 	},
 	{
 		"city": "Hattiesburg",
@@ -1607,7 +1767,8 @@
 			"x": 111,
 			"y": 21,
 			"wfo": "JAN"
-		}
+		},
+		"id": "KHBG"
 	},
 	{
 		"city": "Laurel",
@@ -1617,7 +1778,8 @@
 			"x": 116,
 			"y": 38,
 			"wfo": "JAN"
-		}
+		},
+		"id": "KLUL"
 	},
 	{
 		"city": "Gadsden",
@@ -1627,7 +1789,8 @@
 			"x": 87,
 			"y": 108,
 			"wfo": "BMX"
-		}
+		},
+		"id": "KGAD"
 	},
 	{
 		"city": "Louisville",
@@ -1637,7 +1800,8 @@
 			"x": 49,
 			"y": 78,
 			"wfo": "LMK"
-		}
+		},
+		"id": "KSDF"
 	},
 	{
 		"city": "Lexington",
@@ -1647,7 +1811,8 @@
 			"x": 95,
 			"y": 72,
 			"wfo": "LMK"
-		}
+		},
+		"id": "KLEX"
 	},
 	{
 		"city": "Ashland",
@@ -1657,7 +1822,8 @@
 			"x": 26,
 			"y": 70,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KDWU"
 	},
 	{
 		"city": "Huntington",
@@ -1667,7 +1833,8 @@
 			"x": 34,
 			"y": 68,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KHTS"
 	},
 	{
 		"city": "Charleston",
@@ -1677,7 +1844,8 @@
 			"x": 62,
 			"y": 67,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KCRW"
 	},
 	{
 		"city": "Beckley",
@@ -1687,7 +1855,8 @@
 			"x": 81,
 			"y": 43,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KBKW"
 	},
 	{
 		"city": "Lewisburg",
@@ -1697,7 +1866,8 @@
 			"x": 54,
 			"y": 91,
 			"wfo": "RNK"
-		}
+		},
+		"id": "KLWB"
 	},
 	{
 		"city": "Lexington",
@@ -1707,7 +1877,8 @@
 			"x": 89,
 			"y": 94,
 			"wfo": "RNK"
-		}
+		},
+		"id": "KHSP"
 	},
 	{
 		"city": "Staunton",
@@ -1717,7 +1888,8 @@
 			"x": 29,
 			"y": 29,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KW13"
 	},
 	{
 		"city": "Richmond",
@@ -1727,7 +1899,8 @@
 			"x": 46,
 			"y": 77,
 			"wfo": "AKQ"
-		}
+		},
+		"id": "KRIC"
 	},
 	{
 		"city": "Norfolk",
@@ -1737,7 +1910,8 @@
 			"x": 90,
 			"y": 52,
 			"wfo": "AKQ"
-		}
+		},
+		"id": "KNGU"
 	},
 	{
 		"city": "Chesapeake",
@@ -1747,7 +1921,8 @@
 			"x": 93,
 			"y": 46,
 			"wfo": "AKQ"
-		}
+		},
+		"id": "KCPK"
 	},
 	{
 		"city": "Wentzville",
@@ -1757,7 +1932,8 @@
 			"x": 72,
 			"y": 82,
 			"wfo": "LSX"
-		}
+		},
+		"id": "KSUS"
 	},
 	{
 		"city": "Montgomery",
@@ -1767,7 +1943,8 @@
 			"x": 81,
 			"y": 35,
 			"wfo": "BMX"
-		}
+		},
+		"id": "KMGM"
 	},
 	{
 		"city": "Huntsville",
@@ -1777,7 +1954,8 @@
 			"x": 63,
 			"y": 42,
 			"wfo": "HUN"
-		}
+		},
+		"id": "KMDQ"
 	},
 	{
 		"city": "Indianapolis",
@@ -1787,7 +1965,8 @@
 			"x": 58,
 			"y": 69,
 			"wfo": "IND"
-		}
+		},
+		"id": "KIND"
 	},
 	{
 		"city": "Strasburg",
@@ -1797,7 +1976,8 @@
 			"x": 50,
 			"y": 70,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KFRR"
 	},
 	{
 		"city": "Washington",
@@ -1807,7 +1987,8 @@
 			"x": 97,
 			"y": 71,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KDCA"
 	},
 	{
 		"city": "Fort Wayne",
@@ -1817,7 +1998,8 @@
 			"x": 69,
 			"y": 38,
 			"wfo": "IWX"
-		}
+		},
+		"id": "KFWA"
 	},
 	{
 		"city": "Lansing",
@@ -1827,7 +2009,8 @@
 			"x": 79,
 			"y": 39,
 			"wfo": "GRR"
-		}
+		},
+		"id": "KLAN"
 	},
 	{
 		"city": "Flint",
@@ -1837,7 +2020,8 @@
 			"x": 42,
 			"y": 63,
 			"wfo": "DTX"
-		}
+		},
+		"id": "KFNT"
 	},
 	{
 		"city": "Port Huron",
@@ -1847,7 +2031,8 @@
 			"x": 84,
 			"y": 65,
 			"wfo": "DTX"
-		}
+		},
+		"id": "KPHN"
 	},
 	{
 		"city": "Grand Junction",
@@ -1857,7 +2042,8 @@
 			"x": 95,
 			"y": 102,
 			"wfo": "GJT"
-		}
+		},
+		"id": "KGJT"
 	},
 	{
 		"city": "Limon",
@@ -1867,7 +2053,8 @@
 			"x": 107,
 			"y": 37,
 			"wfo": "BOU"
-		}
+		},
+		"id": "KLIC"
 	},
 	{
 		"city": "Hays",
@@ -1877,7 +2064,8 @@
 			"x": 102,
 			"y": 88,
 			"wfo": "DDC"
-		}
+		},
+		"id": "KHYS"
 	},
 	{
 		"city": "Salina",
@@ -1887,7 +2075,8 @@
 			"x": 53,
 			"y": 86,
 			"wfo": "ICT"
-		}
+		},
+		"id": "KSLN"
 	},
 	{
 		"city": "Topeka",
@@ -1897,7 +2086,8 @@
 			"x": 81,
 			"y": 49,
 			"wfo": "TOP"
-		}
+		},
+		"id": "KTOP"
 	},
 	{
 		"city": "Columbia",
@@ -1907,7 +2097,8 @@
 			"x": 20,
 			"y": 87,
 			"wfo": "LSX"
-		}
+		},
+		"id": "KCOU"
 	},
 	{
 		"city": "Columbus",
@@ -1917,7 +2108,8 @@
 			"x": 85,
 			"y": 81,
 			"wfo": "ILN"
-		}
+		},
+		"id": "KCMH"
 	},
 	{
 		"city": "Wheeling",
@@ -1927,7 +2119,8 @@
 			"x": 54,
 			"y": 47,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KHLG"
 	},
 	{
 		"city": "Washington",
@@ -1937,7 +2130,8 @@
 			"x": 70,
 			"y": 53,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KAFJ"
 	},
 	{
 		"city": "New Stanton",
@@ -1947,7 +2141,8 @@
 			"x": 92,
 			"y": 58,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KLBE"
 	},
 	{
 		"city": "Breezewood",
@@ -1957,7 +2152,8 @@
 			"x": 60,
 			"y": 19,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KHMZ"
 	},
 	{
 		"city": "Hancock",
@@ -1967,7 +2163,8 @@
 			"x": 52,
 			"y": 102,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KMRB"
 	},
 	{
 		"city": "Hagerstown",
@@ -1977,7 +2174,8 @@
 			"x": 69,
 			"y": 102,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KHGR"
 	},
 	{
 		"city": "Baltimore",
@@ -1987,7 +2185,8 @@
 			"x": 109,
 			"y": 91,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KDMH"
 	},
 	{
 		"city": "Frederick",
@@ -1997,7 +2196,8 @@
 			"x": 80,
 			"y": 93,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KFDK"
 	},
 	{
 		"city": "Cincinnati",
@@ -2007,7 +2207,8 @@
 			"x": 36,
 			"y": 38,
 			"wfo": "ILN"
-		}
+		},
+		"id": "KLUK"
 	},
 	{
 		"city": "Cleveland",
@@ -2017,7 +2218,8 @@
 			"x": 83,
 			"y": 65,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KBKL"
 	},
 	{
 		"city": "Springfield",
@@ -2027,7 +2229,8 @@
 			"x": 48,
 			"y": 56,
 			"wfo": "ILX"
-		}
+		},
+		"id": "KSPI"
 	},
 	{
 		"city": "Decatur",
@@ -2037,7 +2240,8 @@
 			"x": 72,
 			"y": 59,
 			"wfo": "ILX"
-		}
+		},
+		"id": "KDEC"
 	},
 	{
 		"city": "Champaign-Urbana",
@@ -2047,7 +2251,8 @@
 			"x": 97,
 			"y": 73,
 			"wfo": "ILX"
-		}
+		},
+		"id": "KCMI"
 	},
 	{
 		"city": "Peoria",
@@ -2057,7 +2262,8 @@
 			"x": 48,
 			"y": 97,
 			"wfo": "ILX"
-		}
+		},
+		"id": "KPIA"
 	},
 	{
 		"city": "Miami",
@@ -2067,7 +2273,8 @@
 			"x": 110,
 			"y": 51,
 			"wfo": "MFL"
-		}
+		},
+		"id": "KMIA"
 	},
 	{
 		"city": "Naples",
@@ -2077,7 +2284,8 @@
 			"x": 45,
 			"y": 60,
 			"wfo": "MFL"
-		}
+		},
+		"id": "KAPF"
 	},
 	{
 		"city": "Valdosta",
@@ -2087,7 +2295,8 @@
 			"x": 120,
 			"y": 107,
 			"wfo": "TAE"
-		}
+		},
+		"id": "KVLD"
 	},
 	{
 		"city": "Marietta",
@@ -2097,7 +2306,8 @@
 			"x": 44,
 			"y": 95,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KMGE"
 	},
 	{
 		"city": "Dayton",
@@ -2107,7 +2317,8 @@
 			"x": 44,
 			"y": 69,
 			"wfo": "ILN"
-		}
+		},
+		"id": "KFFO"
 	},
 	{
 		"city": "Toledo",
@@ -2117,7 +2328,8 @@
 			"x": 20,
 			"y": 67,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KTDZ"
 	},
 	{
 		"city": "Detroit",
@@ -2127,7 +2339,8 @@
 			"x": 66,
 			"y": 34,
 			"wfo": "DTX"
-		}
+		},
+		"id": "KDET"
 	},
 	{
 		"city": "Saginaw",
@@ -2137,7 +2350,8 @@
 			"x": 31,
 			"y": 81,
 			"wfo": "DTX"
-		}
+		},
+		"id": "KHYX"
 	},
 	{
 		"city": "Sault Ste Marie",
@@ -2147,7 +2361,8 @@
 			"x": 64,
 			"y": 131,
 			"wfo": "APX"
-		}
+		},
+		"id": "KANJ"
 	},
 	{
 		"city": "Fort Morgan",
@@ -2157,7 +2372,8 @@
 			"x": 106,
 			"y": 82,
 			"wfo": "BOU"
-		}
+		},
+		"id": "KFMM"
 	},
 	{
 		"city": "Sterling",
@@ -2167,7 +2383,8 @@
 			"x": 127,
 			"y": 98,
 			"wfo": "BOU"
-		}
+		},
+		"id": "KSTK"
 	},
 	{
 		"city": "Omaha",
@@ -2177,7 +2394,8 @@
 			"x": 83,
 			"y": 60,
 			"wfo": "OAX"
-		}
+		},
+		"id": "KOMA"
 	},
 	{
 		"city": "Akron",
@@ -2187,7 +2405,8 @@
 			"x": 91,
 			"y": 47,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KAKR"
 	},
 	{
 		"city": "Youngstown",
@@ -2197,7 +2416,8 @@
 			"x": 121,
 			"y": 51,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KYNG"
 	},
 	{
 		"city": "Pittsburgh",
@@ -2207,7 +2427,8 @@
 			"x": 78,
 			"y": 66,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KAGC"
 	},
 	{
 		"city": "Harrisburg",
@@ -2217,7 +2438,8 @@
 			"x": 106,
 			"y": 37,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KCXY"
 	},
 	{
 		"city": "Valley Forge",
@@ -2227,7 +2449,8 @@
 			"x": 39,
 			"y": 84,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KPTW"
 	},
 	{
 		"city": "Philadelphia",
@@ -2237,7 +2460,8 @@
 			"x": 50,
 			"y": 79,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KPHL"
 	},
 	{
 		"city": "Charlotte",
@@ -2247,7 +2471,8 @@
 			"x": 119,
 			"y": 65,
 			"wfo": "GSP"
-		}
+		},
+		"id": "KCLT"
 	},
 	{
 		"city": "Wytheville",
@@ -2257,7 +2482,8 @@
 			"x": 35,
 			"y": 51,
 			"wfo": "RNK"
-		}
+		},
+		"id": "KMKJ"
 	},
 	{
 		"city": "Bluefield",
@@ -2267,7 +2493,8 @@
 			"x": 29,
 			"y": 64,
 			"wfo": "RNK"
-		}
+		},
+		"id": "KBLF"
 	},
 	{
 		"city": "Parkersburg",
@@ -2277,7 +2504,8 @@
 			"x": 61,
 			"y": 108,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KPKB"
 	},
 	{
 		"city": "Marietta",
@@ -2287,7 +2515,8 @@
 			"x": 64,
 			"y": 116,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KPKB"
 	},
 	{
 		"city": "Canton",
@@ -2297,7 +2526,8 @@
 			"x": 98,
 			"y": 34,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KCAK"
 	},
 	{
 		"city": "Allentown",
@@ -2307,7 +2537,8 @@
 			"x": 35,
 			"y": 106,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KABE"
 	},
 	{
 		"city": "Bethlehem",
@@ -2317,7 +2548,8 @@
 			"x": 38,
 			"y": 108,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KABE"
 	},
 	{
 		"city": "Easton",
@@ -2327,7 +2559,8 @@
 			"x": 43,
 			"y": 112,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KABE"
 	},
 	{
 		"city": "New York City",
@@ -2337,7 +2570,8 @@
 			"x": 33,
 			"y": 42,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KNYC"
 	},
 	{
 		"city": "Clarksburg",
@@ -2347,7 +2581,8 @@
 			"x": 103,
 			"y": 114,
 			"wfo": "RLX"
-		}
+		},
+		"id": "KCKB"
 	},
 	{
 		"city": "Fairmont",
@@ -2357,7 +2592,8 @@
 			"x": 77,
 			"y": 22,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KCKB"
 	},
 	{
 		"city": "Morgantown",
@@ -2367,7 +2603,8 @@
 			"x": 83,
 			"y": 30,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KMGW"
 	},
 	{
 		"city": "Erie",
@@ -2377,7 +2614,8 @@
 			"x": 135,
 			"y": 100,
 			"wfo": "CLE"
-		}
+		},
+		"id": "KERI"
 	},
 	{
 		"city": "Reno",
@@ -2387,7 +2625,8 @@
 			"x": 45,
 			"y": 106,
 			"wfo": "REV"
-		}
+		},
+		"id": "KRNO"
 	},
 	{
 		"city": "Elko",
@@ -2397,7 +2636,8 @@
 			"x": 122,
 			"y": 131,
 			"wfo": "LKN"
-		}
+		},
+		"id": "KEKO"
 	},
 	{
 		"city": "Evanston",
@@ -2407,7 +2647,8 @@
 			"x": 135,
 			"y": 194,
 			"wfo": "SLC"
-		}
+		},
+		"id": "KEVW"
 	},
 	{
 		"city": "Rock Springs",
@@ -2417,7 +2658,8 @@
 			"x": 84,
 			"y": 46,
 			"wfo": "RIW"
-		}
+		},
+		"id": "KRKS"
 	},
 	{
 		"city": "Sidney",
@@ -2427,7 +2669,8 @@
 			"x": 173,
 			"y": 10,
 			"wfo": "CYS"
-		}
+		},
+		"id": "KSNY"
 	},
 	{
 		"city": "North Platte",
@@ -2437,7 +2680,8 @@
 			"x": 68,
 			"y": 39,
 			"wfo": "LBF"
-		}
+		},
+		"id": "KLBF"
 	},
 	{
 		"city": "Kearney",
@@ -2447,7 +2691,8 @@
 			"x": 42,
 			"y": 74,
 			"wfo": "GID"
-		}
+		},
+		"id": "KEAR"
 	},
 	{
 		"city": "Grand Island",
@@ -2457,7 +2702,8 @@
 			"x": 68,
 			"y": 84,
 			"wfo": "GID"
-		}
+		},
+		"id": "KGRI"
 	},
 	{
 		"city": "Lincoln",
@@ -2467,7 +2713,8 @@
 			"x": 56,
 			"y": 40,
 			"wfo": "OAX"
-		}
+		},
+		"id": "KLNK"
 	},
 	{
 		"city": "Iowa City",
@@ -2477,7 +2724,8 @@
 			"x": 35,
 			"y": 72,
 			"wfo": "DVN"
-		}
+		},
+		"id": "KIOW"
 	},
 	{
 		"city": "Davenport",
@@ -2487,7 +2735,8 @@
 			"x": 68,
 			"y": 67,
 			"wfo": "DVN"
-		}
+		},
+		"id": "KDVN"
 	},
 	{
 		"city": "Sharon",
@@ -2497,7 +2746,8 @@
 			"x": 56,
 			"y": 100,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KYNG"
 	},
 	{
 		"city": "Clarion",
@@ -2507,7 +2757,8 @@
 			"x": 95,
 			"y": 104,
 			"wfo": "PBZ"
-		}
+		},
+		"id": "KDUJ"
 	},
 	{
 		"city": "Du Bois",
@@ -2517,7 +2768,8 @@
 			"x": 36,
 			"y": 68,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KDUJ"
 	},
 	{
 		"city": "Clearfield",
@@ -2527,7 +2779,8 @@
 			"x": 48,
 			"y": 65,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KFIG"
 	},
 	{
 		"city": "Bellefonte",
@@ -2537,7 +2790,8 @@
 			"x": 71,
 			"y": 63,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KUNV"
 	},
 	{
 		"city": "Williamsport",
@@ -2547,7 +2801,8 @@
 			"x": 96,
 			"y": 81,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KIPT"
 	},
 	{
 		"city": "Bloomsburg",
@@ -2557,7 +2812,8 @@
 			"x": 116,
 			"y": 73,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KZER"
 	},
 	{
 		"city": "Hazleton",
@@ -2567,7 +2823,8 @@
 			"x": 71,
 			"y": 5,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KHZL"
 	},
 	{
 		"city": "Stroudsburg",
@@ -2577,7 +2834,8 @@
 			"x": 42,
 			"y": 125,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KMPO"
 	},
 	{
 		"city": "Delaware Water Gap",
@@ -2587,7 +2845,8 @@
 			"x": 44,
 			"y": 125,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KMPO"
 	},
 	{
 		"city": "Bristol",
@@ -2597,7 +2856,8 @@
 			"x": 131,
 			"y": 85,
 			"wfo": "MRX"
-		}
+		},
+		"id": "KVJI"
 	},
 	{
 		"city": "Roanoke",
@@ -2607,7 +2867,8 @@
 			"x": 74,
 			"y": 69,
 			"wfo": "RNK"
-		}
+		},
+		"id": "KROA"
 	},
 	{
 		"city": "Winchester",
@@ -2617,7 +2878,8 @@
 			"x": 56,
 			"y": 79,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KOKV"
 	},
 	{
 		"city": "Martinsburg",
@@ -2627,7 +2889,8 @@
 			"x": 61,
 			"y": 92,
 			"wfo": "LWX"
-		}
+		},
+		"id": "KMRB"
 	},
 	{
 		"city": "Chambersburg",
@@ -2637,7 +2900,8 @@
 			"x": 81,
 			"y": 19,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KHGR"
 	},
 	{
 		"city": "Carlisle",
@@ -2647,7 +2911,8 @@
 			"x": 95,
 			"y": 33,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KCXY"
 	},
 	{
 		"city": "Wilkes-Barre",
@@ -2657,7 +2922,8 @@
 			"x": 73,
 			"y": 18,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KAVP"
 	},
 	{
 		"city": "Scranton",
@@ -2667,7 +2933,8 @@
 			"x": 79,
 			"y": 27,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KAVP"
 	},
 	{
 		"city": "Binghamton",
@@ -2677,7 +2944,8 @@
 			"x": 66,
 			"y": 57,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KBGM"
 	},
 	{
 		"city": "Syracuse",
@@ -2687,7 +2955,8 @@
 			"x": 52,
 			"y": 99,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KSYR"
 	},
 	{
 		"city": "Watertown",
@@ -2697,7 +2966,8 @@
 			"x": 128,
 			"y": 110,
 			"wfo": "BUF"
-		}
+		},
+		"id": "KART"
 	},
 	{
 		"city": "Yakima",
@@ -2707,7 +2977,8 @@
 			"x": 84,
 			"y": 153,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KYKM"
 	},
 	{
 		"city": "Pendleton",
@@ -2717,7 +2988,8 @@
 			"x": 132,
 			"y": 100,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KPDT"
 	},
 	{
 		"city": "Hermiston",
@@ -2727,7 +2999,8 @@
 			"x": 117,
 			"y": 110,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KHRI"
 	},
 	{
 		"city": "York",
@@ -2737,7 +3010,8 @@
 			"x": 113,
 			"y": 25,
 			"wfo": "CTP"
-		}
+		},
+		"id": "KTHV"
 	},
 	{
 		"city": "The Dalles",
@@ -2747,7 +3021,8 @@
 			"x": 54,
 			"y": 111,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KDLS"
 	},
 	{
 		"city": "La Grande",
@@ -2757,7 +3032,8 @@
 			"x": 151,
 			"y": 80,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KLGD"
 	},
 	{
 		"city": "Baker",
@@ -2767,7 +3043,8 @@
 			"x": 89,
 			"y": 148,
 			"wfo": "BOI"
-		}
+		},
+		"id": "KBKE"
 	},
 	{
 		"city": "Ontario",
@@ -2777,7 +3054,8 @@
 			"x": 111,
 			"y": 109,
 			"wfo": "BOI"
-		}
+		},
+		"id": "KONO"
 	},
 	{
 		"city": "Boise",
@@ -2787,7 +3065,8 @@
 			"x": 134,
 			"y": 85,
 			"wfo": "BOI"
-		}
+		},
+		"id": "KBOI"
 	},
 	{
 		"city": "Twin Falls",
@@ -2797,7 +3076,8 @@
 			"x": 184,
 			"y": 29,
 			"wfo": "BOI"
-		}
+		},
+		"id": "KTWF"
 	},
 	{
 		"city": "Newburgh",
@@ -2807,7 +3087,8 @@
 			"x": 28,
 			"y": 77,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KSWF"
 	},
 	{
 		"city": "Danbury",
@@ -2817,7 +3098,8 @@
 			"x": 47,
 			"y": 76,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KDXR"
 	},
 	{
 		"city": "Waterbury",
@@ -2827,7 +3109,8 @@
 			"x": 60,
 			"y": 85,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KOXC"
 	},
 	{
 		"city": "Hartford",
@@ -2837,7 +3120,8 @@
 			"x": 22,
 			"y": 65,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KHFD"
 	},
 	{
 		"city": "Boston",
@@ -2847,7 +3131,8 @@
 			"x": 71,
 			"y": 101,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KBOS"
 	},
 	{
 		"city": "Greenville",
@@ -2857,7 +3142,8 @@
 			"x": 64,
 			"y": 43,
 			"wfo": "GSP"
-		}
+		},
+		"id": "KGMU"
 	},
 	{
 		"city": "Petersburg",
@@ -2867,7 +3153,8 @@
 			"x": 48,
 			"y": 63,
 			"wfo": "AKQ"
-		}
+		},
+		"id": "KPTB"
 	},
 	{
 		"city": "Albany",
@@ -2877,7 +3164,8 @@
 			"x": 72,
 			"y": 63,
 			"wfo": "ALY"
-		}
+		},
+		"id": "KALB"
 	},
 	{
 		"city": "Moline",
@@ -2887,7 +3175,8 @@
 			"x": 71,
 			"y": 65,
 			"wfo": "DVN"
-		}
+		},
+		"id": "KMLI"
 	},
 	{
 		"city": "Rock Island",
@@ -2897,7 +3186,8 @@
 			"x": 68,
 			"y": 66,
 			"wfo": "DVN"
-		}
+		},
+		"id": "KMLI"
 	},
 	{
 		"city": "Concord",
@@ -2907,7 +3197,8 @@
 			"x": 34,
 			"y": 30,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KCON"
 	},
 	{
 		"city": "White River Junction",
@@ -2917,7 +3208,8 @@
 			"x": 124,
 			"y": 23,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KLEB"
 	},
 	{
 		"city": "Barre",
@@ -2927,7 +3219,8 @@
 			"x": 114,
 			"y": 47,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KMPV"
 	},
 	{
 		"city": "Burlington",
@@ -2937,7 +3230,8 @@
 			"x": 89,
 			"y": 56,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KBTV"
 	},
 	{
 		"city": "St. Albans",
@@ -2947,7 +3241,8 @@
 			"x": 90,
 			"y": 73,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KFSO"
 	},
 	{
 		"city": "Montpelier",
@@ -2957,7 +3252,8 @@
 			"x": 111,
 			"y": 50,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KMPV"
 	},
 	{
 		"city": "Ellensburg",
@@ -2967,7 +3263,8 @@
 			"x": 86,
 			"y": 172,
 			"wfo": "PDT"
-		}
+		},
+		"id": "KELN"
 	},
 	{
 		"city": "Spokane",
@@ -2977,7 +3274,8 @@
 			"x": 141,
 			"y": 90,
 			"wfo": "OTX"
-		}
+		},
+		"id": "KSFF"
 	},
 	{
 		"city": "Coeur d'Alene",
@@ -2987,7 +3285,8 @@
 			"x": 161,
 			"y": 87,
 			"wfo": "OTX"
-		}
+		},
+		"id": "KCOE"
 	},
 	{
 		"city": "Missoula",
@@ -2997,7 +3296,8 @@
 			"x": 105,
 			"y": 131,
 			"wfo": "MSO"
-		}
+		},
+		"id": "KMSO"
 	},
 	{
 		"city": "Billings",
@@ -3007,7 +3307,8 @@
 			"x": 103,
 			"y": 92,
 			"wfo": "BYZ"
-		}
+		},
+		"id": "KBIL"
 	},
 	{
 		"city": "Gillette",
@@ -3017,7 +3318,8 @@
 			"x": 22,
 			"y": 73,
 			"wfo": "UNR"
-		}
+		},
+		"id": "KGCC"
 	},
 	{
 		"city": "Rapid City",
@@ -3027,7 +3329,8 @@
 			"x": 97,
 			"y": 58,
 			"wfo": "UNR"
-		}
+		},
+		"id": "KRAP"
 	},
 	{
 		"city": "La Crosse",
@@ -3037,7 +3340,8 @@
 			"x": 64,
 			"y": 62,
 			"wfo": "ARX"
-		}
+		},
+		"id": "KLSE"
 	},
 	{
 		"city": "Wisconsin Dells",
@@ -3047,7 +3351,8 @@
 			"x": 24,
 			"y": 89,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KDLL"
 	},
 	{
 		"city": "Madison",
@@ -3057,7 +3362,8 @@
 			"x": 38,
 			"y": 64,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KMSN"
 	},
 	{
 		"city": "Janesville",
@@ -3067,7 +3373,8 @@
 			"x": 52,
 			"y": 47,
 			"wfo": "MKX"
-		}
+		},
+		"id": "KJVL"
 	},
 	{
 		"city": "Buffalo",
@@ -3077,7 +3384,8 @@
 			"x": 36,
 			"y": 47,
 			"wfo": "BUF"
-		}
+		},
+		"id": "KBUF"
 	},
 	{
 		"city": "New Haven",
@@ -3087,7 +3395,8 @@
 			"x": 66,
 			"y": 75,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KHVN"
 	},
 	{
 		"city": "Springfield",
@@ -3097,7 +3406,8 @@
 			"x": 22,
 			"y": 80,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KBAF"
 	},
 	{
 		"city": "Brattleboro",
@@ -3107,7 +3417,8 @@
 			"x": 110,
 			"y": 79,
 			"wfo": "ALY"
-		}
+		},
+		"id": "KEEN"
 	},
 	{
 		"city": "St. Johnsbury",
@@ -3117,7 +3428,8 @@
 			"x": 128,
 			"y": 60,
 			"wfo": "BTV"
-		}
+		},
+		"id": "K1V4"
 	},
 	{
 		"city": "Newport",
@@ -3127,7 +3439,8 @@
 			"x": 118,
 			"y": 83,
 			"wfo": "BTV"
-		}
+		},
+		"id": "KEFK"
 	},
 	{
 		"city": "Quincy",
@@ -3137,7 +3450,8 @@
 			"x": 74,
 			"y": 96,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KBOS"
 	},
 	{
 		"city": "Salem",
@@ -3147,7 +3461,8 @@
 			"x": 48,
 			"y": 12,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KLWM"
 	},
 	{
 		"city": "Manchester",
@@ -3157,7 +3472,8 @@
 			"x": 38,
 			"y": 20,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KMHT"
 	},
 	{
 		"city": "Plymouth",
@@ -3167,7 +3483,8 @@
 			"x": 24,
 			"y": 54,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KLCI"
 	},
 	{
 		"city": "Littleton",
@@ -3177,7 +3494,8 @@
 			"x": 17,
 			"y": 79,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KHIE"
 	},
 	{
 		"city": "Bismarck",
@@ -3187,7 +3505,8 @@
 			"x": 110,
 			"y": 47,
 			"wfo": "BIS"
-		}
+		},
+		"id": "KBIS"
 	},
 	{
 		"city": "Eau Claire",
@@ -3197,7 +3516,8 @@
 			"x": 167,
 			"y": 66,
 			"wfo": "MPX"
-		}
+		},
+		"id": "KEAU"
 	},
 	{
 		"city": "Moorhead",
@@ -3207,7 +3527,8 @@
 			"x": 101,
 			"y": 56,
 			"wfo": "FGF"
-		}
+		},
+		"id": "KFAR"
 	},
 	{
 		"city": "West Palm Beach",
@@ -3217,7 +3538,8 @@
 			"x": 111,
 			"y": 92,
 			"wfo": "MFL"
-		}
+		},
+		"id": "KDJT"
 	},
 	{
 		"city": "Fayetteville",
@@ -3227,7 +3549,8 @@
 			"x": 70,
 			"y": 24,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KFAY"
 	},
 	{
 		"city": "Rocky Mount",
@@ -3237,7 +3560,8 @@
 			"x": 104,
 			"y": 69,
 			"wfo": "RAH"
-		}
+		},
+		"id": "KRWI"
 	},
 	{
 		"city": "Wilmington",
@@ -3247,7 +3571,8 @@
 			"x": 38,
 			"y": 67,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KILG"
 	},
 	{
 		"city": "Chester",
@@ -3257,7 +3582,8 @@
 			"x": 44,
 			"y": 73,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KPHL"
 	},
 	{
 		"city": "Trenton",
@@ -3267,7 +3593,8 @@
 			"x": 62,
 			"y": 93,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KTTN"
 	},
 	{
 		"city": "New London",
@@ -3277,7 +3604,8 @@
 			"x": 93,
 			"y": 82,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KGON"
 	},
 	{
 		"city": "Providence",
@@ -3287,7 +3615,8 @@
 			"x": 64,
 			"y": 75,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KPVD"
 	},
 	{
 		"city": "Portsmouth",
@@ -3297,7 +3626,8 @@
 			"x": 60,
 			"y": 28,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KPSM"
 	},
 	{
 		"city": "Kittery",
@@ -3307,7 +3637,8 @@
 			"x": 61,
 			"y": 29,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KPSM"
 	},
 	{
 		"city": "Portland",
@@ -3317,7 +3648,8 @@
 			"x": 72,
 			"y": 58,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KPWM"
 	},
 	{
 		"city": "Augusta",
@@ -3327,7 +3659,8 @@
 			"x": 83,
 			"y": 91,
 			"wfo": "GYX"
-		}
+		},
+		"id": "KAUG"
 	},
 	{
 		"city": "Bangor",
@@ -3337,7 +3670,8 @@
 			"x": 66,
 			"y": 74,
 			"wfo": "CAR"
-		}
+		},
+		"id": "KBGR"
 	},
 	{
 		"city": "Houlton",
@@ -3347,7 +3681,8 @@
 			"x": 84,
 			"y": 141,
 			"wfo": "CAR"
-		}
+		},
+		"id": "KHUL"
 	},
 	{
 		"city": "Muskegon",
@@ -3357,7 +3692,8 @@
 			"x": 21,
 			"y": 58,
 			"wfo": "GRR"
-		}
+		},
+		"id": "KMKG"
 	},
 	{
 		"city": "Grand Rapids",
@@ -3367,7 +3703,8 @@
 			"x": 41,
 			"y": 47,
 			"wfo": "GRR"
-		}
+		},
+		"id": "KGRR"
 	},
 	{
 		"city": "Columbus",
@@ -3377,7 +3714,8 @@
 			"x": 33,
 			"y": 28,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KCSG"
 	},
 	{
 		"city": "Fall River",
@@ -3387,7 +3725,8 @@
 			"x": 74,
 			"y": 71,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KEWB"
 	},
 	{
 		"city": "New Bedford",
@@ -3397,7 +3736,8 @@
 			"x": 82,
 			"y": 69,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KEWB"
 	},
 	{
 		"city": "Cape Cod",
@@ -3407,7 +3747,8 @@
 			"x": 96,
 			"y": 42,
 			"wfo": "TBW"
-		}
+		},
+		"id": "KFMY"
 	},
 	{
 		"city": "Belmar",
@@ -3417,7 +3758,8 @@
 			"x": 87,
 			"y": 95,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KBLM"
 	},
 	{
 		"city": "Holland",
@@ -3427,7 +3769,8 @@
 			"x": 27,
 			"y": 37,
 			"wfo": "GRR"
-		}
+		},
+		"id": "KBIV"
 	},
 	{
 		"city": "Newark",
@@ -3437,7 +3780,8 @@
 			"x": 27,
 			"y": 42,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KEWR"
 	},
 	{
 		"city": "Parsippany-Troy Hills",
@@ -3447,7 +3791,8 @@
 			"x": 69,
 			"y": 124,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KMMU"
 	},
 	{
 		"city": "Rye",
@@ -3457,7 +3802,8 @@
 			"x": 42,
 			"y": 56,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KHPN"
 	},
 	{
 		"city": "White Plains",
@@ -3467,7 +3813,8 @@
 			"x": 39,
 			"y": 58,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KHPN"
 	},
 	{
 		"city": "Tappan Zee Bridge",
@@ -3477,7 +3824,8 @@
 			"x": 33,
 			"y": 56,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KTEB"
 	},
 	{
 		"city": "Suffern",
@@ -3487,7 +3835,8 @@
 			"x": 26,
 			"y": 59,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KCDW"
 	},
 	{
 		"city": "Mahwah",
@@ -3497,7 +3846,8 @@
 			"x": 25,
 			"y": 58,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KCDW"
 	},
 	{
 		"city": "Morristown",
@@ -3507,7 +3857,8 @@
 			"x": 68,
 			"y": 120,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KMMU"
 	},
 	{
 		"city": "Perth Amboy",
@@ -3517,7 +3868,8 @@
 			"x": 77,
 			"y": 108,
 			"wfo": "PHI"
-		}
+		},
+		"id": "KEWR"
 	},
 	{
 		"city": "Warwick",
@@ -3527,7 +3879,8 @@
 			"x": 63,
 			"y": 69,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KPVD"
 	},
 	{
 		"city": "Cedar Rapids",
@@ -3537,7 +3890,8 @@
 			"x": 29,
 			"y": 86,
 			"wfo": "DVN"
-		}
+		},
+		"id": "KCID"
 	},
 	{
 		"city": "Waterloo",
@@ -3547,7 +3901,8 @@
 			"x": 116,
 			"y": 91,
 			"wfo": "DMX"
-		}
+		},
+		"id": "KALO"
 	},
 	{
 		"city": "Corning",
@@ -3557,7 +3912,8 @@
 			"x": 27,
 			"y": 54,
 			"wfo": "BGM"
-		}
+		},
+		"id": "KELM"
 	},
 	{
 		"city": "Rochester",
@@ -3567,7 +3923,8 @@
 			"x": 76,
 			"y": 65,
 			"wfo": "BUF"
-		}
+		},
+		"id": "KROC"
 	},
 	{
 		"city": "Norwich",
@@ -3577,7 +3934,8 @@
 			"x": 93,
 			"y": 89,
 			"wfo": "OKX"
-		}
+		},
+		"id": "KGON"
 	},
 	{
 		"city": "Worcester",
@@ -3587,7 +3945,8 @@
 			"x": 47,
 			"y": 92,
 			"wfo": "BOX"
-		}
+		},
+		"id": "KORH"
 	},
 	{
 		"city": "Irvine",
@@ -3597,7 +3956,8 @@
 			"x": 39,
 			"y": 60,
 			"wfo": "SGX"
-		}
+		},
+		"id": "KSNA"
 	},
 	{
 		"city": "Canton",
@@ -3607,7 +3967,8 @@
 			"x": 45,
 			"y": 108,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KCNI"
 	},
 	{
 		"city": "Gainesville",
@@ -3617,7 +3978,8 @@
 			"x": 69,
 			"y": 113,
 			"wfo": "FFC"
-		}
+		},
+		"id": "KJCA"
 	},
 	{
 		"city": "Waianae",
@@ -3627,7 +3989,8 @@
 			"x": 140,
 			"y": 151,
 			"wfo": "HFO"
-		}
+		},
+		"id": "PHHI"
 	},
 	{
 		"city": "Honolulu",
@@ -3637,7 +4000,8 @@
 			"x": 154,
 			"y": 145,
 			"wfo": "HFO"
-		}
+		},
+		"id": "PHNL"
 	},
 	{
 		"city": "Wahiawa",
@@ -3647,7 +4011,8 @@
 			"x": 147,
 			"y": 153,
 			"wfo": "HFO"
-		}
+		},
+		"id": "PHHI"
 	},
 	{
 		"city": "Kaneohe",
@@ -3657,7 +4022,8 @@
 			"x": 157,
 			"y": 150,
 			"wfo": "HFO"
-		}
+		},
+		"id": "PHNG"
 	},
 	{
 		"city": "Aiea",
@@ -3667,6 +4033,7 @@
 			"x": 151,
 			"y": 148,
 			"wfo": "HFO"
-		}
+		},
+		"id": "PHNL"
 	}
 ]

@@ -5,7 +5,6 @@ import STATUS from './status.mjs';
 import { distance as calcDistance } from './utils/calc.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import { temperature as temperatureUnit } from './utils/units.mjs';
-import smallIcon from './icons/small.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
@@ -228,7 +227,7 @@ class RegionalForecast extends WeatherDisplay {
 				}
 
 				// start off the observation task
-				const observationPromise = getRegionalObservation(point, city);
+				const observationPromise = getRegionalObservation(city);
 
 				const forecast = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/forecast`);
 				if (!forecast) {
@@ -248,13 +247,13 @@ class RegionalForecast extends WeatherDisplay {
 					daytime: !!/\/day\//.test(observation.icon),
 					temperature: temperatureConverter(observation.temperature.value),
 					name: formatCity(city.city),
-					icon: observation.icon,
+					icon: observation.ws4icon,
 					x: city.pxy[PX],
 					y: city.pxy[PY],
 				};
 
 				// preload the icon
-				preloadImg(smallIcon(regionalObservation.icon, !regionalObservation.daytime));
+				preloadImg(regionalObservation.icon);
 
 				// filter out expired periods first, then use the next two periods for forecast
 				const activePeriods = filterExpiredPeriods(forecast.properties.periods);
@@ -335,7 +334,7 @@ class RegionalForecast extends WeatherDisplay {
 			const fill = {};
 			const period = city[this.screenIndex];
 
-			fill.icon = { type: 'img', src: smallIcon(period.icon, !period.daytime) };
+			fill.icon = { type: 'img', src: period.icon };
 			fill.city = period.name;
 			const { temperature } = period;
 			fill.temp = temperature;

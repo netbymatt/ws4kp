@@ -9,39 +9,25 @@ import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 const buildForecast = (forecast, city, cityXY) => {
 	// get a unit converter
 	const temperatureConverter = temperatureUnit('us');
+	const icon = smallIcon(forecast.icon, !forecast.isDaytime);
+	preloadImg(icon);
 	return {
 		daytime: forecast.isDaytime,
 		temperature: temperatureConverter(forecast.temperature || 0),
 		name: formatCity(city.city),
-		icon: forecast.icon,
+		icon,
 		x: cityXY[0],
 		y: cityXY[1],
 		time: forecast.startTime,
 	};
 };
 
-const getRegionalObservation = async (point, city) => {
+const getRegionalObservation = async (city) => {
+	const stationId = city?.id;
+	if (!stationId) return false;
 	try {
-		// get stations using centralized safe handling
-		const stations = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=10`);
-
-		if (!stations || !stations.features || stations.features.length === 0) {
-			if (debugFlag('verbose-failures')) {
-				console.warn(`Unable to get regional stations for ${city.city}`);
-			}
-			return false;
-		}
-
-		// get the first station with a 4-letter id (generally has appropriate data)
-		const station4Letter = stations.features.find((station) => {
-			if (station?.properties?.stationIdentifier?.length === 4) return station.properties;
-			return false;
-		});
-		if (!station4Letter) return false;
-		const station = station4Letter.id;
-		const stationId = station4Letter.properties.stationIdentifier;
 		// get the observation data using centralized safe handling
-		const observation = await safeJson(`${station}/observations/latest`);
+		const observation = await safeJson(`https://api.weather.gov/stations/${stationId}/observations/latest`);
 
 		if (!observation) {
 			if (debugFlag('verbose-failures')) {
@@ -82,7 +68,10 @@ const getRegionalObservation = async (point, city) => {
 		if (!augmentedObservation.icon) return false;
 		const icon = smallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
 		if (!icon) return false;
-		preloadImg(icon);
+
+		// add the icon url to the dataset
+		augmentedObservation.ws4icon = icon;
+
 		// return the observation
 		return augmentedObservation;
 	} catch (error) {
