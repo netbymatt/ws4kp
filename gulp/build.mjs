@@ -71,7 +71,10 @@ const webpackOptions = {
 			'./server/scripts/modules/progress.mjs',
 			'./server/scripts/modules/settings.mjs',
 			'./server/scripts/modules/utils/setting.mjs',
-			'./server/scripts/modules/icons/*.mjs',
+			'./server/scripts/modules/icons/hourly.mjs',
+			'./server/scripts/modules/icons/large.mjs',
+			'./server/scripts/modules/icons/parse.mjs',
+			'./server/scripts/modules/icons/small.mjs',
 			'./server/scripts/modules/utils/cache.mjs',
 			'./server/scripts/modules/utils/debug.mjs',
 			'./server/scripts/modules/utils/preload-image.mjs',
@@ -98,7 +101,6 @@ const webpackOptions = {
 
 const jsVendorSources = [
 	'server/scripts/vendor/auto/swiped-events.js',
-	'server/scripts/vendor/auto/suncalc.js',
 	'server/scripts/vendor/auto/proj4.js',
 ];
 
@@ -113,7 +115,6 @@ const mjsSources = [
 	'server/scripts/modules/currentweather.mjs',
 	'server/scripts/modules/almanac.mjs',
 	'server/scripts/modules/spc-outlook.mjs',
-	'server/scripts/modules/icons/*.mjs',
 	'server/scripts/modules/extendedforecast.mjs',
 	'server/scripts/modules/hourly.mjs',
 	'server/scripts/modules/hourly-graph.mjs',
