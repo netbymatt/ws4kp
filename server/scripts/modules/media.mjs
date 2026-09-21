@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	// #ToggleMediaVolume opens/closes the volume popup, independent of playback.
 	// it responds to click (so it works on touch/kiosk, which has no hover) and to hovering
 	// the whole control cluster (a convenience for a mouse, not a requirement for anyone else)
-	const mediaContainer = document.getElementById('ToggleMediaContainer');
 	const volumeToggle = document.getElementById('ToggleMediaVolume');
 	volumeToggle.addEventListener('click', toggleVolumeSlider);
 

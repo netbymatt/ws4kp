@@ -1,10 +1,9 @@
 /**
- * Colour mapping, reprojection and canvas painting.
+ * Colour mapping and reprojection of a stitched field into ImageData.
  */
 
 import { RENDER } from './config.mjs';
 import { lonLatToGridIndex } from './grid.mjs';
-import createCanvas from '../utils/create-canvas.mjs';
 import { PX, PY } from '../radar/constants.mjs';
 
 /**
@@ -208,17 +207,7 @@ const fieldToImageData = (field, sampleMap, outputSize) => {
 	return image;
 };
 
-/** Paint an already-projected ImageData onto a canvas at its own size. */
-const paintToCanvas = (image) => {
-	const [canvas, context] = createCanvas(image);
-
-	context.putImageData(image, 0, 0);
-
-	return canvas;
-};
-
 export {
 	getSampleMap,
 	fieldToImageData,
-	paintToCanvas,
 };

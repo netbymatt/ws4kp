@@ -11,4 +11,17 @@ const createCanvas = (size) => {
 	];
 };
 
+// paint an ImageData onto a new canvas of its own size
+const paintToCanvas = (image) => {
+	const [canvas, context] = createCanvas(image);
+
+	context.putImageData(image, 0, 0);
+
+	return canvas;
+};
+
 export default createCanvas;
+
+export {
+	paintToCanvas,
+};

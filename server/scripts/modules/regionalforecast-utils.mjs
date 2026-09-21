@@ -43,7 +43,6 @@ const getStationId = async (city) => {
 		return false;
 	});
 	if (!station4Letter) return false;
-	const station = station4Letter.id;
 	const stationId = station4Letter.properties.stationIdentifier;
 	return stationId;
 };

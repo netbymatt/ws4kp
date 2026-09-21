@@ -3,7 +3,7 @@ import filterRadarNoise from './filter-noise.mjs';
 import {
 	RADAR_FULL_SIZE, RADAR_FINAL_SIZE, PX, PY,
 } from './constants.mjs';
-import createCanvas from '../utils/create-canvas.mjs';
+import createCanvas, { paintToCanvas } from '../utils/create-canvas.mjs';
 
 const projectionCache = {
 	key: null,
@@ -24,9 +24,8 @@ const processRadar = async (data) => {
 	// create radar context for destination image
 	const [, sourceCtx] = createCanvas(RADAR_FULL_SIZE);
 
-	// create the destination canvas
-	const [destCanvas, destCtx] = createCanvas(radarFinalSize);
-	const destData = destCtx.createImageData(radarFinalSize.width, radarFinalSize.height);
+	// create the destination image
+	const destData = new ImageData(radarFinalSize.width, radarFinalSize.height);
 
 	// calculate the cache key from unique values for how the radar is drawn
 	const cacheKey = `${user[PX].toFixed(0)}-${user[PY].toFixed(0)}-${radarFinalSize.width}x${radarFinalSize.height}`;
@@ -71,10 +70,8 @@ const processRadar = async (data) => {
 		}
 	}
 
-	// final copy to dest canvas
-	destCtx.putImageData(destData, 0, 0);
-
-	return destCanvas;
+	// final copy to a dest canvas
+	return paintToCanvas(destData);
 };
 
 export default processRadar;
