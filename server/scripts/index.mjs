@@ -31,6 +31,18 @@ const categories = [
 	'Postal', 'Populated Place',
 ];
 const category = categories.join(',');
+
+// suggestions are ranked toward the saved location, which is rounded to about 10 km so that precise
+// GPS coordinates are not sent to the geocoder with every keystroke
+const locationBias = () => {
+	try {
+		const { lat, lon } = JSON.parse(localStorage.getItem('latLon'));
+		return { location: `${lon.toFixed(1)},${lat.toFixed(1)}` };
+	} catch {
+		// nothing saved yet, so no bias
+		return {};
+	}
+};
 const TXT_ADDRESS_SELECTOR = '#txtLocation';
 const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BTN_GET_GPS_SELECTOR = '#btnGetGps';
@@ -90,12 +102,13 @@ const init = async () => {
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 		deferRequestBy: 300,
 		paramName: 'text',
-		params: {
+		params: () => ({
 			f: 'json',
 			countryCode: 'USA',
 			category,
 			maxSuggestions: 10,
-		},
+			...locationBias(),
+		}),
 		dataType: 'json',
 		transformResult: (response) => ({
 			suggestions: response.suggestions.map((i) => ({
@@ -166,6 +179,8 @@ const init = async () => {
 	if (play === null || play === 'true') sendNavButtonMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
+		// the button is not inside a form, so it does not clear the location box by itself
+		autoComplete.reset();
 		document.querySelector('#spanCity').innerHTML = '';
 		document.querySelector('#spanState').innerHTML = '';
 		document.querySelector('#spanStationId').innerHTML = '';
