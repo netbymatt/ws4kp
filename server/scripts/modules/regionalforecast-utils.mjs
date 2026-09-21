@@ -23,8 +23,33 @@ const buildForecast = (forecast, city) => {
 	};
 };
 
+// fallback method to get a station ID for a provided city
+// temporary while stations.json expires for users
+const getStationId = async (city) => {
+	// get stations using centralized safe handling
+	const { point } = city;
+	const stations = await safeJson(`https://api.weather.gov/gridpoints/${point.wfo}/${point.x},${point.y}/stations?limit=10`);
+
+	if (!stations || !stations.features || stations.features.length === 0) {
+		if (debugFlag('verbose-failures')) {
+			console.warn(`Unable to get regional stations for ${city.city}`);
+		}
+		return false;
+	}
+
+	// get the first station with a 4-letter id (generally has appropriate data)
+	const station4Letter = stations.features.find((station) => {
+		if (station?.properties?.stationIdentifier?.length === 4) return station.properties;
+		return false;
+	});
+	if (!station4Letter) return false;
+	const station = station4Letter.id;
+	const stationId = station4Letter.properties.stationIdentifier;
+	return stationId;
+};
+
 const getRegionalObservation = async (city) => {
-	const stationId = city?.id;
+	const stationId = city?.id ?? await getStationId(city);
 	if (!stationId) return false;
 	try {
 		// get the observation data using centralized safe handling
