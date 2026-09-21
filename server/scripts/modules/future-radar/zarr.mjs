@@ -22,19 +22,17 @@ const pad2 = (n) => String(n).padStart(2, '0');
  * Always UTC — HRRR run hours are UTC and using local time here is a silent,
  * timezone-dependent bug.
  */
-export function formatRunDate(runDate) {
-	return `${runDate.getUTCFullYear()}${pad2(runDate.getUTCMonth() + 1)}${pad2(runDate.getUTCDate())}`;
-}
+const formatRunDate = (runDate) => `${runDate.getUTCFullYear()}${pad2(runDate.getUTCMonth() + 1)}${pad2(runDate.getUTCDate())}`;
 
 /**
  * Base URL of the Zarr store for one model run.
  * e.g. https://.../sfc/20260908/20260908_12z_fcst.zarr
  */
-export function buildStoreUrl(runDate) {
+const buildStoreUrl = (runDate) => {
 	const day = formatRunDate(runDate);
 	const hour = pad2(runDate.getUTCHours());
 	return `${SOURCE.baseUrl}/${SOURCE.levelType}/${day}/${day}_${hour}z_${SOURCE.modelType}.zarr`;
-}
+};
 
 /**
  * URL of the array group for our variable.
@@ -42,10 +40,10 @@ export function buildStoreUrl(runDate) {
  * The level/variable pair repeats twice. That is not a typo — the archive nests
  * the array inside a subgroup of the same name.
  */
-export function buildArrayUrl(runDate) {
+const buildArrayUrl = (runDate) => {
 	const { level, variable } = SOURCE;
 	return `${buildStoreUrl(runDate)}/${level}/${variable}/${level}/${variable}`;
-}
+};
 
 /**
  * URL of a single chunk object.
@@ -55,20 +53,20 @@ export function buildArrayUrl(runDate) {
  * so the same spatial chunk is keyed "0.4.3". We derive the prefix from the
  * array's real dimensionality rather than assuming either shape.
  */
-export function buildChunkUrl(runDate, chunkId, ndim) {
+const buildChunkUrl = (runDate, chunkId, ndim) => {
 	const key = ndim === 3 ? `0.${chunkId}` : chunkId;
 	return `${buildArrayUrl(runDate)}/${key}`;
-}
+};
 
 /* ------------------------------------------------------------------ *
  * Run discovery
  * ------------------------------------------------------------------ */
 
 /** Current UTC time truncated to the top of the hour. */
-function currentRunHour() {
+const currentRunHour = () => {
 	const now = new Date();
 	return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours()));
-}
+};
 
 /**
  * Fetch and parse a run's .zarray metadata.
@@ -78,7 +76,7 @@ function currentRunHour() {
  * and carries the dtype, shape and compressor config we need anyway, so there
  * is no reason to probe with a separate HEAD request.
  */
-export async function fetchArrayMeta(runDate) {
+const fetchArrayMeta = async (runDate) => {
 	const url = `${buildArrayUrl(runDate)}/.zarray`;
 	try {
 		const response = await fetch(url);
@@ -88,7 +86,7 @@ export async function fetchArrayMeta(runDate) {
 		// Network failure or CORS rejection — treat the same as "not there".
 		return null;
 	}
-}
+};
 
 /**
  * Walk backwards from the current UTC hour until a published run is found.
@@ -100,7 +98,7 @@ export async function fetchArrayMeta(runDate) {
  *
  * Returns { runDate, meta } or null if nothing in the window is available.
  */
-export async function findLatestRun(maxLookbackHours = RUN.maxLookbackHours) {
+const findLatestRun = async (maxLookbackHours = RUN.maxLookbackHours) => {
 	const start = currentRunHour();
 
 	for (let back = 0; back <= maxLookbackHours; back += 1) {
@@ -112,7 +110,7 @@ export async function findLatestRun(maxLookbackHours = RUN.maxLookbackHours) {
 		if (meta) return { runDate: candidate, meta };
 	}
 	return null;
-}
+};
 
 /* ------------------------------------------------------------------ *
  * Chunk fetch and decode
@@ -122,7 +120,7 @@ export async function findLatestRun(maxLookbackHours = RUN.maxLookbackHours) {
  * Convert a half-precision bit pattern to a JS number.
  * Used only when the archive stores this variable as float16.
  */
-function float16ToNumber(bits) {
+const float16ToNumber = (bits) => {
 	const sign = (bits & 0x8000) ? -1 : 1;
 	const exponent = (bits & 0x7c00) >> 10;
 	const fraction = bits & 0x03ff;
@@ -130,7 +128,7 @@ function float16ToNumber(bits) {
 	if (exponent === 0) return sign * (2 ** -14) * (fraction / 1024);
 	if (exponent === 0x1f) return fraction ? NaN : sign * Infinity;
 	return sign * (2 ** (exponent - 15)) * (1 + fraction / 1024);
-}
+};
 
 /**
  * Reinterpret decompressed bytes as a Float32Array according to the dtype
@@ -139,7 +137,7 @@ function float16ToNumber(bits) {
  * The archive originally wrote float16 and has been migrating variables to
  * float32, so we read the dtype rather than hard-coding either one.
  */
-function bytesToFloat32(bytes, dtype) {
+const bytesToFloat32 = (bytes, dtype) => {
 	const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 
 	if (dtype === '<f4') return new Float32Array(buffer);
@@ -152,25 +150,21 @@ function bytesToFloat32(bytes, dtype) {
 	}
 
 	throw new Error(`Unsupported dtype ${dtype} — expected <f2 or <f4`);
-}
+};
 
 /**
  * Decoded chunks, keyed by full URL.
  *
- * Adjusting the centre or the image size usually changes the window by less
- * than a chunk, so most of the chunks the new view needs were already fetched
- * for the old one. Caching makes those adjustments free.
+ * A refresh within the same model run asks for exactly the same chunks, and a
+ * small change of location usually changes the window by less than a chunk,
+ * so most requests are served from here.
  */
 const chunkCache = new Map();
 
 /** Drop everything cached. Call when moving to a different model run. */
-export function clearChunkCache() {
+const clearChunkCache = () => {
 	chunkCache.clear();
-}
-
-export function cachedChunkCount() {
-	return chunkCache.size;
-}
+};
 
 /**
  * The Blosc decoder, loaded on first use.
@@ -199,7 +193,7 @@ const loadBlosc = () => {
  * single request returns every forecast hour for that chunk. Analysis chunks
  * are a flat (150, 150).
  */
-export async function fetchChunk(runDate, chunkId, meta, codecPromise) {
+const fetchChunk = async (runDate, chunkId, meta, codecPromise) => {
 	const url = buildChunkUrl(runDate, chunkId, meta.shape.length);
 
 	const cached = chunkCache.get(url);
@@ -227,7 +221,7 @@ export async function fetchChunk(runDate, chunkId, meta, codecPromise) {
 	};
 	chunkCache.set(url, chunk);
 	return chunk;
-}
+};
 
 /**
  * Fetch every requested chunk in parallel.
@@ -235,7 +229,7 @@ export async function fetchChunk(runDate, chunkId, meta, codecPromise) {
  * Uses allSettled so one bad chunk surfaces as a partial result rather than
  * discarding the chunks that did come back.
  */
-export async function fetchChunks(runDate, chunkIds, meta) {
+const fetchChunks = async (runDate, chunkIds, meta) => {
 	const codecPromise = loadBlosc().then((Blosc) => Blosc.fromConfig(meta.compressor));
 	// every chunk awaits this and reports a failure through allSettled; this
 	// keeps the promise itself from being flagged as an unhandled rejection
@@ -254,4 +248,10 @@ export async function fetchChunks(runDate, chunkIds, meta) {
 	});
 
 	return { chunks, errors };
-}
+};
+
+export {
+	findLatestRun,
+	fetchChunks,
+	clearChunkCache,
+};

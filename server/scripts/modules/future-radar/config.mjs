@@ -1,4 +1,4 @@
-export const SOURCE = {
+const SOURCE = {
 	// Public MesoWest / University of Utah HRRR Zarr archive.
 	baseUrl: 'https://hrrrzarr.s3.amazonaws.com',
 
@@ -15,7 +15,7 @@ export const SOURCE = {
 	modelType: 'fcst',
 };
 
-export const RUN = {
+const RUN = {
 	// How many hourly runs to walk backwards through before giving up.
 	// Each probe is a small .zarray GET, so this is cheap.
 	maxLookbackHours: 3,
@@ -29,7 +29,7 @@ export const RUN = {
  * published HRRR north-east corner. Chunk 0.0 is the south-west corner, so row
  * index increases northward and column index increases eastward.
  */
-export const GRID = {
+const GRID = {
 	chunkSize: 150,
 	cellSizeMeters: 3000,
 	nx: 1799,
@@ -42,12 +42,18 @@ export const GRID = {
 	originLonLat: [-122.719528, 21.138123],
 };
 
-export const RENDER = {
+const RENDER = {
 	// Reflectivity below this is treated as no echo and drawn transparent.
 	floorDbz: 5,
 
 	// Values at or below this are treated as missing rather than as real data.
 	// HRRR uses large negatives for "no return"; NaN also appears after decode.
 	missingBelowDbz: -50,
+};
 
+export {
+	SOURCE,
+	RUN,
+	GRID,
+	RENDER,
 };

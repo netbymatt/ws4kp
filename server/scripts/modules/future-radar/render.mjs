@@ -9,7 +9,7 @@ import { PX, PY } from '../radar/constants.mjs';
 
 /**
  * Reflectivity scale stops, in dBZ.
- * From 20 dBZ up, each colour is what reference/remove-noise-lookup.mjs
+ * From 20 dBZ up, each colour is what the lookup in radar/filter-noise.mjs
  * outputs for the matching radar colour, so the render looks like the
  * post-processed composite. The original colour is kept in the trailing
  * comment. 5-15 dBZ stay as they were: the lookup would make them
@@ -43,7 +43,7 @@ const LUT_MAX_DBZ = 85;
  * interpolation for every pixel of every frame, and the table is only a few
  * hundred entries.
  */
-function buildColorTable() {
+const buildColorTable = () => {
 	const size = LUT_MAX_DBZ - LUT_MIN_DBZ + 1;
 	const table = new Uint8ClampedArray(size * 4);
 
@@ -76,7 +76,7 @@ function buildColorTable() {
 	}
 
 	return table;
-}
+};
 
 const COLOR_TABLE = buildColorTable();
 
@@ -97,9 +97,9 @@ const SAMPLE_STEP = 8;
  * that feeds it — or -1 where the pixel falls outside the fetched window.
  *
  * This is the whole reprojection, and it depends only on the view, never on
- * the data, so one map serves every forecast hour. See projection.mjs for the
- * maths, which is identical to the host app's own createProjection call: the
- * image lands on exactly the same pixels as the host's Mercator map, and the
+ * the data, so one map serves every forecast hour. The projection is built by
+ * utils/map-projection.mjs, the same code that positions the base map tiles:
+ * the image lands on exactly the same pixels as the base map, and the
  * north/south flip and any stretch fall out of the projection rather than
  * being applied by hand.
  *
@@ -109,7 +109,7 @@ const SAMPLE_STEP = 8;
  * inverse calls therefore fix the row exactly; only the Lambert Conformal step
  * still curves, and that is what SAMPLE_STEP interpolates across.
  */
-function buildSampleMap(window, projection, outputSize) {
+const buildSampleMap = (window, projection, outputSize) => {
 	const { width, height } = outputSize;
 	const map = new Int32Array(width * height);
 
@@ -143,11 +143,20 @@ function buildSampleMap(window, projection, outputSize) {
 	}
 
 	return map;
-}
+};
 
 const sampleMapCache = { key: null, map: null };
 
-export const getSampleMap = (window, projection, outputSize, user) => {
+/**
+ * The sample map for a view, rebuilt only when the view changes.
+ *
+ * Building it is tens of thousands of proj4 calls, and the view is normally
+ * identical from one refresh to the next. The key covers the window as well
+ * as the user's position: every entry is an offset into the window, so a map
+ * built for a window of a different origin or width would read the wrong
+ * cells.
+ */
+const getSampleMap = (window, projection, outputSize, user) => {
 	const key = `${user[PX]}-${user[PY]}-${outputSize.width}x${outputSize.height}`
 		+ `-${window.i0}-${window.j0}-${window.width}x${window.height}`;
 	if (key !== sampleMapCache.key) {
@@ -158,21 +167,16 @@ export const getSampleMap = (window, projection, outputSize, user) => {
 };
 
 /**
- * Reproject a stitched field into ImageData at the host's exact output pixels.
+ * Colour a stitched field into ImageData at the output pixels.
  *
- * Unlike a native-grid blit, this walks the *output* image: for every screen
- * pixel it asks the shared projection (see projection.mjs — identical maths to
- * the host app's own createProjection call) which lon/lat lands there, converts
- * that to a native grid index, and nearest-neighbour samples the field. That
- * makes the image land on exactly the same pixels as the host's Mercator map,
- * with no separate horizontal/vertical scale to tune — the north/south flip
- * and any east/west or north/south stretch fall out of the projection maths
- * instead of being applied by hand.
+ * This walks the *output* image, looking up each pixel's source cell in the
+ * precomputed sample map (see buildSampleMap), so the reprojection itself
+ * costs nothing per frame; only the colour lookup runs here.
  *
  * Pixels whose lon/lat falls outside the fetched window (should only happen at
  * the domain edge) are left transparent, same as missing/below-floor data.
  */
-export function fieldToImageData(field, sampleMap, outputSize) {
+const fieldToImageData = (field, sampleMap, outputSize) => {
 	const { width, height } = outputSize;
 	const { values } = field;
 
@@ -202,18 +206,19 @@ export function fieldToImageData(field, sampleMap, outputSize) {
 	}
 
 	return image;
-}
+};
 
 /** Paint an already-projected ImageData onto a canvas at its own size. */
-export function paintToCanvas(image) {
+const paintToCanvas = (image) => {
 	const [canvas, context] = createCanvas(image);
 
 	context.putImageData(image, 0, 0);
 
 	return canvas;
-}
+};
 
-/** Colour stops, for drawing a legend. */
-export function colorScaleStops() {
-	return DBZ_STOPS.map(([dbz, rgb]) => ({ dbz, rgb }));
-}
+export {
+	getSampleMap,
+	fieldToImageData,
+	paintToCanvas,
+};

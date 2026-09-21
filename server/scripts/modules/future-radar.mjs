@@ -20,16 +20,16 @@ import {
  * lies in the future relative to the wall clock right now.
  *
  * An hour boundary is the same instant everywhere, so this needs no time
- * zone — DISPLAY.timeZone only affects how frame times are displayed, not
- * which frames are chosen.
+ * zone — timeZone() only affects how frame times are displayed, not which
+ * frames are chosen.
  */
-function firstFutureForecastIndex(runDate) {
+const firstFutureForecastIndex = (runDate) => {
 	const nextFullHourMs = (Math.floor(Date.now() / 3600000) + 1) * 3600000;
 
 	// Forecast cubes start at F01 (run + 1h), so frame index 0 covers hour 1.
 	const hoursFromRun = Math.round((nextFullHourMs - runDate.getTime()) / 3600000);
 	return hoursFromRun - 1;
-}
+};
 
 /**
  * Build one ImageData per forecast hour from the already-fetched chunks.
@@ -40,10 +40,11 @@ function firstFutureForecastIndex(runDate) {
  * `startIndex` lets playback begin partway into the cube — see
  * `firstFutureForecastIndex()` — rather than always from F01.
  *
- * projection/outputSize are passed straight to fieldToImageData() so every
- * frame is reprojected once here, up front, rather than on every paint.
+ * The reprojection comes from one sample map shared by every frame (and
+ * cached across refreshes; see getSampleMap()), so each frame here is only a
+ * stitch and a colour lookup.
  */
-function buildFrames(chunks, window, projection, outputSize, startIndex, hourCount, user) {
+const buildFrames = (chunks, window, projection, outputSize, startIndex, hourCount, user) => {
 	const frames = [];
 	const sampleMap = getSampleMap(window, projection, outputSize, user);
 
@@ -53,20 +54,19 @@ function buildFrames(chunks, window, projection, outputSize, startIndex, hourCou
 	}
 
 	return frames;
-}
+};
 
 /**
- * Local wall-clock time of a forecast frame, in the computed timeZone().
+ * Local wall-clock time of a forecast frame, in timeZone(), padded for the
+ * header's time display.
  *
  * Forecast cubes start at F01, so frame index 0 is one hour after the run.
- * DISPLAY.timeZone is read fresh each call rather than cached, since the host
- * app is expected to set it at runtime.
  */
-function frameLocalTime(runDate, frameIndex) {
+const frameLocalTime = (runDate, frameIndex) => {
 	const frameTime = DateTime.fromJSDate(runDate).plus({ hour: frameIndex + 1 }).setZone(timeZone()).toLocaleString(DateTime.TIME_SIMPLE);
 	const timePadded = frameTime.length >= 8 ? frameTime : `&nbsp;${frameTime} `;
 	return timePadded;
-}
+};
 
 class FutureRadar extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -144,7 +144,7 @@ class FutureRadar extends WeatherDisplay {
 			this.setStatus(STATUS.noData);
 			return;
 		}
-		const coverage = chunksForWindow(window);
+		const chunkIds = chunksForWindow(window);
 
 		// get the latest run
 		const run = await findLatestRun();
@@ -159,7 +159,7 @@ class FutureRadar extends WeatherDisplay {
 		this.runDate = runDate;
 
 		// fetch the chunks
-		const { chunks, errors } = await fetchChunks(this.runDate, coverage.chunkIds, meta);
+		const { chunks, errors } = await fetchChunks(this.runDate, chunkIds, meta);
 
 		if (!chunks.length) {
 			console.error(`Every chunk failed. ${errors.join('; ')}`);
