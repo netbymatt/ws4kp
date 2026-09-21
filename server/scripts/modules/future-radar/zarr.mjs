@@ -11,6 +11,7 @@
 
 import { SOURCE, RUN } from './config.mjs';
 import decodeBlosc from './blosc.mjs';
+import { debugFlag } from '../utils/debug.mjs';
 
 /* ------------------------------------------------------------------ *
  * URL construction
@@ -82,10 +83,18 @@ const fetchArrayMeta = async (runDate) => {
 	const url = `${buildArrayUrl(runDate)}/.zarray`;
 	try {
 		const response = await fetch(url);
-		if (!response.ok) return null;
+		if (!response.ok) {
+			if (debugFlag('verbose-failures')) {
+				console.warn(`FutureRadar: run ${runDate.toISOString()} is not published (HTTP ${response.status} for ${url})`);
+			}
+			return null;
+		}
 		return await response.json();
-	} catch {
+	} catch (error) {
 		// Network failure or CORS rejection — treat the same as "not there".
+		if (debugFlag('verbose-failures')) {
+			console.warn(`FutureRadar: request for run ${runDate.toISOString()} metadata failed (${error.message})`);
+		}
 		return null;
 	}
 };
@@ -109,7 +118,12 @@ const findLatestRun = async (maxLookbackHours = RUN.maxLookbackHours) => {
 		// firing every lookback hour's probe at once.
 		// eslint-disable-next-line no-await-in-loop
 		const meta = await fetchArrayMeta(candidate);
-		if (meta) return { runDate: candidate, meta };
+		if (meta) {
+			if (debugFlag('future-radar')) {
+				console.log(`FutureRadar: found run ${candidate.toISOString()} after looking back ${back} hours`);
+			}
+			return { runDate: candidate, meta };
+		}
 	}
 	return null;
 };
@@ -163,9 +177,11 @@ const bytesToFloat32 = (bytes, dtype) => {
  */
 const chunkCache = new Map();
 
-/** Drop everything cached. Call when moving to a different model run. */
+/** Drop everything cached, returning how many chunks that was. Call when moving to a different model run. */
 const clearChunkCache = () => {
+	const cleared = chunkCache.size;
 	chunkCache.clear();
+	return cleared;
 };
 
 /**
@@ -179,8 +195,14 @@ const fetchChunk = async (runDate, chunkId, meta) => {
 	const url = buildChunkUrl(runDate, chunkId, meta.shape.length);
 
 	const cached = chunkCache.get(url);
-	if (cached) return cached;
+	if (cached) {
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: chunk ${chunkId} served from cache`);
+		}
+		return cached;
+	}
 
+	const started = performance.now();
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`Chunk ${chunkId} unavailable (HTTP ${response.status})`);
@@ -201,6 +223,10 @@ const fetchChunk = async (runDate, chunkId, meta) => {
 		chunkId, values, timeSteps, chunkY, chunkX,
 	};
 	chunkCache.set(url, chunk);
+
+	if (debugFlag('future-radar')) {
+		console.log(`FutureRadar: chunk ${chunkId} fetched and decoded in ${Math.round(performance.now() - started)} ms, ${compressed.length} -> ${raw.length} bytes, ${timeSteps} time steps of ${chunkY}x${chunkX}`);
+	}
 	return chunk;
 };
 
@@ -211,6 +237,7 @@ const fetchChunk = async (runDate, chunkId, meta) => {
  * discarding the chunks that did come back.
  */
 const fetchChunks = async (runDate, chunkIds, meta) => {
+	const started = performance.now();
 	const settled = await Promise.allSettled(
 		chunkIds.map((id) => fetchChunk(runDate, id, meta)),
 	);
@@ -220,8 +247,17 @@ const fetchChunks = async (runDate, chunkIds, meta) => {
 
 	settled.forEach((result, index) => {
 		if (result.status === 'fulfilled') chunks.push(result.value);
-		else errors.push(`${chunkIds[index]}: ${result.reason.message}`);
+		else {
+			errors.push(`${chunkIds[index]}: ${result.reason.message}`);
+			if (debugFlag('verbose-failures')) {
+				console.warn(`FutureRadar: chunk ${chunkIds[index]} failed: ${result.reason.message}`);
+			}
+		}
 	});
+
+	if (debugFlag('future-radar')) {
+		console.log(`FutureRadar: fetched ${chunks.length} of ${chunkIds.length} chunks in ${Math.round(performance.now() - started)} ms, ${chunkCache.size} chunks now cached`);
+	}
 
 	return { chunks, errors };
 };

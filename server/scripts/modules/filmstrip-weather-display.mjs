@@ -14,6 +14,7 @@ import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { timeZone } from './navigation.mjs';
+import { debugFlag } from './utils/debug.mjs';
 import setTiles from './radar/tiles.mjs';
 import { coerce } from './utils/calc.mjs';
 import createProjection from './utils/map-projection.mjs';
@@ -61,6 +62,9 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 
 		// ALASKA AND HAWAII AREN'T SUPPORTED!
 		if (this.weatherParameters.state === 'AK' || this.weatherParameters.state === 'HI') {
+			if (debugFlag('verbose-failures')) {
+				console.warn(`${this.constructor.name}: not available for state ${this.weatherParameters.state}`);
+			}
 			this.setStatus(STATUS.noData);
 			return;
 		}
@@ -69,10 +73,16 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 		const radarFinalSize = RADAR_FINAL_SIZE();
 		const projection = createProjection('radar-conus');
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
+		const projected = [...user];
 
 		// adjust the user's location to not run off the map
 		user[PX] = coerce(user[PX], radarFinalSize.width / 2, TILE_FULL_SIZE.width - (radarFinalSize.width / 2));
 		user[PY] = coerce(user[PY], radarFinalSize.height / 2, TILE_FULL_SIZE.height - (radarFinalSize.height / 2));
+
+		if (debugFlag(this.elemId)) {
+			console.log(`${this.constructor.name}: ${this.weatherParameters.latitude},${this.weatherParameters.longitude} is map pixel ${projected.map(Math.round).join(',')} of ${TILE_FULL_SIZE.width}x${TILE_FULL_SIZE.height}, `
+				+ `${radarFinalSize.width}x${radarFinalSize.height} view centred on ${user.map(Math.round).join(',')} after keeping it on the map`);
+		}
 
 		const imagePromise = this.getImages({ user, projection, radarFinalSize });
 
@@ -89,6 +99,9 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 
 		// if no images were found return no-data
 		if (images.length === 0) {
+			if (debugFlag('verbose-failures')) {
+				console.warn(`${this.constructor.name}: no frames were produced, ${this.imageMax} were requested`);
+			}
 			// Radar fetch failed - skip this display in animation by setting totalScreens = 0
 			this.timing.totalScreens = 0;
 			if (this.isEnabled) this.setStatus(STATUS.failed);
@@ -103,6 +116,13 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 				elem,
 			};
 		});
+
+		if (debugFlag(this.elemId)) {
+			console.log(`${this.constructor.name}: showing ${radarInfo.length} of ${this.imageMax} frames`);
+			radarInfo.forEach(({ time }, index) => {
+				console.log(`${this.constructor.name}: frame ${index} is ${images[index].timestamp.toUTC().toISO({ suppressMilliseconds: true })}, shown as ${time.toLocaleString(DateTime.TIME_SIMPLE)} ${time.zoneName}`);
+			});
+		}
 
 		// put the elements in the container
 		const scrollArea = this.elem.querySelector('.scroll-area');
@@ -133,6 +153,10 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 
 		// scroll to image
 		this.elem.querySelector('.scroll-area').style.top = `${-this.screenIndex * actualFrameHeight}px`;
+
+		if (debugFlag(this.elemId)) {
+			console.log(`${this.constructor.name}: drawing screen ${this.screenIndex} of ${this.times.length}, ${timePadded.replace('&nbsp;', '').trim()}, frame height ${actualFrameHeight}px, scrolled to ${-this.screenIndex * actualFrameHeight}px`);
+		}
 
 		this.finishDraw();
 	}

@@ -2,6 +2,7 @@ import {
 	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY,
 } from './constants.mjs';
 import elemForEach from '../utils/elem-for-each.mjs';
+import { debugFlag } from '../utils/debug.mjs';
 import { shiftPixelForUserGenerator } from './positions.mjs';
 
 // convert a pixel location to a file/tile combination
@@ -75,6 +76,11 @@ const setTiles = (data) => {
 	usedTiles.push(thirdRow && usedTiles[0], thirdRow && usedTiles[1], thirdRow && usedTiles[2]);
 	usedTiles.push(fourthRow && usedTiles[0], fourthRow && usedTiles[1], fourthRow && usedTiles[2]);
 
+	if (debugFlag(elemId)) {
+		const used = usedTiles.map((isUsed, index) => (isUsed ? baseMapTiles[index] : null)).filter((tile) => tile !== null);
+		console.log(`Radar tiles (${elemId}): top-left map pixel ${topLeft.map(Math.round).join(',')}, shifted ${tileShift.x},${tileShift.y}, using ${used.length} of ${usedTiles.length} tiles [${used.join(', ')}]`);
+	}
+
 	// helper function for populating tiles
 	const populateTile = (tileName) => (elem, index) => {
 		// always set the size to flow the images correctly
@@ -85,6 +91,10 @@ const setTiles = (data) => {
 		if (!usedTiles[index]) {
 			elem.src = '';
 			return;
+		}
+
+		if (!baseMapTiles[index] && debugFlag('verbose-failures')) {
+			console.warn(`Radar tiles (${elemId}): tile ${index} is outside the ${TILE_COUNT.x}x${TILE_COUNT.y} map, its ${tileName} image will not load`);
 		}
 
 		// set the image source and size

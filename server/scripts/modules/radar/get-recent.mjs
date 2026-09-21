@@ -2,6 +2,7 @@ import { DateTime } from '../../vendor/auto/luxon.mjs';
 import { RADAR_HOST } from './constants.mjs';
 import fetchImageBlob from '../utils/fetch-image-blob.mjs';
 import processRadar from './processor.mjs';
+import { debugFlag } from '../utils/debug.mjs';
 
 // url patterns as luxon format strings
 // https://mesonet.agron.iastate.edu/archive/data/2026/09/16/GIS/uscomp/n0r_202609160300.png
@@ -43,11 +44,15 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 	if (preProcessed) {
 		// set the used flag for cache cleaning
 		preProcessed.used = true;
+		if (debugFlag('radar')) {
+			console.log(`Radar: ${path} reused from the processed cache`);
+		}
 		return preProcessed;
 	}
 
 	// get the radar and process it for this location
 	try {
+		const started = performance.now();
 		const radarBlob = await fetchImageBlob(modifiedRadarUrl);
 
 		const canvas = await processRadar({
@@ -55,6 +60,10 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 			projection,
 			radarBlob,
 		});
+
+		if (debugFlag('radar')) {
+			console.log(`Radar: ${path} fetched and processed in ${Math.round(performance.now() - started)} ms (${radarBlob.size} bytes)`);
+		}
 
 		// store the processed radar
 		processedRadars.push({
@@ -70,8 +79,11 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 			timestamp: myTimestamp,
 			canvas,
 		};
-	} catch {
+	} catch (error) {
 		// usually a 404 and expected as some images may not be ready yet
+		if (debugFlag('verbose-failures')) {
+			console.warn(`Radar: ${modifiedRadarUrl} unavailable (${error.message}), ${attempts - 1} attempts left`);
+		}
 		// try again decrementing the attempts (timestamp is decremented at the top of the next call)
 		return imageFetcher(stepBack, attempts - 1, user, projection);
 	}
@@ -89,6 +101,10 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 		zone: 'UTC',
 	});
 
+	if (debugFlag('radar')) {
+		console.log(`Radar: requesting ${max} images from ${startingTimestamp.toISO({ suppressMilliseconds: true })}, stepping back 5 minutes each, ${attempts} attempts each, ${processedRadars.length} processed images cached`);
+	}
+
 	// initialize the back-in-time counter
 	const stepBack = stepBackGenerator(startingTimestamp);
 
@@ -101,6 +117,11 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 	// kick off the loop
 	const imagePromises = await Promise.allSettled(Array.from({ length: max }, () => imageFetcher(stepBack, attempts, user, projection)));
 
+	const rejected = imagePromises.filter((image) => image.status === 'rejected');
+	if (rejected.length > 0 && debugFlag('verbose-failures')) {
+		console.warn(`Radar: ${rejected.length} of ${max} images failed: ${[...new Set(rejected.map((image) => image.reason.message))].join('; ')}`);
+	}
+
 	// filter for rejected promises (attempts was exceeded)
 	const images = imagePromises.filter((image) => image.status === 'fulfilled').map((image) => image.value);
 
@@ -109,7 +130,12 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 	images.sort((a, b) => a.timestamp - b.timestamp);
 
 	// clean the pre processed cache
+	const cachedBefore = processedRadars.length;
 	processedRadars = processedRadars.filter((radar) => radar.used === true);
+
+	if (debugFlag('radar')) {
+		console.log(`Radar: ${images.length} of ${max} images ready [${images.map((image) => image.timestamp.toISO({ suppressMilliseconds: true })).join(', ')}], processed cache ${cachedBefore} -> ${processedRadars.length}`);
+	}
 
 	return images;
 };

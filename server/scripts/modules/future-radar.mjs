@@ -4,6 +4,7 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import FilmstripWeatherDisplay from './filmstrip-weather-display.mjs';
 import { registerDisplay } from './navigation.mjs';
 import createProjection from './utils/map-projection.mjs';
+import { debugFlag } from './utils/debug.mjs';
 import { paintToCanvas } from './utils/create-canvas.mjs';
 import { shiftPixelForUserGenerator } from './radar/positions.mjs';
 import { solveWindow, chunksForWindow, assembleWindow } from './future-radar/grid.mjs';
@@ -64,6 +65,8 @@ class FutureRadar extends FilmstripWeatherDisplay {
 	}
 
 	async getImages({ user, projection, radarFinalSize }) {
+		const started = performance.now();
+
 		// the finished image is the radarFinalSize crop of the conus map centred on
 		// the user, so its corners give the exact bounds the reflectivity must
 		// land in — no separate scale constant to keep in step with the tiles
@@ -73,31 +76,61 @@ class FutureRadar extends FilmstripWeatherDisplay {
 		const bounds = { x: [west, east], y: [north, south] };
 		const hrrrProjection = createProjection('radar-conus', bounds, radarFinalSize);
 
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: view bounds west ${west.toFixed(3)}, east ${east.toFixed(3)}, north ${north.toFixed(3)}, south ${south.toFixed(3)}`);
+		}
+
 		const window = solveWindow(radarFinalSize, hrrrProjection);
+
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: grid window ${window.width}x${window.height} cells at i ${window.i0}, j ${window.j0}, clipped to the domain ${window.clippedToDomain}, centre inside the domain ${window.insideDomain}`);
+		}
+
 		if (!window.insideDomain) {
-			console.error('User is outside the conus domain');
+			if (debugFlag('verbose-failures')) {
+				console.warn('FutureRadar: the view is centred outside the HRRR (CONUS) domain');
+			}
 			this.setStatus(STATUS.noData);
 			return null;
 		}
 		const chunkIds = chunksForWindow(window);
 
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: window needs ${chunkIds.length} chunks [${chunkIds.join(', ')}]`);
+		}
+
 		// get the latest run
 		const run = await findLatestRun();
 		if (!run) {
-			console.warn(`No published run found in the last ${RUN.maxLookbackHours + 1} hours. `
-				+ 'Reflectivity is temporarily unavailable.');
+			if (debugFlag('verbose-failures')) {
+				console.warn(`FutureRadar: no published run found in the last ${RUN.maxLookbackHours + 1} hours, reflectivity is temporarily unavailable`);
+			}
 			this.setStatus(STATUS.noData);
 			return null;
 		}
 		const { runDate, meta } = run;
-		if (this.runDate?.getTime() !== runDate.getTime()) clearChunkCache();
+
+		if (debugFlag('future-radar')) {
+			const { compressor } = meta;
+			console.log(`FutureRadar: using run ${runDate.toISOString()}, ${((Date.now() - runDate.getTime()) / 3600000).toFixed(1)} hours old, `
+				+ `${meta.dtype} ${meta.shape.join('x')} in chunks of ${meta.chunks.join('x')}, ${compressor?.id} ${compressor?.cname} level ${compressor?.clevel} shuffle ${compressor?.shuffle}`);
+		}
+
+		if (this.runDate?.getTime() !== runDate.getTime()) {
+			const cleared = clearChunkCache();
+			if (debugFlag('future-radar')) {
+				console.log(`FutureRadar: run changed from ${this.runDate?.toISOString() ?? 'none'}, dropped ${cleared} cached chunks`);
+			}
+		}
 		this.runDate = runDate;
 
 		// fetch the chunks
 		const { chunks, errors } = await fetchChunks(runDate, chunkIds, meta);
 
 		if (!chunks.length) {
-			console.error(`Every chunk failed. ${errors.join('; ')}`);
+			if (debugFlag('verbose-failures')) {
+				console.error(`FutureRadar: every chunk failed. ${errors.join('; ')}`);
+			}
 			this.setStatus(STATUS.noData);
 			return null;
 		}
@@ -105,17 +138,32 @@ class FutureRadar extends FilmstripWeatherDisplay {
 		// Cube depth varies by run; never ask for more hours than exist.
 		const available = Math.min(...chunks.map((c) => c.timeSteps));
 
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: ${chunks.length} of ${chunkIds.length} chunks ready, time steps per chunk [${chunks.map((chunk) => chunk.timeSteps).join(', ')}], ${available} forecast hours available`);
+		}
+
 		// Playback starts at the first forecast hour still in the future, not
 		// always at F01 — a run found via lookback can already be partway past.
 		const startIndex = Math.max(0, firstFutureForecastIndex(runDate));
+
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: first future forecast hour is F${String(startIndex + 1).padStart(2, '0')} (index ${startIndex})`);
+		}
+
 		if (startIndex >= available) {
-			console.error('This run has no forecast hours left in the future.');
+			if (debugFlag('verbose-failures')) {
+				console.error(`FutureRadar: run ${runDate.toISOString()} has no forecast hours left in the future, the first future hour is index ${startIndex} but only ${available} are available`);
+			}
 			this.setStatus(STATUS.noData);
 			return null;
 		}
 
 		const hourCount = Math.min(this.imageMax, available - startIndex);
 		const canvases = buildFrames(chunks, window, hrrrProjection, radarFinalSize, startIndex, hourCount, user);
+
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: built ${canvases.length} frames F${String(startIndex + 1).padStart(2, '0')} to F${String(startIndex + canvases.length).padStart(2, '0')} (up to ${this.imageMax}), ${Math.round(performance.now() - started)} ms since the view was solved`);
+		}
 
 		// Forecast cubes start at F01, so frame index 0 is one hour after the run.
 		return canvases.map((canvas, index) => ({

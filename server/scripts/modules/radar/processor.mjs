@@ -4,6 +4,7 @@ import {
 	RADAR_FULL_SIZE, RADAR_FINAL_SIZE, PX, PY,
 } from './constants.mjs';
 import createCanvas, { paintToCanvas } from '../utils/create-canvas.mjs';
+import { debugFlag } from '../utils/debug.mjs';
 
 const projectionCache = {
 	key: null,
@@ -32,8 +33,13 @@ const processRadar = async (data) => {
 
 	// see if the cache key matches and if not invalidate the cache
 	if (cacheKey !== projectionCache.key) {
+		const started = performance.now();
+		const previousKey = projectionCache.key;
 		projectionCache.key = cacheKey;
 		projectionCache.rows = projectRadar(projection, user);
+		if (debugFlag('radar')) {
+			console.log(`Radar: projection rows rebuilt for ${cacheKey} (was ${previousKey}) in ${Math.round(performance.now() - started)} ms`);
+		}
 	}
 
 	// load radar into source canvas

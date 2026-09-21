@@ -3,6 +3,7 @@
  */
 
 import { RENDER } from './config.mjs';
+import { debugFlag } from '../utils/debug.mjs';
 import { lonLatToGridIndex } from './grid.mjs';
 import { PX, PY } from '../radar/constants.mjs';
 
@@ -159,8 +160,14 @@ const getSampleMap = (window, projection, outputSize, user) => {
 	const key = `${user[PX]}-${user[PY]}-${outputSize.width}x${outputSize.height}`
 		+ `-${window.i0}-${window.j0}-${window.width}x${window.height}`;
 	if (key !== sampleMapCache.key) {
+		const started = performance.now();
 		sampleMapCache.key = key;
 		sampleMapCache.map = buildSampleMap(window, projection, outputSize);
+		if (debugFlag('future-radar')) {
+			console.log(`FutureRadar: sample map rebuilt in ${Math.round(performance.now() - started)} ms for ${key}`);
+		}
+	} else if (debugFlag('future-radar')) {
+		console.log(`FutureRadar: sample map reused for ${key}`);
 	}
 	return sampleMapCache.map;
 };
