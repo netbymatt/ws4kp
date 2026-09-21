@@ -20,6 +20,37 @@
 			],
 		},
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "Server",
+			"skipFiles": [
+				"<node_internals>/**",
+			],
+			"program": "${workspaceFolder}/index.mjs",
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Server-dist",
+			"skipFiles": [
+				"<node_internals>/**",
+			],
+			"program": "${workspaceFolder}/index.mjs",
+			"env": {
+				"DIST": "1"
+			}
+		},
+		{
+			"name": "Test",
+			"program": "${workspaceFolder}/tests/index.mjs",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "node",
+			"console": "integratedTerminal"
+		},
+		{
 			"name": "Data:stations",
 			"program": "${workspaceFolder}/datagenerators/stations.mjs",
 			"request": "launch",
@@ -57,38 +88,7 @@
 				"<node_internals>/**"
 			],
 			"type": "node"
-		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Server",
-			"skipFiles": [
-				"<node_internals>/**",
-			],
-			"program": "${workspaceFolder}/index.mjs",
-		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Server-dist",
-			"skipFiles": [
-				"<node_internals>/**",
-			],
-			"program": "${workspaceFolder}/index.mjs",
-			"env": {
-				"DIST": "1"
-			}
-		},
-		{
-			"name": "Test",
-			"program": "${workspaceFolder}/tests/index.mjs",
-			"request": "launch",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"type": "node",
-			"console": "integratedTerminal"
-		},
+		}
 	],
 	"compounds": [
 		{

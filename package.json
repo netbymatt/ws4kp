@@ -44,16 +44,17 @@
 		"metar-taf-parser": "^9.0.0",
 		"p-limit": "^7.3.1",
 		"sass": "^1.54.0",
+		"suncalc": "^2.0.2",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
-		"suncalc": "^2.0.2",
 		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"dotenv": "^17.0.1",
 		"ejs": "^6.0.1",
 		"express": "^5.1.0",
+		"numcodecs": "^0.3.2",
 		"proj4": "^2.22.0"
 	},
 	"allowScripts": {

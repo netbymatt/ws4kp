@@ -29,11 +29,11 @@ const OUTPUTSIZES = {
 };
 
 // mapName from choices above
-const createProjection = (mapName) => {
+const createProjection = (mapName, _bounds, _outputSize) => {
 	// get the projection and bounds
 	const projString = PROJECTIONS[mapName];
-	const bounds = BOUNDS[mapName];
-	const outputSize = OUTPUTSIZES[mapName];
+	const bounds = _bounds ?? BOUNDS[mapName];
+	const outputSize = _outputSize ?? OUTPUTSIZES[mapName];
 	if (!projString || !bounds || !outputSize) throw new Error(`mapName '${mapName}' not found when creating projection`);
 
 	// name the provided variables

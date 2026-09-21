@@ -44,7 +44,7 @@ const scaling = (mapName) => {
 	}
 
 	// create a projection for the associated map
-	const projection = createProjection(mapName, available);
+	const projection = createProjection(mapName);
 
 	// get the full size of the map
 	const mapSize = OUTPUTSIZES[mapName];

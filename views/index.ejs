@@ -56,11 +56,11 @@
   <script type="module" src="scripts/modules/hourly.mjs"></script>
   <script type="module" src="scripts/modules/latestobservations.mjs"></script>
   <script type="module" src="scripts/modules/localforecast.mjs"></script>
-  <script type="module" src="scripts/modules/radar.mjs"></script>
   <script type="module" src="scripts/modules/regionalforecast.mjs"></script>
   <script type="module" src="scripts/modules/travelforecast.mjs"></script>
   <script type="module" src="scripts/modules/progress.mjs"></script>
   <script type="module" src="scripts/modules/radar.mjs"></script>
+  <script type="module" src="scripts/modules/future-radar.mjs"></script>
   <script type="module" src="scripts/modules/settings.mjs"></script>
   <script type="module" src="scripts/modules/media.mjs"></script>
   <script type="module" src="scripts/modules/custom-scroll-text.mjs"></script>
@@ -129,7 +129,10 @@
           <%- include('partials/extended-forecast.ejs') %>
         </div>
         <div id="radar-html" class="weather-display">
-          <%- include('partials/radar.ejs') %>
+          <%- include('partials/radar-common.ejs', { titleTop: 'Local', mainClass: 'radar' }) %>
+        </div>
+        <div id="future-radar-html" class="weather-display">
+          <%- include('partials/radar-common.ejs', { titleTop: 'Future', mainClass: 'future-radar' }) %>
         </div>
         <div id="hazards-html" class="weather-display">
           <%- include('partials/hazards.ejs') %>

@@ -32,7 +32,16 @@ const webpackOptions = {
 	mode: 'production',
 	output: {
 		filename: '[name].min.js',
+		// lazily loaded chunks (blosc) get a content hash: the ?_=version cache
+		// buster in index.ejs only applies to the entry scripts, not to URLs the
+		// webpack runtime generates itself
+		chunkFilename: '[name].[contenthash:8].min.js',
+		// resolve chunk URLs from the script that holds the runtime
+		// (shared.min.js, loaded from resources/)
+		publicPath: 'auto',
 	},
+	// we know the blosc data is large
+	performance: { assetFilter: (name) => !name.startsWith('blosc.') && !name.endsWith('.map') },
 	resolve: {
 		roots: ['./'],
 	},
@@ -54,6 +63,7 @@ const webpackOptions = {
 				'./server/scripts/modules/latestobservations.mjs',
 				'./server/scripts/modules/localforecast.mjs',
 				'./server/scripts/modules/radar.mjs',
+				'./server/scripts/modules/future-radar.mjs',
 				'./server/scripts/modules/regionalforecast.mjs',
 				'./server/scripts/modules/travelforecast.mjs',
 			],
@@ -121,6 +131,7 @@ const mjsSources = [
 	'server/scripts/modules/latestobservations.mjs',
 	'server/scripts/modules/localforecast.mjs',
 	'server/scripts/modules/radar.mjs',
+	'server/scripts/modules/future-radar.mjs',
 	'server/scripts/modules/regionalforecast.mjs',
 	'server/scripts/modules/travelforecast.mjs',
 	'server/scripts/modules/progress.mjs',

@@ -1,4 +1,4 @@
-// current weather conditions display
+// radar loop display
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import getRecentRadars from './radar/get-recent.mjs';
@@ -56,7 +56,7 @@ class Radar extends WeatherDisplay {
 
 		// calculate offsets and sizes
 		const radarFinalSize = RADAR_FINAL_SIZE();
-		const projection = createProjection('radar-conus', radarFinalSize);
+		const projection = createProjection('radar-conus');
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// adjust the user's location to not run off the map

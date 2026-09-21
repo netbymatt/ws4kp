@@ -3,23 +3,11 @@ import filterRadarNoise from './filter-noise.mjs';
 import {
 	RADAR_FULL_SIZE, RADAR_FINAL_SIZE, PX, PY,
 } from './constants.mjs';
+import createCanvas from '../utils/create-canvas.mjs';
 
 const projectionCache = {
 	key: null,
 	rows: [],
-};
-
-const createCanvas = (size) => {
-	const canvas = document.createElement('canvas');
-	canvas.width = size.width;
-	canvas.height = size.height;
-	const context = canvas.getContext('2d');
-	context.imageSmoothingEnabled = false;
-
-	return [
-		canvas,
-		context,
-	];
 };
 
 // process a single radar image and place it on the provided canvas

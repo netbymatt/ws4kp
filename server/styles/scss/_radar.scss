@@ -2,7 +2,8 @@
 @use 'shared/_utils'as u;
 @use 'shared/positions'as p;
 
-#radar-html.weather-display {
+#radar-html.weather-display,
+#future-radar-html.weather-display {
 	background-image: url('../images/backgrounds/4.png');
 
 	.wide & {
@@ -52,7 +53,7 @@
 					border: 2px solid black;
 					width: 17px;
 					height: 24px;
-					padding: 0
+					padding: 0;
 				}
 
 				.box-1 {
@@ -106,7 +107,8 @@
 	}
 }
 
-.weather-display .main.radar {
+.weather-display .main.radar,
+.weather-display .main.future-radar {
 	overflow: hidden;
 	height: 367px;
 	width: p.$standard-width;
