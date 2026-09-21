@@ -30,11 +30,8 @@
 
   <% if (production) { %>
   <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-  <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/index.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/displays.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/features.min.js?_=<%=production%>"></script>
-  <script type="text/javascript" src="resources/shared.min.js?_=<%=production%>"></script>
+  <script type="text/javascript" src="resources/vendor.min.js?_=<%=production%>" defer></script>
+  <script type="text/javascript" src="resources/app.min.js?_=<%=production%>" defer></script>
   <script type="text/javascript">
     const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
   </script>

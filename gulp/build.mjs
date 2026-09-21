@@ -28,70 +28,46 @@ const RESOURCES_PATH = './dist/resources';
 
 // Data is now served as JSON files to avoid redundancy
 
+// Every module that registers itself when it loads, in the order the page loads them during
+// development (see the script tags in views/index.ejs). The rest of the app is pulled in through their imports.
+const appModules = [
+	'./server/scripts/modules/hazards.mjs',
+	'./server/scripts/modules/currentweatherscroll.mjs',
+	'./server/scripts/modules/currentweather.mjs',
+	'./server/scripts/modules/almanac.mjs',
+	'./server/scripts/modules/spc-outlook.mjs',
+	'./server/scripts/modules/extendedforecast.mjs',
+	'./server/scripts/modules/hourly-graph.mjs',
+	'./server/scripts/modules/hourly.mjs',
+	'./server/scripts/modules/latestobservations.mjs',
+	'./server/scripts/modules/localforecast.mjs',
+	'./server/scripts/modules/regionalforecast.mjs',
+	'./server/scripts/modules/travelforecast.mjs',
+	'./server/scripts/modules/progress.mjs',
+	'./server/scripts/modules/radar.mjs',
+	'./server/scripts/modules/future-radar.mjs',
+	'./server/scripts/modules/settings.mjs',
+	'./server/scripts/modules/media.mjs',
+	'./server/scripts/modules/custom-scroll-text.mjs',
+	'./server/scripts/index.mjs',
+];
+
 const webpackOptions = {
 	mode: 'production',
 	output: {
 		filename: '[name].min.js',
-		// lazily loaded chunks (blosc) get a content hash: the ?_=version cache
-		// buster in index.ejs only applies to the entry scripts, not to URLs the
-		// webpack runtime generates itself
-		chunkFilename: '[name].[contenthash:8].min.js',
-		// resolve chunk URLs from the script that holds the runtime
-		// (shared.min.js, loaded from resources/)
-		publicPath: 'auto',
 	},
-	// we know the blosc data is large
-	performance: { assetFilter: (name) => !name.startsWith('blosc.') && !name.endsWith('.map') },
 	resolve: {
 		roots: ['./'],
 	},
 	devtool: 'source-map',
 	entry: {
-		index: {
-			import: './server/scripts/index.mjs',
-			dependOn: 'shared',
-		},
-		displays: {
-			import: [
-				'./server/scripts/modules/hazards.mjs',
-				'./server/scripts/modules/currentweather.mjs',
-				'./server/scripts/modules/almanac.mjs',
-				'./server/scripts/modules/spc-outlook.mjs',
-				'./server/scripts/modules/extendedforecast.mjs',
-				'./server/scripts/modules/hourly.mjs',
-				'./server/scripts/modules/hourly-graph.mjs',
-				'./server/scripts/modules/latestobservations.mjs',
-				'./server/scripts/modules/localforecast.mjs',
-				'./server/scripts/modules/radar.mjs',
-				'./server/scripts/modules/future-radar.mjs',
-				'./server/scripts/modules/regionalforecast.mjs',
-				'./server/scripts/modules/travelforecast.mjs',
-			],
-			dependOn: 'shared',
-		},
-		features: {
-			import: [
-				'./server/scripts/modules/custom-scroll-text.mjs',
-				'./server/scripts/modules/currentweatherscroll.mjs',
-				'./server/scripts/modules/media.mjs',
-			],
-			dependOn: 'shared',
-		},
-		shared: [
-			'./server/scripts/modules/progress.mjs',
-			'./server/scripts/modules/settings.mjs',
-			'./server/scripts/modules/utils/setting.mjs',
-			'./server/scripts/modules/icons/hourly.mjs',
-			'./server/scripts/modules/icons/large.mjs',
-			'./server/scripts/modules/icons/parse.mjs',
-			'./server/scripts/modules/icons/small.mjs',
-			'./server/scripts/modules/utils/cache.mjs',
-			'./server/scripts/modules/utils/debug.mjs',
-			'./server/scripts/modules/utils/preload-image.mjs',
-			'./server/scripts/modules/utils/metar.mjs',
-			'./server/scripts/modules/utils/mapclick.mjs',
-			'./server/scripts/modules/utils/units.mjs',
-		],
+		app: appModules,
+	},
+	// the single bundle is over webpack's default 244 KiB limit, so warn when it grows past this instead
+	performance: {
+		maxAssetSize: 300 * 1024,
+		maxEntrypointSize: 300 * 1024,
 	},
 	optimization: {
 		minimize: true,
@@ -119,28 +95,8 @@ const compressJsVendor = () => src(jsVendorSources)
 	.pipe(terser())
 	.pipe(dest(RESOURCES_PATH));
 
-const mjsSources = [
-	'server/scripts/modules/currentweatherscroll.mjs',
-	'server/scripts/modules/hazards.mjs',
-	'server/scripts/modules/currentweather.mjs',
-	'server/scripts/modules/almanac.mjs',
-	'server/scripts/modules/spc-outlook.mjs',
-	'server/scripts/modules/extendedforecast.mjs',
-	'server/scripts/modules/hourly.mjs',
-	'server/scripts/modules/hourly-graph.mjs',
-	'server/scripts/modules/latestobservations.mjs',
-	'server/scripts/modules/localforecast.mjs',
-	'server/scripts/modules/radar.mjs',
-	'server/scripts/modules/future-radar.mjs',
-	'server/scripts/modules/regionalforecast.mjs',
-	'server/scripts/modules/travelforecast.mjs',
-	'server/scripts/modules/progress.mjs',
-	'server/scripts/modules/media.mjs',
-	'server/scripts/modules/custom-scroll-text.mjs',
-	'server/scripts/index.mjs',
-];
-
-const buildJs = () => src(mjsSources)
+// webpack-stream takes its entry from the config, the files here only start the stream
+const buildJs = () => src(appModules, { read: false })
 	.pipe(webpack(webpackOptions))
 	.pipe(dest(RESOURCES_PATH));
 

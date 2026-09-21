@@ -11,8 +11,6 @@ const vendorFiles = [
 	'./node_modules/suncalc/index.js',
 	'./node_modules/swiped-events/src/swiped-events.js',
 	'./node_modules/proj4/dist/proj4.js',
-	'./node_modules/numcodecs/dist/blosc.js',
-	'./node_modules/numcodecs/dist/chunk-*.js',
 ];
 
 // Special handling for metar-taf-parser - only copy main file and English locale
@@ -23,14 +21,10 @@ const metarFiles = [
 
 const copy = () => src(vendorFiles)
 	.pipe(rename((path, file) => {
-		if (file.base.includes('suncalc')) {
-			path.basename = 'suncalc';
-			return;
-		}
-		if (path.basename.startsWith('chunk-')) return; // hashed numcodecs chunk, name is load-bearing
 		path.dirname = path.dirname.toLowerCase();
 		path.basename = path.basename.toLowerCase();
 		path.extname = path.extname.toLowerCase();
+		if (file.base.includes('suncalc')) path.basename = 'suncalc';
 	}))
 	.pipe(dest('./server/scripts/vendor/auto'));
 

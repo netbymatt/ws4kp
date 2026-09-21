@@ -3,12 +3,14 @@
  * Minimal Zarr v2 reader for the hrrrzarr archive.
  *
  * This deliberately does not use a general Zarr library. We only ever read a
- * handful of known chunks from a known layout, so direct fetch() plus a Blosc
- * decoder is smaller and more transparent than a full chunk-grid abstraction —
- * and the archive's doubled group nesting tends to fight generic readers.
+ * handful of known chunks from a known layout, so direct fetch() plus a small
+ * Blosc decoder (see blosc.mjs) is smaller and more transparent than a full
+ * chunk-grid abstraction — and the archive's doubled group nesting tends to
+ * fight generic readers.
  */
 
 import { SOURCE, RUN } from './config.mjs';
+import decodeBlosc from './blosc.mjs';
 
 /* ------------------------------------------------------------------ *
  * URL construction
@@ -167,33 +169,13 @@ const clearChunkCache = () => {
 };
 
 /**
- * The Blosc decoder, loaded on first use.
- *
- * blosc.js is ~600 KB (the WASM codec is inlined as base64) and only this
- * display needs it, so it is split out of the displays bundle and fetched the
- * first time chunks are decoded. The promise is shared so every chunk waits on
- * one download, and it is cleared on failure so the next refresh can retry
- * instead of replaying a cached rejection forever.
- */
-let bloscPromise;
-const loadBlosc = () => {
-	bloscPromise ??= import(/* webpackChunkName: "blosc" */ '../../vendor/auto/blosc.js')
-		.then((module) => module.default)
-		.catch((error) => {
-			bloscPromise = undefined;
-			throw error;
-		});
-	return bloscPromise;
-};
-
-/**
  * Fetch one chunk and return it as a Float32Array plus its own shape.
  *
  * Forecast chunks are 3-D cubes of (forecastHours, 150, 150), which means a
  * single request returns every forecast hour for that chunk. Analysis chunks
  * are a flat (150, 150).
  */
-const fetchChunk = async (runDate, chunkId, meta, codecPromise) => {
+const fetchChunk = async (runDate, chunkId, meta) => {
 	const url = buildChunkUrl(runDate, chunkId, meta.shape.length);
 
 	const cached = chunkCache.get(url);
@@ -206,8 +188,7 @@ const fetchChunk = async (runDate, chunkId, meta, codecPromise) => {
 
 	const compressed = new Uint8Array(await response.arrayBuffer());
 
-	const codec = await codecPromise;
-	const raw = await codec.decode(compressed);
+	const raw = decodeBlosc(compressed);
 
 	const values = bytesToFloat32(raw, meta.dtype);
 
@@ -230,13 +211,8 @@ const fetchChunk = async (runDate, chunkId, meta, codecPromise) => {
  * discarding the chunks that did come back.
  */
 const fetchChunks = async (runDate, chunkIds, meta) => {
-	const codecPromise = loadBlosc().then((Blosc) => Blosc.fromConfig(meta.compressor));
-	// every chunk awaits this and reports a failure through allSettled; this
-	// keeps the promise itself from being flagged as an unhandled rejection
-	codecPromise.catch(() => { });
-
 	const settled = await Promise.allSettled(
-		chunkIds.map((id) => fetchChunk(runDate, id, meta, codecPromise)),
+		chunkIds.map((id) => fetchChunk(runDate, id, meta)),
 	);
 
 	const chunks = [];
