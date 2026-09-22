@@ -40,8 +40,7 @@ class LatestObservations extends WeatherDisplay {
 		const nextStation = () => queue.stations[queue.index++];
 
 		// get stations via the recurrent getStation function and the length of queue.stations
-		const stationLimit = MAX_REGIONAL_STATIONS * ((settings.portrait?.value) ? 2 : 1);
-		const workerCount = Math.min(queue.stations.length, stationLimit);
+		const workerCount = Math.min(queue.stations.length, this.stationLimit());
 
 		// run the loop (and filter out empty responses)
 		const actualConditions = (await safePromiseAll(Array.from({ length: workerCount }).map(() => this.getStation(nextStation)))).filter((d) => d);
@@ -69,6 +68,19 @@ class LatestObservations extends WeatherDisplay {
 		if (stationData) return stationData;
 		// recur (loop is ended when nextStation is exhausted with the length of regional stations)
 		return this.getStation(nextStation);
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	stationLimit() {
+		return MAX_REGIONAL_STATIONS * (settings.portrait?.value ? 2 : 1);
+	}
+
+	async modeChanged() {
+		// get additional data if needed for the mode change
+		if (this.status === STATUS.loaded && this.data.length < this.stationLimit()) await this.getData(this.weatherParameters, true);
+		// draw a second time to side-step the potential race condition beteween loading data and the higher-level call to
+		// drawCanvas
+		if (this.active) this.drawCanvas();
 	}
 
 	// This is a class method because it needs access to the instance's `stillWaiting` method
@@ -143,7 +155,9 @@ class LatestObservations extends WeatherDisplay {
 		const windConverter = windSpeed();
 		const temperatureConverter = temperature();
 
-		const lines = conditions.map((condition) => {
+		// shorten conditions to number to display based on portrait/landscape orientation
+
+		const lines = conditions.slice(0, this.stationLimit()).map((condition) => {
 			const windDirection = directionToNSEW(condition.windDirection.value);
 
 			const Temperature = temperatureConverter(condition.temperature.value);
