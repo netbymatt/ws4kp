@@ -128,6 +128,15 @@ class SpcOutlook extends WeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
+	// fetch additional data
+	async modeChanged() {
+		// get additional data if in portrait
+		if (!settings.portrait?.value || this.status !== STATUS.loaded) return;
+		const point = [this.weatherParameters.longitude, this.weatherParameters.latitude];
+		await this.getRemainingData(this.testAllPoints(point, 'categorical'));
+		this.filteredData = this.testAllPoints(point);
+	}
+
 	async drawCanvas() {
 		super.drawCanvas();
 

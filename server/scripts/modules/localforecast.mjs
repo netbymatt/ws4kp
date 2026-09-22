@@ -49,7 +49,7 @@ class LocalForecast extends WeatherDisplay {
 	}
 
 	modeChanged() {
-		if (!this.enabled) return;
+		if (this.status !== STATUS.loaded) return;
 		this.layoutScreens();	// pairing + fillTemplate + calculateContentAwareTiming + calcNavTiming
 		// roll back the screen if the re-layout puts us past the end of pages
 		if (this.screenIndex >= this.timing.totalScreens) this.screenIndex = this.timing.totalScreens - 1;
