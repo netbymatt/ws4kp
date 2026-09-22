@@ -78,16 +78,6 @@ class HourlyGraph extends WeatherDisplay {
 			skyCover, temperature, probabilityOfPrecipitation, temperatureUnit: data[0].temperatureUnit, dewpoint,
 		};
 
-		// get the data length for current settings
-		const { dataLength } = scaling();
-
-		// clamp down the data to the allowed size
-		Object.entries(this.data).forEach(([key, value]) => {
-			if (Array.isArray(value)) {
-				this.data[key] = value.slice(0, dataLength.hours);
-			}
-		});
-
 		this.setStatus(STATUS.loaded);
 	}
 
@@ -95,6 +85,17 @@ class HourlyGraph extends WeatherDisplay {
 		super.drawCanvas();
 		// get scaling parameters
 		const { dataLength, available } = scaling();
+
+		const data = {};
+		// clamp down the data to the allowed size
+		Object.entries(this.data).forEach(([key, value]) => {
+			if (Array.isArray(value)) {
+				data[key] = value.slice(0, dataLength.hours);
+			}
+		});
+
+		// copy the temperature unit
+		data.temperatureUnit = this.data.temperatureUnit;
 
 		// get the image
 		if (!this.image) this.image = this.elem.querySelector('.chart canvas');
@@ -132,8 +133,8 @@ class HourlyGraph extends WeatherDisplay {
 		}
 
 		// calculate time scale
-		const timeScale = calcScale(0, 5, this.data.temperature.length - 1, available.width);
-		const timeStep = this.data.temperature.length / (dataLength.xTicks);
+		const timeScale = calcScale(0, 5, data.temperature.length - 1, available.width);
+		const timeStep = data.temperature.length / (dataLength.xTicks);
 		const startTime = DateTime.now().setZone(timeZone()).startOf('hour');
 
 		// there are two x axes in portrait
@@ -152,36 +153,36 @@ class HourlyGraph extends WeatherDisplay {
 		// order is important last line drawn is on top
 		// clouds
 		const percentScale = calcScale(0, available.height - 10, 100, 10);
-		const cloud = createPath(this.data.skyCover, timeScale, percentScale);
+		const cloud = createPath(data.skyCover, timeScale, percentScale);
 		drawPath(cloud, contexts[3], {
 			strokeStyle: 'lightgrey',
 			lineWidth: 3,
 		});
 
 		// precip
-		const precip = createPath(this.data.probabilityOfPrecipitation, timeScale, percentScale);
+		const precip = createPath(data.probabilityOfPrecipitation, timeScale, percentScale);
 		drawPath(precip, contexts[2], {
 			strokeStyle: 'aqua',
 			lineWidth: 3,
 		});
 
 		// calculate temperature scale for min and max of dewpoint and temperature
-		const minScale = Math.min(...this.data.dewpoint, ...this.data.temperature);
-		const maxScale = Math.max(...this.data.dewpoint, ...this.data.temperature);
+		const minScale = Math.min(...data.dewpoint, ...data.temperature);
+		const maxScale = Math.max(...data.dewpoint, ...data.temperature);
 		const thirdScale = (maxScale - minScale) / 3;
 		const midScale1 = Math.round(minScale + thirdScale);
 		const midScale2 = Math.round(minScale + (thirdScale * 2));
 		const tempScale = calcScale(minScale, available.height - 10, maxScale, 10);
 
 		// dewpoint
-		const dewpointPath = createPath(this.data.dewpoint, timeScale, tempScale);
+		const dewpointPath = createPath(data.dewpoint, timeScale, tempScale);
 		drawPath(dewpointPath, contexts[1], {
 			strokeStyle: 'green',
 			lineWidth: 3,
 		});
 
 		// temperature
-		const tempPath = createPath(this.data.temperature, timeScale, tempScale);
+		const tempPath = createPath(data.temperature, timeScale, tempScale);
 		drawPath(tempPath, contexts[0], {
 			strokeStyle: 'red',
 			lineWidth: 3,
@@ -198,8 +199,8 @@ class HourlyGraph extends WeatherDisplay {
 		this.elem.querySelector('.y-axis .l-4').innerHTML = (minScale + degree).substring(0, 3);
 
 		// change the units in the header
-		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
-		this.elem.querySelector('.dewpoint').innerHTML = `Dewpoint ${String.fromCharCode(176)}${this.data.temperatureUnit}`;
+		this.elem.querySelector('.temperature').innerHTML = `Temperature ${String.fromCharCode(176)}${data.temperatureUnit}`;
+		this.elem.querySelector('.dewpoint').innerHTML = `Dewpoint ${String.fromCharCode(176)}${data.temperatureUnit}`;
 
 		this.finishDraw();
 	}
