@@ -20,15 +20,20 @@ class ExtendedForecast extends WeatherDisplay {
 	}
 
 	// set up timings
+	// this is called on a switch of display modes so it exits early if no change is necessary
 	setTimings() {
-		// set timings
-		if (settings.portrait?.value) {
-			this.timing.totalScreens = 1;
-			this.perPage = 6;
-		} else {
-			this.timing.totalScreens = 2;
-			this.perPage = 3;
-		}
+		const portrait = !!settings.portrait?.value;
+		this.perPage = portrait ? 6 : 3;
+		const totalScreens = portrait ? 1 : 2;
+		if (this.timing.totalScreens === totalScreens) return;
+		this.timing.totalScreens = totalScreens;
+		this.calcNavTiming();
+		if (this.screenIndex >= totalScreens) this.screenIndex = totalScreens - 1;
+	}
+
+	// on a change of mode only a recalculation of timings is needed
+	modeChanged() {
+		this.setTimings();
 	}
 
 	async getData(weatherParameters, refresh) {
