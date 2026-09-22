@@ -45,6 +45,8 @@ if (!USE_CACHE) {
 				let stations;
 				let next = `https://api.weather.gov/stations?state=${state}`;
 				let round = 0;
+				let count = 0;
+				let usedCount = 0;
 				do {
 					console.log(`Getting: ${state}-${round}`);
 					// get list and parse the JSON
@@ -53,6 +55,7 @@ if (!USE_CACHE) {
 					stations = JSON.parse(stationsRaw);
 					// filter against starting letter
 					const stationsFiltered = stations.features.filter(stationFilter);
+					count += stations.features.length;
 					// add each resulting station to the output
 					stationsFiltered.forEach((station) => {
 						const id = station.properties.stationIdentifier;
@@ -62,7 +65,9 @@ if (!USE_CACHE) {
 						}
 						if (station.properties.provider === '' && station.properties.subProvider === '') {
 							console.log(`No providers for: ${state}\\${id}`);
+							return;
 						}
+						usedCount += 1;
 						output[id] = {
 							id,
 							city: station.properties.name,
@@ -79,7 +84,7 @@ if (!USE_CACHE) {
 				}
 				while (next && stations.features.length > 0);
 				completed += 1;
-				console.log(`Complete: ${state} ${completed}/${states.length}`);
+				console.log(`Complete: ${state} ${completed}/${states.length} Stations: ${usedCount}/${count}`);
 				return true;
 			} catch (e) {
 				console.error(`Unable to get state: ${state}`);
