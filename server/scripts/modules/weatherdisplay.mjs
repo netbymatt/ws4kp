@@ -507,6 +507,12 @@ class WeatherDisplay {
 		return template;
 	}
 
+	// stub hood
+	// displays that need to load additional data or re-layout their screens
+	// should implement this hook to allow clean, no refresh switching between enhanced and non-enhanced modes
+	// eslint-disable-next-line class-methods-use-this
+	modeChanged() { }
+
 	// still waiting for data (retries triggered)
 	stillWaiting() {
 		if (this.isEnabled) this.setStatus(STATUS.retrying);

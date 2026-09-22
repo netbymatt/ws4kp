@@ -73,8 +73,6 @@ const enhancedChange = (value) => {
 	} else {
 		container.classList.remove('enhanced');
 	}
-	// Trigger resize to recalculate scaling for new width, on next event loop to allow settings to propagate
-	setTimeout(() => window.dispatchEvent(new Event('redraw')), 0);
 };
 
 const viewModeChange = (value) => {
@@ -100,6 +98,8 @@ const viewModeChange = (value) => {
 			settings.enhanced.value = false;
 			settings.portrait.value = false;
 	}
+	// notify displays to perform data updates or redraws as required
+	window.dispatchEvent(new Event('display-mode-change'));
 };
 
 const kioskChange = (value) => {

@@ -38,8 +38,10 @@ const init = async () => {
 		resizeTimeout = setTimeout(() => resize(), 100);
 	});
 
-	// redraw current screen (typically from enhanced setting change)
-	window.addEventListener('redraw', () => {
+	window.addEventListener('display-mode-change', () => {
+		// every display is asked to rebuild its data and display
+		displays.forEach((display) => display.modeChanged());
+		// redraw the current display after the above computations are done.
 		currentDisplay()?.drawCanvas();
 	});
 
