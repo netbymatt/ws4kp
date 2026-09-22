@@ -2,9 +2,17 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 import * as url from 'node:url';
 
-// Load station data
-const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations-raw.json', 'utf8'));
-// const regionalCities = JSON.parse(readFileSync('./datagenerators/output/regionalcities.json', 'utf8'));
+// determine if running from command line or module
+const commandLine = (() => {
+	if (import.meta.url.startsWith('file:')) { // (A)
+		const modulePath = url.fileURLToPath(import.meta.url);
+		if (process.argv[1] === modulePath) { // (B)
+			return true;
+		}
+	}
+	return false;
+}
+)();
 
 // Airport exceptions for stations that require external knowledge NOT present in the original name
 const airportNamingExceptions = {
@@ -1135,6 +1143,11 @@ const postProcessor = async (_options) => {
 	// combine default and provided options
 	const options = { ...DEFAULT_OPTIONS, ..._options };
 
+	// read the file
+	// Load station data
+
+	const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations-raw.json', 'utf8'));
+
 	// Process ALL stations at once to get the display name map
 	let displayNameMap = processAllStations(stationInfo);
 
@@ -1271,18 +1284,6 @@ const postProcessor = async (_options) => {
 
 	return returnObject;
 };
-
-// determine if running from command line or module
-const commandLine = (() => {
-	if (import.meta.url.startsWith('file:')) { // (A)
-		const modulePath = url.fileURLToPath(import.meta.url);
-		if (process.argv[1] === modulePath) { // (B)
-			return true;
-		}
-	}
-	return false;
-}
-)();
 
 // run post processor if called from command line
 if (commandLine) {

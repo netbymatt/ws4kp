@@ -3,6 +3,8 @@
 // only find stations with 4 letter codes
 
 import { writeFile } from 'node:fs/promises';
+import pLimit from 'p-limit';
+import { setTimeout } from 'node:timers/promises';
 import getHttps from './https.mjs';
 import states from './stations-states.mjs';
 import chunk from './chunk.mjs';
@@ -19,6 +21,16 @@ const chunkStates = chunk(states, 3);
 // store output
 const output = {};
 let completed = 0;
+
+// limit the number of in-flight requests at one time
+const limit = pLimit(5);
+const HTTPS_GET_INTERVAL = 500; // ms
+
+const httpsGetLimited = async (...args) => {
+	// be nice to the api wait
+	await setTimeout(HTTPS_GET_INTERVAL);
+	return limit(getHttps, ...args);
+};
 
 // get data from api if desired
 if (!USE_CACHE) {
@@ -37,16 +49,19 @@ if (!USE_CACHE) {
 					console.log(`Getting: ${state}-${round}`);
 					// get list and parse the JSON
 					// eslint-disable-next-line no-await-in-loop
-					const stationsRaw = await getHttps(next);
+					const stationsRaw = await httpsGetLimited(next);
 					stations = JSON.parse(stationsRaw);
 					// filter against starting letter
-					const stationsFiltered = stations.filter(stationFilter);
+					const stationsFiltered = stations.features.filter(stationFilter);
 					// add each resulting station to the output
 					stationsFiltered.forEach((station) => {
 						const id = station.properties.stationIdentifier;
 						if (output[id]) {
 							console.log(`Duplicate station: ${state}-${id}`);
 							return;
+						}
+						if (station.properties.provider === '' && station.properties.subProvider === '') {
+							console.log(`No providers for: ${state}\\${id}`);
 						}
 						output[id] = {
 							id,
@@ -66,8 +81,9 @@ if (!USE_CACHE) {
 				completed += 1;
 				console.log(`Complete: ${state} ${completed}/${states.length}`);
 				return true;
-			} catch {
+			} catch (e) {
 				console.error(`Unable to get state: ${state}`);
+				console.error(e);
 				return false;
 			}
 		}));
@@ -76,7 +92,7 @@ if (!USE_CACHE) {
 
 // run the post processor
 // data is passed through the file stations-raw.json
-const postProcessed = await postProcessor();
+const postProcessed = await postProcessor({ writeFile: true });
 
 // apply any overrides
 Object.entries(overrides).forEach(([id, values]) => {
