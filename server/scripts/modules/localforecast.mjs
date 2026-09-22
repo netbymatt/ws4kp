@@ -43,6 +43,20 @@ class LocalForecast extends WeatherDisplay {
 		}
 		// store the data
 		this.data = rawData || this.data;
+
+		// set up the forecast pages
+		this.layoutScreens();
+	}
+
+	modeChanged() {
+		if (!this.enabled) return;
+		this.layoutScreens();	// pairing + fillTemplate + calculateContentAwareTiming + calcNavTiming
+		// roll back the screen if the re-layout puts us past the end of pages
+		if (this.screenIndex >= this.timing.totalScreens) this.screenIndex = this.timing.totalScreens - 1;
+	}
+
+	// set the paging and screen timings for the text forecasts
+	layoutScreens() {
 		// parse raw data and filter out expired periods
 		const conditions = parse(this.data, this.weatherParameters.forecast);
 
