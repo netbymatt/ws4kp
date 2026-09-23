@@ -29,6 +29,9 @@ class ExtendedForecast extends WeatherDisplay {
 		this.timing.totalScreens = totalScreens;
 		this.calcNavTiming();
 		if (this.screenIndex >= totalScreens) this.screenIndex = totalScreens - 1;
+		// re-sync the base count to the start of the screen on display so the new timing
+		// array picks up where the old one left off instead of jumping
+		this.navBaseCount = this.screenIndex <= 0 ? 0 : this.timing.fullDelay[this.screenIndex - 1];
 	}
 
 	// on a change of mode only a recalculation of timings is needed
@@ -70,9 +73,6 @@ class ExtendedForecast extends WeatherDisplay {
 
 	async drawCanvas() {
 		super.drawCanvas();
-
-		// reset the timings in case the mode changes
-		this.setTimings();
 
 		// determine bounds
 		// grab the first three or second set of three array elements

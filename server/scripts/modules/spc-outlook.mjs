@@ -135,6 +135,8 @@ class SpcOutlook extends WeatherDisplay {
 		const point = [this.weatherParameters.longitude, this.weatherParameters.latitude];
 		await this.getRemainingData(this.testAllPoints(point, 'categorical'));
 		this.filteredData = this.testAllPoints(point);
+		// draw now to avoid a race condition with the higher-level draw command getting not-yet-ready data
+		if (this.active) this.drawCanvas();
 	}
 
 	async drawCanvas() {

@@ -39,9 +39,14 @@ const init = async () => {
 	});
 
 	window.addEventListener('display-mode-change', () => {
-		// every display is asked to rebuild its data and display
-		displays.forEach((display) => display.modeChanged());
-		// redraw the current display after the above computations are done.
+		// one display failing to update must not stop the others or the redraw below
+		displays.forEach((display) => {
+			try {
+				Promise.resolve(display.modeChanged()).catch((error) => console.error(`${display.elemId} modeChanged failed: ${error.message}`));
+			} catch (error) {
+				console.error(`${display.elemId} modeChanged failed: ${error.message}`);
+			}
+		});
 		currentDisplay()?.drawCanvas();
 	});
 

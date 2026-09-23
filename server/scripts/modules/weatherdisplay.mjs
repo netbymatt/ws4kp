@@ -238,7 +238,7 @@ class WeatherDisplay {
 	}
 
 	get active() {
-		return this.elem.offsetHeight !== 0;
+		return this.elem?.offsetHeight !== undefined && this.elem.offsetHeight !== 0;
 	}
 
 	get enabled() {
