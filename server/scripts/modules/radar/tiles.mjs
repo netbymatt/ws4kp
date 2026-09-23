@@ -51,6 +51,9 @@ const setTiles = (data) => {
 		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 3),
 		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 3),
 		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 3),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 4),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 4),
+		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 4),
 	];
 
 	// do some calculations
@@ -65,6 +68,7 @@ const setTiles = (data) => {
 	const secondRow = TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE().height;
 	const thirdRow = (TILE_SIZE.y * 2) - tileShift.y < RADAR_FINAL_SIZE().height;
 	const fourthRow = (TILE_SIZE.y * 3) - tileShift.y < RADAR_FINAL_SIZE().height;
+	const fifthRow = (TILE_SIZE.y * 4) - tileShift.y < RADAR_FINAL_SIZE().height;
 	const usedTiles = [
 		true,
 		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE().width,
@@ -75,6 +79,7 @@ const setTiles = (data) => {
 	usedTiles.push(secondRow && usedTiles[0], secondRow && usedTiles[1], secondRow && usedTiles[2]);
 	usedTiles.push(thirdRow && usedTiles[0], thirdRow && usedTiles[1], thirdRow && usedTiles[2]);
 	usedTiles.push(fourthRow && usedTiles[0], fourthRow && usedTiles[1], fourthRow && usedTiles[2]);
+	usedTiles.push(fifthRow && usedTiles[0], fourthRow && usedTiles[1], fourthRow && usedTiles[2]);
 
 	if (debugFlag(elemId)) {
 		const used = usedTiles.map((isUsed, index) => (isUsed ? baseMapTiles[index] : null)).filter((tile) => tile !== null);
