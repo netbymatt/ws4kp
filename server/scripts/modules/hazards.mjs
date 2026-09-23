@@ -42,6 +42,9 @@ class Hazards extends ScrollWeatherDisplay {
 		// take note of the already-shown alert ids
 		this.viewedAlerts = new Set();
 		this.viewedGetCount = 0;
+
+		// true while replaying all alerts after a click in the display list
+		this.replaying = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -61,6 +64,7 @@ class Hazards extends ScrollWeatherDisplay {
 			if (!refresh) {
 				this.viewedGetCount = 0;
 				this.viewedAlerts.clear();
+				this.replaying = false;
 			}
 
 			// get the forecast using centralized safe handling
@@ -116,8 +120,35 @@ class Hazards extends ScrollWeatherDisplay {
 	}
 
 	// alerts that have already been scrolled through are not shown again until the next reset
+	// except when replaying on request, which shows them all
 	scrollRows() {
+		if (this.replaying) return this.data;
 		return this.data.filter((data) => !this.viewedAlerts.has(data.id));
+	}
+
+	// hazards can be replayed from the display list even after they have scrolled through once
+	canShowOnRequest() {
+		return this.data?.some((alert) => alert.properties.description) ?? false;
+	}
+
+	prepareShowOnRequest() {
+		this.replaying = true;
+		// force a rebuild so the scroll starts from the top with every alert
+		this.lastContentSignature = null;
+		this.drawLongCanvas();
+	}
+
+	// leaving a replay part way through ends it, so it does not come back around during play
+	hideCanvas() {
+		if (this.replaying && this.active) this.endViewing();
+		super.hideCanvas();
+	}
+
+	// take this out of the rotation until the next reset and note the ids shown
+	endViewing() {
+		this.replaying = false;
+		this.timing.totalScreens = 0;
+		this?.data?.forEach((alert) => this.viewedAlerts.add(alert.id));
 	}
 
 	// Alert ids alone are not enough: an alert can be reissued under the same id with updated
@@ -147,12 +178,7 @@ class Hazards extends ScrollWeatherDisplay {
 	screenIndexFromBaseCount() {
 		const superValue = super.screenIndexFromBaseCount();
 		// false is returned when we reach the end of the scroll
-		if (superValue === false) {
-			// set total screens to zero to take this out of the rotation
-			this.timing.totalScreens = 0;
-			// note the ids shown
-			this?.data?.forEach((alert) => this.viewedAlerts.add(alert.id));
-		}
+		if (superValue === false) this.endViewing();
 		// return the value as expected
 		return superValue;
 	}

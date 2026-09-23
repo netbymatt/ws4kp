@@ -1,5 +1,3 @@
-@use 'shared/_utils'as u;
-@use 'shared/_colors'as c;
 @use 'shared/positions'as p;
 
 @font-face {
@@ -398,65 +396,6 @@ body {
 	}
 }
 
-.heading {
-	font-weight: bold;
-	margin-top: 15px;
-}
-
-#settings {
-	margin-bottom: 15px;
-}
-
-#enabledDisplays,
-#settings {
-	margin-bottom: 15px;
-	@include u.status-colors();
-
-	.press-here {
-		color: white;
-	}
-
-	@media (prefers-color-scheme: light) {
-
-		.loading,
-		.retrying {
-			color: hsl(60, 100%, 30%);
-		}
-
-		.press-here {
-			color: black;
-			cursor: pointer;
-		}
-
-		.failed {
-			color: hsl(0, 100%, 30%);
-		}
-
-		.no-data {
-			color: hsl(0, 0%, 30%);
-		}
-
-		.disabled {
-			color: hsl(0, 0%, 30%);
-		}
-	}
-
-	label {
-		display: block;
-		max-width: fit-content;
-		cursor: pointer;
-
-		.alert {
-			display: none;
-
-			&.show {
-				display: inline;
-				color: red;
-			}
-		}
-	}
-}
-
 #divTwcBottom img {
 	transform: scale(0.75);
 
@@ -809,15 +748,6 @@ body {
 	}
 }
 
-#share-link-copied {
-	color: hsl(60, 100%, 30%);
-	display: none;
-}
-
-#share-link-instructions {
-	display: none;
-}
-
 // Hide instructions in kiosk mode (higher specificity than the show rule)
 body.kiosk #loading .instructions {
 	display: none !important;
@@ -828,27 +758,6 @@ body.kiosk #loading .instructions {
 	// In kiosk mode, hide everything except the main weather display
 	>*:not(#divTwc) {
 		display: none !important;
-	}
-}
-
-#divInfo {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	max-width: 250px;
-}
-
-.lower-flex-container {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-	align-items: flex-start;
-	align-content: stretch;
-	gap: 8px;
-	column-gap: 64px;
-
-	.item {
-		display: inline-block;
 	}
 }
 

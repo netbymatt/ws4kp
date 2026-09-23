@@ -167,6 +167,76 @@
     </div>
   </div>
 
+  <div id="lower-tabs">
+    <div class="tab-bar" role="tablist">
+      <button type="button" role="tab" id="tab-displays" aria-controls="tab-panel-displays" aria-selected="true">Displays <span id="enabled-count" class="count"></span></button>
+      <button type="button" role="tab" id="tab-settings" aria-controls="tab-panel-settings" aria-selected="false">Settings</button>
+      <button type="button" role="tab" id="tab-share" aria-controls="tab-panel-share" aria-selected="false">Share</button>
+      <button type="button" role="tab" id="tab-headend" aria-controls="tab-panel-headend" aria-selected="false">Headend</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" role="tabpanel" id="tab-panel-displays" aria-labelledby="tab-displays">
+        <div id="enabledDisplays"></div>
+        <div class="legend">
+          <span class="ready">Ready (click to view)</span>
+          <span class="loading">Loading</span>
+          <span class="failed">Failed</span>
+          <span class="off">Off / no data</span>
+        </div>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-panel-settings" aria-labelledby="tab-settings">
+        <div id="settings"></div>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-panel-share" aria-labelledby="tab-share">
+        <div class="share-row">
+          <input type="url" id="share-link-url" readonly aria-label="Permalink">
+          <button type="button" id="share-link" class="tab-button">Copy permalink</button>
+        </div>
+        <p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied" class="copied">Link copied to clipboard!</span></p>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-panel-headend" aria-labelledby="tab-headend">
+        <dl id="divInfo">
+          <div class="wide-item">
+            <dt>Location</dt>
+            <dd><span id="spanCity"></span> <span id="spanState"></span></dd>
+          </div>
+          <div>
+            <dt>Station</dt>
+            <dd id="spanStationId"></dd>
+          </div>
+          <div>
+            <dt>Radar</dt>
+            <dd id="spanRadarId"></dd>
+          </div>
+          <div>
+            <dt>Zone</dt>
+            <dd id="spanZoneId"></dd>
+          </div>
+          <div>
+            <dt>Office</dt>
+            <dd id="spanOfficeId"></dd>
+          </div>
+          <div>
+            <dt>Grid X,Y</dt>
+            <dd id="spanGridPoint"></dd>
+          </div>
+          <div>
+            <dt>Version</dt>
+            <dd><%- version %></dd>
+          </div>
+          <div class="full-row">
+            <dt>Music</dt>
+            <dd id="musicTrack">Not playing</dd>
+          </div>
+        </dl>
+        <div class="button-row">
+          <button type="button" id="copy-headend" class="tab-button">Copy headend info</button>
+          <span id="copy-headend-copied" class="copied">Copied to clipboard!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="content-wrapper">
     <br />
 
@@ -174,48 +244,6 @@
       <a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
     </div>
     <div class="media"></div>
-
-    <div class='lower-flex-container'>
-      <div class='item'>
-        <div class='heading'>Selected displays</div>
-        <div id='enabledDisplays'>
-
-        </div>
-      </div>
-      <div class='item'>
-        <div class='heading'>Settings</div>
-        <div id='settings'>
-          <div class='heading'>Sharing</div>
-        </div>
-        <div class='item'>
-          <a href='' id='share-link'>Copy Permalink</a> <span id="share-link-copied">Link copied to clipboard!</span>
-          <div id="share-link-instructions">
-            Copy this long URL:
-            <input type='text' id="share-link-url">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class='heading'>Headend Information</div>
-    <div id="divInfo">
-      <div class="header">Location:</div>
-      <div class="header"><span id="spanCity"></span> <span id="spanState"></span></div>
-      <div class="header">Station Id:</div>
-      <div class="header"><span id="spanStationId"></span></div>
-      <div class="header">Radar Id:</div>
-      <div class="header"><span id="spanRadarId"></span></div>
-      <div class="header">Zone Id:</div>
-      <div class="header"><span id="spanZoneId"></span></div>
-      <div class="header">Office Id:</div>
-      <div class="header"><span id="spanOfficeId"></span></div>
-      <div class="header">Grid X,Y:</div>
-      <div class="header"><span id="spanGridPoint"></span></div>
-      <div class="header">Music:</div>
-      <div class="header"><span id="musicTrack">Not playing</span></div>
-      <div class="header">Ws4kp Version:</div>
-      <div class="header"><span><%- version %></span></div>
-    </div>
 
 </body>
 

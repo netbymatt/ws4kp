@@ -300,6 +300,17 @@ const loadDisplay = (direction) => {
 	if (direction > 0) newDisplay.showCanvas(msg.command.firstFrame);
 };
 
+// show a specific display, used by the display list below the player
+// the play state is unchanged: when playing, it continues on from this display
+const showDisplay = (display) => {
+	if (display.status !== STATUS.loaded || !display.canShowOnRequest()) return;
+	if (progress) progress.hideCanvas();
+	hideAllCanvases();
+	// after hiding, so a display that is already showing starts over
+	display.prepareShowOnRequest();
+	display.showCanvas(msg.command.firstFrame);
+};
+
 // get the current display index or value
 const currentDisplayIndex = () => displays.findIndex((display) => display.active);
 const currentDisplay = () => displays[currentDisplayIndex()];
@@ -845,6 +856,7 @@ export {
 	registerDisplay,
 	registerProgress,
 	currentDisplay,
+	showDisplay,
 	getDisplay,
 	msg,
 	message,

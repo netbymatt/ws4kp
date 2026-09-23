@@ -5,6 +5,7 @@ import {
 } from './modules/navigation.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { registerHiddenSetting } from './modules/share.mjs';
+import './modules/tabs.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
 import { loadAllData } from './modules/utils/data-loader.mjs';

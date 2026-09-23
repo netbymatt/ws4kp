@@ -3,7 +3,7 @@
 import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import {
-	msg, displayNavMessage, isPlaying, updateStatus, timeZone,
+	msg, displayNavMessage, isPlaying, updateStatus, timeZone, showDisplay,
 } from './navigation.mjs';
 import { parseQueryString } from './utils/setting.mjs';
 import settings from './settings.mjs';
@@ -85,14 +85,24 @@ class WeatherDisplay {
 		const span = document.createElement('span');
 		span.innerHTML = this.name;
 		const alert = document.createElement('span');
-		alert.innerHTML = '!!!';
+		alert.innerHTML = 'ALERT';
 		alert.classList.add('alert');
 
 		label.append(checkbox, span, alert);
+		label.addEventListener('click', (e) => this.labelClick(e));
 
 		this.checkbox = label;
 
 		return label;
+	}
+
+	// clicking the name or status of a ready display shows it, the checkbox still turns it on or off
+	labelClick(e) {
+		if (e.target.type === 'checkbox' || this.status !== STATUS.loaded) return;
+		// don't toggle the checkbox
+		e.preventDefault();
+		showDisplay(this);
+		document.querySelector('#divTwc').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 	}
 
 	checkboxChange(e) {
@@ -226,6 +236,15 @@ class WeatherDisplay {
 		this.elem.classList.add('show');
 		document.querySelector('#divTwc').classList.add(this.elemId);
 	}
+
+	// a display can be shown on request from the display list when it has something to show
+	canShowOnRequest() {
+		return this.timing.totalScreens > 0;
+	}
+
+	// hook for displays that skip content during play but should show it on request
+	// eslint-disable-next-line class-methods-use-this
+	prepareShowOnRequest() {}
 
 	hideCanvas() {
 		this.resetNavBaseCount();

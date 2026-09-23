@@ -251,11 +251,11 @@ const init = () => {
 		type: 'select',
 		defaultValue: 1.0,
 		values: [
-			[0.5, 'Very Fast'],
-			[0.75, 'Fast'],
+			[0.5, 'Very Fast 2x'],
+			[0.75, 'Fast 1.5x'],
 			[1.0, 'Normal'],
-			[1.25, 'Slow'],
-			[1.5, 'Very Slow'],
+			[1.25, 'Slow 0.75x'],
+			[1.5, 'Very Slow 0.67x'],
 		],
 	});
 	settings.scanLines = new Setting('scanLines', {

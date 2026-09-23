@@ -10,8 +10,8 @@ const changeEnable = (newValue) => {
 	if (newValue) {
 		// add the text to the scroll
 		parseText(customText.value);
-		// show the string box
-		newDisplay = 'block';
+		// show the string box using the stylesheet's layout
+		newDisplay = '';
 	} else {
 		// set scroll back to original
 		resetScroll();

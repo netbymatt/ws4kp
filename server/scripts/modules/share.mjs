@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => init());
 const hiddenSettings = [];
 
 const init = () => {
-	// add action to existing link
+	// add action to existing button
 	const shareLink = document.querySelector('#share-link');
 	shareLink.addEventListener('click', createLink);
 
@@ -15,12 +15,12 @@ const init = () => {
 	if (!navigator?.clipboard) {
 		shareLink.textContent = 'Get Permalink';
 	}
+
+	// refresh the displayed link each time the share tab is opened
+	document.querySelector('#tab-panel-share')?.addEventListener('tab-shown', showLink);
 };
 
-const createLink = (e) => {
-	// cancel default event (click on hyperlink)
-	e.preventDefault();
-
+const buildLink = () => {
 	// list to receive checkbox statuses
 	const queryStringElements = {};
 
@@ -46,13 +46,27 @@ const createLink = (e) => {
 
 	const queryString = (new URLSearchParams(queryStringElements)).toString();
 
-	const url = new URL(`?${queryString}`, document.location.href);
+	return new URL(`?${queryString}`, document.location.href);
+};
+
+// write the current link to the read-only box on the share tab
+const showLink = () => {
+	const url = buildLink();
+	document.querySelector('#share-link-url').value = url;
+	return url;
+};
+
+const createLink = (e) => {
+	// cancel default event
+	e.preventDefault();
+
+	const url = showLink();
 
 	// send to proper function based on availability of clipboard
 	if (navigator?.clipboard) {
 		copyToClipboard(url);
 	} else {
-		writeLinkToPage(url);
+		selectLink();
 	}
 };
 
@@ -62,26 +76,21 @@ const copyToClipboard = async (url) => {
 		await navigator.clipboard.writeText(url.toString());
 		// alert user
 		const confirmSpan = document.querySelector('#share-link-copied');
-		confirmSpan.style.display = 'inline';
+		confirmSpan.classList.add('show');
 
 		// hide confirm text after 5 seconds
 		setTimeout(() => {
-			confirmSpan.style.display = 'none';
+			confirmSpan.classList.remove('show');
 		}, 5000);
 	} catch (error) {
 		console.error(error);
-		writeLinkToPage(url);
+		selectLink();
 	}
 };
 
-const writeLinkToPage = (url) => {
-	// get elements
-	const shareLinkInstructions = document.querySelector('#share-link-instructions');
-	const shareLinkUrl = shareLinkInstructions.querySelector('#share-link-url');
-	// populate url and display
-	shareLinkUrl.value = url;
-	shareLinkInstructions.style.display = 'inline';
-	// highlight for convenience
+// highlight the link so it can be copied by hand
+const selectLink = () => {
+	const shareLinkUrl = document.querySelector('#share-link-url');
 	shareLinkUrl.focus();
 	shareLinkUrl.select();
 };

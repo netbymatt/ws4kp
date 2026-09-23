@@ -116,11 +116,14 @@ class SpcOutlook extends WeatherDisplay {
 		this.filteredData = this.testAllPoints([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 
 		// check if there's a "risk" for any of the three days, otherwise skip the SPC Outlook screen
-		if (this.filteredData.some((d) => Object.keys(d).length !== 0)) {
-			this.timing.totalScreens = 1;
-		} else {
+		if (!this.filteredData.some((d) => Object.keys(d).length !== 0)) {
 			this.timing.totalScreens = 0;
+			this.calcNavTiming();
+			// the data loaded, there's just nothing to show for this location
+			this.setStatus(STATUS.noData);
+			return;
 		}
+		this.timing.totalScreens = 1;
 		this.calcNavTiming();
 
 		// we only get here if there was no error above
