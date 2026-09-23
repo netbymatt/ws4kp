@@ -70,21 +70,16 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 		}
 
 		// calculate offsets and sizes
-		const radarFinalSize = RADAR_FINAL_SIZE();
-		const projection = createProjection('radar-conus');
-		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
-		const projected = [...user];
-
-		// adjust the user's location to not run off the map
-		user[PX] = coerce(user[PX], radarFinalSize.width / 2, TILE_FULL_SIZE.width - (radarFinalSize.width / 2));
-		user[PY] = coerce(user[PY], radarFinalSize.height / 2, TILE_FULL_SIZE.height - (radarFinalSize.height / 2));
+		const view = this.calcView();
+		this.view = view;
+		const { user, radarFinalSize, projected } = view;
 
 		if (debugFlag(this.elemId)) {
 			console.log(`${this.constructor.name}: ${this.weatherParameters.latitude},${this.weatherParameters.longitude} is map pixel ${projected.map(Math.round).join(',')} of ${TILE_FULL_SIZE.width}x${TILE_FULL_SIZE.height}, `
 				+ `${radarFinalSize.width}x${radarFinalSize.height} view centred on ${user.map(Math.round).join(',')} after keeping it on the map`);
 		}
 
-		const imagePromise = this.getImages({ user, projection, radarFinalSize });
+		const imagePromise = this.getImages(view);
 
 		// set up the base map and overlay tiles
 		setTiles({
@@ -128,6 +123,8 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 		const scrollArea = this.elem.querySelector('.scroll-area');
 		scrollArea.innerHTML = '';
 		scrollArea.append(...radarInfo.map((r) => r.elem));
+		// these frames match the current view, so drop any offset left over from a change of mode
+		scrollArea.style.transform = '';
 
 		// set max length
 		this.timing.totalScreens = radarInfo.length;
@@ -139,6 +136,69 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 	// hook that produces the frames, see the description at the top of the file
 	getImages() {
 		throw new Error(`${this.constructor.name} must implement getImages()`);
+	}
+
+	// the view the frames are built for: the size of the finished image, the projection and the
+	// user's location in map pixels, kept on the display so drawCanvas() never has to work it out.
+	// this is arithmetic only, no network and no rendering
+	calcView() {
+		const radarFinalSize = RADAR_FINAL_SIZE();
+		const projection = createProjection('radar-conus');
+		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
+		const projected = [...user];
+
+		// adjust the user's location to not run off the map
+		user[PX] = coerce(user[PX], radarFinalSize.width / 2, TILE_FULL_SIZE.width - (radarFinalSize.width / 2));
+		user[PY] = coerce(user[PY], radarFinalSize.height / 2, TILE_FULL_SIZE.height - (radarFinalSize.height / 2));
+
+		return {
+			user, projection, radarFinalSize, projected,
+		};
+	}
+
+	// the frames are rendered for one view size, so a change of display mode has to rebuild them.
+	// the cheap parts (the view itself and the base map tiles) are done here and immediately, the
+	// frames are rebuilt through the normal data path
+	async modeChanged() {
+		if (this.status !== STATUS.loaded) return;
+
+		const previous = this.view;
+		const view = this.calcView();
+
+		// switching between standard and widescreen does not resize the radar, so there is
+		// nothing to rebuild
+		if (previous
+			&& previous.radarFinalSize.width === view.radarFinalSize.width
+			&& previous.radarFinalSize.height === view.radarFinalSize.height) return;
+
+		this.view = view;
+
+		// the base map is made of static images, so it is correct for the new mode right away
+		setTiles({
+			user: view.user,
+			elemId: this.elemId,
+		});
+		this.offsetFrames(previous);
+
+		// rebuild the frames at the new size. the source images are cached, so this re-projects
+		// what is already in memory rather than downloading it again
+		await this.getData(this.weatherParameters, true);
+		if (this.active) this.drawCanvas();
+	}
+
+	// the frames on screen were rendered for the previous view. both views use the same projection
+	// and scale, so shifting them by the change in the top-left corner of the view keeps them
+	// registered to the new base map until the rebuilt frames replace them
+	offsetFrames(previous) {
+		if (!previous) return;
+		const topLeft = (view) => [
+			view.user[PX] - (view.radarFinalSize.width / 2),
+			view.user[PY] - (view.radarFinalSize.height / 2),
+		];
+		const previousTopLeft = topLeft(previous);
+		const currentTopLeft = topLeft(this.view);
+
+		this.elem.querySelector('.scroll-area').style.transform = `translate(${previousTopLeft[PX] - currentTopLeft[PX]}px, ${previousTopLeft[PY] - currentTopLeft[PY]}px)`;
 	}
 
 	async drawCanvas() {

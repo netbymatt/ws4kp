@@ -32,13 +32,14 @@
 
 <div class="main <%-mainClass%> can-enhance">
   <div class="container">
-    <div class="map-tiles tiles"><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /></div>
+    <%# the img placeholders and the width of the tile containers are created by tiles.mjs from TILE_GRID %>
+    <div class="map-tiles tiles"></div>
     <div class="scroll-area">
       <div class="frame template">
         <div class="map">
         </div>
       </div>
     </div>
-    <div class="overlay-tiles tiles"><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /></div>
+    <div class="overlay-tiles tiles"></div>
   </div>
 </div>

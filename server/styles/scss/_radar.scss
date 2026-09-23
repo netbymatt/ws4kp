@@ -121,7 +121,7 @@
 
 		.tiles {
 			position: absolute;
-			width: 1530px;
+			// width is set by tiles.mjs, it is a product of TILE_GRID and TILE_SIZE
 
 			img {
 				vertical-align: middle;

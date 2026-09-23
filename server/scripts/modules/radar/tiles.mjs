@@ -1,5 +1,5 @@
 import {
-	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY,
+	RADAR_FINAL_SIZE, TILE_SIZE, TILE_COUNT, PX, PY, TILE_GRID,
 } from './constants.mjs';
 import elemForEach from '../utils/elem-for-each.mjs';
 import { debugFlag } from '../utils/debug.mjs';
@@ -13,6 +13,15 @@ const pixelToFile = (xPixel, yPixel) => {
 	return `${xTile.toString().padStart(2, '0')}-${yTile.toString().padStart(2, '0')}`;
 };
 
+// create the tile placeholders on first run and size the container to hold TILE_GRID.x of them
+// per row, so neither the markup nor the stylesheet has to match the grid
+const fillContainer = (container, count) => {
+	container.style.width = `${TILE_GRID.x * TILE_SIZE.x}px`;
+	while (container.children.length < count) {
+		container.append(document.createElement('img'));
+	}
+};
+
 // convert a pixel location in the overall map to a pixel location on the tile set
 const modTile = (xPixel, yPixel) => {
 	// adjust for additional 1 tile when odd
@@ -22,10 +31,10 @@ const modTile = (xPixel, yPixel) => {
 	return { x, y };
 };
 
-// creates the radar background map image and overlay transparency
+// sets the radar background map image and overlay transparency
 // which remain fixed on the page as the radar image changes in layered divs
-// it returns 4 ImageBitmaps that represent the base map, and 4 ImageBitmaps that are the overlay
-// the main thread pushes these ImageBitmaps into the image placeholders on the page
+// the images that make up the map are placed in the <img> placeholders on the page, and the
+// containers holding them are shifted to center the map on the user
 const setTiles = (data) => {
 	const {
 		user,
@@ -37,89 +46,74 @@ const setTiles = (data) => {
 	const shiftPixelForUser = shiftPixelForUserGenerator(user);
 	const topLeft = shiftPixelForUser([0, 0]);
 
-	// determine the basemap images needed
-	const baseMapTiles = [
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY]),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY]),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY]),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 2),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 2),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 2),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 3),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 3),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 3),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 0, topLeft[PY] + TILE_SIZE.y * 4),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 1, topLeft[PY] + TILE_SIZE.y * 4),
-		pixelToFile(topLeft[PX] + TILE_SIZE.x * 2, topLeft[PY] + TILE_SIZE.y * 4),
-	];
-
-	// do some calculations
-	// the tiles are arranged as follows, with the horizontal axis as x, and correlating with the second set of digits in the image file number
-	// T[0] T[1] T[2]
-	// T[3] T[4] T[5]
-
 	// calculate the shift of tile 0 (upper left)
 	const tileShift = modTile(topLeft[PX], topLeft[PY]);
+	const finalSize = RADAR_FINAL_SIZE();
 
-	// determine which tiles are used
-	const secondRow = TILE_SIZE.y - tileShift.y < RADAR_FINAL_SIZE().height;
-	const thirdRow = (TILE_SIZE.y * 2) - tileShift.y < RADAR_FINAL_SIZE().height;
-	const fourthRow = (TILE_SIZE.y * 3) - tileShift.y < RADAR_FINAL_SIZE().height;
-	const fifthRow = (TILE_SIZE.y * 4) - tileShift.y < RADAR_FINAL_SIZE().height;
-	const usedTiles = [
-		true,
-		TILE_SIZE.x - tileShift.x < RADAR_FINAL_SIZE().width,
-		(TILE_SIZE.x * 2) - tileShift.x < RADAR_FINAL_SIZE().width,
-	];
-	// rows 2, 3 and 4 are a copy of the first row when in use
-	// calculate T[4] and T[5]
-	usedTiles.push(secondRow && usedTiles[0], secondRow && usedTiles[1], secondRow && usedTiles[2]);
-	usedTiles.push(thirdRow && usedTiles[0], thirdRow && usedTiles[1], thirdRow && usedTiles[2]);
-	usedTiles.push(fourthRow && usedTiles[0], fourthRow && usedTiles[1], fourthRow && usedTiles[2]);
-	usedTiles.push(fifthRow && usedTiles[0], fourthRow && usedTiles[1], fourthRow && usedTiles[2]);
+	// the tiles are laid out row by row, left to right, matching the order of the <img>
+	// placeholders on the page:
+	// T[0] T[1] T[2]
+	// T[3] T[4] T[5]
+	// ...and so on for TILE_GRID.y rows
+	//
+	// a tile is used when its leading edge falls inside the visible area once the container has
+	// been shifted by tileShift; the first row and column always qualify because the shift is
+	// never more than one tile
+	const tiles = Array.from({ length: TILE_GRID.x * TILE_GRID.y }, (value, index) => {
+		const col = index % TILE_GRID.x;
+		const row = Math.floor(index / TILE_GRID.x);
+		return {
+			file: pixelToFile(topLeft[PX] + TILE_SIZE.x * col, topLeft[PY] + TILE_SIZE.y * row),
+			used: (TILE_SIZE.x * col) - tileShift.x < finalSize.width
+				&& (TILE_SIZE.y * row) - tileShift.y < finalSize.height,
+		};
+	});
 
 	if (debugFlag(elemId)) {
-		const used = usedTiles.map((isUsed, index) => (isUsed ? baseMapTiles[index] : null)).filter((tile) => tile !== null);
-		console.log(`Radar tiles (${elemId}): top-left map pixel ${topLeft.map(Math.round).join(',')}, shifted ${tileShift.x},${tileShift.y}, using ${used.length} of ${usedTiles.length} tiles [${used.join(', ')}]`);
+		const used = tiles.filter((tile) => tile.used).map((tile) => tile.file);
+		console.log(`Radar tiles (${elemId}): top-left map pixel ${topLeft.map(Math.round).join(',')}, shifted ${tileShift.x},${tileShift.y}, using ${used.length} of ${tiles.length} tiles [${used.join(', ')}]`);
 	}
 
 	// helper function for populating tiles
 	const populateTile = (tileName) => (elem, index) => {
+		const tile = tiles[index];
+
 		// always set the size to flow the images correctly
 		elem.width = TILE_SIZE.x;
 		elem.height = TILE_SIZE.y;
 
-		// check if the tile is used
-		if (!usedTiles[index]) {
-			elem.src = '';
+		// check if the tile is used, this also covers any placeholder beyond the tile grid
+		if (!tile?.used) {
+			elem.removeAttribute('src');
 			return;
 		}
 
-		if (!baseMapTiles[index] && debugFlag('verbose-failures')) {
+		if (!tile.file && debugFlag('verbose-failures')) {
 			console.warn(`Radar tiles (${elemId}): tile ${index} is outside the ${TILE_COUNT.x}x${TILE_COUNT.y} map, its ${tileName} image will not load`);
 		}
 
 		// set the image source and size
-		const newSource = `/images/maps/radar-conus/${tileName}/${baseMapTiles[index]}.webp`;
-		if (elem.src === newSource) return;
+		// compare the attribute, not elem.src, which reports a fully qualified url and would
+		// never match the relative path below
+		const newSource = `/images/maps/radar-conus/${tileName}/${tile.file}.webp`;
+		if (elem.getAttribute('src') === newSource) return;
 		elem.src = newSource;
 	};
 
-	// populate the map and overlay tiles
-	// fill the tiles with the map
+	// make sure both containers have a placeholder for every tile in the grid
+	const mapTileContainer = document.querySelector(`#${elemIdFull} .map-tiles`);
+	const overlayTileContainer = document.querySelector(`#${elemIdFull} .overlay-tiles`);
+	fillContainer(mapTileContainer, tiles.length);
+	fillContainer(overlayTileContainer, tiles.length);
+
+	// fill the tiles with the map and the overlay
 	elemForEach(`#${elemIdFull} .map-tiles img`, populateTile('base'));
 	elemForEach(`#${elemIdFull} .overlay-tiles img`, populateTile('overlay'));
 
-	// fill the tiles with the overlay
-	// shift the map tile containers
-	const mapTileContainer = document.querySelector(`#${elemIdFull} .map-tiles`);
+	// shift the map tile container
 	mapTileContainer.style.top = `${-tileShift.y}px`;
 	mapTileContainer.style.left = `${-tileShift.x}px`;
-	// // and the same for the overlay
-	const overlayTileContainer = document.querySelector(`#${elemIdFull} .overlay-tiles`);
+	// and the same for the overlay
 	overlayTileContainer.style.top = `${-tileShift.y}px`;
 	overlayTileContainer.style.left = `${-tileShift.x}px`;
 };

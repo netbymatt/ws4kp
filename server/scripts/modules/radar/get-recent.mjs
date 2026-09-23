@@ -1,5 +1,5 @@
 import { DateTime } from '../../vendor/auto/luxon.mjs';
-import { RADAR_HOST } from './constants.mjs';
+import { RADAR_HOST, RADAR_FINAL_SIZE } from './constants.mjs';
 import fetchImageBlob from '../utils/fetch-image-blob.mjs';
 import processRadar from './processor.mjs';
 import { debugFlag } from '../utils/debug.mjs';
@@ -11,6 +11,11 @@ const FILE_FORMAT = 'yyyyMMddHHmm';
 
 // already processed cache
 let processedRadars = [];
+
+// source images keyed by path, kept so that a change of view size can re-project the same
+// images without downloading them again. the processed cache above can not serve that because
+// its entries are rendered for one view size only
+const radarBlobs = new Map();
 
 // step back produces timestamps at -5 minute intervals from the time it was initialized from
 const stepBackGenerator = (initTime) => {
@@ -26,7 +31,7 @@ const stepBackGenerator = (initTime) => {
 	};
 };
 
-const imageFetcher = async (stepBack, attempts, user, projection) => {
+const imageFetcher = async (stepBack, attempts, user, projection, viewKey) => {
 	if (!attempts || attempts <= 0) throw new Error('Exhausted radar image loading attempts');
 
 	// get this instance's timestamp
@@ -37,13 +42,17 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 	const url = `https://${RADAR_HOST}/${path}`;
 	const modifiedRadarUrl = OVERRIDES.RADAR_HOST ? url.replace(RADAR_HOST, OVERRIDES.RADAR_HOST) : url;
 
-	const key = `${user[0]}-${user[1]}-${path}`;
+	// the processed image is only valid for the location and the view size it was rendered for
+	const key = `${viewKey}-${path}`;
 
 	// check for pre-processed radar and return early
 	const preProcessed = processedRadars.find((radar) => radar.key === key);
 	if (preProcessed) {
 		// set the used flag for cache cleaning
 		preProcessed.used = true;
+		// keep the source image as well, it is needed if the view size changes
+		const cachedBlob = radarBlobs.get(path);
+		if (cachedBlob) cachedBlob.used = true;
 		if (debugFlag('radar')) {
 			console.log(`Radar: ${path} reused from the processed cache`);
 		}
@@ -53,7 +62,12 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 	// get the radar and process it for this location
 	try {
 		const started = performance.now();
-		const radarBlob = await fetchImageBlob(modifiedRadarUrl);
+
+		// re-use the source image when it has already been downloaded, which is the case when
+		// only the view size has changed
+		const cachedBlob = radarBlobs.get(path);
+		const radarBlob = cachedBlob?.blob ?? (await fetchImageBlob(modifiedRadarUrl));
+		radarBlobs.set(path, { blob: radarBlob, used: true });
 
 		const canvas = await processRadar({
 			user,
@@ -62,7 +76,8 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 		});
 
 		if (debugFlag('radar')) {
-			console.log(`Radar: ${path} fetched and processed in ${Math.round(performance.now() - started)} ms (${radarBlob.size} bytes)`);
+			const source = cachedBlob ? 're-projected from the source cache' : 'fetched and processed';
+			console.log(`Radar: ${path} ${source} in ${Math.round(performance.now() - started)} ms (${radarBlob.size} bytes)`);
 		}
 
 		// store the processed radar
@@ -85,7 +100,7 @@ const imageFetcher = async (stepBack, attempts, user, projection) => {
 			console.warn(`Radar: ${modifiedRadarUrl} unavailable (${error.message}), ${attempts - 1} attempts left`);
 		}
 		// try again decrementing the attempts (timestamp is decremented at the top of the next call)
-		return imageFetcher(stepBack, attempts - 1, user, projection);
+		return imageFetcher(stepBack, attempts - 1, user, projection, viewKey);
 	}
 };
 
@@ -108,14 +123,21 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 	// initialize the back-in-time counter
 	const stepBack = stepBackGenerator(startingTimestamp);
 
-	// reset the "used" flag on pre-processed radars
+	// reset the "used" flag on pre-processed radars and source images
 	// items that were not used during this process are deleted (either expired via time or change of location)
 	processedRadars.forEach((radar) => {
 		radar.used = false;
 	});
+	radarBlobs.forEach((entry) => {
+		entry.used = false;
+	});
+
+	// the processed images are rendered for one location and view size, both of which form the key
+	const radarFinalSize = RADAR_FINAL_SIZE();
+	const viewKey = `${user[0]}-${user[1]}-${radarFinalSize.width}x${radarFinalSize.height}`;
 
 	// kick off the loop
-	const imagePromises = await Promise.allSettled(Array.from({ length: max }, () => imageFetcher(stepBack, attempts, user, projection)));
+	const imagePromises = await Promise.allSettled(Array.from({ length: max }, () => imageFetcher(stepBack, attempts, user, projection, viewKey)));
 
 	const rejected = imagePromises.filter((image) => image.status === 'rejected');
 	if (rejected.length > 0 && debugFlag('verbose-failures')) {
@@ -129,12 +151,16 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 	// resulting array is oldest timestamp at [0]
 	images.sort((a, b) => a.timestamp - b.timestamp);
 
-	// clean the pre processed cache
+	// clean the pre processed cache and the source images behind it
 	const cachedBefore = processedRadars.length;
 	processedRadars = processedRadars.filter((radar) => radar.used === true);
+	const blobsBefore = radarBlobs.size;
+	radarBlobs.forEach((entry, path) => {
+		if (!entry.used) radarBlobs.delete(path);
+	});
 
 	if (debugFlag('radar')) {
-		console.log(`Radar: ${images.length} of ${max} images ready [${images.map((image) => image.timestamp.toISO({ suppressMilliseconds: true })).join(', ')}], processed cache ${cachedBefore} -> ${processedRadars.length}`);
+		console.log(`Radar: ${images.length} of ${max} images ready [${images.map((image) => image.timestamp.toISO({ suppressMilliseconds: true })).join(', ')}], processed cache ${cachedBefore} -> ${processedRadars.length}, source cache ${blobsBefore} -> ${radarBlobs.size}`);
 	}
 
 	return images;

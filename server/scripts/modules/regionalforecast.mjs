@@ -104,6 +104,10 @@ class RegionalForecast extends WeatherDisplay {
 
 		// timings
 		this.timing.totalScreens = 3;
+
+		// set while a change of display mode is choosing and loading a new set of cities, it
+		// leaves the map empty instead of showing the previous selection
+		this.reloadingForMode = false;
 	}
 
 	async getData(weatherParameters, refresh) {
@@ -122,14 +126,10 @@ class RegionalForecast extends WeatherDisplay {
 		this.elem.querySelector('.map img').src = baseMap;
 
 		// get user's location in x/y
+		this.layout = this.calcLayout();
 		const {
-			available, mapSize, projection, boxPadY,
-		} = scaling('forecast-conus');
-		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
-
-		// adjust the user's location to not run off the map
-		user[PX] = coerce(user[PX], available.width / 2, mapSize.width - (available.width / 2));
-		user[PY] = coerce(user[PY], available.height / 2, mapSize.height - (available.height / 2));
+			user, projection, available, boxPadY,
+		} = this.layout;
 
 		const minLatLon = projection.inverse([
 			user[PX] - (available.width / 2),
@@ -290,20 +290,68 @@ class RegionalForecast extends WeatherDisplay {
 			return;
 		}
 
-		// return the weather data and offsets
+		// return the weather data
+		// the offsets used to draw it come from this.layout, which is recalculated whenever the
+		// display mode changes
 		this.data = {
 			regionalData,
-			user,
-			available,
 		};
 
 		this.setStatus(STATUS.loaded);
 	}
 
+	// arithmetic only: one projection build, a coerce and a subtraction.
+	// called from getData() and from modeChanged(), never from drawCanvas()
+	calcLayout() {
+		const {
+			available, mapSize, projection, boxPadY,
+		} = scaling('forecast-conus');
+		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
+		user[PX] = coerce(user[PX], available.width / 2, mapSize.width - (available.width / 2));
+		user[PY] = coerce(user[PY], available.height / 2, mapSize.height - (available.height / 2));
+		return {
+			available,
+			projection,
+			boxPadY,
+			user,
+			offset: [user[PX] - (available.width / 2), user[PY] - (available.height / 2)],
+		};
+	}
+
+	// the cities shown are chosen to fit the available space, so a change of display mode has to
+	// pick them again. the map re-centres immediately and is left empty while the new selection
+	// is chosen and loaded
+	async modeChanged() {
+		if (this.status !== STATUS.loaded) return;
+
+		const previous = this.layout;
+		this.layout = this.calcLayout();
+
+		// widescreen only adds space when enhanced is also on, so a switch between standard and
+		// widescreen leaves the available area, and the cities that fit in it, unchanged
+		if (previous
+			&& previous.available.width === this.layout.available.width
+			&& previous.available.height === this.layout.available.height) return;
+
+		// the cities that fit the new area have not been chosen yet, so empty the map rather than
+		// leave the previous selection sitting in places that no longer match it. the map itself
+		// re-centres right away, which is arithmetic only
+		this.reloadingForMode = true;
+		if (this.active) this.drawCanvas();
+
+		// choose and load the cities for the new area through the normal data path
+		try {
+			await this.getData(this.weatherParameters, true);
+		} finally {
+			this.reloadingForMode = false;
+		}
+		if (this.active) this.drawCanvas();
+	}
+
 	drawCanvas() {
 		super.drawCanvas();
 		// break up data into useful values
-		const { regionalData: data, user, available } = this.data;
+		const { regionalData: data } = this.data;
 
 		// draw the header graphics
 
@@ -326,16 +374,14 @@ class RegionalForecast extends WeatherDisplay {
 		}
 
 		// calculate the overall offset (top/left corner)
-		const offset = [
-			user[PX] - (available.width / 2),
-			user[PY] - (available.height / 2),
-		];
+		const { offset } = this.layout;
 
 		// draw the map
 		const map = this.elem.querySelector('.map');
 		map.style.transform = `translate(-${offset[PX]}px, -${offset[PY]}px)`;
 
-		const cities = data.map((city) => {
+		// a change of display mode leaves the map empty until the new selection has loaded
+		const cities = this.reloadingForMode ? [] : data.map((city) => {
 			const fill = {};
 			const period = city[this.screenIndex];
 
