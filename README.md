@@ -17,7 +17,7 @@ It's also a creative outlet for me and keeps my programming skills honed for whe
 ### Included technology
 I've kept this open source, well commented, and made it as library-free as possible to help others interested in programming be able to jump right in and start working with the code.
 
-From a learning standpoint, this codebase make use of a lot of different methods and technologies common on the internet including:
+From a learning standpoint, this codebase makes use of a lot of different methods and technologies common on the internet including:
 
 * The https://api.weather.gov REST API. ([documentation](https://www.weather.gov/documentation/services-web-api)).
 * ES 6 functionality
@@ -31,7 +31,7 @@ From a learning standpoint, this codebase make use of a lot of different methods
 * Practical API rates and static asset caching
 * Very straight-forward hand written HTML
 * Build system integration (Gulp, Webpack) to reduce the number of scripts that need to be loaded
-* Hand written CSS made easier to mange with SASS
+* Hand written CSS made easier to manage with SASS
 * A linting library to keep code style consistent
 
 ## Quick Start
@@ -44,7 +44,7 @@ npm install
 npm start
 ```
 
-Open your browser and navigate to https://localhost:8080
+Open your browser and navigate to http://localhost:8080
 
 ## Does WeatherStar 4000+ work outside of the USA?
 
@@ -179,32 +179,45 @@ STATIC=1 DIST=1 npm start   # Use Express to serve (minimized) production files
 I've made several changes to this Weather Star 4000 simulation compared to the original hardware unit and the code that this was forked from.
 
 * Radar displays the timestamp of the image.
+* A new Future Radar display loops forecast radar reflectivity from the HRRR model for the next several hours. It is only available within the continental United States.
 * A new hour-by-hour graph of the temperature, cloud cover and precipitation chances for the next 36 hours.
 * A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast. (off by default because it duplicates the hourly graph)
-* The SPC Outlook is shown in the style of the old air quality screen. This shows the probability of severe weather over the next 3 days at your location. SPC outlook only displays if you're within one of the highlight areas over the next 3 day. You can view the [maps](https://www.weather.gov/crh/outlooks) and pick a location within one of the risk categories to see if the screen is working for you.
+* The SPC Outlook is shown in the style of the old air quality screen. This shows the probability of severe weather over the next 3 days at your location. SPC outlook only displays if you're within one of the highlight areas over the next 3 days. You can view the [maps](https://www.weather.gov/crh/outlooks) and pick a location within one of the risk categories to see if the screen is working for you.
 * The "Local Forecast" and "Extended Forecast" provide several additional days of information compared to the original format in the 90s.
 * The original music has been replaced. More info in [Music](#music).
 * Marine forecast (tides) is not available as it is not reliably part of the new API.
-* "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and a checkboxes can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
+* "Flavors" are not present in this simulation. Flavors refer to the order of the weather information that was shown on the original units. Instead, the order of the displays has been fixed and checkboxes on the Displays tab can be used to turn on and off individual displays. The travel forecast has been defaulted to off so only local information shows for new users.
+
+## Page layout
+
+Below the weather display are four tabs:
+
+* **Displays:** Checkboxes to turn each display on or off, with a count of how many are enabled. Each display's name is colored by its status (ready, loading, failed or off/no data), and clicking the name of a ready display jumps straight to it.
+* **Settings:** The options described in [Settings](#settings).
+* **Share:** Shows and copies a [permalink](#sharing-a-permalink-bookmarking) to your current configuration.
+* **Headend:** The location, observation station, radar, forecast zone, NWS office and grid point being used, along with the version number and the music track that is playing. The "Copy headend info" button copies all of this as text, which is helpful to include when reporting an issue.
 
 ## Sharing a permalink (bookmarking)
-Selected displays, the forecast city and widescreen setting are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it, click the "Copy Permalink" (or get "Get Permalink") near the bottom of the page. A URL will be copied to your clipboard with all of you selected displays and location (or copy it from the page if your browser doesn't support clipboard transfers directly). You can then share this link or add it to your bookmarks.
+Selected displays, the forecast city and most settings are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it, open the Share tab. The permalink is shown in a read-only box and the "Copy permalink" button copies it to your clipboard. (If your browser doesn't support clipboard transfers directly the button reads "Get Permalink" and selects the link so you can copy it by hand.) The link includes your selected displays, settings and location. You can then share this link or add it to your bookmarks.
 
 Your permalink will be very long. Here is an example for the Orlando International Airport:
 ```
-https://weatherstar.netbymatt.com/?hazards=false&current-weather=true&latest-observations=true&hourly=false&hourly-graph=true&travel=false&regional-forecast=true&local-forecast=true&extended-forecast=true&almanac=false&spc-outlook=true&radar=true&wide=false&kiosk=false&scanLines=false&speed-select=1.00&units-select=us&latLonQuery=Orlando+International+Airport%2C+Orlando%2C+FL%2C+USA&latLon=%7B%22lat%22%3A28.431%2C%22lon%22%3A-81.3076%7D
+https://weatherstar.netbymatt.com/?hazards=true&current-weather=true&latest-observations=true&hourly=false&hourly-graph=true&travel=false&regional-forecast=true&local-forecast=true&extended-forecast=true&almanac=false&spc-outlook=true&radar=true&future-radar=true&kiosk=false&stickyKiosk=false&scanLines=false&customTextEnable=false&viewMode=standard&speed=1&scanLineMode=auto&units=us&customText=&wide=false&portrait=false&enhanced=false&mediaVolume=0.75&latLonQuery=Orlando+International+Airport%2C+Orlando%2C+FL%2C+USA&latLon=%7B%22lat%22%3A28.431%2C%22lon%22%3A-81.3076%7D
 ```
 You can also build your own permalink. Any omitted settings will be filled with defaults. Here are a few examples:
 ```
 https://weatherstar.netbymatt.com/?latLonQuery=Orlando+International+Airport
 https://weatherstar.netbymatt.com/?kiosk=true
-https://weatherstar.netbymatt.com/?units-select=metric
+https://weatherstar.netbymatt.com/?units=si
+https://weatherstar.netbymatt.com/?viewMode=wide-enhanced
 ```
 
-### Kiosk mode
-Kiosk mode can be activated by a checkbox on the page. This will start Weatherstar in a fullscreen-like view without the play/volume/etc toolbar and scaled to fill the entire space. This does not activate the browser's fullscreen or kiosk mode. Those can only be activated by user interaction or by launching the browser with specific parameters such as `--start-fullscreen` or `--kiosk`. 
+Permalinks created with older versions, which used keys such as `travel-checkbox` and `settings-units-select`, continue to work.
 
- When using kiosk mode (via the checkbox), there will be no way to exit the fullscreen-like view of weatherstar. Reloading the page should remove the kiosk checkbox and return you to the normal view. This is deliberate as a browser's kiosk mode it intended not to be exited or significantly modified. A separate full-screen icon is available in the tool bar to go full-screen on a laptop or mobile browser.
+### Kiosk mode
+Kiosk mode can be activated by the Kiosk checkbox on the Settings tab. This will start Weatherstar in a fullscreen-like view without the play/volume/etc toolbar and scaled to fill the entire space. This does not activate the browser's fullscreen or kiosk mode. Those can only be activated by user interaction or by launching the browser with specific parameters such as `--start-fullscreen` or `--kiosk`.
+
+When using kiosk mode (via the checkbox), there is no on-screen way to exit the fullscreen-like view of weatherstar. Press `Ctrl-K` or reload the page to return to the normal view (unless [Sticky Kiosk](#settings) is enabled). This is deliberate as a browser's kiosk mode is intended not to be exited or significantly modified. A separate full-screen icon is available in the tool bar to go full-screen on a laptop or mobile browser.
 
 It's also possible to enter kiosk mode using a permalink. First generate a [Permalink](#sharing-a-permalink-bookmarking), then to the end of it add `&kiosk=true`. Opening this link will load all of the selected displays included in the Permalink, enter kiosk mode immediately upon loading and start playing the forecast.
 
@@ -213,21 +226,21 @@ When serving this via the built-in Express server, it's possible to define envir
 
 Environment variables can be added to the command line as usual, or via a .env file which is parsed with [dotenv](https://github.com/motdotla/dotenv). Both methods have the same effect.
 
-Environment variables that are to be added to the default query string are prefixed with `WSQS_` and then use the same key/value pairs generated by the [Permalink](#sharing-a-permalink-bookmarking) above, with the `- (dash)` character replaced by an `_ (underscore)`. For example, if you wanted to turn the travel forecast on, you would find `travel-checkbox=true` in the permalink, its matching environment variable becomes `WSQS_travel=true`.
+Environment variables that are to be added to the default query string are prefixed with `WSQS_` and then use the same key/value pairs generated by the [Permalink](#sharing-a-permalink-bookmarking) above, with the `- (dash)` character replaced by an `_ (underscore)`. For example, if you wanted to turn the travel forecast on, you would find `travel=true` in the permalink, its matching environment variable becomes `WSQS_travel=true`. Likewise `regional-forecast=false` becomes `WSQS_regional_forecast=false`.
 
 When using the Docker container, these environment variables are read on container start-up to generate the static redirect HTML.
 
 ## Settings
 
-**Speed:** Controls the playback speed multiplier of the displays, from "Very Fast" (1.5x) to "Very Slow" (0.5x) with "Normal" being 1x
+These are found on the Settings tab below the weather display.
+
+**Speed:** Controls the playback speed of the displays, from "Very Fast" (2x) to "Very Slow" (0.67x) with "Normal" being 1x. Note: if editing the permalink the multipliers are inverse with Very Fast = 0.5 and Very Slow = 1.5. These are the multipliers that are applied directly to the time delays in the slide deck.
 
 **Display Mode:**
 - Standard: Classic 4:3 display with the classic (not enhanced, below) screen layouts.
 - Widescreen: Stretches the background to 16:9 to avoid "pillarboxing" on modern displays
 - Widescreen Enhanced: Stretches as above, and makes use of the additional space to provide wider maps, more weather data and/or additional days in the forecast
-- Portrait Enhanced: (in progress) Rotates the screen to a 16:9 portrait orientation and enhances the original displays by adjusting them to fit the new orientation and filling with additional data where possible
-
-
+- Portrait Enhanced: Rotates the screen to a 16:9 portrait orientation and enhances the original displays by adjusting them to fit the new orientation and filling with additional data where possible
 
 **Kiosk:** Immediately activates kiosk mode, which hides all settings. Exit by refreshing the page or using `Ctrl-K`. (Kiosk mode is similar to clicking the "Fullscreen" icon, but scales to the current browser viewport instead of activating the browser's actual "Fullscreen" mode.)
 
@@ -265,7 +278,9 @@ For temporary fullscreen during regular browsing, use the fullscreen button in t
 
 **Units:** Switches between US and metric units. (Note that some text-based products from the National Weather Service APIs contain embedded units that are not converted.)
 
-**Volume:** Controls the audio level when music is enabled
+**Enable Custom Text / Custom Text:** Adds your own text to the scroll in the bottom blue bar. See [Custom text scroll](#custom-text-scroll).
+
+Volume is set with the speaker icon in the toolbar and is included in the permalink.
 
 ## Music
 
@@ -315,7 +330,7 @@ Subdirectories will not be scanned. When WeatherStar loads in the browser, it ra
 ### Music doesn't auto play
 Ws4kp is muted by default, but if it was unmuted on the last visit it is coded to try and auto play music on subsequent visits. But, it's considered bad form to have a web site play music automatically on load, and I fully agree with this. [Chrome](https://developer.chrome.com/blog/autoplay/#media_engagement_index) and [Firefox](https://hacks.mozilla.org/2019/02/firefox-66-to-block-automatically-playing-audible-video-and-audio/) have extensive details on how and when auto play is allowed.
 
-Chrome seems to be more lenient on auto play and will eventually let a site auto-play music if you're visited it enough recently and manually clicked to start playing music on each visit. It also has a flag you can add to the command line when launching Chrome: `chrome.exe --autoplay-policy=no-user-gesture-required`. This is the best solution when using Kiosk-style setup.
+Chrome seems to be more lenient on auto play and will eventually let a site auto-play music if you've visited it enough recently and manually clicked to start playing music on each visit. It also has a flag you can add to the command line when launching Chrome: `chrome.exe --autoplay-policy=no-user-gesture-required`. This is the best solution when using Kiosk-style setup.
 
 If you're unable to pre-set the play state before entering kiosk mode (such as with a home dashboard implementation) you can add the query string value below to the url. Volume can be pre-set in the same way. The browser will still follow the auto play rules outlined above.
 ```
@@ -337,7 +352,7 @@ Thanks to the WeatherStar+ community for providing these discussions to further 
 
 ## Customization
 
-A hooks are provided as `server/scripts/custom.js` and `server/scripts/custom.mjs` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. A sample file is provided at `server/scripts/custom.sample.js` and should be renamed to `custom.js` activate it. Recommended naming for additional files is `custom-file.json` which are also part of gitignore.
+Hooks are provided as `server/scripts/custom.js` and `server/scripts/custom.mjs` to allow customizations to your own fork of this project, without accidentally pushing your customizations back upstream to the git repository. A sample file is provided at `server/scripts/custom.sample.js` and should be renamed to `custom.js` to activate it. Recommended naming for additional files is `custom-file.json` which are also part of gitignore.
 
 When using Docker:
 
@@ -345,7 +360,7 @@ When using Docker:
 * **Server deployment**: Mount your `custom.js` file to `/app/server/scripts/custom.js`
 
 ### Custom text scroll
-If you would like your Weatherstar to have custom scrolling text in the bottom blue bar, turn on the setting for `Enable RSS Feed/Text` and then enter text in the resulting text box. Then press set.
+If you would like your Weatherstar to have custom scrolling text in the bottom blue bar, turn on the `Enable Custom Text` setting and then enter text in the Custom Text box. Then press Set.
 
 Tip: You can have Weatherstar select randomly between several text strings on each pass through the current conditions. Use a pipe character to separate string. `Welcome to Weatherstar|Thanks for watching`.
 
@@ -365,7 +380,7 @@ This is a known problem with the Ws4kp as it ages. It was a problem with the [ac
 
 An Android app is in a closed beta test. It's nothing too special, just a wrapper for displaying the website in a browser.
 
-You can get this functionality without an app on both Andriod and iOS by using the install or add to home screen feature of your browser.
+You can get this functionality without an app on both Android and iOS by using the install or add to home screen feature of your browser.
 
 iOS native app? No. I own zero Apple devices and thus have no way to develop, test, compile or verify myself to the app store. This app has been created by the [community](#community-notes).
 
