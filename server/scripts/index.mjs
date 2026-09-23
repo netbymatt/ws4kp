@@ -189,6 +189,9 @@ const init = async () => {
 		document.querySelector('#spanZoneId').innerHTML = '';
 		document.querySelector('#spanOfficeId').innerHTML = '';
 		document.querySelector('#spanGridPoint').innerHTML = '';
+		document.querySelector('#spanObservation').innerHTML = '';
+		document.querySelector('#spanFutureRadarRun').innerHTML = '';
+		document.querySelector('#spanRefresh').innerHTML = '';
 
 		localStorage.removeItem('play');
 		sendNavButtonMessage('navButton', 'play');

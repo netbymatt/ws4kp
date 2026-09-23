@@ -11,5 +11,5 @@ Please do not report issues with api.weather.gov being down. It's a new service 
 
 Please include:
 * Web browser and OS
-* Headend Information text block from the very bottom of the web page
+* Headend Information from the tab below the player, use the copy button for easy copying!
 * How you're running Weatherstar (Node, Dockerfile, Dockerfile.server, etc.)

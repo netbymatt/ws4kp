@@ -6,7 +6,7 @@ import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import largeIcon from './icons/large.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay } from './navigation.mjs';
+import { registerDisplay, timeZone } from './navigation.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
 import {
 	temperature, windSpeed, pressure, distanceMeters, distanceKilometers,
@@ -24,6 +24,8 @@ class CurrentWeather extends WeatherDisplay {
 	async getData(weatherParameters, refresh) {
 		// always load the data for use in the lower scroll
 		const superResult = super.getData(weatherParameters, refresh);
+		// the auto refresh interval runs from the start of each fetch
+		const fetchedAt = DateTime.now();
 		// note: current weather does not use old data on a silent refresh
 		// this is deliberate because it can pull data from more than one station in sequence
 
@@ -33,6 +35,7 @@ class CurrentWeather extends WeatherDisplay {
 		// Load the observations
 		let observations;
 		let station;
+		let filledFromMetar = [];
 
 		const metarFields = [
 			{ name: 'temperature', check: (orig, metar) => orig.temperature?.value === null && metar.temperature?.value !== null },
@@ -115,6 +118,7 @@ class CurrentWeather extends WeatherDisplay {
 				if (missingRequired.length === 0 && missingOptionalCount <= 1) {
 					// Station data is good, use it
 					observations = candidateObservation;
+					filledFromMetar = metarReplacements;
 					if (debugFlag('currentweather') && missingOptional.length > 0) {
 						console.log(`Data for station ${stationId} is missing optional fields: ${missingOptional.join(', ')} (acceptable)`);
 					}
@@ -136,6 +140,8 @@ class CurrentWeather extends WeatherDisplay {
 		if (!observations) {
 			console.error('Current Conditions failure: all nearby weather stations exhausted!');
 			if (this.isEnabled) this.setStatus(STATUS.failed);
+			document.querySelector('#spanStationId').textContent = 'none available';
+			document.querySelector('#spanObservation').textContent = '';
 			// send failed to subscribers
 			this.getDataCallback(undefined);
 			return;
@@ -145,12 +151,6 @@ class CurrentWeather extends WeatherDisplay {
 		this.data = parseData({ ...observations, station });
 		this.getDataCallback();
 
-		// stop here if we're disabled
-		if (!superResult) return;
-
-		// Data is available, ensure we're enabled for display
-		this.timing.totalScreens = 1;
-
 		// Check final data age
 		const { isStale, ageInMinutes } = isDataStale(observations.features[0].properties.timestamp, 80); // hourly observation + 20 minute propagation delay
 		this.isStaleData = isStale;
@@ -158,6 +158,15 @@ class CurrentWeather extends WeatherDisplay {
 		if (isStale && debugFlag('currentweather')) {
 			console.warn(`Current Conditions: Data is ${ageInMinutes.toFixed(0)} minutes old (from ${new Date(observations.features[0].properties.timestamp).toISOString()})`);
 		}
+
+		// headend is updated even when disabled because the data still feeds the lower scroll
+		updateHeadend(station, observations, fetchedAt, filledFromMetar, isStale, ageInMinutes);
+
+		// stop here if we're disabled
+		if (!superResult) return;
+
+		// Data is available, ensure we're enabled for display
+		this.timing.totalScreens = 1;
 
 		// preload the icon if available
 		if (observations.features[0].properties.icon) {
@@ -357,6 +366,22 @@ const backfillProperty = (data, key) => data.reduce(
 	},
 	{ value: null }, // null is the default provided by the api
 );
+
+// the station list is in distance order but a station is skipped when its data is incomplete
+// show the one that was actually used along with when it reported and the refresh schedule
+const updateHeadend = (station, observations, fetchedAt, filledFromMetar, isStale, ageInMinutes) => {
+	const zone = timeZone();
+	const observedAt = DateTime.fromISO(observations.features[0].properties.timestamp).setZone(zone);
+	let observed = observedAt.toFormat('h:mm a');
+	if (isStale) observed += ` (stale, ${ageInMinutes.toFixed(0)} min old)`;
+	if (filledFromMetar.length > 0) observed += `, METAR filled ${filledFromMetar.join(', ')}`;
+
+	const nextRefresh = fetchedAt.plus({ milliseconds: settings.refreshTime.value });
+
+	document.querySelector('#spanStationId').textContent = station.properties.stationIdentifier;
+	document.querySelector('#spanObservation').textContent = observed;
+	document.querySelector('#spanRefresh').textContent = `${fetchedAt.setZone(zone).toFormat('h:mm a')}, next ${nextRefresh.setZone(zone).toFormat('h:mm a')}`;
+};
 
 const display = new CurrentWeather(1, 'current-weather');
 registerDisplay(display);
