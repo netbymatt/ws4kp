@@ -1,5 +1,6 @@
 import elemForEach from './utils/elem-for-each.mjs';
 import Setting from './utils/setting.mjs';
+import announce from './utils/announce.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());
 
@@ -74,14 +75,8 @@ const copyToClipboard = async (url) => {
 	try {
 		// write to clipboard
 		await navigator.clipboard.writeText(url.toString());
-		// alert user
-		const confirmSpan = document.querySelector('#share-link-copied');
-		confirmSpan.classList.add('show');
-
-		// hide confirm text after 5 seconds
-		setTimeout(() => {
-			confirmSpan.classList.remove('show');
-		}, 5000);
+		// tell the user, the text clears after 5 seconds
+		announce(document.querySelector('#share-link-copied'), 'Link copied to clipboard!');
 	} catch (error) {
 		console.error(error);
 		selectLink();

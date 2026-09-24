@@ -76,6 +76,12 @@ const init = async () => {
 	document.querySelector('#NavigatePlay').addEventListener('click', btnNavigatePlayClick);
 	document.querySelector('#ToggleScanlines').addEventListener('click', btnNavigateToggleScanlines);
 
+	// a mouse click leaves focus on the toolbar button, which would stop the keyboard shortcuts from working
+	// keyboard presses (detail 0) keep focus so keyboard users can keep tabbing through the toolbar
+	document.querySelector('#divTwcBottom').addEventListener('click', (e) => {
+		if (e.detail > 0) e.target.closest('button')?.blur();
+	});
+
 	// Hide fullscreen button on iOS since it doesn't support true fullscreen
 	const fullscreenButton = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
 	if (isIOS()) {
@@ -310,10 +316,11 @@ const enterFullScreen = async () => {
 	updateFullScreenNavigate();
 
 	// change hover text and image
-	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	if (img && img.style.display !== 'none') {
-		img.src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
-		img.title = 'Exit fullscreen';
+	const button = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
+	if (button && button.style.display !== 'none') {
+		button.querySelector('img').src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
+		button.title = 'Exit fullscreen';
+		button.setAttribute('aria-label', 'Exit fullscreen');
 	}
 };
 
@@ -336,10 +343,11 @@ const exitFullscreen = () => {
 
 const exitFullScreenVisibilityChanges = () => {
 	// change hover text and image
-	const img = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	if (img && img.style.display !== 'none') {
-		img.src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
-		img.title = 'Enter fullscreen';
+	const button = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
+	if (button && button.style.display !== 'none') {
+		button.querySelector('img').src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
+		button.title = 'Enter fullscreen';
+		button.setAttribute('aria-label', 'Enter fullscreen');
 	}
 	document.querySelector('#divTwc').classList.remove('no-cursor');
 	const divTwcBottom = document.querySelector('#divTwcBottom');

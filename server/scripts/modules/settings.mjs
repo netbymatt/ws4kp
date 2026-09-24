@@ -145,11 +145,13 @@ const scanLineChange = (value) => {
 	if (value) {
 		container.classList.add('scanlines');
 		navIcons.classList.add('on');
+		navIcons.setAttribute('aria-pressed', 'true');
 		modeSelect?.style?.removeProperty('display');
 	} else {
 		// Remove all scanline classes
 		container.classList.remove('scanlines', 'scanlines-auto', 'scanlines-fine', 'scanlines-normal', 'scanlines-thick', 'scanlines-classic', 'scanlines-retro');
 		navIcons.classList.remove('on');
+		navIcons.setAttribute('aria-pressed', 'false');
 		if (modeSelect) {
 			modeSelect.style.display = 'none';
 		}

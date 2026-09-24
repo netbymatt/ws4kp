@@ -318,13 +318,9 @@
 }
 
 // confirmation after copying to the clipboard
+// always rendered (empty when idle) so screen readers announce the text when it's filled in
 .copied {
-	display: none;
 	color: var(--ready);
-
-	&.show {
-		display: inline;
-	}
 }
 
 // headend tab

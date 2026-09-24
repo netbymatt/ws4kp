@@ -141,30 +141,30 @@
     </div>
     <div id="divTwcBottom">
       <div id="divTwcBottomLeft">
-        <img id="NavigateMenu" class="navButton" src="images/nav/ic_menu_white_24dp_2x.png" title="Menu" />
-        <img id="NavigatePrevious" class="navButton" src="images/nav/ic_skip_previous_white_24dp_2x.png" title="Previous" />
-        <img id="NavigateNext" class="navButton" src="images/nav/ic_skip_next_white_24dp_2x.png" title="Next" />
-        <img id="NavigatePlay" class="navButton" src="images/nav/ic_play_arrow_white_24dp_2x.png" title="Play" />
+        <button type="button" id="NavigateMenu" class="navButton" title="Menu" aria-label="Menu"><img src="images/nav/ic_menu_white_24dp_2x.png" alt="" /></button>
+        <button type="button" id="NavigatePrevious" class="navButton" title="Previous" aria-label="Previous"><img src="images/nav/ic_skip_previous_white_24dp_2x.png" alt="" /></button>
+        <button type="button" id="NavigateNext" class="navButton" title="Next" aria-label="Next"><img src="images/nav/ic_skip_next_white_24dp_2x.png" alt="" /></button>
+        <button type="button" id="NavigatePlay" class="navButton" title="Play" aria-label="Play"><img src="images/nav/ic_play_arrow_white_24dp_2x.png" alt="" /></button>
       </div>
       <div id="divTwcBottomMiddle">
-        <img id="NavigateRefresh" class="navButton" src="images/nav/ic_refresh_white_24dp_2x.png" title="Refresh" />
+        <button type="button" id="NavigateRefresh" class="navButton" title="Refresh" aria-label="Refresh"><img src="images/nav/ic_refresh_white_24dp_2x.png" alt="" /></button>
       </div>
       <div id="divTwcBottomRight">
         <div id="ToggleMediaContainer">
-          <div id="ToggleMedia" title="Toggle music">
-            <img class="navButton off" src="images/nav/ic_music_off_white_24dp_2x.png" title="Play music" />
-            <img class="navButton on" src="images/nav/ic_music_on_white_24dp_2x.png" title="Pause music" />
-          </div>
-          <img id="ToggleMediaVolume" class="navButton" src="images/nav/ic_volume_on_white_24dp_2x.png" title="Volume" />
-          <div class="volume-slider">
-            <input type="range" min="1" max="100" value="75" />
+          <button type="button" id="ToggleMedia" class="navButton" title="Toggle music" aria-label="Music" aria-pressed="false">
+            <img class="off" src="images/nav/ic_music_off_white_24dp_2x.png" alt="" />
+            <img class="on" src="images/nav/ic_music_on_white_24dp_2x.png" alt="" />
+          </button>
+          <button type="button" id="ToggleMediaVolume" class="navButton" title="Volume" aria-label="Volume" aria-expanded="false" aria-controls="volume-slider"><img src="images/nav/ic_volume_on_white_24dp_2x.png" alt="" /></button>
+          <div class="volume-slider" id="volume-slider">
+            <input type="range" min="1" max="100" value="75" aria-label="Music volume" />
           </div>
         </div>
-        <div id="ToggleScanlines">
-          <img class="navButton off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" title="Scan lines on" />
-          <img class="navButton on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" title="Scan lines off" />
-        </div>
-        <img id="ToggleFullScreen" class="navButton" src="images/nav/ic_fullscreen_white_24dp_2x.png" title="Enter Fullscreen" />
+        <button type="button" id="ToggleScanlines" class="navButton" title="Scan lines" aria-label="Scan lines" aria-pressed="false">
+          <img class="off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" alt="" />
+          <img class="on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" alt="" />
+        </button>
+        <button type="button" id="ToggleFullScreen" class="navButton" title="Enter fullscreen" aria-label="Enter fullscreen"><img src="images/nav/ic_fullscreen_white_24dp_2x.png" alt="" /></button>
       </div>
     </div>
   </div>
@@ -194,7 +194,7 @@
           <input type="url" id="share-link-url" readonly aria-label="Permalink">
           <button type="button" id="share-link" class="tab-button">Copy permalink</button>
         </div>
-        <p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied" class="copied">Link copied to clipboard!</span></p>
+        <p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied" class="copied" role="status"></span></p>
       </div>
       <div class="tab-panel" role="tabpanel" id="tab-panel-headend" aria-labelledby="tab-headend">
         <dl id="divInfo">
@@ -257,7 +257,7 @@
         </dl>
         <div class="button-row">
           <button type="button" id="copy-headend" class="tab-button">Copy headend info</button>
-          <span id="copy-headend-copied" class="copied">Copied to clipboard!</span>
+          <span id="copy-headend-copied" class="copied" role="status"></span>
         </div>
       </div>
     </div>

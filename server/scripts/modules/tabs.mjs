@@ -1,14 +1,20 @@
 // tabs below the weather display (displays, settings, share, headend)
 import settings from './settings.mjs';
+import announce from './utils/announce.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());
 
 const init = () => {
 	// one listener on the bar, so tabs added later (such as from custom.mjs) work without extra code
-	document.querySelector('#lower-tabs .tab-bar').addEventListener('click', (e) => {
+	const tabBar = document.querySelector('#lower-tabs .tab-bar');
+	tabBar.addEventListener('click', (e) => {
 		const tab = e.target.closest('[role=tab]');
 		if (tab) selectTab(tab);
 	});
+	tabBar.addEventListener('keydown', tabKeydown);
+	// tabs added later need their place in the tab order too
+	new MutationObserver(syncTabOrder).observe(tabBar, { childList: true });
+	syncTabOrder();
 
 	// keep the "enabled of total" count on the displays tab current
 	const enabledDisplays = document.querySelector('#enabledDisplays');
@@ -72,6 +78,43 @@ const selectTab = (selected) => {
 		// let the panel's owner refresh its content
 		if (isSelected) panel.dispatchEvent(new Event('tab-shown'));
 	});
+	syncTabOrder();
+};
+
+const allTabs = () => [...document.querySelectorAll('#lower-tabs [role=tab]')];
+
+// only the selected tab is in the tab order, the arrow keys move between tabs
+const syncTabOrder = () => {
+	allTabs().forEach((tab) => {
+		tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
+	});
+};
+
+const tabKeydown = (e) => {
+	const tabs = allTabs();
+	const current = tabs.indexOf(e.target.closest('[role=tab]'));
+	if (current < 0) return;
+
+	let next;
+	switch (e.key) {
+		case 'ArrowRight':
+			next = (current + 1) % tabs.length;
+			break;
+		case 'ArrowLeft':
+			next = (current - 1 + tabs.length) % tabs.length;
+			break;
+		case 'Home':
+			next = 0;
+			break;
+		case 'End':
+			next = tabs.length - 1;
+			break;
+		default:
+			return;
+	}
+	e.preventDefault();
+	selectTab(tabs[next]);
+	tabs[next].focus();
 };
 
 const updateCount = () => {
@@ -93,11 +136,9 @@ const copyHeadend = async () => {
 	const confirmSpan = document.querySelector('#copy-headend-copied');
 	try {
 		await navigator.clipboard.writeText(lines.join('\n'));
-		confirmSpan.textContent = 'Copied to clipboard!';
+		announce(confirmSpan, 'Copied to clipboard!');
 	} catch (error) {
 		console.error(error);
-		confirmSpan.textContent = 'Unable to copy';
+		announce(confirmSpan, 'Unable to copy');
 	}
-	confirmSpan.classList.add('show');
-	setTimeout(() => confirmSpan.classList.remove('show'), 5000);
 };

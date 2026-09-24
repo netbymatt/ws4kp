@@ -354,13 +354,15 @@ const setPlaying = (newValue) => {
 			// Wake lock failed, but continue normally
 		});
 		playButton.title = 'Pause';
-		playButton.src = 'images/nav/ic_pause_white_24dp_2x.png';
+		playButton.setAttribute('aria-label', 'Pause');
+		playButton.querySelector('img').src = 'images/nav/ic_pause_white_24dp_2x.png';
 	} else {
 		noSleep(false).catch(() => {
 			// Wake lock disable failed, but continue normally
 		});
 		playButton.title = 'Play';
-		playButton.src = 'images/nav/ic_play_arrow_white_24dp_2x.png';
+		playButton.setAttribute('aria-label', 'Play');
+		playButton.querySelector('img').src = 'images/nav/ic_play_arrow_white_24dp_2x.png';
 	}
 	// if we're playing and on the progress screen (or in kiosk mode), jump to the next screen
 	if (playing && !currentDisplay()) {

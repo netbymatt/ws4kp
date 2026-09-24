@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	// called on any interaction via 'input' (vs change) for immediate volume response
 	volumeSlider.addEventListener('input', setSliderTimeout);
 	volumeSlider.addEventListener('input', sliderChanged);
+	// don't hide the slider while a keyboard user is on it
+	volumeSlider.addEventListener('focusin', () => clearTimeout(sliderTimeout));
+	volumeSlider.addEventListener('focusout', setSliderTimeout);
 
 	// get the playlist
 	getMedia();
@@ -118,6 +121,7 @@ const setIcon = () => {
 	} else {
 		icon.classList.remove('playing');
 	}
+	document.getElementById('ToggleMedia').setAttribute('aria-pressed', mediaPlaying.value === true);
 };
 
 // pure toggle: flips playback on/off and nothing else. Does not touch the volume popup.
@@ -151,6 +155,7 @@ const showVolumeSlider = () => {
 	// show the slider
 	if (volumeSlider) {
 		volumeSlider.classList.add('show');
+		document.getElementById('ToggleMediaVolume').setAttribute('aria-expanded', 'true');
 	}
 };
 
@@ -163,6 +168,7 @@ const hideVolumeSlider = () => {
 	// hide the element
 	if (volumeSlider) {
 		volumeSlider.classList.remove('show');
+		document.getElementById('ToggleMediaVolume').setAttribute('aria-expanded', 'false');
 	}
 };
 
