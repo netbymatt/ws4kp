@@ -106,6 +106,8 @@ export default defineConfig([
 	},
 	// Ignore files and folders listed in .gitignore
 	includeIgnoreFile(gitignorePath),
+	// un-exclude the custom files if used
+	{ ignores: ['!server/scripts/custom*.*'] },
 	// JavaScript config
 	...jsConfig,
 	// Node config
