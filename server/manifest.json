@@ -1,5 +1,6 @@
 {
 	"name": "WeatherStar 4000+",
+	"short_name": "WeatherStar",
 	"icons": [
 		{
 			"src": "/images/logos/logo192.png",
@@ -13,5 +14,7 @@
 		}
 	],
 	"start_url": "/",
-	"display": "standalone"
+	"display": "standalone",
+	"background_color": "#000000",
+	"theme_color": "#000000"
 }
