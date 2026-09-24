@@ -71,6 +71,7 @@ const ignores = [
 	'*.min.*',
 	'server/scripts/vendor/*',
 	'dist/**/*',
+	'tests',
 ];
 
 const htmlSpecial = {

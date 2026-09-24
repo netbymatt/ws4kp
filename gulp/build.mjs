@@ -138,8 +138,8 @@ const otherFiles = [
 	'server/robots.txt',
 	'server/manifest.json',
 	'server/music/**/*.mp3',
-	'apple-touch-icon.png',
-	'favicon.ico',
+	'server/apple-touch-icon.png',
+	'server/favicon.ico',
 	'server/.well-known/security.txt',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
