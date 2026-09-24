@@ -20,6 +20,15 @@ export const radarProxy = async (req, res) => {
 	});
 };
 
+// HRRR proxy for HRRR model data
+export const hrrrProxy = async (req, res) => {
+	await cache.handleRequest(req, res, 'https://hrrrzarr.s3.amazonaws.com', {
+		serviceName: 'HRRR S3 bucket',
+		skipParams: [],
+		encoding: 'binary', // HRRR blobs are binary data
+	});
+};
+
 // SPC (Storm Prediction Center) outlook proxy
 export const outlookProxy = async (req, res) => {
 	await cache.handleRequest(req, res, 'https://www.spc.noaa.gov', {

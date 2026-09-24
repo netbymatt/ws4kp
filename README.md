@@ -366,7 +366,7 @@ Tip: You can have Weatherstar select randomly between several text strings on ea
 
 ## Issue reporting and feature requests
 
-Please do not report issues with api.weather.gov being down. It's a new service and not considered fully operational yet. I've also observed that the API can go down on a regional basis (based on NWS office locations). This means that you may have problems getting data for, say, Chicago right now, but Dallas and others are working just fine.
+Please do not report issues with api.weather.gov being down. I've also observed that the API can go down on a regional basis (based on NWS office locations). This means that you may have problems getting data for, say, Chicago right now, but Dallas and others are working just fine.
 
 Before reporting an issue or requesting a feature please consider that this is not intended to be a perfect recreation of the WeatherStar 4000, it's a best effort that fits within what's available from the API and within a web browser.
 

@@ -13,26 +13,6 @@ const safeJson = async (url, params) => {
 	}
 };
 
-const safeText = async (url, params) => {
-	try {
-		const result = await text(url, params);
-		return result;
-	} catch {
-		// Error already logged in fetchAsync; return null to be "safe"
-		return null;
-	}
-};
-
-const safeBlob = async (url, params) => {
-	try {
-		const result = await blob(url, params);
-		return result;
-	} catch {
-		// Error already logged in fetchAsync; return null to be "safe"
-		return null;
-	}
-};
-
 const safePromiseAll = async (promises) => {
 	try {
 		const results = await Promise.allSettled(promises);
@@ -290,7 +270,5 @@ export {
 	text,
 	blob,
 	safeJson,
-	safeText,
-	safeBlob,
 	safePromiseAll,
 };

@@ -75,4 +75,4 @@ else
     touch /etc/nginx/includes/wsqs_redirect.conf
 fi
 
-exec nginx -g 'daemon off;'
+# docker is started by the container automatically

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -66,7 +66,7 @@
 
 </head>
 
-<body <% if (query && (query['kiosk'] === true || query['settings-kiosk-checkbox'] === 'true' )) { %>class="kiosk" <% }%>>
+<body <% if (query && (query['kiosk'] === 'true' || query['settings-kiosk-checkbox'] === 'true' )) { %>class="kiosk" <% }%>>
 
   <div id="divQuery">
     <input id="txtLocation" name="txtLocation" type="text" value="" placeholder="ZIP Code or City, State" data-1p-ignore />
@@ -85,7 +85,7 @@
   <div id="divTwc">
     <div id="divTwcMain">
       <div id="container">
-        <div id="loading" width="640" height="480">
+        <div id="loading">
           <div>
             <div class="title">WeatherStar 4000+</div>
             <div class="version">v<%- version %></div>
@@ -262,12 +262,9 @@
   </div>
 
   <div class="content-wrapper">
-    <br />
-
     <div class="info">
       <a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
     </div>
-    <div class="media"></div>
 
 </body>
 

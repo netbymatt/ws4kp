@@ -1,4 +1,10 @@
 .git/
 Dockerfile
-.vscode/
-dist/
+dist
+.env
+node_modules
+tests
+dist
+image-templates
+.vscode
+.github

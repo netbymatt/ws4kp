@@ -425,8 +425,8 @@ const documentKeydown = (e) => {
 
 	// Handle Ctrl+K to exit kiosk mode (even when other modifiers would normally be ignored)
 	if (e.ctrlKey && (key === 'k' || key === 'K')) {
-		e.preventDefault();
 		if (settings.kiosk?.value) {
+			e.preventDefault();
 			settings.kiosk.value = false;
 		}
 		return false;

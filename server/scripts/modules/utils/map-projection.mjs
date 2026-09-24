@@ -84,6 +84,5 @@ const createProjection = (mapName, _bounds, _outputSize) => {
 export default createProjection;
 
 export {
-	BOUNDS,
 	OUTPUTSIZES,
 };

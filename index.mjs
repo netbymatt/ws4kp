@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { readFile } from 'node:fs/promises';
 import {
-	weatherProxy, radarProxy, outlookProxy, mesonetProxy, forecastProxy,
+	weatherProxy, radarProxy, outlookProxy, mesonetProxy, forecastProxy, hrrrProxy,
 } from './proxy/handlers.mjs';
 import playlistGenerator from './src/playlist.mjs';
 import OVERRIDES from './src/overrides.mjs';
@@ -127,6 +127,7 @@ if (!process.env?.STATIC) {
 
 	// specific proxies for other services
 	app.use('/radar/', radarProxy);
+	app.use('/hrrr/', hrrrProxy);
 	app.use('/spc/', outlookProxy);
 	app.use('/mesonet/', mesonetProxy);
 	app.use('/forecast/', forecastProxy);
@@ -145,7 +146,7 @@ const dataEndpoints = {
 Object.entries(dataEndpoints).forEach(([name, data]) => {
 	app.get(`/data/${name}.json`, (req, res) => {
 		res.set({
-			'Cache-Control': 'public, max-age=31536000, immutable',
+			'Cache-Control': 'public, max-age=2592000, immutable',
 			'Content-Type': 'application/json',
 		});
 		res.json(data);
@@ -161,9 +162,9 @@ if (process.env?.DIST === '1') {
 
 	// render the EJS template in production mode (serve compressed files from dist directory)
 	app.get('/', (req, res) => {
-		renderIndex(req, res, true);
+		if (hasQsVars && Object.keys(req.query).length === 0) return index(req, res); // or factor out the redirect
+		return renderIndex(req, res, true);
 	});
-
 	app.use('/', express.static('./dist', staticOptions));
 } else {
 	// Development mode serves files from the server directory: 'npm start'

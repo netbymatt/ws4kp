@@ -9,7 +9,8 @@
 		"stop": "pkill -f 'node index.mjs' || echo 'No process found'",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:travelcities": "node datagenerators/travelcities.mjs",
-		"build:css": "sass --style=compressed ./server/styles/scss/main.scss ./server/styles/main.css",
+		"build:css": "sass --style=compressed ./server/styles/scss/ws.scss ./server/styles/ws.css",
+		"watch:css": "npm run build:css -- --watch",
 		"build": "npx gulp buildDist",
 		"lint": "npx eslint .",
 		"lint:fix": "npx eslint --fix ."

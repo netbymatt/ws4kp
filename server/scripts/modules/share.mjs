@@ -32,7 +32,7 @@ const buildLink = () => {
 	};
 	captureField('input[type=checkbox]', (elem) => elem?.checked ?? false);
 	captureField('select', (elem) => elem?.value ?? '');
-	captureField('input[type=text]', (elem) => elem?.value ?? '');
+	captureField('#settings input[type=text]', (elem) => elem?.value ?? '');
 
 	// get any hidden settings
 	hiddenSettings.forEach((setting) => {
@@ -105,6 +105,6 @@ const registerHiddenSetting = (name, value) => {
 };
 
 export {
-	createLink,
+	// eslint-disable-next-line import-x/prefer-default-export
 	registerHiddenSetting,
 };

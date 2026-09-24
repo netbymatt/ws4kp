@@ -1,6 +1,6 @@
 // Data loader utility for fetching JSON data with cache-busting
 
-let dataCache = {};
+const dataCache = {};
 
 // Load data with version-based cache busting
 const loadData = async (dataType, version = '') => {
@@ -41,13 +41,7 @@ const loadAllData = async (version = '') => {
 	return { travelCities, regionalCities, stationInfo };
 };
 
-// Clear cache (useful for development)
-const clearDataCache = () => {
-	dataCache = {};
-};
-
 export {
 	loadData,
 	loadAllData,
-	clearDataCache,
 };
