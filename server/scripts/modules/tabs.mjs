@@ -1,6 +1,7 @@
 // tabs below the weather display (displays, settings, share, headend)
 import settings from './settings.mjs';
 import announce from './utils/announce.mjs';
+import setHeadend from './headend.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());
 
@@ -26,7 +27,7 @@ const init = () => {
 	document.querySelector('#copy-headend').addEventListener('click', copyHeadend);
 
 	// headend rows that are read from the page as it is right now
-	document.querySelector('#spanSource').textContent = sourceText();
+	setHeadend('source', sourceText());
 	document.querySelector('#tab-panel-headend').addEventListener('tab-shown', updateHeadend);
 	// display status is a class on each checkbox's label
 	new MutationObserver(updateHeadend).observe(enabledDisplays, { subtree: true, attributeFilter: ['class'] });
@@ -51,8 +52,8 @@ const updateHeadend = () => {
 	// display mode, scale and window size, useful for layout problems
 	const { viewMode } = settings;
 	const modeName = viewMode.values.find(([value]) => value === viewMode.value)?.[1] ?? viewMode.value;
-	const scale = window.currentScale ?? 1;
-	document.querySelector('#spanDisplayMode').textContent = `${modeName}, ${scale.toFixed(2)}x, ${window.innerWidth}x${window.innerHeight}`;
+	const scale = window.displayScale ?? 1;
+	setHeadend('display', `${modeName}, ${scale.toFixed(2)}x, ${window.innerWidth}x${window.innerHeight}`);
 
 	// list enabled displays that have failed or are still retrying, so they're included in the copied text
 	const displaysWithClass = (className) => [...document.querySelectorAll(`#enabledDisplays label.${className} span:not(.alert)`)].map((span) => span.textContent);
@@ -61,7 +62,7 @@ const updateHeadend = () => {
 	const problems = [];
 	if (failed.length) problems.push(`failed: ${failed.join(', ')}`);
 	if (retrying.length) problems.push(`retrying: ${retrying.join(', ')}`);
-	document.querySelector('#spanProblems').textContent = problems.join('; ') || 'none';
+	setHeadend('problems', problems.join('; ') || 'none');
 };
 
 const matchPlayerWidth = () => {

@@ -7,6 +7,7 @@ import { lookupPoint } from './utils/get-point.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import settings from './settings.mjs';
 import { stationFilter } from './utils/string.mjs';
+import setHeadend from './headend.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 	init();
@@ -504,6 +505,8 @@ const resize = (force = false) => {
 	lastAppliedScale = scale;
 	lastAppliedKioskMode = isKioskLike;
 	window.currentScale = scale; // Make scale available to settings module
+	// the scale actually applied to the display, for the headend (the branch below that doesn't scale sets 1)
+	window.displayScale = scale;
 
 	const wrapper = document.querySelector('#divTwc');
 	const mainContainer = document.querySelector('#divTwcMain');
@@ -520,6 +523,8 @@ const resize = (force = false) => {
 		clearElementStyles(container, SCALING_PROPERTIES.positioning);
 		clearElementStyles(mainContainer, SCALING_PROPERTIES.positioning);
 
+		// no scaling is applied here, so the headend reports 1x
+		window.displayScale = 1.0;
 		applyScanlineScaling(1.0);
 		return;
 	}
@@ -863,12 +868,11 @@ const registerProgress = (_progress) => {
 };
 
 const populateWeatherParameters = (params, point) => {
-	document.querySelector('#spanCity').innerHTML = `${params.city}, `;
-	document.querySelector('#spanState').innerHTML = params.state;
-	document.querySelector('#spanRadarId').innerHTML = params.radarId;
-	document.querySelector('#spanZoneId').innerHTML = params.zoneId;
-	document.querySelector('#spanOfficeId').innerHTML = point.cwa;
-	document.querySelector('#spanGridPoint').innerHTML = `${point.gridX},${point.gridY}`;
+	setHeadend('location', `${params.city}, ${params.state}`);
+	setHeadend('radar', params.radarId);
+	setHeadend('zone', params.zoneId);
+	setHeadend('office', point.cwa);
+	setHeadend('grid', `${point.gridX},${point.gridY}`);
 };
 
 const latLonReceived = (data, haveDataCallback) => {

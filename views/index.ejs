@@ -197,62 +197,63 @@
         <p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied" class="copied" role="status"></span></p>
       </div>
       <div class="tab-panel" role="tabpanel" id="tab-panel-headend" aria-labelledby="tab-headend">
+        <!-- each row is written by key through modules/headend.mjs -->
         <dl id="divInfo">
           <div class="wide-item">
             <dt>Location</dt>
-            <dd><span id="spanCity"></span> <span id="spanState"></span></dd>
+            <dd data-headend="location"></dd>
           </div>
           <div>
             <dt>Station</dt>
-            <dd id="spanStationId"></dd>
+            <dd data-headend="station"></dd>
           </div>
           <div>
             <dt>Radar</dt>
-            <dd id="spanRadarId"></dd>
+            <dd data-headend="radar"></dd>
           </div>
           <div class="wide-item">
             <dt>Observed</dt>
-            <dd id="spanObservation"></dd>
+            <dd data-headend="observed"></dd>
           </div>
           <div>
             <dt>Zone</dt>
-            <dd id="spanZoneId"></dd>
+            <dd data-headend="zone"></dd>
           </div>
           <div>
             <dt>Office</dt>
-            <dd id="spanOfficeId"></dd>
+            <dd data-headend="office"></dd>
           </div>
           <div class="wide-item">
             <dt>Refreshed</dt>
-            <dd id="spanRefresh"></dd>
+            <dd data-headend="refreshed"></dd>
           </div>
           <div>
             <dt>Grid X,Y</dt>
-            <dd id="spanGridPoint"></dd>
+            <dd data-headend="grid"></dd>
           </div>
           <div>
             <dt>HRRR run</dt>
-            <dd id="spanFutureRadarRun"></dd>
+            <dd data-headend="hrrr"></dd>
           </div>
           <div class="wide-item">
             <dt>Display</dt>
-            <dd id="spanDisplayMode"></dd>
+            <dd data-headend="display"></dd>
           </div>
           <div class="wide-item">
             <dt>Source</dt>
-            <dd id="spanSource"></dd>
+            <dd data-headend="source"></dd>
           </div>
           <div>
             <dt>Version</dt>
-            <dd><%- version %></dd>
+            <dd data-headend="version"><%- version %></dd>
           </div>
           <div class="full-row">
             <dt>Problems</dt>
-            <dd id="spanProblems"></dd>
+            <dd data-headend="problems"></dd>
           </div>
           <div class="full-row">
             <dt>Music</dt>
-            <dd id="musicTrack">Not playing</dd>
+            <dd data-headend="music">Not playing</dd>
           </div>
         </dl>
         <div class="button-row">

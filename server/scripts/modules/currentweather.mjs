@@ -15,6 +15,7 @@ import { debugFlag } from './utils/debug.mjs';
 import { isDataStale, enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import settings from './settings.mjs';
+import setHeadend from './headend.mjs';
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -140,8 +141,8 @@ class CurrentWeather extends WeatherDisplay {
 		if (!observations) {
 			console.error('Current Conditions failure: all nearby weather stations exhausted!');
 			if (this.isEnabled) this.setStatus(STATUS.failed);
-			document.querySelector('#spanStationId').textContent = 'none available';
-			document.querySelector('#spanObservation').textContent = '';
+			setHeadend('station', 'none available');
+			setHeadend('observed');
 			// send failed to subscribers
 			this.getDataCallback(undefined);
 			return;
@@ -378,9 +379,9 @@ const updateHeadend = (station, observations, fetchedAt, filledFromMetar, isStal
 
 	const nextRefresh = fetchedAt.plus({ milliseconds: settings.refreshTime.value });
 
-	document.querySelector('#spanStationId').textContent = station.properties.stationIdentifier;
-	document.querySelector('#spanObservation').textContent = observed;
-	document.querySelector('#spanRefresh').textContent = `${fetchedAt.setZone(zone).toFormat('h:mm a')}, next ${nextRefresh.setZone(zone).toFormat('h:mm a')}`;
+	setHeadend('station', station.properties.stationIdentifier);
+	setHeadend('observed', observed);
+	setHeadend('refreshed', `${fetchedAt.setZone(zone).toFormat('h:mm a')}, next ${nextRefresh.setZone(zone).toFormat('h:mm a')}`);
 };
 
 const display = new CurrentWeather(1, 'current-weather');

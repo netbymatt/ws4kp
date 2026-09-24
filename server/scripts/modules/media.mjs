@@ -1,6 +1,7 @@
 import { text } from './utils/fetch.mjs';
 import Setting from './utils/setting.mjs';
 import { registerHiddenSetting } from './share.mjs';
+import setHeadend from './headend.mjs';
 
 let playlist;
 let currentTrack = 0;
@@ -316,7 +317,7 @@ const setTrackName = (fileName) => {
 	const trackName = decodeURIComponent(
 		baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
 	);
-	document.getElementById('musicTrack').innerHTML = trackName;
+	setHeadend('music', trackName);
 };
 
 export default toggleMediaPlayback;

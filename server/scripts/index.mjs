@@ -6,6 +6,7 @@ import {
 import { round2 } from './modules/utils/units.mjs';
 import { registerHiddenSetting } from './modules/share.mjs';
 import './modules/tabs.mjs';
+import { clearLocationRows } from './modules/headend.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
 import { loadAllData } from './modules/utils/data-loader.mjs';
@@ -188,16 +189,7 @@ const init = async () => {
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
 		// the button is not inside a form, so it does not clear the location box by itself
 		autoComplete.reset();
-		document.querySelector('#spanCity').innerHTML = '';
-		document.querySelector('#spanState').innerHTML = '';
-		document.querySelector('#spanStationId').innerHTML = '';
-		document.querySelector('#spanRadarId').innerHTML = '';
-		document.querySelector('#spanZoneId').innerHTML = '';
-		document.querySelector('#spanOfficeId').innerHTML = '';
-		document.querySelector('#spanGridPoint').innerHTML = '';
-		document.querySelector('#spanObservation').innerHTML = '';
-		document.querySelector('#spanFutureRadarRun').innerHTML = '';
-		document.querySelector('#spanRefresh').innerHTML = '';
+		clearLocationRows();
 
 		localStorage.removeItem('play');
 		sendNavButtonMessage('navButton', 'play');

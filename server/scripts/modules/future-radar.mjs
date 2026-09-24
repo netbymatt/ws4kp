@@ -11,6 +11,7 @@ import { solveWindow, chunksForWindow, assembleWindow } from './future-radar/gri
 import { RUN } from './future-radar/config.mjs';
 import { findLatestRun, fetchChunks, clearChunkCache } from './future-radar/zarr.mjs';
 import { fieldToImageData, getSampleMap } from './future-radar/render.mjs';
+import setHeadend from './headend.mjs';
 
 /**
  * Forecast-hour index (0-based, where 0 is F01) of the first full hour that
@@ -20,11 +21,6 @@ import { fieldToImageData, getSampleMap } from './future-radar/render.mjs';
  * zone — timeZone() only affects how frame times are displayed, not which
  * frames are chosen.
  */
-// model run information for the headend tab
-const setHeadendRun = (text) => {
-	document.querySelector('#spanFutureRadarRun').textContent = text;
-};
-
 const firstFutureForecastIndex = (runDate) => {
 	const nextFullHourMs = (Math.floor(Date.now() / 3600000) + 1) * 3600000;
 
@@ -95,7 +91,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 			if (debugFlag('verbose-failures')) {
 				console.warn('FutureRadar: the view is centred outside the HRRR (CONUS) domain');
 			}
-			setHeadendRun('outside coverage');
+			setHeadend('hrrr', 'outside coverage');
 			this.setStatus(STATUS.noData);
 			return null;
 		}
@@ -111,7 +107,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 			if (debugFlag('verbose-failures')) {
 				console.warn(`FutureRadar: no published run found in the last ${RUN.maxLookbackHours + 1} hours, reflectivity is temporarily unavailable`);
 			}
-			setHeadendRun('none available');
+			setHeadend('hrrr', 'none available');
 			this.setStatus(STATUS.noData);
 			return null;
 		}
@@ -131,7 +127,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 		}
 		this.runDate = runDate;
 		const runLabel = DateTime.fromJSDate(runDate).toUTC().toFormat("HH'Z' LLL d");
-		setHeadendRun(runLabel);
+		setHeadend('hrrr', runLabel);
 
 		// fetch the chunks
 		const { chunks, errors } = await fetchChunks(runDate, chunkIds, meta);
@@ -140,7 +136,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 			if (debugFlag('verbose-failures')) {
 				console.error(`FutureRadar: every chunk failed. ${errors.join('; ')}`);
 			}
-			setHeadendRun(`${runLabel}, download failed`);
+			setHeadend('hrrr', `${runLabel}, download failed`);
 			this.setStatus(STATUS.noData);
 			return null;
 		}
@@ -164,7 +160,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 			if (debugFlag('verbose-failures')) {
 				console.error(`FutureRadar: run ${runDate.toISOString()} has no forecast hours left in the future, the first future hour is index ${startIndex} but only ${available} are available`);
 			}
-			setHeadendRun(`${runLabel}, no future hours`);
+			setHeadend('hrrr', `${runLabel}, no future hours`);
 			this.setStatus(STATUS.noData);
 			return null;
 		}
