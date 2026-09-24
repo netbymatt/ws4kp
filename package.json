@@ -6,9 +6,9 @@
 	"type": "module",
 	"scripts": {
 		"start": "node index.mjs",
-		"stop": "pkill -f 'node index.mjs' || echo 'No process found'",
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:travelcities": "node datagenerators/travelcities.mjs",
+		"build:regionalcities": "node datagenerators/regionalcities.mjs",
+		"build:stations": "node datagenerators/stations.mjs",
 		"build:css": "sass --style=compressed ./server/styles/scss/ws.scss ./server/styles/ws.css",
 		"watch:css": "npm run build:css -- --watch",
 		"build": "npx gulp buildDist",
@@ -33,6 +33,7 @@
 		"eslint": "^9.39.5",
 		"eslint-config-airbnb-extended": "^3.1.1",
 		"fancy-log": "^2.0.0",
+		"globals": "^17.12.0",
 		"gulp": "^5.0.0",
 		"gulp-concat": "^2.6.1",
 		"gulp-ejs": "^5.1.0",
@@ -44,13 +45,13 @@
 		"luxon": "^3.0.0",
 		"metar-taf-parser": "^9.0.0",
 		"p-limit": "^7.3.1",
+		"proj4": "^2.22.0",
 		"sass": "^1.54.0",
 		"suncalc": "^2.0.2",
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
-		"webpack-stream": "^7.0.0",
-		"proj4": "^2.22.0"
+		"webpack-stream": "^7.0.0"
 	},
 	"dependencies": {
 		"dotenv": "^18.0.1",
@@ -60,5 +61,8 @@
 	"allowScripts": {
 		"@parcel/watcher@2.6.0": true,
 		"unrs-resolver@1.12.2": true
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

@@ -155,7 +155,6 @@ const copyDataFiles = () => src([
 const imageSources = [
 	'server/fonts/**',
 	'server/images/**',
-	'!server/images/gimp/**',
 ];
 
 const copyImageSources = () => src(imageSources, { base: './server', encoding: false })
