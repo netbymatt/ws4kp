@@ -446,34 +446,6 @@ class HttpCache {
 		}, 5 * 60 * 1000); // Cleanup every 5 minutes
 	}
 
-	// Cache statistics
-	getStats() {
-		const now = Date.now();
-		let expired = 0;
-		let valid = 0;
-
-		Array.from(this.cache.values()).forEach((cached) => {
-			if (now > cached.expiry) {
-				expired += 1;
-			} else {
-				valid += 1;
-			}
-		});
-
-		return {
-			total: this.cache.size,
-			valid,
-			expired,
-			inFlight: this.inFlight.size,
-		};
-	}
-
-	// Clear all cache entries
-	clear() {
-		this.cache.clear();
-		console.log('🗑️ Clear    | Cache cleared');
-	}
-
 	// Clear a specific cache entry by path
 	clearEntry(path) {
 		const key = path;
@@ -483,16 +455,6 @@ class HttpCache {
 			return true;
 		}
 		return false;
-	}
-
-	// Stop cleanup interval
-	destroy() {
-		if (this.cleanupInterval) {
-			clearInterval(this.cleanupInterval);
-			this.cleanupInterval = null;
-		}
-		this.clear();
-		this.inFlight.clear();
 	}
 }
 
