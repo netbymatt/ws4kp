@@ -113,6 +113,9 @@ const staticOptions = {
 	},
 };
 
+// serve .well-known files (off by default in express)
+app.use('/.well-known', express.static('./server/.well-known', { ...staticOptions, dotfiles: 'allow' }));
+
 // Weather.gov API proxy (catch-all for any Weather.gov API endpoint)
 // Skip setting up routes for the caching proxy server in static mode
 if (!process.env?.STATIC) {

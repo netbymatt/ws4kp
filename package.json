@@ -49,13 +49,13 @@
 		"swiped-events": "^1.1.4",
 		"terser-webpack-plugin": "^5.3.6",
 		"webpack": "^5.99.9",
-		"webpack-stream": "^7.0.0"
+		"webpack-stream": "^7.0.0",
+		"proj4": "^2.22.0"
 	},
 	"dependencies": {
 		"dotenv": "^18.0.1",
 		"ejs": "^6.0.1",
-		"express": "^5.1.0",
-		"proj4": "^2.22.0"
+		"express": "^5.1.0"
 	},
 	"allowScripts": {
 		"@parcel/watcher@2.6.0": true,

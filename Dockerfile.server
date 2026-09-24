@@ -1,13 +1,37 @@
-FROM node:24-alpine
+# build stage: needs the devDependencies (gulp, webpack, sass) to produce dist
+FROM node:24-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+RUN npm run build \
+	# the server serves /music from server/music, so this copy is never used
+	&& rm -rf dist/music
 
-RUN npm run build
+# runtime stage: only what index.mjs reads in DIST mode
+FROM node:24-alpine
+WORKDIR /app
+ENV NODE_ENV=production \
+	DIST=1
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+COPY index.mjs ./
+COPY proxy ./proxy
+COPY src ./src
+COPY views ./views
+COPY server/scripts ./server/scripts
+COPY server/music ./server/music
+COPY datagenerators/output/travelcities.json datagenerators/output/regionalcities.json datagenerators/output/stations.json ./datagenerators/output/
+COPY --from=build /app/dist ./dist
+
+# the app only reads files, so the unprivileged user from the node image is enough
+USER node
 
 EXPOSE 8080
+HEALTHCHECK --interval=60s --timeout=5s --start-period=15s --retries=3 \
+	CMD wget -q --spider "http://127.0.0.1:${WS4KP_PORT:-8080}/manifest.json" || exit 1
 
-ENV DIST=1
 CMD ["node", "index.mjs"]

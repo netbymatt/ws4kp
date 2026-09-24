@@ -1,0 +1,3 @@
+Contact: https://github.com/netbymatt/ws4kp/security/advisories/new
+Expires: 2027-09-30T00:00:00.000Z
+Preferred-Languages: en
