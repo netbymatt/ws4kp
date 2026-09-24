@@ -1,0 +1,16 @@
+# WeatherStar 4000+
+# Let crawlers index the page itself, but keep them out of the weather proxies
+# and away from the endless permalink variations
+
+User-agent: *
+Allow: /$
+Disallow: /*?
+Disallow: /api/
+Disallow: /forecast/
+Disallow: /radar/
+Disallow: /hrrr/
+Disallow: /spc/
+Disallow: /mesonet/
+Disallow: /geoip
+Disallow: /playlist.json
+Disallow: /music/
