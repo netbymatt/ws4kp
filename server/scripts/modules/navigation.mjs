@@ -3,7 +3,7 @@ import noSleep from './utils/nosleep.mjs';
 import STATUS from './status.mjs';
 import { wrap } from './utils/calc.mjs';
 import { safeJson } from './utils/fetch.mjs';
-import getPoint from './utils/get-point.mjs';
+import { lookupPoint } from './utils/get-point.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import settings from './settings.mjs';
 import { stationFilter } from './utils/string.mjs';
@@ -72,37 +72,65 @@ const message = (data) => {
 	return console.error(`Unknown event ${data.type}`);
 };
 
-const getWeather = async (latLon, haveDataCallback) => {
-	// get initial weather data
-	const point = await getPoint(latLon.lat, latLon.lon);
+// each lookup gets a number, so a slow earlier lookup can't overwrite a newer location
+let weatherRequest = 0;
+let retryTimeout = null;
+// wait longer after each failure, then keep trying every 10 minutes
+const RETRY_DELAYS = [60_000, 120_000, 300_000, 600_000];
 
-	// check if point data was successfully retrieved
+// one message in two places: the loading screen (first load and kiosk)
+// and under the location box (when an earlier forecast is still showing)
+const setLocationStatus = (text = '') => {
+	document.querySelectorAll('.location-status').forEach((elem) => {
+		elem.textContent = text;
+	});
+};
+
+const getWeather = async (latLon, haveDataCallback, attempt = 0) => {
+	weatherRequest += 1;
+	const request = weatherRequest;
+	clearTimeout(retryTimeout);
+	setLocationStatus();
+	const isCurrent = () => request === weatherRequest;
+
+	// temporary problems (NWS down or slow) are retried, so a kiosk recovers without a reload
+	const retryLater = (reason) => {
+		if (!isCurrent()) return;
+		const delay = RETRY_DELAYS[Math.min(attempt, RETRY_DELAYS.length - 1)];
+		const at = new Date(Date.now() + delay).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+		setLocationStatus(`${reason} Trying again at ${at}.`);
+		retryTimeout = setTimeout(() => getWeather(latLon, haveDataCallback, attempt + 1), delay);
+	};
+	// permanent problems for this location are only reported
+	const fail = (text) => {
+		if (isCurrent()) setLocationStatus(text);
+	};
+
+	const { point, reason } = await lookupPoint(latLon.lat, latLon.lon);
+	if (!isCurrent()) return;
 	if (!point) {
+		if (reason === 'outside') {
+			fail('No National Weather Service forecast is available for this location. WeatherStar only covers the United States.');
+		} else {
+			retryLater('The National Weather Service isn\'t responding.');
+		}
 		return;
 	}
 
 	if (typeof haveDataCallback === 'function') haveDataCallback(point);
 
 	try {
-		// get stations using centralized safe handling
 		const stations = await safeJson(point.properties.observationStations);
+		if (!isCurrent()) return;
 
 		if (!stations) {
-			console.warn('Failed to get Observation Stations');
+			retryLater('Couldn\'t load nearby weather stations.');
 			return;
 		}
 
-		// check if stations data is valid
-		if (!stations || !stations.features || stations.features.length === 0) {
-			console.warn('No Observation Stations found for this location');
-			return;
-		}
-
-		// filter stations for proper format
-		const stationsFiltered = stations.features.filter(stationFilter);
-		// check for stations available after filtering
+		const stationsFiltered = (stations.features ?? []).filter(stationFilter);
 		if (stationsFiltered.length === 0) {
-			console.warn('No observation stations left for location after filtering');
+			fail('No weather stations report near this location. Try a nearby city.');
 			return;
 		}
 
@@ -154,6 +182,7 @@ const getWeather = async (latLon, haveDataCallback) => {
 		displays.forEach((display) => display.getData(weatherParameters));
 	} catch (error) {
 		console.error(`Failed to get weather data: ${error.message}`);
+		retryLater('Something went wrong loading this location.');
 	}
 };
 

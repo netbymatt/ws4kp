@@ -35,6 +35,12 @@ body {
 	max-width: p.$standard-width;
 	padding: 8px;
 
+	.location-status {
+		margin-top: 6px;
+		font-size: 14px;
+		color: #c62828;
+	}
+
 	.buttons {
 		display: inline-block;
 		width: 150px;
@@ -313,6 +319,17 @@ body {
 	.instructions {
 		font-size: 24px;
 	}
+
+	.location-status {
+		max-width: 80%;
+		margin: 24px auto 0;
+		font-size: 20px;
+		color: yellow;
+	}
+}
+
+.location-status:empty {
+	display: none;
 }
 
 #divTwcBottom img {

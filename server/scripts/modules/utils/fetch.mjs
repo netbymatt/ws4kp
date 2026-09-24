@@ -88,7 +88,11 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 		const response = await doFetch(url, params);
 
 		// check for ok response
-		if (!response.ok) throw new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${response.url}`);
+		if (!response.ok) {
+			const error = new Error(`Fetch error ${response.status} ${response.statusText} while fetching ${response.url}`);
+			error.status = response.status;
+			throw error;
+		}
 		// process the response based on type
 		let result;
 		switch (responseType) {
