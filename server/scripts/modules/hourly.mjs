@@ -7,7 +7,8 @@ import { temperature as temperatureUnit, windSpeed as windUnit } from './utils/u
 import hourlyIcon from './icons/hourly.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
 import ScrollWeatherDisplay from './scroll-weather-display.mjs';
-import { registerDisplay, timeZone } from './navigation.mjs';
+import { registerDisplay } from './navigation.mjs';
+import { timeZone } from './location.mjs';
 import getSun from './almanac.mjs';
 import { debugFlag } from './utils/debug.mjs';
 

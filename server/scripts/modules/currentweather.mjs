@@ -6,7 +6,8 @@ import { directionToNSEW } from './utils/calc.mjs';
 import { locationCleanup } from './utils/string.mjs';
 import largeIcon from './icons/large.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay, timeZone } from './navigation.mjs';
+import { registerDisplay } from './navigation.mjs';
+import { timeZone } from './location.mjs';
 import augmentObservationWithMetar from './utils/metar.mjs';
 import {
 	temperature, windSpeed, pressure, distanceMeters, distanceKilometers,

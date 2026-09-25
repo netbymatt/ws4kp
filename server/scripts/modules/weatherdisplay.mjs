@@ -3,12 +3,13 @@
 import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import {
-	msg, displayNavMessage, isPlaying, updateStatus, timeZone, showDisplay,
+	msg, displayNavMessage, isPlaying, updateStatus, showDisplay,
 } from './navigation.mjs';
 import { parseQueryString } from './utils/setting.mjs';
 import settings from './settings.mjs';
 import elemForEach from './utils/elem-for-each.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { timeZone } from './location.mjs';
 
 let drawStartedAt = null;
 
@@ -244,7 +245,7 @@ class WeatherDisplay {
 
 	// hook for displays that skip content during play but should show it on request
 	// eslint-disable-next-line class-methods-use-this
-	prepareShowOnRequest() {}
+	prepareShowOnRequest() { }
 
 	hideCanvas() {
 		this.resetNavBaseCount();

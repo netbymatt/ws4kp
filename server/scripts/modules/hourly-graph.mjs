@@ -3,7 +3,8 @@
 import STATUS from './status.mjs';
 import getHourlyData from './hourly.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay, timeZone } from './navigation.mjs';
+import { registerDisplay } from './navigation.mjs';
+import { timeZone } from './location.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import settings from './settings.mjs';
 

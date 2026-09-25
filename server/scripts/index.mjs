@@ -1,8 +1,9 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resize, resetStatuses, latLonReceived, isIOS,
+	message as navMessage, isPlaying, resetStatuses,
 } from './modules/navigation.mjs';
+import { latLonReceived } from './modules/location.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { registerHiddenSetting } from './modules/share.mjs';
 import './modules/tabs.mjs';
@@ -13,6 +14,7 @@ import { loadAllData } from './modules/utils/data-loader.mjs';
 import { debugFlag } from './modules/utils/debug.mjs';
 import { parseQueryString } from './modules/utils/setting.mjs';
 import { Settings } from './vendor/auto/luxon.mjs';
+import { resize, isIOS } from './modules/utils/scaling.mjs';
 
 // set luxon's default locale to en-US as the forecast text and other hard coded assets are only available in Englixh
 Settings.defaultLocale = 'en-US';

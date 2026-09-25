@@ -3,7 +3,8 @@ import preloadImg from './utils/preload-image.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import STATUS from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { registerDisplay, timeZone } from './navigation.mjs';
+import { registerDisplay } from './navigation.mjs';
+import { timeZone } from './location.mjs';
 import { getMoonIllumination, getTimes, getMoonTimes } from '../vendor/auto/suncalc.js';
 
 class Almanac extends WeatherDisplay {

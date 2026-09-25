@@ -13,7 +13,7 @@
 import STATUS from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
-import { timeZone } from './navigation.mjs';
+import { timeZone } from './location.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import setTiles from './radar/tiles.mjs';
 import { coerce } from './utils/calc.mjs';

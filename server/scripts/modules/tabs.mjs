@@ -2,6 +2,7 @@
 import settings from './settings.mjs';
 import announce from './utils/announce.mjs';
 import setHeadend from './headend.mjs';
+import { displayScale } from './utils/scaling.mjs';
 
 document.addEventListener('DOMContentLoaded', () => init());
 
@@ -52,7 +53,7 @@ const updateHeadend = () => {
 	// display mode, scale and window size, useful for layout problems
 	const { viewMode } = settings;
 	const modeName = viewMode.values.find(([value]) => value === viewMode.value)?.[1] ?? viewMode.value;
-	const scale = window.displayScale ?? 1;
+	const scale = displayScale();
 	setHeadend('display', `${modeName}, ${scale.toFixed(2)}x, ${window.innerWidth}x${window.innerHeight}`);
 
 	// list enabled displays that have failed or are still retrying, so they're included in the copied text

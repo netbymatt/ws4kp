@@ -147,6 +147,8 @@ const scanLineChange = (value) => {
 		navIcons.classList.add('on');
 		navIcons.setAttribute('aria-pressed', 'true');
 		modeSelect?.style?.removeProperty('display');
+		// size the lines for the current scale now, resize() only does it when the window size changes
+		window.dispatchEvent(new Event('scanlines-change'));
 	} else {
 		// Remove all scanline classes
 		container.classList.remove('scanlines', 'scanlines-auto', 'scanlines-fine', 'scanlines-normal', 'scanlines-thick', 'scanlines-classic', 'scanlines-retro');
@@ -160,13 +162,10 @@ const scanLineChange = (value) => {
 
 const scanLineModeChange = (_value) => {
 	// Only apply if scanlines are currently enabled
+	// scaling.mjs re-applies the scan lines at the current scale
+	// an event, because scaling.mjs imports settings and importing it here would be circular
 	if (settings.scanLines?.value) {
-		// Call the scanline update function directly with current scale
-		if (typeof window.applyScanlineScaling === 'function') {
-			// Get current scale from navigation module or use 1.0 as fallback
-			const scale = window.currentScale || 1.0;
-			window.applyScanlineScaling(scale);
-		}
+		window.dispatchEvent(new Event('scanlines-change'));
 	}
 };
 
