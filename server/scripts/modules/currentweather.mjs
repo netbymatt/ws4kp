@@ -17,6 +17,7 @@ import { isDataStale, enhanceObservationWithMapClick } from './utils/mapclick.mj
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import settings from './settings.mjs';
 import setHeadend from './headend.mjs';
+import { StationInfo } from './utils/data-loader.mjs';
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -199,7 +200,7 @@ class CurrentWeather extends WeatherDisplay {
 		// get location (city name) from StationInfo if available (allows for overrides)
 		// longer name allowed if in wide-enhanced
 		const locationLimit = (settings.wide?.value && settings.enhanced?.value) ? 25 : 20;
-		const location = (StationInfo[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substring(0, locationLimit);
+		const location = ((await StationInfo)[this.data.station.properties.stationIdentifier]?.city ?? locationCleanup(this.data.station.properties.name)).substring(0, locationLimit);
 
 		const fill = {
 			temp: this.data.Temperature + String.fromCharCode(176),

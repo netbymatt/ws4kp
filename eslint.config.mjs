@@ -80,9 +80,6 @@ const htmlSpecial = {
 		globals: {
 			...globals.browser,
 			OVERRIDES: 'readonly',
-			StationInfo: 'readonly',
-			RegionalCities: 'readonly',
-			TravelCities: 'readonly',
 			proj4: 'readonly',
 		},
 	},

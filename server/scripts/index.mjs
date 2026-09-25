@@ -10,13 +10,13 @@ import './modules/tabs.mjs';
 import { clearLocationRows } from './modules/headend.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
-import { loadAllData } from './modules/utils/data-loader.mjs';
+import { StationInfo, RegionalCities, TravelCities } from './modules/utils/data-loader.mjs';
 import { debugFlag } from './modules/utils/debug.mjs';
 import { parseQueryString } from './modules/utils/setting.mjs';
 import { Settings } from './vendor/auto/luxon.mjs';
 import { resize, isIOS } from './modules/utils/scaling.mjs';
 
-// set luxon's default locale to en-US as the forecast text and other hard coded assets are only available in Englixh
+// set luxon's default locale to en-US as the forecast text and other hard coded assets are only available in English
 Settings.defaultLocale = 'en-US';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -54,7 +54,9 @@ const BTN_GET_GPS_SELECTOR = '#btnGetGps';
 const init = async () => {
 	// Load core data first - app cannot function without it
 	try {
-		await loadAllData(typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '');
+		await RegionalCities;
+		await TravelCities;
+		await StationInfo;
 	} catch (error) {
 		console.error('Failed to load core application data:', error);
 		// Show error message to user and halt initialization

@@ -10,6 +10,7 @@ import augmentObservationWithMetar from './utils/metar.mjs';
 import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
+import { StationInfo } from './utils/data-loader.mjs';
 
 const MAX_REGIONAL_STATIONS = 7;
 
@@ -24,7 +25,7 @@ class LatestObservations extends WeatherDisplay {
 		// this is intentional because up to 30 stations are available to pull data from
 
 		// calculate distance to each station
-		const stationsByDistance = Object.values(StationInfo).map((station) => {
+		const stationsByDistance = Object.values(await StationInfo).map((station) => {
 			const distance = calcDistance(station.lat, station.lon, this.weatherParameters.latitude, this.weatherParameters.longitude);
 			return { ...station, distance };
 		});

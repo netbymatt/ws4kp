@@ -15,6 +15,7 @@ import filterExpiredPeriods from './utils/forecast-utils.mjs';
 import settings from './settings.mjs';
 import createProjection, { OUTPUTSIZES } from './utils/map-projection.mjs';
 import { getRegionalObservation, formatCity, buildForecast } from './regionalforecast-utils.mjs';
+import { RegionalCities, StationInfo } from './utils/data-loader.mjs';
 
 // array indices for reference
 const PX = 0;
@@ -164,7 +165,7 @@ class RegionalForecast extends WeatherDisplay {
 			maxLon: maxLatLonStation[LON],
 		};
 
-		const regionalCitiesNearby = RegionalCities.filter((city) => cityLatLonBoundingBox(city, minMaxLatLonRegional));
+		const regionalCitiesNearby = (await RegionalCities).filter((city) => cityLatLonBoundingBox(city, minMaxLatLonRegional));
 
 		// bring the cities within the actual available space (left sloppy above to favor regional cities over stations)
 		// and copy the city so we don't mutate the original RegionalCities array
@@ -199,7 +200,7 @@ class RegionalForecast extends WeatherDisplay {
 		});
 
 		// now do the same for the list of stations (back fills empty areas on the map)
-		const stationsNearby = Object.values(StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLonStations));
+		const stationsNearby = Object.values(await StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLonStations));
 
 		const stationsDistance = stationsNearby.map((city) => calcDistPxyBBox(city, projection, user));
 		const sortedStations = stationsDistance.sort((a, b) => a.distance - b.distance);

@@ -1,5 +1,4 @@
 // Data loader utility for fetching JSON data with cache-busting
-
 const dataCache = {};
 
 // Load data with version-based cache busting
@@ -25,23 +24,15 @@ const loadData = async (dataType, version = '') => {
 	}
 };
 
-// Load all data types
-const loadAllData = async (version = '') => {
-	const [travelCities, regionalCities, stationInfo] = await Promise.all([
-		loadData('travelcities', version),
-		loadData('regionalcities', version),
-		loadData('stations', version),
-	]);
+// start off loading the data
+const version = typeof OVERRIDES !== 'undefined' && OVERRIDES.VERSION ? OVERRIDES.VERSION : '';
 
-	// Set global variables for backward compatibility
-	window.TravelCities = travelCities;
-	window.RegionalCities = regionalCities;
-	window.StationInfo = stationInfo;
-
-	return { travelCities, regionalCities, stationInfo };
-};
+const TravelCities = loadData('travelcities', version);
+const RegionalCities = loadData('regionalcities', version);
+const StationInfo = loadData('stations', version);
 
 export {
-	loadData,
-	loadAllData,
+	TravelCities,
+	RegionalCities,
+	StationInfo,
 };

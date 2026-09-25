@@ -3,6 +3,7 @@ import getCurrentWeather from './currentweather.mjs';
 import { currentDisplay } from './navigation.mjs';
 import getHazards from './hazards.mjs';
 import settings from './settings.mjs';
+import { StationInfo } from './utils/data-loader.mjs';
 
 // constants
 const degree = String.fromCharCode(176);
@@ -145,6 +146,8 @@ const hazards = (data) => {
 	};
 };
 
+const stationInfo = await StationInfo;
+
 // additional screens are stored in a separate for simple clearing/resettings
 let additionalScreens = [];
 // the "screens" are stored in an array for easy addition and removal
@@ -152,8 +155,8 @@ const baseScreens = [
 	// hazards
 	hazards,
 	// station name
-	(data) => {
-		const location = (StationInfo[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substr(0, 20);
+	async (data) => {
+		const location = (stationInfo[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substr(0, 20);
 		return `Conditions at ${location}`;
 	},
 

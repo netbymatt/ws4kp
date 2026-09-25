@@ -3,6 +3,7 @@ import { lookupPoint } from './utils/get-point.mjs';
 import { stationFilter } from './utils/string.mjs';
 import setHeadend from './headend.mjs';
 import { startDisplays } from './navigation.mjs';
+import { StationInfo } from './utils/data-loader.mjs';
 
 const weatherParameters = {};
 
@@ -72,9 +73,10 @@ const getWeather = async (latLon, haveDataCallback, attempt = 0) => {
 
 		let { city } = point.properties.relativeLocation.properties;
 		const { state } = point.properties.relativeLocation.properties;
+		const stationInfo = await StationInfo;
 
-		if (StationId in StationInfo) {
-			city = StationInfo[StationId].city;
+		if (StationId in stationInfo) {
+			city = stationInfo[StationId].city;
 			[city] = city.split('/');
 			city = city.replace(/\s+$/, '');
 		}
