@@ -100,15 +100,19 @@ const resize = (force = false) => {
 	const isMobileSafariKiosk = isIOS() && isKioskMode;	// Detect Mobile Safari in kiosk mode (regardless of standalone status)
 	const targetWidth = BASE_SIZE.width;
 
-	// Use window width instead of bottom container width to avoid zero-dimension issues
-	const widthZoomPercent = window.innerWidth / targetWidth;
-	const heightZoomPercent = window.innerHeight / BASE_SIZE.height;
+	// Use centering behavior for fullscreen, kiosk mode, or Mobile Safari kiosk mode
+	const isKioskLike = isFullscreen || isKioskMode || isMobileSafariKiosk;
+
+	// Use the page's visible area instead of the bottom container width to avoid zero-dimension issues
+	// clientWidth/clientHeight leave out the page scrollbars, which innerWidth/innerHeight include
+	// on the normal page the body's width also leaves out the gutter kept by scrollbar-gutter: stable,
+	// which the root's clientWidth still counts while no scrollbar is showing (kiosk and fullscreen have no gutter)
+	const viewWidth = isKioskLike ? document.documentElement.clientWidth : document.body.clientWidth;
+	const widthZoomPercent = viewWidth / targetWidth;
+	const heightZoomPercent = document.documentElement.clientHeight / BASE_SIZE.height;
 
 	// Standard scaling: fit within both dimensions
 	const scale = Math.min(widthZoomPercent, heightZoomPercent);
-
-	// Use centering behavior for fullscreen, kiosk mode, or Mobile Safari kiosk mode
-	const isKioskLike = isFullscreen || isKioskMode || isMobileSafariKiosk;
 
 	if (debugFlag('resize') || debugFlag('fullscreen')) {
 		console.log(`🖥️ Resize: force=${force} isKioskLike=${isKioskLike} window=${window.innerWidth}x${window.innerHeight} targetWidth=${targetWidth} widthZoom=${widthZoomPercent.toFixed(3)} heightZoom=${heightZoomPercent.toFixed(3)} finalScale=${scale.toFixed(3)} fullscreenElement=${!!document.fullscreenElement} isIOS=${isIOS()} standalone=${window.navigator.standalone} isMobileSafariKiosk=${isMobileSafariKiosk} kioskMode=${settings.kiosk?.value} wideMode=${settings.wide.value}`);
@@ -250,8 +254,8 @@ const resize = (force = false) => {
 		 */
 		const scaledWidth = wrapperWidth * scale;
 		const scaledHeight = wrapperHeight * scale;
-		const offsetX = (window.innerWidth - scaledWidth) / 2;
-		const offsetY = (window.innerHeight - scaledHeight) / 2;
+		const offsetX = (document.documentElement.clientWidth - scaledWidth) / 2;
+		const offsetY = (document.documentElement.clientHeight - scaledHeight) / 2;
 
 		if (debugFlag('fullscreen')) {
 			console.log(`🖥️ Applying fullscreen/kiosk scaling: wrapper=${wrapperWidth}x${wrapperHeight} scale=${scale.toFixed(3)} offset=${offsetX.toFixed(1)},${offsetY.toFixed(1)} target=${isFullscreen ? '#container' : '#divTwcMain'}`);

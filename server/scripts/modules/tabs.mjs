@@ -54,7 +54,8 @@ const updateHeadend = () => {
 	const { viewMode } = settings;
 	const modeName = viewMode.values.find(([value]) => value === viewMode.value)?.[1] ?? viewMode.value;
 	const scale = displayScale();
-	setHeadend('display', `${modeName}, ${scale.toFixed(2)}x, ${window.innerWidth}x${window.innerHeight}`);
+	// the space the display gets, without the page scrollbar or its reserved gutter
+	setHeadend('display', `${modeName}, ${scale.toFixed(2)}x, ${document.body.clientWidth}x${document.documentElement.clientHeight}`);
 
 	// list enabled displays that have failed or are still retrying, so they're included in the copied text
 	const displaysWithClass = (className) => [...document.querySelectorAll(`#enabledDisplays label.${className} span:not(.alert)`)].map((span) => span.textContent);

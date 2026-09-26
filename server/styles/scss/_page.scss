@@ -6,6 +6,13 @@
 	font-display: swap;
 }
 
+// always reserve the scrollbar's space, so the width resize() measures doesn't change
+// when shrinking the display makes the page short enough for the scrollbar to disappear
+// not in kiosk mode, which hides overflow and would otherwise keep an empty strip on the right
+html:not(:has(body.kiosk)) {
+	scrollbar-gutter: stable;
+}
+
 body {
 	font-family: "Star4000";
 	margin: 0;
