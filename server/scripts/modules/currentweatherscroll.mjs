@@ -155,7 +155,7 @@ const baseScreens = [
 	// hazards
 	hazards,
 	// station name
-	async (data) => {
+	(data) => {
 		const location = (stationInfo[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substr(0, 20);
 		return `Conditions at ${location}`;
 	},

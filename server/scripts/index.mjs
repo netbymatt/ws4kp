@@ -542,6 +542,7 @@ const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {
 };
 
 const getCustomCode = async () => {
+	console.log('A 404 error for custom.js or custom.mjs is expected below for most applications');
 	// fetch the custom file and see if it returns a 200 status
 	const response = await fetch('scripts/custom.js', { method: 'HEAD' });
 	if (response.ok) {

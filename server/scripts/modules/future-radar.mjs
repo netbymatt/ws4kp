@@ -102,6 +102,7 @@ class FutureRadar extends FilmstripWeatherDisplay {
 		}
 
 		// get the latest run
+		console.log('404 errors for hrrrzarrr.s3.amazonaws.com are expected, this app has to optimistically try and load hrrr data for the current hour even though it may not be published yet');
 		const run = await findLatestRun();
 		if (!run) {
 			if (debugFlag('verbose-failures')) {

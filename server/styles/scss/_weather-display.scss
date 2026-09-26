@@ -242,10 +242,15 @@
 		}
 
 		.reveal {
-			overflow: hidden;
-			width: 0;
-			animation:
-				typing 0.2s steps(21, end) forwards;
+			@media (prefers-reduced-motion: no-preference) {
+				overflow: hidden;
+				width: 0;
+				animation:
+					typing 0.2s steps(21, end) forwards;
+
+
+
+			}
 		}
 
 		@keyframes typing {

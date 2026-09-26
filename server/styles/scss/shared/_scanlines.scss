@@ -42,6 +42,10 @@ $scan-opacity: .75;
 @mixin scan-moving($scan-moving-line) {
 	@if $scan-moving-line==true {
 		animation: scanline 6s linear infinite;
+
+		@media (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
 	}
 
 	@else {
