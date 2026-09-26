@@ -179,10 +179,10 @@ class WeatherDisplay {
 		if (this.screenIndex < 0) this.screenIndex = 0;
 		if (this.okToDrawCurrentDateTime) this.drawCurrentDateTime();
 		if (this.okToDrawCurrentConditions) {
-			postMessage({ type: 'current-weather-scroll', method: 'start' });
+			window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail: 'start' }));
 		} else {
-			postMessage({ type: 'current-weather-scroll', method: 'non-display' });
-			postMessage({ type: 'current-weather-scroll', method: 'hide' });
+			window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail: 'non-display' }));
+			window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail: 'hide' }));
 		}
 		WeatherDisplay.sendRenderStart();
 	}

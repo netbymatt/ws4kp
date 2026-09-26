@@ -272,16 +272,6 @@ const drawScrollCondition = (screen) => {
 	}, startDelayTime * 1000);
 };
 
-const parseMessage = (event) => {
-	if (event?.data?.type === 'current-weather-scroll') {
-		if (event.data?.method === 'start') start();
-		if (event.data?.method === 'reload') stop(true);
-		if (event.data?.method === 'non-display') nonDisplay();
-		if (event.data?.method === 'show') show();
-		if (event.data?.method === 'hide') hide();
-	}
-};
-
 const show = () => {
 	mainScroll.style.display = 'block';
 };
@@ -307,8 +297,16 @@ const nonDisplay = () => {
 const screenCount = () => workingScreens.length;
 const atDefault = () => defaultScreensLoaded;
 
-// add event listener for start message
-window.addEventListener('message', parseMessage);
+// other modules control the scroll with a 'current-weather-scroll' event whose detail names the action
+// an event instead of imports, because this module imports displays that import those modules (circular)
+const scrollActions = {
+	start,
+	reload: () => stop(true),
+	'non-display': nonDisplay,
+	show,
+	hide,
+};
+window.addEventListener('current-weather-scroll', (event) => scrollActions[event.detail]?.());
 
 window.CurrentWeatherScroll = {
 	addScreen,

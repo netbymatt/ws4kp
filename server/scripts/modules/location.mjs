@@ -100,7 +100,7 @@ const getWeather = async (latLon, haveDataCallback, attempt = 0) => {
 		populateWeatherParameters(weatherParameters, point.properties);
 
 		// reset the scroll
-		postMessage({ type: 'current-weather-scroll', method: 'reload' });
+		window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail: 'reload' }));
 
 		// show progress and start loading every display
 		await startDisplays(weatherParameters);

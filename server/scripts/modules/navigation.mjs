@@ -243,7 +243,7 @@ const handleNavButton = (button) => {
 			break;
 		case 'menu':
 			setPlaying(false);
-			postMessage({ type: 'current-weather-scroll', method: 'hide' });
+			window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail: 'hide' }));
 			hideAllCanvases();
 			if (progress) {
 				progress.showCanvas();
