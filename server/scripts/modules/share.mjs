@@ -99,7 +99,7 @@ const registerHiddenSetting = (name, value) => {
 	});
 };
 
+/* eslint-disable import-x/prefer-default-export */
 export {
-	// eslint-disable-next-line import-x/prefer-default-export
 	registerHiddenSetting,
 };
