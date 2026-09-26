@@ -197,6 +197,22 @@ Below the weather display are four tabs:
 * **Share:** Shows and copies a [permalink](#sharing-a-permalink-bookmarking) to your current configuration.
 * **Headend:** The location, observation station, radar, forecast zone, NWS office and grid point being used, along with the version number and the music track that is playing. The "Copy headend info" button copies all of this as text, which is helpful to include when reporting an issue.
 
+### Keyboard shortcuts
+
+These work while the page itself has focus (click on the weather display first if you've been typing in the location box or using a tab), and in fullscreen and kiosk mode.
+
+| Key | Action |
+|---|---|
+| `Space` | Play or pause |
+| `→` or `Page Down` | Next screen |
+| `←` or `Page Up` | Previous screen |
+| `↑` | Stop playback and show the list of displays |
+| `0` (zero) | Reload the forecast data |
+| `F` | Enter or exit fullscreen |
+| `Ctrl-K` | Exit [kiosk mode](#kiosk-mode) |
+
+On a touch screen, swipe left or right on the weather display for the next or previous screen.
+
 ## Sharing a permalink (bookmarking)
 Selected displays, the forecast city and most settings are sticky from one session to the next. However if you would like to share your exact configuration or bookmark it, open the Share tab. The permalink is shown in a read-only box and the "Copy permalink" button copies it to your clipboard. (If your browser doesn't support clipboard transfers directly the button reads "Get Permalink" and selects the link so you can copy it by hand.) The link includes your selected displays, settings and location. You can then share this link or add it to your bookmarks.
 

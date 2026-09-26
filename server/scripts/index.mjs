@@ -439,6 +439,7 @@ const documentKeydown = (e) => {
 	// don't trigger on ctrl/alt/shift modified key for other shortcuts
 	if (e.altKey || e.ctrlKey || e.shiftKey) return false;
 
+	// these shortcuts are listed in the README under "Keyboard shortcuts"
 	if (document.fullscreenElement || document.activeElement === document.body) {
 		switch (key) {
 			case ' ': // Space
@@ -461,12 +462,12 @@ const documentKeydown = (e) => {
 				btnNavigatePreviousClick();
 				return false;
 
-			case 'ArrowUp': // Home
+			case 'ArrowUp': // menu: stop playback and show the list of displays
 				e.preventDefault();
 				btnNavigateMenuClick();
 				return false;
 
-			case '0': // "O" Restart
+			case '0': // zero: reload the forecast data
 				btnNavigateRefreshClick();
 				return false;
 
