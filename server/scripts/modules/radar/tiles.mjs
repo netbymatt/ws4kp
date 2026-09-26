@@ -95,7 +95,7 @@ const setTiles = (data) => {
 		// set the image source and size
 		// compare the attribute, not elem.src, which reports a fully qualified url and would
 		// never match the relative path below
-		const newSource = `/images/maps/radar-conus/${tileName}/${tile.file}.webp`;
+		const newSource = `images/maps/radar-conus/${tileName}/${tile.file}.webp`;
 		if (elem.getAttribute('src') === newSource) return;
 		elem.src = newSource;
 	};

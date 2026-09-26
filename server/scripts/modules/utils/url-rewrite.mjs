@@ -1,3 +1,7 @@
+// the proxy routes sit next to the page, so resolve them against the page's own address
+// that keeps them working when the site is hosted under a subpath such as https://example.com/weatherstar/
+const toProxy = (url, route) => new URL(`${route}${url.pathname}${url.search}`, window.location.href);
+
 // rewrite URLs to use local proxy server
 const rewriteUrl = (_url) => {
 	if (!_url) {
@@ -22,32 +26,14 @@ const rewriteUrl = (_url) => {
 	}
 
 	// Rewrite the origin to use local proxy server
-	if (url.origin === 'https://api.weather.gov') {
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/api${url.pathname}`;
-	} else if (url.origin === 'https://forecast.weather.gov') {
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/forecast${url.pathname}`;
-	} else if (url.origin === 'https://www.spc.noaa.gov') {
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/spc${url.pathname}`;
-	} else if (url.origin === 'https://radar.weather.gov') {
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/radar${url.pathname}`;
-	} else if (url.origin === 'https://mesonet.agron.iastate.edu') {
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/mesonet${url.pathname}`;
-	} else if (typeof OVERRIDES !== 'undefined' && OVERRIDES?.RADAR_HOST && url.origin === `https://${OVERRIDES.RADAR_HOST}`) {
-		// Handle override radar host
-		url.protocol = window.location.protocol;
-		url.host = window.location.host;
-		url.pathname = `/mesonet${url.pathname}`;
-	}
+	if (url.origin === 'https://api.weather.gov') return toProxy(url, 'api');
+	if (url.origin === 'https://forecast.weather.gov') return toProxy(url, 'forecast');
+	if (url.origin === 'https://www.spc.noaa.gov') return toProxy(url, 'spc');
+	if (url.origin === 'https://radar.weather.gov') return toProxy(url, 'radar');
+	if (url.origin === 'https://mesonet.agron.iastate.edu') return toProxy(url, 'mesonet');
+	if (url.origin === 'https://hrrrzarr.s3.amazonaws.com') return toProxy(url, 'hrrr');
+	// Handle override radar host
+	if (typeof OVERRIDES !== 'undefined' && OVERRIDES?.RADAR_HOST && url.origin === `https://${OVERRIDES.RADAR_HOST}`) return toProxy(url, 'mesonet');
 
 	return url;
 };

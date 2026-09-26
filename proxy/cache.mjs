@@ -23,6 +23,16 @@ import https from 'node:https';
 // Default timeout for upstream requests (matches client-side default)
 const DEFAULT_REQUEST_TIMEOUT = 15000;
 
+// upstream headers that are not passed on to the browser
+// cache headers: the proxy sets its own cache policy
+// hop-by-hop headers: they describe the proxy's connection to upstream, not the browser's connection to the proxy
+// content-length: res.send() sets it for the body actually sent
+const SKIPPED_HEADERS = [
+	'cache-control', 'expires', 'etag', 'last-modified',
+	'connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'upgrade', 'proxy-authenticate', 'proxy-authorization',
+	'content-length',
+];
+
 class HttpCache {
 	constructor() {
 		this.cache = new Map();
@@ -54,8 +64,7 @@ class HttpCache {
 		// Strip cache-related headers and pass through others
 		Object.entries(headers || {}).forEach(([key, value]) => {
 			const lowerKey = key.toLowerCase();
-			// Skip cache-related headers that should be controlled by our proxy
-			if (!['cache-control', 'expires', 'etag', 'last-modified'].includes(lowerKey)) {
+			if (!SKIPPED_HEADERS.includes(lowerKey)) {
 				res.header(lowerKey, value);
 			}
 		});
@@ -69,8 +78,9 @@ class HttpCache {
 		const path = req.path || req.url || '/';
 		const url = req.url || req.path || '/';
 
-		// Since this cache is intended only by the frontend, we can use a simple URL-based key
-		return `${path}${url.includes('?') ? url.substring(url.indexOf('?')) : ''}`;
+		// req.path is relative to where the proxy is mounted, so include the mount (/api, /spc, /hrrr...)
+		// to keep each service's entries apart. This is also the form DELETE /cache/... takes: /cache/api/points/...
+		return `${req.baseUrl ?? ''}${path}${url.includes('?') ? url.substring(url.indexOf('?')) : ''}`;
 	}
 
 	// High-level method to handle caching for HTTP proxies
@@ -185,6 +195,19 @@ class HttpCache {
 
 			let responseHandled = false; // Track if we've already sent a response
 
+			// when upstream fails, an expired copy is better than an error (weather.gov has frequent short outages)
+			// expired entries are kept for up to 3 hours, see startCleanup()
+			const serveStale = (reason) => {
+				if (!staleCache) return false;
+				const age = Math.round((Date.now() - staleCache.timestamp) / 1000);
+				console.warn(`🕰️ Stale    | ${fullUrl} (${reason}, serving the cached copy, age: ${age}s)`);
+				res.status(staleCache.statusCode);
+				HttpCache.setFilteredHeaders(res, staleCache.headers);
+				res.send(staleCache.data);
+				resolve(true);
+				return true;
+			};
+
 			const upstreamReq = https.get(fullUrl, { headers }, (getRes) => {
 				const { statusCode } = getRes;
 
@@ -227,11 +250,11 @@ class HttpCache {
 						console.error(`🚫 ${statusCode}      | ${fullUrl}`);
 					}
 
-					// Filter out cache headers before storing - we don't need them in our cache
+					// Filter out cache and hop-by-hop headers before storing - they aren't sent to the browser
 					const filteredHeaders = {};
 					Object.entries(getRes.headers || {}).forEach(([key, value]) => {
 						const lowerKey = key.toLowerCase();
-						if (!['cache-control', 'expires', 'etag', 'last-modified'].includes(lowerKey)) {
+						if (!SKIPPED_HEADERS.includes(lowerKey)) {
 							filteredHeaders[key] = value;
 						}
 					});
@@ -244,6 +267,7 @@ class HttpCache {
 
 					// Check if this is a server error (5xx) or client error that shouldn't be cached
 					if (statusCode >= 500 && statusCode <= 599) {
+						if (serveStale(`upstream ${statusCode}`)) return;
 						// For 5xx errors, send response (don't cache, but don't reject since response is sent)
 						res.status(statusCode);
 						HttpCache.setFilteredHeaders(res, getRes.headers);
@@ -308,6 +332,7 @@ class HttpCache {
 				if (responseHandled) return; // Prevent double response
 				responseHandled = true;
 				console.error(`💥 Error    | ${fullUrl}: ${err.message}`);
+				if (serveStale(err.message)) return;
 				res.status(500).json({ error: `Failed to fetch data from ${options.serviceName || 'upstream API'}` });
 				resolve(false); // Error handled, response sent
 			});
@@ -318,9 +343,6 @@ class HttpCache {
 
 				console.error(`⏲️ Timeout  | ${fullUrl} (after ${options.timeout || DEFAULT_REQUEST_TIMEOUT}ms)`);
 
-				// Send timeout response to client
-				res.status(504).json({ error: 'Gateway timeout' });
-
 				// Don't destroy the request immediately - let the response be sent first
 				// Then destroy to clean up the upstream connection
 				setImmediate(() => {
@@ -328,6 +350,11 @@ class HttpCache {
 						upstreamReq.destroy();
 					}
 				});
+
+				if (serveStale('timeout')) return;
+
+				// Send timeout response to client
+				res.status(504).json({ error: 'Gateway timeout' });
 
 				resolve(false); // Timeout handled, response sent
 			});

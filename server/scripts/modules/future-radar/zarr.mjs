@@ -12,6 +12,7 @@
 import { SOURCE, RUN } from './config.mjs';
 import decodeBlosc from './blosc.mjs';
 import { debugFlag } from '../utils/debug.mjs';
+import rewriteUrl from '../utils/url-rewrite.mjs';
 
 /* ------------------------------------------------------------------ *
  * URL construction
@@ -82,7 +83,8 @@ const currentRunHour = () => {
 const fetchArrayMeta = async (runDate) => {
 	const url = `${buildArrayUrl(runDate)}/.zarray`;
 	try {
-		const response = await fetch(url);
+		// through the caching proxy when it's available
+		const response = await fetch(rewriteUrl(url));
 		if (!response.ok) {
 			if (debugFlag('verbose-failures')) {
 				console.warn(`FutureRadar: run ${runDate.toISOString()} is not published (HTTP ${response.status} for ${url})`);
@@ -203,7 +205,8 @@ const fetchChunk = async (runDate, chunkId, meta) => {
 	}
 
 	const started = performance.now();
-	const response = await fetch(url);
+	// through the caching proxy when it's available, the cache below is still keyed by the original URL
+	const response = await fetch(rewriteUrl(url));
 	if (!response.ok) {
 		throw new Error(`Chunk ${chunkId} unavailable (HTTP ${response.status})`);
 	}
