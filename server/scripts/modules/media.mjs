@@ -9,6 +9,8 @@ let player;
 let sliderTimeout = null;
 let volumeSlider = null;
 let volumeSliderInput = null;
+// music was left on but the browser blocked playback until the page is interacted with
+let waitingForInteraction = false;
 
 const mediaPlaying = new Setting('mediaPlaying', {
 	name: 'Media Playing',
@@ -115,20 +117,46 @@ const enableMediaPlayer = () => {
 };
 
 const setIcon = () => {
-	// get the icon
-	const icon = document.getElementById('ToggleMediaContainer');
-	if (mediaPlaying.value === true) {
-		icon.classList.add('playing');
-	} else {
-		icon.classList.remove('playing');
-	}
-	document.getElementById('ToggleMedia').setAttribute('aria-pressed', mediaPlaying.value === true);
+	// while waiting for an interaction the music is not heard, so the button shows it as off
+	const playing = mediaPlaying.value === true && !waitingForInteraction;
+	document.getElementById('ToggleMediaContainer').classList.toggle('playing', playing);
+	document.getElementById('ToggleMedia').setAttribute('aria-pressed', playing);
 };
 
 // pure toggle: flips playback on/off and nothing else. Does not touch the volume popup.
 const toggleMediaPlayback = () => {
+	// music was left on and this click is the interaction the browser was waiting for, so start it
+	if (waitingForInteraction) {
+		stopWaitingForInteraction();
+		startMedia();
+		return;
+	}
 	mediaPlaying.value = !mediaPlaying.value;
 	stateChanged();
+};
+
+// any click or key press on the page lets the browser start the music
+const interactionStartsMedia = (e) => {
+	// the music button's own click handler takes care of that button
+	if (e.target?.closest?.('#ToggleMedia')) return;
+	stopWaitingForInteraction();
+	startMedia();
+};
+
+const waitForInteraction = () => {
+	if (waitingForInteraction) return;
+	waitingForInteraction = true;
+	setIcon();
+	setHeadend('music', 'Waiting for a click or key press to start');
+	document.addEventListener('click', interactionStartsMedia, { capture: true });
+	document.addEventListener('keydown', interactionStartsMedia, { capture: true });
+};
+
+const stopWaitingForInteraction = () => {
+	waitingForInteraction = false;
+	setIcon();
+	document.removeEventListener('click', interactionStartsMedia, { capture: true });
+	document.removeEventListener('keydown', interactionStartsMedia, { capture: true });
 };
 
 // open/close the volume popup. Independent of playback: volume can be adjusted whether or
@@ -182,6 +210,11 @@ const startMedia = async () => {
 			await player.play();
 			setTrackName(playlist.availableFiles[currentTrack]);
 		} catch (e) {
+			// the browser won't play sound before the page is interacted with, keep the saved setting and try again then
+			if (e.name === 'NotAllowedError') {
+				waitForInteraction();
+				return;
+			}
 			// report the error
 			console.error('Couldn\'t play music');
 			console.error(e);

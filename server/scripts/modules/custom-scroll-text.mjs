@@ -1,5 +1,6 @@
 import Setting from './utils/setting.mjs';
 import { reset as resetScroll, addScreen as addScroll, hazards } from './currentweatherscroll.mjs';
+import { escapeHtml } from './utils/string.mjs';
 
 let firstRun = true;
 
@@ -36,7 +37,8 @@ const parseText = (textInput) => {
 	}
 
 	// split the text at pipe characters
-	const texts = textInput.split('|');
+	// the scroll draws its text as html, and this text can arrive in a shared link, so it is escaped
+	const texts = textInput.split('|').map(escapeHtml);
 
 	// add single text scroll after hazards if present
 	resetScroll();
@@ -80,7 +82,7 @@ const customTextEnable = new Setting('customTextEnable', {
 });
 
 // initialize the custom text inputs on the page
-document.addEventListener('DOMContentLoaded', () => {
+const init = () => {
 	// add the controls to the page
 	const settingsSection = document.querySelector('#settings');
 	settingsSection.append(customTextEnable.generate(), customText.generate());
@@ -88,4 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	firstRun = false;
 	// call change enable with the current value to show/hide the url box
 	changeEnable(customTextEnable.value);
-});
+};
+
+// currentweatherscroll.mjs waits for the station data at the top level, which holds up this module
+// until after DOMContentLoaded has usually fired
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', init);
+} else {
+	init();
+}

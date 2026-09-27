@@ -1,8 +1,8 @@
 // regional forecast and observations
-import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
+import { calcStatusClass, statusClasses } from './status.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import {
-	registerProgress, message, getDisplay, msg,
+	registerProgress, message, getDisplay, showDisplay,
 } from './navigation.mjs';
 
 class Progress extends WeatherDisplay {
@@ -75,6 +75,7 @@ class Progress extends WeatherDisplay {
 		}
 	}
 
+	// eslint-disable-next-line class-methods-use-this
 	lineClick(e) {
 		// get index
 		const indexRaw = e.target?.parentNode?.dataset?.index;
@@ -82,13 +83,10 @@ class Progress extends WeatherDisplay {
 		const index = +indexRaw;
 
 		// stop playing
-		message('navButton');
-		// use the y value to determine an index
+		message({ type: 'navButton', message: 'stop' });
+		// show the display, the same as a click in the display list
 		const display = getDisplay(index);
-		if (display && display.status === STATUS.loaded) {
-			display.showCanvas(msg.command.firstFrame);
-			this.elem.classList.remove('show');
-		}
+		if (display) showDisplay(display);
 	}
 }
 

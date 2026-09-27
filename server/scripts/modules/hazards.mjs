@@ -186,12 +186,7 @@ class Hazards extends ScrollWeatherDisplay {
 	// make data available outside this class
 	// promise allows for data to be requested before it is available
 	async getHazards(stillWaiting) {
-		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
-		return new Promise((resolve) => {
-			if (this.data) resolve(this.data);
-			// data not available, put it into the data callback queue
-			this.getDataCallbacks.push(() => resolve(this.data));
-		});
+		return this.dataReady(stillWaiting);
 	}
 }
 

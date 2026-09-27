@@ -145,7 +145,8 @@ const init = async () => {
 	// Auto load the parsed parameters and fall back to the previous query
 	const query = parsedParameters.latLonQuery ?? localStorage.getItem('latLonQuery');
 	const latLon = parsedParameters.latLon ?? localStorage.getItem('latLon');
-	const fromGPS = localStorage.getItem('latLonFromGPS') && !loadFromParsed;
+	// compared to the string, earlier versions could store 'false'
+	const fromGPS = localStorage.getItem('latLonFromGPS') === 'true' && !loadFromParsed;
 
 	if (parsedParameters.latLonQuery && !parsedParameters.latLon) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
@@ -163,7 +164,7 @@ const init = async () => {
 		// use lat-long lookup if that's all that was provided in the query string
 		if (loadFromParsed && parsedParameters.latLon && !parsedParameters.latLonQuery) {
 			const { lat, lon } = JSON.parse(latLon);
-			getForecastFromLatLon(lat, lon, true);
+			getForecastFromLatLon(lat, lon);
 		} else {
 			// otherwise use pre-stored data
 			loadData(JSON.parse(latLon));
@@ -537,7 +538,12 @@ const getForecastFromLatLon = (latitude, longitude, fromGps = false) => {
 		const query = `${location.city}, ${location.state}`;
 		localStorage.setItem('latLon', JSON.stringify({ lat: latitude, lon: longitude }));
 		localStorage.setItem('latLonQuery', query);
-		localStorage.setItem('latLonFromGPS', fromGps);
+		if (fromGps) {
+			localStorage.setItem('latLonFromGPS', 'true');
+		} else {
+			localStorage.removeItem('latLonFromGPS');
+			document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
+		}
 		txtAddress.value = `${location.city}, ${location.state}`;
 	});
 };

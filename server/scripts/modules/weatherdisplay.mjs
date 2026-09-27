@@ -174,6 +174,16 @@ class WeatherDisplay {
 		this.getDataCallbacks = [];
 	}
 
+	// make data available outside this class
+	// resolves right away if the data is here, otherwise when it arrives (undefined if loading fails)
+	dataReady(stillWaiting) {
+		if (this.data) return Promise.resolve(this.data);
+		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
+		return new Promise((resolve) => {
+			this.getDataCallbacks.push(resolve);
+		});
+	}
+
 	drawCanvas() {
 		// clean up the first-run flag in screen index
 		if (this.screenIndex < 0) this.screenIndex = 0;

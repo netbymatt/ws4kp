@@ -70,7 +70,8 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	};
 
 	// rewrite URLs for various services to use the backend proxy server for proper caching (and request logging)
-	const url = rewriteUrl(_url);
+	// relative urls come back from rewriteUrl as strings, resolve them so query parameters can be added below
+	const url = new URL(rewriteUrl(_url), window.location.href);
 	// match the security protocol when not on localhost
 	// url.protocol = window.location.hostname === 'localhost' ? url.protocol : window.location.protocol;
 	// add parameters if necessary

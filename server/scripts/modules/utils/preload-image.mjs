@@ -11,8 +11,11 @@ const preloadImg = (src) => {
 	}
 
 	if (cachedImages.includes(src)) return false;
-	blob(src);
 	cachedImages.push(src);
+	blob(src).catch(() => {
+		// the fetch helper has already logged the failure, forget the image so a later call can try again
+		cachedImages.splice(cachedImages.indexOf(src), 1);
+	});
 	return true;
 };
 

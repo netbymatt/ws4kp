@@ -17,8 +17,16 @@ const locationCleanup = (input) => {
 const skipStations = ['U', 'C', 'H', 'W', 'Y', 'T', 'S', 'M', 'O', 'L', 'A', 'F', 'B', 'N', 'V', 'R', 'D', 'E', 'I', 'G', 'J'];
 const stationFilter = (station) => station.properties.stationIdentifier.match(/^[A-Z]{4}$/) && !skipStations.includes(station.properties.stationIdentifier.slice(0, 1));
 
-export {
+// make text safe to place in innerHTML, used for text that comes from the url or the user
+const escapeHtml = (text) => text
+	.replaceAll('&', '&amp;')
+	.replaceAll('<', '&lt;')
+	.replaceAll('>', '&gt;')
+	.replaceAll('"', '&quot;')
+	.replaceAll('\'', '&#39;');
 
+export {
+	escapeHtml,
 	locationCleanup,
 	stationFilter,
 };

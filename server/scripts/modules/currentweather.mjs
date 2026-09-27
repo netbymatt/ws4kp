@@ -249,16 +249,12 @@ class CurrentWeather extends WeatherDisplay {
 	}
 
 	// make data available outside this class
-	// promise allows for data to be requested before it is available
+	// always resolves to { data, parameters }, data is undefined if loading failed
 	async getCurrentWeather(stillWaiting) {
 		// an external caller has requested data, set up auto reload
 		this.setAutoReload();
-		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
-		return new Promise((resolve) => {
-			if (this.data) resolve({ data: this.data, parameters: this.weatherParameters });
-			// data not available, put it into the data callback queue
-			this.getDataCallbacks.push(() => resolve(this.data));
-		});
+		const data = await this.dataReady(stillWaiting);
+		return { data, parameters: this.weatherParameters };
 	}
 }
 
