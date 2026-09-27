@@ -145,8 +145,8 @@ class CurrentWeather extends WeatherDisplay {
 			if (this.isEnabled) this.setStatus(STATUS.failed);
 			setHeadend('station', 'none available');
 			setHeadend('observed');
-			// send failed to subscribers
-			this.getDataCallback(undefined);
+			// release anyone waiting, they get the data from the last successful load (undefined if there isn't any)
+			this.getDataCallback();
 			return;
 		}
 

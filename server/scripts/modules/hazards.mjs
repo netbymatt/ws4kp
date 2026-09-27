@@ -104,8 +104,8 @@ class Hazards extends ScrollWeatherDisplay {
 		} catch (error) {
 			console.error(`Unexpected Active Alerts error: ${error.message}`);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
-			// return undefined to other subscribers
-			this.getDataCallback(undefined);
+			// release anyone waiting, they get the data from the last successful load (undefined if there isn't any)
+			this.getDataCallback();
 			return;
 		}
 

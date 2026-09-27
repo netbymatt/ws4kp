@@ -48,8 +48,8 @@ class Hourly extends ScrollWeatherDisplay {
 			// use old data if available, fail if no data at all
 			if (!this.data) {
 				if (this.isEnabled) this.setStatus(STATUS.failed);
-				// return undefined to other subscribers
-				this.getDataCallback(undefined);
+				// release anyone waiting, there is no data so they get undefined
+				this.getDataCallback();
 				return;
 			}
 
@@ -61,7 +61,8 @@ class Hourly extends ScrollWeatherDisplay {
 		} catch (error) {
 			console.error(`Unexpected error getting hourly forecast: ${error.message}`);
 			if (this.isEnabled) this.setStatus(STATUS.failed);
-			this.getDataCallback(undefined);
+			// release anyone waiting, they get the data from the last successful load (undefined if there isn't any)
+			this.getDataCallback();
 		}
 	}
 
