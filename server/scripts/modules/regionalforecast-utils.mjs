@@ -91,7 +91,8 @@ const getRegionalObservation = async (city) => {
 
 		// preload the image
 		if (!augmentedObservation.icon) return false;
-		const icon = smallIcon(augmentedObservation.icon, !augmentedObservation.daytime);
+		// the icon url carries day/night (/icons/land/day/...), which smallIcon reads when no override is given
+		const icon = smallIcon(augmentedObservation.icon);
 		if (!icon) return false;
 
 		// add the icon url to the dataset

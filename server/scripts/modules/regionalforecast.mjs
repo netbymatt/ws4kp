@@ -249,7 +249,6 @@ class RegionalForecast extends WeatherDisplay {
 
 				// format the observation the same as the forecast
 				const regionalObservation = {
-					daytime: !!/\/day\//.test(observation.icon),
 					temperature: temperatureConverter(observation.temperature.value),
 					name: formatCity(city.city),
 					icon: observation.ws4icon,
