@@ -339,6 +339,9 @@ class AutoComplete {
 			this.options.onSelect(suggestion);
 			this.elem.value = suggestion.value;
 			this.hideSuggestions();
+		} else if (suggestions) {
+			// the search worked but found nothing, show the no results notice (a failed search already shows its own)
+			this.populateSuggestions();
 		}
 	}
 

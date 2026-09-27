@@ -3,7 +3,7 @@ import noSleep from './modules/utils/nosleep.mjs';
 import {
 	message as navMessage, isPlaying, resetStatuses,
 } from './modules/navigation.mjs';
-import { latLonReceived } from './modules/location.mjs';
+import { latLonReceived, setLocationStatus } from './modules/location.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { registerHiddenSetting } from './modules/share.mjs';
 import './modules/tabs.mjs';
@@ -151,7 +151,7 @@ const init = async () => {
 	if (parsedParameters.latLonQuery && !parsedParameters.latLon) {
 		const txtAddress = document.querySelector(TXT_ADDRESS_SELECTOR);
 		txtAddress.value = parsedParameters.latLonQuery;
-		const geometry = await geocodeLatLonQuery(parsedParameters.latLonQuery);
+		const geometry = await findLocation({ text: parsedParameters.latLonQuery });
 		if (geometry) {
 			doRedirectToGeometry(geometry);
 		}
@@ -203,6 +203,7 @@ const init = async () => {
 		localStorage.removeItem('latLon');
 		localStorage.removeItem('latLonFromGPS');
 		document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
+		setLocationStatus();
 	});
 
 	// swipe functionality
@@ -214,44 +215,43 @@ const init = async () => {
 	registerHiddenSetting('latLon', () => localStorage.getItem('latLon'));
 };
 
-const geocodeLatLonQuery = async (query) => {
+// look up a search, or a chosen suggestion (text and magicKey), and return its geometry
+// reports the problem to the user and returns null when the location can't be found
+const findLocation = async (search) => {
+	setLocationStatus();
 	try {
+		// Note: it's fine that this uses json instead of safeJson since it's infrequent and user-initiated
 		const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
 			data: {
-				text: query,
+				...search,
 				f: 'json',
 			},
+		}, {
+			retryCount: 0,
 		});
+		// json() returns null when the request was aborted
+		if (!data) throw new Error('no response');
 
-		const loc = data.locations?.[0];
-		if (loc) {
-			return loc.feature.geometry;
-		}
-		return null;
+		const geometry = data.locations?.[0]?.feature?.geometry;
+		if (!geometry) setLocationStatus(`Couldn't find "${search.text}". Try a different search.`);
+		return geometry ?? null;
 	} catch (error) {
 		console.error('Geocoding failed:', error);
+		setLocationStatus('Location search isn\'t responding. Please try again.');
 		return null;
 	}
 };
 
 const autocompleteOnSelect = async (suggestion) => {
-	// Note: it's fine that this uses json instead of safeJson since it's infrequent and user-initiated
-	const data = await json('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find', {
-		data: {
-			text: suggestion.value,
-			magicKey: suggestion.data,
-			f: 'json',
-		},
+	const geometry = await findLocation({
+		text: suggestion.value,
+		magicKey: suggestion.data,
 	});
+	if (!geometry) return;
 
-	const loc = data.locations[0];
-	if (loc) {
-		localStorage.removeItem('latLonFromGPS');
-		document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
-		doRedirectToGeometry(loc.feature.geometry);
-	} else {
-		console.error('An unexpected error occurred. Please try a different search string.');
-	}
+	localStorage.removeItem('latLonFromGPS');
+	document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
+	doRedirectToGeometry(geometry);
 };
 
 const doRedirectToGeometry = (geom, haveDataCallback) => {
@@ -516,6 +516,7 @@ const btnGetGpsClick = async () => {
 
 	// set gps active
 	btn.classList.add('active');
+	setLocationStatus();
 
 	// get position
 	try {
@@ -525,6 +526,20 @@ const btnGetGpsClick = async () => {
 	} catch (error) {
 		btn.classList.remove('active');
 		console.error('Unable to get GPS location:', error.message);
+		setLocationStatus(gpsErrorText(error));
+	}
+};
+
+// explain a failed geolocation request, error.code is from GeolocationPositionError
+const gpsErrorText = (error) => {
+	switch (error.code) {
+		case 1: // PERMISSION_DENIED
+			return 'Location access was blocked. Allow location access for this site, or enter a location.';
+		case 3: // TIMEOUT
+			return 'Finding your location took too long. Try again, or enter a location.';
+		case 2: // POSITION_UNAVAILABLE
+		default:
+			return 'Your location couldn\'t be determined. Try again, or enter a location.';
 	}
 };
 

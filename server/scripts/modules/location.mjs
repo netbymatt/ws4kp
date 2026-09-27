@@ -127,4 +127,5 @@ const timeZone = () => weatherParameters.timeZone;
 export {
 	timeZone,
 	latLonReceived,
+	setLocationStatus,
 };
