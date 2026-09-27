@@ -2,7 +2,7 @@
 import { distance as calcDistance, directionToNSEW } from './utils/calc.mjs';
 import { safeJson, safePromiseAll } from './utils/fetch.mjs';
 import STATUS from './status.mjs';
-import { locationCleanup } from './utils/string.mjs';
+import { locationCleanup, shortConditions } from './utils/string.mjs';
 import { temperature, windSpeed } from './utils/units.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -172,7 +172,7 @@ class LatestObservations extends WeatherDisplay {
 				location: locationCleanup(condition.city).substring(0, locationLimit),
 				temp: Temperature,
 				like: Like.value,
-				weather: shortenCurrentConditions(condition.textDescription).substring(0, weatherLimit),
+				weather: shortConditions(condition.textDescription).substring(0, weatherLimit),
 			};
 
 			if (WindSpeed > 0) {
@@ -235,23 +235,5 @@ const metarFields = [
 	{ name: 'windDirection', check: (orig, metar) => orig.windDirection.value === null && metar.windDirection.value !== null },
 ];
 
-const shortenCurrentConditions = (_condition) => {
-	let condition = _condition;
-	condition = condition.replace(/Light/g, 'L');
-	condition = condition.replace(/Heavy/g, 'H');
-	condition = condition.replace(/Partly/g, 'P');
-	condition = condition.replace(/Mostly/g, 'M');
-	condition = condition.replace(/Few/g, 'F');
-	condition = condition.replace(/Thunderstorm/g, 'T\'storm');
-	condition = condition.replace(/ in /g, '');
-	condition = condition.replace(/Vicinity/g, '');
-	condition = condition.replace(/ and /g, ' ');
-	condition = condition.replace(/Freezing Rain/g, 'Frz Rn');
-	condition = condition.replace(/Freezing/g, 'Frz');
-	condition = condition.replace(/Unknown Precip/g, '');
-	condition = condition.replace(/L Snow Fog/g, 'L Snw/Fog');
-	condition = condition.replace(/ with /g, '/');
-	return condition;
-};
 // register display
 registerDisplay(new LatestObservations(2, 'latest-observations'));

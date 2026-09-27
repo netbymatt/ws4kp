@@ -3,7 +3,7 @@ import STATUS from './status.mjs';
 import preloadImg from './utils/preload-image.mjs';
 import { safeJson } from './utils/fetch.mjs';
 import { directionToNSEW } from './utils/calc.mjs';
-import { locationCleanup } from './utils/string.mjs';
+import { locationCleanup, shortConditions } from './utils/string.mjs';
 import largeIcon from './icons/large.mjs';
 import WeatherDisplay from './weatherdisplay.mjs';
 import { registerDisplay } from './navigation.mjs';
@@ -257,25 +257,6 @@ class CurrentWeather extends WeatherDisplay {
 		return { data, parameters: this.weatherParameters };
 	}
 }
-
-const shortConditions = (_condition) => {
-	let condition = _condition;
-	condition = condition.replace(/Light/g, 'L');
-	condition = condition.replace(/Heavy/g, 'H');
-	condition = condition.replace(/Partly/g, 'P');
-	condition = condition.replace(/Mostly/g, 'M');
-	condition = condition.replace(/Few/g, 'F');
-	condition = condition.replace(/Thunderstorm/g, 'T\'storm');
-	condition = condition.replace(/ in /g, '');
-	condition = condition.replace(/Vicinity/g, '');
-	condition = condition.replace(/ and /g, ' ');
-	condition = condition.replace(/Freezing Rain/g, 'Frz Rn');
-	condition = condition.replace(/Freezing/g, 'Frz');
-	condition = condition.replace(/Unknown Precip/g, '');
-	condition = condition.replace(/L Snow Fog/g, 'L Snw/Fog');
-	condition = condition.replace(/ with /g, '/');
-	return condition;
-};
 
 // format the received data
 const parseData = (data) => {
