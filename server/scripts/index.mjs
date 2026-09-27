@@ -1,9 +1,9 @@
 import { json } from './modules/utils/fetch.mjs';
 import noSleep from './modules/utils/nosleep.mjs';
 import {
-	message as navMessage, isPlaying, resetStatuses,
+	message as navMessage, isPlaying, resetStatuses, resetDisplays,
 } from './modules/navigation.mjs';
-import { latLonReceived, setLocationStatus } from './modules/location.mjs';
+import { latLonReceived, setLocationStatus, cancelWeather } from './modules/location.mjs';
 import { round2 } from './modules/utils/units.mjs';
 import { registerHiddenSetting } from './modules/share.mjs';
 import './modules/tabs.mjs';
@@ -192,18 +192,32 @@ const init = async () => {
 	if (play === null || play === 'true') sendNavButtonMessage('navButton', 'play');
 
 	document.querySelector('#btnClearQuery').addEventListener('click', () => {
+		// stop any lookup still running, then go back to the title card
+		cancelWeather();
+		resetDisplays();
+		currentLatLon = undefined;
+
 		// the button is not inside a form, so it does not clear the location box by itself
 		autoComplete.reset();
 		clearLocationRows();
 
+		// playing is the default, so the next location entered starts playing
 		localStorage.removeItem('play');
 		sendNavButtonMessage('navButton', 'play');
 
 		localStorage.removeItem('latLonQuery');
 		localStorage.removeItem('latLon');
 		localStorage.removeItem('latLonFromGPS');
+		// the next load is treated as a first visit, which lets custom code (such as a geoip lookup) run again
+		localStorage.removeItem('firstRun');
 		document.querySelector(BTN_GET_GPS_SELECTOR).classList.remove('active');
 		setLocationStatus();
+
+		// a location in the address would be loaded again on a refresh, other parameters (kiosk, settings) are kept
+		const url = new URL(window.location.href);
+		url.searchParams.delete('latLonQuery');
+		url.searchParams.delete('latLon');
+		window.history.replaceState(null, '', url);
 	});
 
 	// swipe functionality

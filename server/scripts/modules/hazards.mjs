@@ -119,6 +119,12 @@ class Hazards extends ScrollWeatherDisplay {
 		this.setStatus(STATUS.loaded);
 	}
 
+	// also clear the alert indicator in the display list
+	reset() {
+		super.reset();
+		this.checkbox?.querySelector('.alert')?.classList.remove('show');
+	}
+
 	// alerts that have already been scrolled through are not shown again until the next reset
 	// except when replaying on request, which shows them all
 	scrollRows() {

@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 const displays = [];
 let playing = false;
 let progress;
+// false until a location is entered, and again after the reset button
+// a request that was still running when reset was pressed must not bring a display back
+let locationActive = false;
 
 const init = async () => {
 	window.addEventListener('display-mode-change', () => {
@@ -38,6 +41,7 @@ const message = (data) => {
 // receive a status update from a module {id, value}
 const updateStatus = (value) => {
 	if (value.id < 0) return;
+	if (!locationActive) return;
 	if (!progress && !settings?.kiosk?.value) return;
 
 	if (progress) progress.drawCanvas(displays, countLoadedDisplays());
@@ -105,6 +109,7 @@ const displayNavMessage = (myMessage) => {
 
 // navigate to next or previous
 const navTo = (direction) => {
+	if (!locationActive) return;
 	// test for a current display
 	const current = currentDisplay();
 	if (progress) progress.hideCanvas();
@@ -181,6 +186,7 @@ const loadDisplay = (direction) => {
 // show a specific display, used by the display list below the player
 // the play state is unchanged: when playing, it continues on from this display
 const showDisplay = (display) => {
+	if (!locationActive) return;
 	if (display.status !== STATUS.loaded || !display.canShowOnRequest()) return;
 	if (progress) progress.hideCanvas();
 	hideAllCanvases();
@@ -297,6 +303,7 @@ const registerProgress = (_progress) => {
 // a location is ready: show progress and ask every display for data
 // location.mjs calls this, so navigation doesn't need to import it
 const startDisplays = async (weatherParameters) => {
+	locationActive = true;
 	hideAllCanvases();
 	if (!settings?.kiosk?.value) {
 		// In normal mode, hide loading screen and show progress
@@ -312,8 +319,23 @@ const startDisplays = async (weatherParameters) => {
 	displays.forEach((display) => display.getData(weatherParameters));
 };
 
+const isLocationActive = () => locationActive;
+
+// the reset button: stop every display and go back to the title card
+const resetDisplays = () => {
+	locationActive = false;
+	// stop and hide the scroll at the bottom, and start it from the beginning next time
+	['non-display', 'hide', 'reload'].forEach((detail) => window.dispatchEvent(new CustomEvent('current-weather-scroll', { detail })));
+	displays.forEach((display) => display.reset());
+	progress?.hideCanvas();
+	// the title card's own stylesheet shows it
+	document.querySelector('#loading').style.removeProperty('display');
+};
+
 export {
 	updateStatus,
+	resetDisplays,
+	isLocationActive,
 	displayNavMessage,
 	resetStatuses,
 	isPlaying,

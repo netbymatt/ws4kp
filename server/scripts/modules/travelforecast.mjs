@@ -8,6 +8,7 @@ import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { TravelCities } from './utils/data-loader.mjs';
+import { timeZone } from './location.mjs';
 
 // A cheap, stable signature of the content about to be rendered. Only the fields that reach the DOM
 // are included. Rows for cities whose forecast failed are dropped from the rendered list, so the row
@@ -140,7 +141,7 @@ const getTravelCitiesDayName = (cities) => {
 	const firstCity = cities.find((city) => city && !city.error);
 	if (firstCity) {
 		// today or tomorrow
-		const day = DateTime.local().plus({ days: (firstCity.today) ? 0 : 1 });
+		const day = DateTime.local().setZone(timeZone()).plus({ days: (firstCity.today) ? 0 : 1 });
 		// return the day
 		return day.toLocaleString({ weekday: 'long' });
 	}

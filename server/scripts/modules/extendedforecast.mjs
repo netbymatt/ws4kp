@@ -11,6 +11,7 @@ import { registerDisplay } from './navigation.mjs';
 import settings from './settings.mjs';
 import filterExpiredPeriods from './utils/forecast-utils.mjs';
 import { debugFlag } from './utils/debug.mjs';
+import { timeZone } from './location.mjs';
 
 class ExtendedForecast extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -152,7 +153,7 @@ const parse = (fullForecast, forecastUrl) => {
 			fDay.high = period.temperature;
 			fDay.icon = largeIcon(period.icon);
 			fDay.text = shortenExtendedForecastText(period.shortForecast);
-			fDay.dayName = DateTime.fromISO(period.startTime).startOf('day').toLocaleString({ weekday: 'short' });
+			fDay.dayName = DateTime.fromISO(period.startTime).setZone(timeZone()).startOf('day').toLocaleString({ weekday: 'short' });
 			// preload the icon
 			preloadImg(fDay.icon);
 			// Wait for the corresponding night period to increment

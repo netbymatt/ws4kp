@@ -118,6 +118,13 @@ const populateWeatherParameters = (params, point) => {
 	setHeadend('grid', `${point.gridX},${point.gridY}`);
 };
 
+// the reset button: drop a lookup that is still running or waiting to retry
+const cancelWeather = () => {
+	weatherRequest += 1;
+	clearTimeout(retryTimeout);
+	setLocationStatus();
+};
+
 const latLonReceived = (data, haveDataCallback) => {
 	getWeather(data, haveDataCallback);
 };
@@ -128,4 +135,5 @@ export {
 	timeZone,
 	latLonReceived,
 	setLocationStatus,
+	cancelWeather,
 };

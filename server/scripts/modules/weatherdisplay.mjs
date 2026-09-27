@@ -3,7 +3,7 @@
 import STATUS, { calcStatusClass, statusClasses } from './status.mjs';
 import { DateTime } from '../vendor/auto/luxon.mjs';
 import {
-	msg, displayNavMessage, isPlaying, updateStatus, showDisplay,
+	msg, displayNavMessage, isPlaying, updateStatus, showDisplay, isLocationActive,
 } from './navigation.mjs';
 import { parseQueryString } from './utils/setting.mjs';
 import settings from './settings.mjs';
@@ -111,8 +111,19 @@ class WeatherDisplay {
 		this.isEnabled = e.target.checked;
 		// store the value for the next load
 		window.localStorage.setItem(`display-enabled: ${this.elemId}`, this.isEnabled);
+		// without a location there is nothing to load, the choice is used once one is entered
+		if (!isLocationActive()) return;
 		// calling get data will update the status and actually get the data if we're set to enabled
 		this.getData();
+	}
+
+	// return to the state before a location was entered, used by the reset button
+	reset() {
+		this.clearAutoReload();
+		this.data = undefined;
+		this.status = STATUS.loading;
+		this.checkbox?.classList.remove(...statusClasses);
+		this.hideCanvas();
 	}
 
 	// set data status and send update to navigation module
@@ -124,7 +135,8 @@ class WeatherDisplay {
 		});
 
 		// update coloring of checkbox at bottom of page
-		if (!this.checkbox) return;
+		// a request that finishes after the reset button must not color the list again
+		if (!this.checkbox || !isLocationActive()) return;
 		this.checkbox.classList.remove(...statusClasses);
 		this.checkbox.classList.add(calcStatusClass(value));
 	}

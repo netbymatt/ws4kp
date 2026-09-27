@@ -48,13 +48,13 @@ class Almanac extends WeatherDisplay {
 
 	calcSunMoonData(weatherParameters) {
 		const dayOffsets = [0, 1, 2, 3, 4, 5, 6];
-		const sun = dayOffsets.map((days) => getTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
-		const moonTransit = dayOffsets.map((days) => getMoonTimes(DateTime.local().plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
+		const sun = dayOffsets.map((days) => getTimes(DateTime.local().setZone(timeZone()).plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
+		const moonTransit = dayOffsets.map((days) => getMoonTimes(DateTime.local().setZone(timeZone()).plus({ days }).toJSDate(), weatherParameters.latitude, weatherParameters.longitude));
 
 		// brute force the moon phases by scanning the next 45 days
 		const moon = [];
 		// start with yesterday
-		let moonDate = DateTime.local().minus({ days: 1 });
+		let moonDate = DateTime.local().setZone(timeZone()).minus({ days: 1 });
 		let { phase } = getMoonIllumination(moonDate.toJSDate());
 		let iterations = 0;
 		do {
