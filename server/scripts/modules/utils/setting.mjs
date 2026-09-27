@@ -85,7 +85,7 @@ class Setting {
 	generateSelect() {
 		// create a radio button set in the selected displays area
 		const label = document.createElement('label');
-		label.for = `settings-${this.shortName}-select`;
+		label.htmlFor = `settings-${this.shortName}-select`;
 		label.id = `settings-${this.shortName}-label`;
 
 		const span = document.createElement('span');
@@ -121,7 +121,7 @@ class Setting {
 	generateCheckbox() {
 		// create a checkbox in the selected displays area
 		const label = document.createElement('label');
-		label.for = `settings-${this.shortName}-checkbox`;
+		label.htmlFor = `settings-${this.shortName}-checkbox`;
 		label.id = `settings-${this.shortName}-label`;
 		const checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';
@@ -143,7 +143,7 @@ class Setting {
 	generateString() {
 		// create a string input and accompanying set button
 		const label = document.createElement('label');
-		label.for = `settings-${this.shortName}-string`;
+		label.htmlFor = `settings-${this.shortName}-string`;
 		label.id = `settings-${this.shortName}-label`;
 		// text input box
 		const textInput = document.createElement('input');
@@ -152,6 +152,8 @@ class Setting {
 		textInput.id = `settings-${this.shortName}-string`;
 		textInput.name = this.shortName;
 		textInput.placeholder = this.placeholder;
+		// the label holds no text of its own, so name the box for screen readers
+		textInput.setAttribute('aria-label', this.name);
 		// set button
 		const setButton = document.createElement('input');
 		setButton.type = 'button';

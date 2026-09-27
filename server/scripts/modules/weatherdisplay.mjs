@@ -74,7 +74,7 @@ class WeatherDisplay {
 
 		// create a checkbox in the selected displays area
 		const label = document.createElement('label');
-		label.for = `${this.elemId}-checkbox`;
+		label.htmlFor = `${this.elemId}-checkbox`;
 		label.id = `${this.elemId}-label`;
 		const checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';

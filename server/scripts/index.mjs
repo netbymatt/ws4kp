@@ -134,7 +134,6 @@ const init = async () => {
 		onSelect(suggestion) {
 			autocompleteOnSelect(suggestion);
 		},
-		width: 490,
 	});
 	window.autoComplete = autoComplete;
 

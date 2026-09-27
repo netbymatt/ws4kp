@@ -66,18 +66,28 @@ class AutoComplete {
 
 		// create and add the results container
 		const results = document.createElement('div');
+		results.id = `${this.elem.id || 'autocomplete'}-suggestions`;
+		results.setAttribute('role', 'listbox');
 		results.style.display = 'none';
 		results.classList.add(this.options.containerClass);
-		results.style.width = (typeof this.options.width === 'string') ? this.options.width : `${this.options.width}px`;
+		// without a width option the list matches the box, measured each time it is shown
+		if (this.options.width !== undefined) {
+			results.style.width = (typeof this.options.width === 'string') ? this.options.width : `${this.options.width}px`;
+		}
 		results.style.zIndex = this.options.zIndex;
 		results.style.maxHeight = `${this.options.maxHeight}px`;
 		results.style.overflowX = 'hidden';
+		// the border is inside the width, so a list sized to the box lines up with it
+		results.style.boxSizing = 'border-box';
 		// a suggestion line is highlighted while the pointer or the arrow keys are on it
-		results.addEventListener('mouseover', (e) => suggestionLine(e.target)?.classList.add('selected'));
+		results.addEventListener('mouseover', (e) => {
+			const line = suggestionLine(e.target);
+			if (line) this.select(line);
+		});
 		results.addEventListener('mouseout', (e) => {
 			const line = suggestionLine(e.target);
 			// moving between the bold part and the plain part of one line is not leaving it
-			if (line && !line.contains(e.relatedTarget)) line.classList.remove('selected');
+			if (line && !line.contains(e.relatedTarget)) this.deselectAll();
 		});
 		results.addEventListener('click', (e) => this.click(e));
 		// pressing on the list must not take focus from the box, otherwise choosing a line would look the same as tabbing away
@@ -85,6 +95,21 @@ class AutoComplete {
 
 		this.results = results;
 		this.elem.after(results);
+
+		// the box is a combobox that controls the list, screen readers follow the highlighted line through aria-activedescendant
+		this.elem.setAttribute('role', 'combobox');
+		this.elem.setAttribute('aria-autocomplete', 'list');
+		this.elem.setAttribute('aria-expanded', 'false');
+		this.elem.setAttribute('aria-controls', results.id);
+
+		// screen readers are told how many suggestions were found, or why there are none, through a visually hidden status
+		const announcer = document.createElement('div');
+		announcer.setAttribute('role', 'status');
+		Object.assign(announcer.style, {
+			position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap',
+		});
+		this.announcer = announcer;
+		results.after(announcer);
 
 		// add handlers for changing text (typing, paste, autofill, voice input) and for the navigation keys
 		this.elem.addEventListener('input', () => this.onInput());
@@ -121,10 +146,15 @@ class AutoComplete {
 
 	hideSuggestions() {
 		this.results.style.display = 'none';
+		this.elem.setAttribute('aria-expanded', 'false');
+		// a hidden line can't stay highlighted, Enter would otherwise choose something the user can't see
+		this.deselectAll();
 	}
 
 	showSuggestions() {
+		if (this.options.width === undefined) this.results.style.width = `${this.elem.offsetWidth}px`;
 		this.results.style.removeProperty('display');
+		this.elem.setAttribute('aria-expanded', 'true');
 	}
 
 	clearSuggestions() {
@@ -306,6 +336,9 @@ class AutoComplete {
 			const elem = document.createElement('div');
 			elem.classList.add('suggestion');
 			elem.dataset.item = idx;
+			elem.id = `${this.results.id}-${idx}`;
+			elem.setAttribute('role', 'option');
+			elem.setAttribute('aria-selected', 'false');
 			elem.innerHTML = formatResult(suggested.value, this.currentValue);
 			return elem;
 		});
@@ -313,6 +346,8 @@ class AutoComplete {
 		this.results.replaceChildren(...suggestionElems);
 		this.dismissed = false;
 		this.showSuggestions();
+		const count = suggestionElems.length;
+		this.announcer.textContent = `${count} suggestion${count === 1 ? '' : 's'}, use the up and down arrows to choose`;
 	}
 
 	noSuggestionNotice() {
@@ -322,9 +357,13 @@ class AutoComplete {
 	showNotice(message) {
 		const notice = document.createElement('div');
 		notice.textContent = message;
+		// inside the listbox, so it is an option that can't be chosen
+		notice.setAttribute('role', 'option');
+		notice.setAttribute('aria-disabled', 'true');
 		this.results.replaceChildren(notice);
 		this.dismissed = false;
 		this.showSuggestions();
+		this.announcer.textContent = message;
 	}
 
 	// the submit button has been pressed and we'll just use the first suggestion found
@@ -375,16 +414,28 @@ class AutoComplete {
 		index = ((index % this.suggestions.length) + this.suggestions.length) % this.suggestions.length;
 
 		// set this index
-		this.deselectAll();
 		const line = this.results.querySelectorAll('.suggestion')[index];
-		line?.classList.add('selected');
+		if (!line) return;
+		this.select(line);
 		// a long list scrolls, keep the highlighted line in view
-		line?.scrollIntoView({ block: 'nearest' });
+		line.scrollIntoView({ block: 'nearest' });
+	}
+
+	// highlight one line, for the arrow keys and the pointer
+	select(line) {
+		this.deselectAll();
+		line.classList.add('selected');
+		line.setAttribute('aria-selected', 'true');
+		this.elem.setAttribute('aria-activedescendant', line.id);
 	}
 
 	deselectAll() {
 		// clear other selected indexes
-		[...this.results.querySelectorAll('.selected')].forEach((elem) => elem.classList.remove('selected'));
+		[...this.results.querySelectorAll('.selected')].forEach((elem) => {
+			elem.classList.remove('selected');
+			elem.setAttribute('aria-selected', 'false');
+		});
+		this.elem.removeAttribute('aria-activedescendant');
 	}
 
 	// if a click is detected on the page, generally we hide the suggestions, unless the click was within the autocomplete elements

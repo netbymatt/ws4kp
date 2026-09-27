@@ -69,10 +69,10 @@
 <body <% if (query && (query['kiosk'] === 'true' || query['settings-kiosk-checkbox'] === 'true' )) { %>class="kiosk" <% }%>>
 
   <div id="divQuery">
-    <input id="txtLocation" name="txtLocation" type="text" value="" placeholder="ZIP Code or City, State" data-1p-ignore />
+    <input id="txtLocation" name="txtLocation" type="text" value="" placeholder="ZIP Code or City, State" aria-label="Location" data-1p-ignore />
     <div class="buttons">
-      <button id="btnGetGps" type="button" title="Get GPS Location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light" />
-        <img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark" />
+      <button id="btnGetGps" type="button" title="Get GPS Location" aria-label="Get GPS location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light" alt="" />
+        <img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark" alt="" />
       </button>
       <button id="btnGetLatLng" type="submit">GO</button>
       <button id="btnClearQuery" type="button">Reset</button>
