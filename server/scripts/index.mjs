@@ -94,6 +94,7 @@ const init = async () => {
 	} else {
 		fullscreenButton.addEventListener('click', btnFullScreenClick);
 	}
+	document.addEventListener('fullscreenchange', fullscreenChanged);
 
 	const btnGetGps = document.querySelector(BTN_GET_GPS_SELECTOR);
 	btnGetGps.addEventListener('click', btnGetGpsClick);
@@ -279,7 +280,8 @@ const doRedirectToGeometry = (geom, haveDataCallback) => {
 
 const btnFullScreenClick = () => {
 	if (document.fullscreenElement) {
-		exitFullscreen();
+		// Note: Chrome can't leave a fullscreen the user entered with F11 this way
+		document.exitFullscreen();
 	} else {
 		enterFullScreen();
 	}
@@ -290,79 +292,47 @@ const btnFullScreenClick = () => {
 		noSleep(false);
 	}
 
-	updateFullScreenNavigate();
-
 	return false;
 };
 
-// This is async because modern browsers return a Promise from requestFullscreen
+// This is async because requestFullscreen returns a Promise
 const enterFullScreen = async () => {
 	const element = document.querySelector('#divTwc');
 
-	// Supports most browsers and their versions.
-	const requestMethod = element.requestFullscreen || element.webkitRequestFullscreen || element.mozRequestFullscreen || element.msRequestFullscreen;
-
-	if (requestMethod) {
-		try {
-			// Native full screen with options for optimal display
-			await requestMethod.call(element, {
-				navigationUI: 'hide',
-				allowsInlineMediaPlayback: true,
-			});
-
-			if (debugFlag('fullscreen')) {
-				setTimeout(() => {
-					console.log(`🖥️ Fullscreen engaged. window=${window.innerWidth}x${window.innerHeight} fullscreenElement=${!!document.fullscreenElement}`);
-				}, 150);
-			}
-		} catch (error) {
-			console.error('❌ Fullscreen request failed:', error);
-		}
-	} else {
-		// iOS doesn't support FullScreen API.
+	if (!element.requestFullscreen) {
+		// iPhone Safari has no fullscreen for page elements
 		window.scrollTo(0, 0);
 		resize(true); // Force resize for iOS
+		updateFullScreenNavigate();
+		return;
 	}
+
+	try {
+		await element.requestFullscreen({ navigationUI: 'hide' });
+
+		if (debugFlag('fullscreen')) {
+			setTimeout(() => {
+				console.log(`🖥️ Fullscreen engaged. window=${window.innerWidth}x${window.innerHeight} fullscreenElement=${!!document.fullscreenElement}`);
+			}, 150);
+		}
+	} catch (error) {
+		console.error('❌ Fullscreen request failed:', error);
+	}
+};
+
+// the button and the control bar follow the fullscreen state however it changed:
+// the button, the F key, Esc or the browser's own controls
+// Note: resize is called by the fullscreenchange listener in scaling.mjs
+const fullscreenChanged = () => {
+	const isFullscreen = !!document.fullscreenElement;
+	const label = isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen';
+	const button = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
+	button.querySelector('img').src = isFullscreen ? 'images/nav/ic_fullscreen_exit_white_24dp_2x.png' : 'images/nav/ic_fullscreen_white_24dp_2x.png';
+	button.title = label;
+	button.setAttribute('aria-label', label);
+
+	// shows the control bar and cursor, and hides them again after a pause while fullscreen
 	updateFullScreenNavigate();
-
-	// change hover text and image
-	const button = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	if (button && button.style.display !== 'none') {
-		button.querySelector('img').src = 'images/nav/ic_fullscreen_exit_white_24dp_2x.png';
-		button.title = 'Exit fullscreen';
-		button.setAttribute('aria-label', 'Exit fullscreen');
-	}
-};
-
-const exitFullscreen = () => {
-	// exit full-screen
-
-	if (document.exitFullscreen) {
-		// Chrome 71 broke this if the user pressed F11 to enter full screen mode.
-		document.exitFullscreen();
-	} else if (document.webkitExitFullscreen) {
-		document.webkitExitFullscreen();
-	} else if (document.mozCancelFullscreen) {
-		document.mozCancelFullscreen();
-	} else if (document.msExitFullscreen) {
-		document.msExitFullscreen();
-	}
-	// Note: resize will be called by fullscreenchange event listener
-	exitFullScreenVisibilityChanges();
-};
-
-const exitFullScreenVisibilityChanges = () => {
-	// change hover text and image
-	const button = document.querySelector(TOGGLE_FULL_SCREEN_SELECTOR);
-	if (button && button.style.display !== 'none') {
-		button.querySelector('img').src = 'images/nav/ic_fullscreen_white_24dp_2x.png';
-		button.title = 'Enter fullscreen';
-		button.setAttribute('aria-label', 'Enter fullscreen');
-	}
-	document.querySelector('#divTwc').classList.remove('no-cursor');
-	const divTwcBottom = document.querySelector('#divTwcBottom');
-	divTwcBottom.classList.remove('hidden');
-	divTwcBottom.classList.add('visible');
 };
 
 const btnNavigateMenuClick = () => {

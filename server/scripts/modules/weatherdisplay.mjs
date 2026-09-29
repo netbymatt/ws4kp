@@ -13,6 +13,13 @@ import { timeZone } from './location.mjs';
 
 let drawStartedAt = null;
 
+// one clock for every display: it updates the display that drew last, while that display is on screen
+let clockDisplay = null;
+let clockInterval = null;
+const clockTick = () => {
+	if (clockDisplay?.active) clockDisplay.drawCurrentDateTime();
+};
+
 class WeatherDisplay {
 	constructor(navId, elemId, name, defaultEnabled) {
 		// navId is used in messaging and sort order
@@ -213,11 +220,9 @@ class WeatherDisplay {
 		// draw date and time
 		if (this.okToDrawCurrentDateTime) {
 			this.drawCurrentDateTime();
-			// auto clock refresh
-			if (!this.dateTimeInterval) {
-				// only draw if canvas is active to conserve battery
-				this.dateTimeInterval = setInterval(() => this.active && this.drawCurrentDateTime(), 100);
-			}
+			// hand the shared clock to this display, the clock is started by the first display to draw
+			clockDisplay = this;
+			if (!clockInterval) clockInterval = setInterval(clockTick, 100);
 		}
 		WeatherDisplay.sendRenderEnd();
 	}

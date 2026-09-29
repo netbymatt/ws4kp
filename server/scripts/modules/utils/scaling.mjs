@@ -20,7 +20,7 @@ let appliedScale = 1;
 const isIOS = () => {
 	const { userAgent } = navigator;
 	const iOSRegex = /CPU.*OS ([0-9_]{1,})[0-9_]{0,}|(CPU like).*AppleWebKit.*Mobile/i;
-	return iOSRegex.test(userAgent) && !window.MSStream;
+	return iOSRegex.test(userAgent);
 };
 
 // Helper function to clear CSS properties from elements
@@ -56,14 +56,11 @@ const init = () => {
 	window.addEventListener('scanlines-change', () => applyScanlineScaling(appliedScale));
 
 	// Handle fullscreen change events and trigger an immediate resize calculation
-	const fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
-	fullscreenEvents.forEach((eventName) => {
-		document.addEventListener(eventName, () => {
-			if (debugFlag('fullscreen')) {
-				console.log(`🖥️ ${eventName} event fired. fullscreenElement=${!!document.fullscreenElement}`);
-			}
-			resize(true);
-		});
+	document.addEventListener('fullscreenchange', () => {
+		if (debugFlag('fullscreen')) {
+			console.log(`🖥️ fullscreenchange event fired. fullscreenElement=${!!document.fullscreenElement}`);
+		}
+		resize(true);
 	});
 
 	// De-bounced resize handler to prevent rapid-fire resize calls
@@ -100,8 +97,8 @@ const resize = (force = false) => {
 	const isMobileSafariKiosk = isIOS() && isKioskMode;	// Detect Mobile Safari in kiosk mode (regardless of standalone status)
 	const targetWidth = BASE_SIZE.width;
 
-	// Use centering behavior for fullscreen, kiosk mode, or Mobile Safari kiosk mode
-	const isKioskLike = isFullscreen || isKioskMode || isMobileSafariKiosk;
+	// Use centering behavior for fullscreen and kiosk mode (Mobile Safari kiosk is a kind of kiosk mode)
+	const isKioskLike = isFullscreen || isKioskMode;
 
 	// Use the page's visible area instead of the bottom container width to avoid zero-dimension issues
 	// clientWidth/clientHeight leave out the page scrollbars, which innerWidth/innerHeight include
@@ -142,7 +139,7 @@ const resize = (force = false) => {
 	const mainContainer = document.querySelector('#divTwcMain');
 
 	// BASELINE: content fits naturally, no scaling needed
-	if (!isKioskLike && scale >= 1.0 && !isKioskMode) {
+	if (!isKioskLike && scale >= 1.0) {
 		if (debugFlag('fullscreen')) {
 			console.log('🖥️ Resetting fullscreen/kiosk styles to normal');
 		}
@@ -160,7 +157,8 @@ const resize = (force = false) => {
 	}
 
 	// MOBILE SCALING: Use wrapper scaling for mobile devices (but not when in fullscreen/kiosk mode)
-	if ((scale < 1.0 || (isKioskMode && !isKioskLike)) && !isMobileSafariKiosk && !isKioskLike) {
+	// the baseline above has taken every other normal page case, so this is a normal page that doesn't fit
+	if (!isKioskLike) {
 		/*
 		 * MOBILE SCALING (Wrapper Scaling)
 		 *
