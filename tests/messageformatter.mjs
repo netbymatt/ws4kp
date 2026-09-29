@@ -16,7 +16,7 @@ const colors = {
 const messageFormatter = async (message) => {
 	const args = await Promise.all(message.args().map((arg) => describe(arg)));
 	// make ability to paint different console[types]
-	const type = message.type().substr(0, 3).toUpperCase();
+	const type = message.type().substring(0, 3).toUpperCase();
 	const color = colors[type] || chalk.blue;
 	let text = '';
 	for (let i = 0; i < args.length; i += 1) {

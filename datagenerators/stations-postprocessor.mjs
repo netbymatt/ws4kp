@@ -1189,7 +1189,7 @@ const postProcessor = async (_options) => {
 			state: station.state,
 			location: originalName, // original full location name
 			city: processedName, // processed city name for display
-			simple: originalName.match(/[^,/;\\-]*/)[0].substr(0, 12).trim(),
+			simple: originalName.match(/[^,/;\\-]*/)[0].substring(0, 12).trim(),
 			type: airportType,
 			priority,
 			potentialIssues,

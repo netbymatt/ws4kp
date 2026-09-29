@@ -84,8 +84,8 @@ const getWeather = async (latLon, haveDataCallback, attempt = 0) => {
 		// populate the weather parameters
 		weatherParameters.latitude = latLon.lat;
 		weatherParameters.longitude = latLon.lon;
-		weatherParameters.zoneId = point.properties.forecastZone.substr(-6);
-		weatherParameters.radarId = point.properties.radarStation.substr(-3);
+		weatherParameters.zoneId = point.properties.forecastZone.slice(-6);
+		weatherParameters.radarId = point.properties.radarStation.slice(-3);
 		weatherParameters.stationId = StationId;
 		weatherParameters.weatherOffice = point.properties.cwa;
 		weatherParameters.city = city;

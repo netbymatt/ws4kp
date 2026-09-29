@@ -178,8 +178,8 @@ const expand = (data, maxHours = 48) => {
 	const startOfHour = DateTime.utc().startOf('hour').toMillis();
 	const result = []; // resulting expanded values
 	data.forEach((item) => {
-		let startTime = Date.parse(item.validTime.substr(0, item.validTime.indexOf('/')));
-		const duration = Duration.fromISO(item.validTime.substr(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
+		let startTime = Date.parse(item.validTime.substring(0, item.validTime.indexOf('/')));
+		const duration = Duration.fromISO(item.validTime.substring(item.validTime.indexOf('/') + 1)).shiftTo('milliseconds').values.milliseconds;
 		const endTime = startTime + duration;
 		// loop through duration at one hour intervals
 		do {

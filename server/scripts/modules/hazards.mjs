@@ -80,7 +80,7 @@ class Hazards extends ScrollWeatherDisplay {
 				this.data = [];
 			} else {
 				const allUnsortedAlerts = alerts.features ?? [];
-				const hasImmediate = allUnsortedAlerts.reduce((acc, hazard) => acc || hazard.properties.urgency === 'Immediate', false);
+				const hasImmediate = allUnsortedAlerts.some((hazard) => hazard.properties.urgency === 'Immediate');
 				const sortedAlerts = allUnsortedAlerts.sort((a, b) => (calcSeverity(b.properties.severity, b.properties.event)) - (calcSeverity(a.properties.severity, a.properties.event)));
 				const filteredAlerts = sortedAlerts.filter((hazard) => hazard.properties.severity !== 'Unknown' && (!hasImmediate || (hazard.properties.urgency === 'Immediate')));
 				this.data = filteredAlerts.slice(0, 5);

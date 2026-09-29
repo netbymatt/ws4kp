@@ -13,10 +13,10 @@ class Almanac extends WeatherDisplay {
 
 		// occasional degraded moon icon
 		this.iconPaths = {
-			Full: imageName(Math.random() > 0.995 ? 'Degraded' : 'Full'),
-			Last: imageName('Last'),
-			New: imageName('New'),
-			First: imageName('First'),
+			Full: imageNames[Math.random() > 0.995 ? 'Degraded' : 'Full'],
+			Last: imageNames.Last,
+			New: imageNames.New,
+			First: imageNames.First,
 		};
 
 		// preload the moon images
@@ -199,20 +199,14 @@ class Almanac extends WeatherDisplay {
 	}
 }
 
-const imageName = (type) => {
-	switch (type) {
-		case 'Full':
-			return 'images/icons/moon-phases/Full-Moon.gif';
-		case 'Degraded':
-			return 'images/icons/moon-phases/Full-Moon-Degraded.gif';
-		case 'Last':
-			return 'images/icons/moon-phases/Last-Quarter.gif';
-		case 'New':
-			return 'images/icons/moon-phases/New-Moon.gif';
-		case 'First':
-		default:
-			return 'images/icons/moon-phases/First-Quarter.gif';
-	}
+const imageNames = {
+
+	Full: 'images/icons/moon-phases/Full-Moon.gif',
+	Degraded: 'images/icons/moon-phases/Full-Moon-Degraded.gif',
+	Last: 'images/icons/moon-phases/Last-Quarter.gif',
+	New: 'images/icons/moon-phases/New-Moon.gif',
+	First: 'images/icons/moon-phases/First-Quarter.gif',
+
 };
 
 const formatTimeForColumn = (time) => {

@@ -7,24 +7,16 @@ const STATUS = {
 	retrying: Symbol('retrying'),
 };
 
-const calcStatusClass = (statusCode) => {
-	switch (statusCode) {
-		case STATUS.loading:
-			return 'loading';
-		case STATUS.loaded:
-			return 'press-here';
-		case STATUS.failed:
-			return 'failed';
-		case STATUS.noData:
-			return 'no-data';
-		case STATUS.disabled:
-			return 'disabled';
-		case STATUS.retrying:
-			return 'retrying';
-		default:
-			return '';
-	}
+const statusClassMappings = {
+	[STATUS.loading]: 'loading',
+	[STATUS.loaded]: 'press-here',
+	[STATUS.failed]: 'failed',
+	[STATUS.noData]: 'no-data',
+	[STATUS.disabled]: 'disabled',
+	[STATUS.retrying]: 'retrying',
 };
+
+const calcStatusClass = (statusCode) => statusClassMappings[statusCode] ?? '';
 
 const statusClasses = ['loading', 'press-here', 'failed', 'no-data', 'disabled', 'retrying'];
 

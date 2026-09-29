@@ -108,7 +108,7 @@ const getRegionalObservation = async (city) => {
 };
 
 // to fit on the map, remove anything after punctuation and then limit to 15 characters
-const formatCity = (city) => city.match(/[^,/;\\-]*/)[0].substr(0, 12);
+const formatCity = (city) => city.match(/[^,/;\\-]*/)[0].substring(0, 12);
 
 export {
 	buildForecast,

@@ -62,7 +62,6 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	const params = {
 		method: 'GET',
 		mode: 'cors',
-		type: 'GET',
 		retryCount: 3, // Default to 3 retries for any failed requests (timeout or 5xx server errors)
 		timeout: DEFAULT_REQUEST_TIMEOUT,
 		..._params,

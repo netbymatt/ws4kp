@@ -277,7 +277,7 @@ const init = () => {
 			['medium', 'Medium (2x)'],
 			['thick', 'Thick (3x)'],
 		],
-		visible: false,
+		visible: true,
 	});
 	settings.units = new Setting('units', {
 		name: 'Units',
