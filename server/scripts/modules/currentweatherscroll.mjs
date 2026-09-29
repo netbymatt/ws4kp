@@ -101,7 +101,7 @@ const drawScreen = async () => {
 	// if we have no current weather and no hazards, there's nothing to display
 	if (!data && (!scrollData.hazards || scrollData.hazards.length === 0)) return;
 
-	const thisScreen = workingScreens[screenIndex](scrollData, parameters);
+	const thisScreen = await workingScreens[screenIndex](scrollData, parameters);
 
 	// update classes on the scroll area
 	Array.from(mainScroll.classList).forEach((cls) => {
@@ -146,8 +146,6 @@ const hazards = (data) => {
 	};
 };
 
-const stationInfo = await StationInfo;
-
 // additional screens are stored in a separate for simple clearing/resettings
 let additionalScreens = [];
 // the "screens" are stored in an array for easy addition and removal
@@ -155,8 +153,8 @@ const baseScreens = [
 	// hazards
 	hazards,
 	// station name
-	(data) => {
-		const location = (stationInfo[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substring(0, 20);
+	async (data) => {
+		const location = ((await StationInfo)[data.station.properties.stationIdentifier]?.city ?? locationCleanup(data.station.properties.name)).substring(0, 20);
 		return `Conditions at ${location}`;
 	},
 

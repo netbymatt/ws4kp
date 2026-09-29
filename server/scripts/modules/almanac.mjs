@@ -122,7 +122,8 @@ class Almanac extends WeatherDisplay {
 		// Generate sun data grid in reading order (left-to-right, top-to-bottom)
 
 		// Set day names and sunset times
-		const Today = DateTime.local();
+		// in the location's time zone, to match the sun and moon times calculated for it
+		const Today = DateTime.local().setZone(timeZone());
 		const portraitLines = [];
 		const moonPortraitLines = [];
 		// fill all days, even if some are hidden by the mode selection.

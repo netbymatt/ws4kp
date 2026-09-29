@@ -1,12 +1,7 @@
 // Data loader utility for fetching JSON data with cache-busting
-const dataCache = {};
 
 // Load data with version-based cache busting
 const loadData = async (dataType, version = '') => {
-	if (dataCache[dataType]) {
-		return dataCache[dataType];
-	}
-
 	try {
 		// relative, so it also works when the site is hosted under a subpath
 		const url = `data/${dataType}.json${version ? `?_=${version}` : ''}`;
@@ -17,7 +12,7 @@ const loadData = async (dataType, version = '') => {
 		}
 
 		const data = await response.json();
-		dataCache[dataType] = data;
+
 		return data;
 	} catch (error) {
 		console.error(`Error loading ${dataType}:`, error);

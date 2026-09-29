@@ -282,7 +282,7 @@ class Setting {
 
 	generate() {
 		// don't generate a control for not visible items
-		if (!this.visible) return '';
+		if (!this.visible) return false;
 		// call the appropriate control generator
 		switch (this.type) {
 			case 'select':

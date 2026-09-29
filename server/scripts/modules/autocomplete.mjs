@@ -16,7 +16,6 @@ const DEFAULT_OPTIONS = {
 	// values sent with every search, or a function that returns them when they can change from one search to the next
 	params: {},
 	zIndex: 9999,
-	type: 'GET',
 	containerClass: 'autocomplete-suggestions',
 	paramName: 'query',
 	transformResult: (a) => a,

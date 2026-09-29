@@ -259,15 +259,15 @@ const doFetch = (url, params, originalRetryCount = null) => new Promise((resolve
 	});
 });
 
-const retryDelay = (retryNumber) => {
-	switch (retryNumber) {
-		case 1: return 1000;
-		case 2: return 2000;
-		case 3: return 5000;
-		case 4: return 10_000;
-		default: return 30_000;
-	}
-};
+const retryDelays = [
+	1000, // 0th index is not called in code
+	1000,
+	2000,
+	5000,
+	10_000,
+];
+
+const retryDelay = (step) => retryDelays[step] ?? 30_000;
 
 export {
 	json,

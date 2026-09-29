@@ -151,7 +151,7 @@ const scanLineChange = (value) => {
 		window.dispatchEvent(new Event('scanlines-change'));
 	} else {
 		// Remove all scanline classes
-		container.classList.remove('scanlines', 'scanlines-auto', 'scanlines-fine', 'scanlines-normal', 'scanlines-thick', 'scanlines-classic', 'scanlines-retro');
+		container.classList.remove('scanlines');
 		navIcons.classList.remove('on');
 		navIcons.setAttribute('aria-pressed', 'false');
 		if (modeSelect) {
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// Then generate the settings UI
-	const settingHtml = Object.values(settings).map((setting) => {
+	const settingElems = Object.values(settings).map((setting) => {
 		if (hiddenSettingNames.includes(setting.shortName)) {
 			// setting is hidden, register it
 			registerHiddenSetting(setting.shortName, setting);
@@ -334,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		return setting.generate();
 	}).filter((d) => d);
 	const settingsSection = document.querySelector('#settings');
-	settingsSection.innerHTML = '';
-	settingsSection.append(...settingHtml);
+	settingsSection.prepend(...settingElems);
 
 	// update visibility on some settings
 	const modeSelect = document.getElementById('settings-scanLineMode-label');

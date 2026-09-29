@@ -9,9 +9,9 @@ import OVERRIDES from './src/overrides.mjs';
 import cache from './proxy/cache.mjs';
 import devTools from './src/com.chrome.devtools.mjs';
 
-const travelCities = JSON.parse(await readFile('./datagenerators/output/travelcities.json'));
-const regionalCities = JSON.parse(await readFile('./datagenerators/output/regionalcities.json'));
-const stationInfo = JSON.parse(await readFile('./datagenerators/output/stations.json'));
+const travelCities = await readFile('./datagenerators/output/travelcities.json');
+const regionalCities = await readFile('./datagenerators/output/regionalcities.json');
+const stationInfo = await readFile('./datagenerators/output/stations.json');
 
 const app = express();
 const port = process.env.WS4KP_PORT ?? 8080;
@@ -152,7 +152,7 @@ Object.entries(dataEndpoints).forEach(([name, data]) => {
 			'Cache-Control': 'public, max-age=2592000, immutable',
 			'Content-Type': 'application/json',
 		});
-		res.json(data);
+		res.send(data);
 	});
 });
 
