@@ -2,14 +2,11 @@ import 'dotenv/config';
 import {
 	src, dest, series, parallel,
 } from 'gulp';
-import concat from 'gulp-concat';
-import terser from 'gulp-terser';
 import ejs from 'gulp-ejs';
 import rename from 'gulp-rename';
 import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import webpack from 'webpack-stream';
-import TerserPlugin from 'terser-webpack-plugin';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
@@ -44,35 +41,17 @@ const webpackOptions = {
 	},
 	// the single bundle is over webpack's default 244 KiB limit, so warn when it grows past this instead
 	performance: {
-		maxAssetSize: 300 * 1024,
-		maxEntrypointSize: 300 * 1024,
+		maxAssetSize: 450 * 1024,
+		maxEntrypointSize: 450 * 1024,
 	},
-	optimization: {
-		minimize: true,
-		minimizer: [
-			new TerserPlugin({
-				extractComments: false,
-				terserOptions: {
-					// sourceMap: true,
-					format: {
-						comments: false,
-					},
-				},
-			}),
-		],
+	module: {
+		rules: [{
+			// the vendor files are UMD or plain scripts; treated as ES modules, proj4 sets its global the same way it does in the browser
+			test: /[\\/]vendor[\\/]auto[\\/](proj4|swiped-events)\.js$/,
+			type: 'javascript/esm',
+		}],
 	},
 };
-
-const jsVendorSources = [
-	'server/scripts/vendor/auto/swiped-events.js',
-	'server/scripts/vendor/auto/proj4.js',
-];
-
-const compressJsVendor = () => src(jsVendorSources)
-	.pipe(concat('vendor.min.js'))
-	.pipe(terser())
-	.pipe(dest(RESOURCES_PATH));
-
 // webpack-stream takes its entry from the config, the files here only start the stream
 const buildJs = () => src(wsModules, { read: false })
 	.pipe(webpack(webpackOptions))
@@ -151,7 +130,7 @@ const logVersion = async () => {
 	log(`Built version: ${await getVersion()}`);
 };
 
-const buildDist = series(clean, parallel(buildJs, compressJsVendor, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist), logVersion);
+const buildDist = series(clean, parallel(buildJs, buildCss, compressHtml, copyOtherFiles, copyDataFiles, copyImageSources, buildPlaylist), logVersion);
 
 export default buildDist;
 
