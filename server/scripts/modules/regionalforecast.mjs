@@ -188,16 +188,7 @@ class RegionalForecast extends WeatherDisplay {
 		const regionalCities = [];
 
 		// Determine which cities do not overlap each other, starting with the closest city
-		sortedRegionalCities.forEach((city) => {
-			const cityBox = makeCityBox(city, boxPadY);
-			const overlaps = regionalCities.some((test) => boxOverlaps(cityBox, test.box), false);
-			if (!overlaps) {
-				regionalCities.push({
-					...city,
-					box: cityBox,
-				});
-			}
-		});
+		regionalCities.push(...placeCities(sortedRegionalCities, boxPadY));
 
 		// now do the same for the list of stations (back fills empty areas on the map)
 		const stationsNearby = Object.values(await StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLonStations));
@@ -205,17 +196,8 @@ class RegionalForecast extends WeatherDisplay {
 		const stationsDistance = stationsNearby.map((city) => calcDistPxyBBox(city, projection, user));
 		const sortedStations = stationsDistance.sort((a, b) => a.distance - b.distance);
 
-		// Determine which stations do not overlap each other, starting with the closest city
-		sortedStations.forEach((city) => {
-			const cityBox = makeCityBox(city, boxPadY);
-			const overlaps = regionalCities.some((test) => boxOverlaps(cityBox, test.box));
-			if (!overlaps) {
-				regionalCities.push({
-					...city,
-					box: cityBox,
-				});
-			}
-		});
+		// place non-overlapping cities
+		regionalCities.push(...placeCities(sortedStations, boxPadY, regionalCities));
 
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
@@ -461,6 +443,21 @@ const getAndFormatPoint = async (lat, lon) => {
 	} catch (error) {
 		throw new Error(`Unexpected error getting point for ${lat}, ${lon}: ${error.message} `);
 	}
+};
+
+const placeCities = (cities, boxPadY, existingCities = []) => {
+	// Determine which stations do not overlap each other, starting with the closest city
+	cities.forEach((city) => {
+		const cityBox = makeCityBox(city, boxPadY);
+		const overlaps = existingCities.some((test) => boxOverlaps(cityBox, test.box));
+		if (!overlaps) {
+			existingCities.push({
+				...city,
+				box: cityBox,
+			});
+		}
+	});
+	return existingCities;
 };
 
 // register display
