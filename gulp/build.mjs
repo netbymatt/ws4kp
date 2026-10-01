@@ -80,7 +80,7 @@ const compressHtml = async () => {
 	const version = await getVersion();
 	return src(htmlSources)
 		.pipe(ejs({
-			production: version,
+			production: true,
 			serverAvailable: false,
 			version,
 			OVERRIDES,

@@ -29,8 +29,8 @@
   <% } %>
 
   <% if (production) { %>
-  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=production%>" />
-  <script type="text/javascript" src="resources/ws.min.js?_=<%=production%>" defer></script>
+  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=version%>" />
+  <script type="text/javascript" src="resources/ws.min.js?_=<%=version%>" defer></script>
   <script type="text/javascript">
     const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
   </script>
