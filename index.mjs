@@ -94,11 +94,7 @@ const geoip = (req, res) => {
 const staticOptions = {
 	etag: true, // Enable ETag generation
 	lastModified: true, // Enable Last-Modified headers
-	setHeaders: (res, path, stat) => {
-		// Generate ETag based on file modification time and size for better cache validation
-		const etag = `"${stat.mtime.getTime().toString(16)}-${stat.size.toString(16)}"`;
-		res.setHeader('ETag', etag);
-
+	setHeaders: (res, path) => {
 		if (path.match(/\.(png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot)$/i)) {
 			// Images and fonts - cache for 1 year (immutable content)
 			res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
