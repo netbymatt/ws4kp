@@ -426,6 +426,15 @@ class WeatherDisplay {
 		}
 	}
 
+	// keep showing the same screen after the timing changes (such as on a change of display mode)
+	// roll back a screen index that is now past the end, and re-sync the base count to the start of
+	// that screen so the new timing array picks up where the old one left off instead of jumping
+	resyncScreenIndex() {
+		const { totalScreens, fullDelay } = this.timing;
+		if (this.screenIndex >= totalScreens) this.screenIndex = totalScreens - 1;
+		this.navBaseCount = this.screenIndex <= 0 ? 0 : fullDelay[this.screenIndex - 1];
+	}
+
 	// navigate to next screen
 	navNext(command) {
 		// check for special 'first frame' command

@@ -10,7 +10,7 @@ import './modules/tabs.mjs';
 import { clearLocationRows } from './modules/headend.mjs';
 import settings from './modules/settings.mjs';
 import AutoComplete from './modules/autocomplete.mjs';
-import { StationInfo, RegionalCities, TravelCities } from './modules/utils/data-loader.mjs';
+import { StationInfo } from './modules/utils/data-loader.mjs';
 import { debugFlag } from './modules/utils/debug.mjs';
 import { parseQueryString } from './modules/utils/setting.mjs';
 import { Settings } from './vendor/auto/luxon.mjs';
