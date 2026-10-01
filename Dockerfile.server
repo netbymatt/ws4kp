@@ -22,11 +22,9 @@ COPY index.mjs ./
 COPY proxy ./proxy
 COPY src ./src
 COPY views ./views
-# the page loads these optional custom scripts from /scripts, the app itself is served from dist
-# custom.sample.js is in the repository, so this always matches at least one file
-COPY server/scripts/custom*.* ./server/scripts/
 COPY server/music ./server/music
 COPY datagenerators/output/travelcities.json datagenerators/output/regionalcities.json datagenerators/output/stations.json ./datagenerators/output/
+# includes any custom scripts (server/scripts/custom*.*), which the build copies to dist/scripts
 COPY --from=build /app/dist ./dist
 
 # the app only reads files, so the unprivileged user from the node image is enough

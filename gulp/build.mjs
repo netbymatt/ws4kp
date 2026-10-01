@@ -98,6 +98,8 @@ const otherFiles = [
 	'server/apple-touch-icon.png',
 	'server/favicon.ico',
 	'server/.well-known/security.txt',
+	// optional custom scripts the page loads from scripts/, so static hosting and both Docker images include them
+	'server/scripts/custom*.*',
 ];
 const copyOtherFiles = () => src(otherFiles, { base: 'server/', encoding: false })
 	.pipe(dest('./dist'));

@@ -14,10 +14,8 @@ FROM nginx:alpine
 COPY static-env-handler.sh /docker-entrypoint.d/01-static-env-handler.sh
 RUN chmod +x /docker-entrypoint.d/01-static-env-handler.sh
 
+# includes any custom scripts (server/scripts/custom*.*), which the build copies to dist/scripts
 COPY --from=node-builder /app/dist /usr/share/nginx/html
-# optional custom scripts the page loads from /scripts
-# custom.sample.js is in the repository, so this always matches at least one file
-COPY --from=node-builder /app/server/scripts/custom*.* /usr/share/nginx/html/scripts/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=15s --retries=3 \
