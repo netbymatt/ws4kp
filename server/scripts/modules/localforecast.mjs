@@ -50,7 +50,7 @@ class LocalForecast extends WeatherDisplay {
 
 	modeChanged() {
 		if (this.status !== STATUS.loaded) return;
-		this.layoutScreens();	// pairing + fillTemplate + calculateContentAwareTiming + calcNavTiming
+		this.layoutScreens();	// measure + pack + fillTemplate + calcNavTiming
 		this.resyncScreenIndex();
 	}
 
@@ -58,45 +58,66 @@ class LocalForecast extends WeatherDisplay {
 	layoutScreens() {
 		// parse raw data and filter out expired periods
 		const conditions = parse(this.data, this.weatherParameters.forecast);
+		const periodTexts = conditions.map((condition) => `${condition.DayName}...${condition.Text.replaceAll('...', ' ')}`);
 
-		// read each text
-		this.screenTexts = conditions.map((condition) => {
-			// process the text
-			let text = `${condition.DayName}...`;
-			const conditionText = condition.Text;
-			text += conditionText.replaceAll('...', ' ');
+		const forecastsElem = this.elem.querySelector('.forecasts');
+		const forecastContainer = this.elem.querySelector('.local-forecast .container');
 
-			return text;
-		});
+		// render each period on its own so its line count can be measured
+		const periodTemplates = periodTexts.map((text) => this.fillTemplate('forecast', { text }));
+		forecastsElem.innerHTML = '';
+		forecastsElem.append(...periodTemplates);
 
-		// if in portrait combine to 2 days on one screen
-
-		if (settings.portrait?.value && settings.enhanced?.value) {
-			const newScreenTexts = [];
-			this.screenTexts.forEach((text, idx) => {
-				// even is passed through
-				if ((idx % 2) === 0) {
-					newScreenTexts.push(text);
-				} else {
-					// odd is added to the previous index
-					newScreenTexts[Math.floor(idx / 2)] += `<br/><br/>${text}`;
-				}
-			});
-			// reassign the screens
-			this.screenTexts = newScreenTexts;
+		if (periodTemplates.length === 0) {
+			// nothing to measure or paginate, hold one minimum-length screen
+			this.pageHeight = forecastContainer?.offsetHeight ?? 0;
+			this.timing.delay = secondsToCounts(MIN_SCREEN_SECONDS);
+			this.calcNavTiming();
+			this.setStatus(STATUS.loaded);
+			return;
 		}
 
-		// fill the forecast texts
-		const templates = this.screenTexts.map((text) => this.fillTemplate('forecast', { text }));
-		const forecastsElem = this.elem.querySelector('.forecasts');
-		forecastsElem.innerHTML = '';
-		forecastsElem.append(...templates);
+		const lineHeight = parseInt(window.getComputedStyle(periodTemplates[0]).lineHeight, 10);
 
-		// measures the rendered page, sets this.pageHeight, and builds the timing array
-		this.calculateContentAwareTiming(templates);
+		// Page geometry is measured from the rendered container so it cannot drift from the
+		// stylesheet, then snapped down to a whole number of lines. A page height that is not an
+		// exact multiple of the line height puts the page boundary partway through a wrapped line.
+		let linesPerPage = Math.floor((forecastContainer?.offsetHeight ?? 0) / lineHeight);
+		if (!Number.isFinite(linesPerPage) || linesPerPage < 1) {
+			console.error(`LocalForecast: could not measure the forecast container, falling back to ${FALLBACK_PAGE_LINES} lines per page`);
+			linesPerPage = FALLBACK_PAGE_LINES;
+		}
+		this.pageHeight = linesPerPage * lineHeight;
+
+		const periodLines = periodTemplates.map((template) => Math.max(1, Math.round(template.offsetHeight / lineHeight)));
+		// portrait enhanced keeps its limit of two periods per screen
+		const maxPeriods = (settings.portrait?.value && settings.enhanced?.value) ? 2 : Infinity;
+		const groups = packPeriods(periodLines, linesPerPage, maxPeriods);
+
+		// render one template per group, padded to a whole number of pages
+		const screenTemplates = groups.map((group) => {
+			const text = group.periods.map((index) => periodTexts[index]).join('<br/><br/>');
+			const template = this.fillTemplate('forecast', { text });
+			template.style.height = `${Math.ceil(group.lines / linesPerPage) * this.pageHeight}px`;
+			return template;
+		});
+		forecastsElem.innerHTML = '';
+		forecastsElem.append(...screenTemplates);
+
+		// Hold each screen in proportion to how much text it carries so the reading rate is the same
+		// on a sparse standard page and a dense portrait one. Only text lines count, not the blank
+		// line between periods. These are normal-speed durations; the user's speed setting is
+		// applied downstream when the base count interval is scheduled.
+		const screenLines = groups.flatMap((group) => pageTextLines(group, periodLines, linesPerPage));
+		this.timing.delay = screenLines.map((lines) => secondsToCounts(screenSeconds(lines)));
+
+		if (debugFlag('localforecast')) {
+			console.log(`LocalForecast: page holds ${linesPerPage} lines (${this.pageHeight}px at ${lineHeight}px line-height)`);
+			console.log('LocalForecast: period lines', periodLines, 'groups', groups.map((group) => group.periods));
+			console.log('LocalForecast: Screen durations (s at normal speed):', screenLines.map(screenSeconds));
+		}
 
 		this.calcNavTiming();
-
 		this.setStatus(STATUS.loaded);
 	}
 
@@ -121,150 +142,6 @@ class LocalForecast extends WeatherDisplay {
 
 		this.finishDraw();
 	}
-
-	// calculate dynamic timing based on height measurement template approach
-	calculateContentAwareTiming(templates) {
-		const forecastContainer = this.elem.querySelector('.local-forecast .container');
-
-		if (!templates || templates.length === 0) {
-			// nothing to measure or paginate, hold one minimum-length screen
-			this.pageHeight = forecastContainer?.offsetHeight ?? 0;
-			this.timing.delay = secondsToCounts(MIN_SCREEN_SECONDS);
-			return;
-		}
-
-		// Get line height from CSS for accurate calculations
-		const sampleForecast = templates[0];
-		const computedStyle = window.getComputedStyle(sampleForecast);
-		const lineHeight = parseInt(computedStyle.lineHeight, 10);
-
-		// Page geometry is measured from the rendered container so it cannot drift from the
-		// stylesheet, then snapped down to a whole number of lines. A page height that is not an
-		// exact multiple of the line height puts the page boundary partway through a wrapped line.
-		let maxLinesPerScreen = Math.floor((forecastContainer?.offsetHeight ?? 0) / lineHeight);
-		if (!Number.isFinite(maxLinesPerScreen) || maxLinesPerScreen < 1) {
-			console.error(`LocalForecast: could not measure the forecast container, falling back to ${FALLBACK_PAGE_LINES} lines per page`);
-			maxLinesPerScreen = FALLBACK_PAGE_LINES;
-		}
-		this.pageHeight = maxLinesPerScreen * lineHeight;
-
-		if (debugFlag('localforecast')) {
-			console.log(`LocalForecast: page holds ${maxLinesPerScreen} lines (${this.pageHeight}px at ${lineHeight}px line-height)`);
-		}
-
-		// Measure each forecast period to get actual line counts
-		const forecastLineCounts = [];
-
-		templates.forEach((template, index) => {
-			const currentHeight = template.offsetHeight;
-			const currentLines = Math.round(currentHeight / lineHeight);
-
-			if (currentLines > maxLinesPerScreen) {
-				// Multi-page forecasts measure correctly, so use the measurement directly
-				forecastLineCounts.push(currentLines);
-
-				if (debugFlag('localforecast')) {
-					console.log(`LocalForecast: Forecast ${index} measured ${currentLines} lines (${currentHeight}px direct measurement, ${lineHeight}px line-height)`);
-				}
-			} else {
-				// Short forecasts are floored by the css min-height, so a two line and a full page
-				// forecast measure the same. Pad past that floor with one <br/> per page line,
-				// measure, then subtract the padding to recover the real line count.
-				const originalHTML = template.innerHTML;
-				const paddingBRs = '<br/>'.repeat(maxLinesPerScreen);
-				template.innerHTML = originalHTML + paddingBRs;
-
-				// Measure the padded height
-				const paddedHeight = template.offsetHeight;
-				const paddedLines = Math.round(paddedHeight / lineHeight);
-
-				// Calculate actual content lines by subtracting the padding lines we added
-				const actualLines = Math.max(1, paddedLines - maxLinesPerScreen);
-
-				// Restore original content
-				template.innerHTML = originalHTML;
-
-				forecastLineCounts.push(actualLines);
-
-				if (debugFlag('localforecast')) {
-					console.log(`LocalForecast: Forecast ${index} measured ${actualLines} lines (${paddedHeight}px with padding - ${maxLinesPerScreen * lineHeight}px = ${actualLines * lineHeight}px actual, ${lineHeight}px line-height)`);
-				}
-			}
-		});
-
-		// Apply height padding for proper scrolling display (keep existing system working)
-		templates.forEach((forecast) => {
-			const newHeight = Math.ceil(forecast.offsetHeight / this.pageHeight) * this.pageHeight;
-			forecast.style.height = `${newHeight}px`;
-		});
-
-		// Calculate total screens based on padded height (for navigation system)
-		const forecastsElem = templates[0].parentNode;
-		const totalHeight = forecastsElem.scrollHeight;
-		this.timing.totalScreens = Math.round(totalHeight / this.pageHeight);
-
-		// Now calculate timing based on actual measured line counts, ignoring padding
-		const screenTimings = [];
-		forecastLineCounts.forEach((lines, forecastIndex) => {
-			if (lines <= maxLinesPerScreen) {
-				// Single screen for this forecast
-				screenTimings.push({ forecastIndex, lines, type: 'single' });
-			} else {
-				// Multiple screens for this forecast
-				let remainingLines = lines;
-				let isFirst = true;
-
-				while (remainingLines > 0) {
-					const linesThisScreen = Math.min(remainingLines, maxLinesPerScreen);
-					const type = isFirst ? 'first-of-multi' : 'remainder';
-
-					screenTimings.push({ forecastIndex, lines: linesThisScreen, type });
-
-					remainingLines -= linesThisScreen;
-					isFirst = false;
-				}
-			}
-		});
-
-		// Hold each screen in proportion to how much text it carries so the reading rate is the same
-		// on a sparse standard page and a dense portrait one. These are normal-speed durations; the
-		// user's speed setting is applied downstream when the base count interval is scheduled.
-		const screenDelays = screenTimings.map((screenInfo, screenIndex) => {
-			const seconds = screenSeconds(screenInfo.lines);
-			const baseCounts = secondsToCounts(seconds);
-
-			if (debugFlag('localforecast')) {
-				console.log(`LocalForecast: Screen ${screenIndex}: ${screenInfo.lines} lines, ${seconds.toFixed(1)}s at normal speed, ${baseCounts} counts (forecast ${screenInfo.forecastIndex}, ${screenInfo.type})`);
-			}
-
-			return baseCounts;
-		});
-
-		// Reconcile against the screen count the padded heights produced. The two agree whenever the
-		// page height is a whole number of lines, so a mismatch means the geometry changed underneath.
-		while (screenDelays.length < this.timing.totalScreens) {
-			screenDelays.push(secondsToCounts(MIN_SCREEN_SECONDS));
-			if (debugFlag('localforecast')) {
-				console.warn(`LocalForecast: using fallback timing for screen ${screenDelays.length - 1}`);
-			}
-		}
-
-		// Truncate if we have too many calculated screens
-		if (screenDelays.length > this.timing.totalScreens) {
-			const removed = screenDelays.splice(this.timing.totalScreens);
-			if (debugFlag('localforecast')) {
-				console.warn(`LocalForecast: truncated ${removed.length} excess screen timings`);
-			}
-		}
-
-		// Set the timing array based on screen content
-		this.timing.delay = screenDelays;
-
-		if (debugFlag('localforecast')) {
-			console.log(`LocalForecast: Final screen count - calculated: ${screenTimings.length}, actual: ${this.timing.totalScreens}, timing array: ${screenDelays.length}`);
-			console.log('LocalForecast: Screen durations (s at normal speed):', screenDelays.map((counts) => (counts * BASE_DELAY_MS) / 1000));
-		}
-	}
 }
 
 // format the forecast
@@ -279,5 +156,39 @@ const parse = (forecast, forecastUrl) => {
 		Text: text.detailedForecast,
 	}));
 };
+
+// Group consecutive periods onto shared screens. A period joins the previous group only when it
+// fits entirely, after a one line gap, in the space left on that group's last page, and the group
+// holds fewer than maxPeriods periods.
+const packPeriods = (periodLines, linesPerPage, maxPeriods = Infinity) => {
+	const groups = [];
+	let current = null;
+	periodLines.forEach((lines, index) => {
+		const lastPageLines = current ? ((current.lines - 1) % linesPerPage) + 1 : linesPerPage;
+		if (current && current.periods.length < maxPeriods && linesPerPage - lastPageLines >= lines + 1) {
+			current.periods.push(index);
+			current.lines += 1 + lines;
+		} else {
+			current = { periods: [index], lines };
+			groups.push(current);
+		}
+	});
+	return groups;
+};
+
+// count the text lines on each page of a group, skipping the blank line between periods
+const pageTextLines = (group, periodLines, linesPerPage) => {
+	const pages = new Array(Math.ceil(group.lines / linesPerPage)).fill(0);
+	let line = 0;
+	group.periods.forEach((index, position) => {
+		if (position > 0) line += 1; // blank separator line
+		for (let i = 0; i < periodLines[index]; i += 1) {
+			pages[Math.floor(line / linesPerPage)] += 1;
+			line += 1;
+		}
+	});
+	return pages;
+};
+
 // register display
 registerDisplay(new LocalForecast(7, 'local-forecast'));
