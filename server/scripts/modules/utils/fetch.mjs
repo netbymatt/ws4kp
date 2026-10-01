@@ -150,115 +150,55 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 	}
 };
 
+// names for the server errors that are logged when retrying
+const SERVER_ERROR_NAMES = {
+	502: 'Bad Gateway',
+	503: 'Service Unavailable',
+	504: 'Gateway Timeout',
+};
+
 // fetch with retry and back-off
-const doFetch = (url, params, originalRetryCount = null) => new Promise((resolve, reject) => {
-	// On the first call, store the retry count for later logging
-	const initialRetryCount = originalRetryCount ?? params.retryCount;
+// server errors (5xx), network errors and timeouts are retried, an abort by the browser is not
+// a server error with no retries left is returned so fetchAsync can report its status
+const doFetch = async (url, params) => {
+	const retries = Math.max(0, params.retryCount ?? 0);
 
-	// Create AbortController for timeout
-	const controller = new AbortController();
-	const startTime = Date.now();
-	const timeoutId = setTimeout(() => {
-		controller.abort();
-	}, params.timeout);
-
-	// Add signal to fetch params
-	const fetchParams = {
-		...params,
-		signal: controller.signal,
-	};
-
-	// Shared retry logic to avoid duplication
-	const attemptRetry = (reason) => {
-		// Safety check for params
-		if (!params || typeof params.retryCount !== 'number') {
-			console.error(`❌ Invalid params for retry: ${url}`);
-			return reject(new Error('Invalid retry parameters'));
+	for (let attempt = 0; ; attempt += 1) {
+		const retriesLeft = retries - attempt;
+		let reason;
+		try {
+			// AbortSignal.timeout() rejects with a TimeoutError, which is kept apart from a browser abort (AbortError)
+			// eslint-disable-next-line no-await-in-loop
+			const response = await fetch(url, { ...params, signal: AbortSignal.timeout(params.timeout) });
+			if (response.status < 500 || retriesLeft <= 0) return response;
+			reason = `${SERVER_ERROR_NAMES[response.status] ?? 'Server error'} ${response.status} ${response.statusText}`;
+		} catch (error) {
+			if (error.name === 'AbortError' || retriesLeft <= 0) throw error;
+			reason = error.name === 'TimeoutError' ? `Request timeout after ${Math.round(params.timeout / 1000)}s` : `Network error: ${error.message}`;
 		}
 
-		const retryAttempt = initialRetryCount - params.retryCount + 1;
-		const remainingRetries = params.retryCount - 1;
-		const delayMs = retryDelay(retryAttempt);
-
-		console.warn(`🔄 Retry ${retryAttempt}/${initialRetryCount} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remainingRetries} retr${remainingRetries === 1 ? 'y' : 'ies'} left)`);
+		const retryNumber = attempt + 1;
+		const delayMs = retryDelay(retryNumber);
+		const remaining = retriesLeft - 1;
+		console.warn(`🔄 Retry ${retryNumber}/${retries} for ${url} - ${reason} (retrying in ${delayMs}ms, ${remaining} retr${remaining === 1 ? 'y' : 'ies'} left)`);
 
 		// call the "still waiting" function on first retry
-		if (params && params.stillWaiting && typeof params.stillWaiting === 'function' && retryAttempt === 1) {
+		if (retryNumber === 1 && typeof params.stillWaiting === 'function') {
 			try {
 				params.stillWaiting();
 			} catch (callbackError) {
 				console.warn(`⚠️ stillWaiting callback error for ${url}:`, callbackError.message);
 			}
 		}
-		// decrement and retry with safe parameter copying
-		const newParams = {
-			...params,
-			retryCount: Math.max(0, params.retryCount - 1), // Ensure retryCount doesn't go negative
-		};
-		// Use setTimeout directly instead of the delay wrapper to avoid Promise resolution issues
-		setTimeout(() => {
-			doFetch(url, newParams, initialRetryCount).then(resolve).catch(reject);
-		}, delayMs);
-		return undefined; // Explicit return for linter
-	};
 
-	fetch(url, fetchParams).then((response) => {
-		clearTimeout(timeoutId); // Clear timeout on successful response
+		// eslint-disable-next-line no-await-in-loop
+		await new Promise((resolve) => {
+			setTimeout(resolve, delayMs);
+		});
+	}
+};
 
-		// Retry 500 status codes if we have retries left
-		if (params && params.retryCount > 0 && response.status >= 500 && response.status <= 599) {
-			let errorType = 'Server error';
-			if (response.status === 502) {
-				errorType = 'Bad Gateway';
-			} else if (response.status === 503) {
-				errorType = 'Service Unavailable';
-			} else if (response.status === 504) {
-				errorType = 'Gateway Timeout';
-			}
-			return attemptRetry(`${errorType} ${response.status} ${response.statusText}`);
-		}
-
-		// Log when we're out of retries for server errors
-		// if (response.status >= 500 && response.status <= 599) {
-		// 	console.warn(`⚠️ Server error ${response.status} ${response.statusText} for ${url} - no retries remaining`);
-		// }
-
-		// successful response or out of retries
-		return resolve(response);
-	}).catch((error) => {
-		clearTimeout(timeoutId); // Clear timeout on error
-
-		// Enhance AbortError detection by checking if we're near the timeout duration
-		if (error.name === 'AbortError') {
-			const duration = Date.now() - startTime;
-			const isLikelyTimeout = duration >= (params.timeout - 1000); // Within 1 second of timeout
-
-			// Convert likely timeouts to TimeoutError for better error reporting
-			if (isLikelyTimeout) {
-				const reason = `Request timeout after ${Math.round(duration / 1000)}s`;
-				if (params && params.retryCount > 0) {
-					return attemptRetry(reason);
-				}
-				// Convert to a timeout error for better error reporting
-				const timeoutError = new Error(`Request timeout after ${Math.round(duration / 1000)}s`);
-				timeoutError.name = 'TimeoutError';
-				reject(timeoutError);
-				return undefined;
-			}
-		}
-
-		// Retry network errors if we have retries left
-		if (params && params.retryCount > 0 && error.name !== 'AbortError') {
-			const reason = error.name === 'TimeoutError' ? 'Request timeout' : `Network error: ${error.message}`;
-			return attemptRetry(reason);
-		}
-
-		// out of retries or AbortError - reject
-		reject(error);
-		return undefined; // Explicit return for linter
-	});
-});
-
+// delay before each retry, indexed by retry number (retries start at 1)
 const retryDelays = [
 	1000, // 0th index is not called in code
 	1000,
