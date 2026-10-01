@@ -27,28 +27,10 @@ const RESOURCES_PATH = './dist/resources';
 
 // Data is now served as JSON files to avoid redundancy
 
-// Every module that registers itself when it loads, in the order the page loads them during
-// development (see the script tags in views/index.ejs). The rest of the app is pulled in through their imports.
-const appModules = [
-	'./server/scripts/modules/hazards.mjs',
-	'./server/scripts/modules/currentweatherscroll.mjs',
-	'./server/scripts/modules/currentweather.mjs',
-	'./server/scripts/modules/almanac.mjs',
-	'./server/scripts/modules/spc-outlook.mjs',
-	'./server/scripts/modules/extendedforecast.mjs',
-	'./server/scripts/modules/hourly-graph.mjs',
-	'./server/scripts/modules/hourly.mjs',
-	'./server/scripts/modules/latestobservations.mjs',
-	'./server/scripts/modules/localforecast.mjs',
-	'./server/scripts/modules/regionalforecast.mjs',
-	'./server/scripts/modules/travelforecast.mjs',
-	'./server/scripts/modules/progress.mjs',
-	'./server/scripts/modules/radar.mjs',
-	'./server/scripts/modules/future-radar.mjs',
-	'./server/scripts/modules/settings.mjs',
-	'./server/scripts/modules/media.mjs',
-	'./server/scripts/modules/custom-scroll-text.mjs',
-	'./server/scripts/index.mjs',
+// the app's single entry point, server/scripts/ws.mjs imports every module that registers itself when it loads
+
+const wsModules = [
+	'./server/scripts/ws.mjs',
 ];
 
 const webpackOptions = {
@@ -56,12 +38,9 @@ const webpackOptions = {
 	output: {
 		filename: '[name].min.js',
 	},
-	resolve: {
-		roots: ['./'],
-	},
 	devtool: 'source-map',
 	entry: {
-		app: appModules,
+		ws: wsModules,
 	},
 	// the single bundle is over webpack's default 244 KiB limit, so warn when it grows past this instead
 	performance: {
@@ -95,7 +74,7 @@ const compressJsVendor = () => src(jsVendorSources)
 	.pipe(dest(RESOURCES_PATH));
 
 // webpack-stream takes its entry from the config, the files here only start the stream
-const buildJs = () => src(appModules, { read: false })
+const buildJs = () => src(wsModules, { read: false })
 	.pipe(webpack(webpackOptions))
 	.pipe(dest(RESOURCES_PATH));
 
