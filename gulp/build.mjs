@@ -10,8 +10,7 @@ import htmlmin from 'gulp-html-minifier-terser';
 import { deleteAsync } from 'del';
 import webpack from 'webpack-stream';
 import TerserPlugin from 'terser-webpack-plugin';
-import { readFile } from 'node:fs/promises';
-import file from 'gulp-file';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
 import log from 'fancy-log';
@@ -101,7 +100,7 @@ const buildJs = () => src(appModules, { read: false })
 	.pipe(dest(RESOURCES_PATH));
 
 const cssSources = [
-	'server/styles/scss/**/*.scss',
+	'server/styles/scss/ws.scss',
 ];
 const buildCss = () => src(cssSources, { sourcemaps: true })
 	.pipe(sass({ style: 'compressed' }).on('error', sass.logError))
@@ -163,7 +162,10 @@ const copyImageSources = () => src(imageSources, { base: './server', encoding: f
 const buildPlaylist = async () => {
 	const availableFiles = await reader();
 	const playlist = { availableFiles };
-	return file('playlist.json', JSON.stringify(playlist)).pipe(dest('./dist'));
+	// dist doesn't exist yet in a fresh checkout or a Docker build, and the tasks that create it run in parallel with this one
+	await mkdir('./dist', { recursive: true });
+
+	await writeFile('./dist/playlist.json', JSON.stringify(playlist));
 };
 
 const logVersion = async () => {
