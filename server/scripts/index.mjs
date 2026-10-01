@@ -52,24 +52,6 @@ const TOGGLE_FULL_SCREEN_SELECTOR = '#ToggleFullScreen';
 const BTN_GET_GPS_SELECTOR = '#btnGetGps';
 
 const init = async () => {
-	// Load core data first - app cannot function without it
-	try {
-		await RegionalCities;
-		await TravelCities;
-		await StationInfo;
-	} catch (error) {
-		console.error('Failed to load core application data:', error);
-		// Show error message to user and halt initialization
-		document.body.innerHTML = `
-			<div>
-				<h2>Unable to load Weather Data</h2>
-				<p>The application cannot start because core data failed to load.</p>
-				<p>Please check your connection and try refreshing.</p>
-			</div>
-		`;
-		return; // Stop initialization
-	}
-
 	document.querySelector(TXT_ADDRESS_SELECTOR).addEventListener('focus', (e) => {
 		e.target.select();
 	});
@@ -227,6 +209,22 @@ const init = async () => {
 	// register hidden settings for search and location query
 	registerHiddenSetting('latLonQuery', () => localStorage.getItem('latLonQuery'));
 	registerHiddenSetting('latLon', () => localStorage.getItem('latLon'));
+
+	// Station info is required for location lookup,
+	// Other static data missing is handled by the pages that use it
+	try {
+		await StationInfo;
+	} catch (error) {
+		console.error('Failed to load core application data:', error);
+		// Show error message to user and halt initialization
+		document.body.innerHTML = `
+			<div>
+				<h2>Unable to load Weather Data</h2>
+				<p>The application cannot start because core data failed to load.</p>
+				<p>Please check your connection and try refreshing.</p>
+			</div>
+		`;
+	}
 };
 
 // look up a search, or a chosen suggestion (text and magicKey), and return its geometry

@@ -56,7 +56,8 @@ class ExtendedForecast extends WeatherDisplay {
 			// if there's no new data and no previous data, fail
 			if (!data) {
 				console.warn(`Unable to get extended forecast for ${this.weatherParameters.latitude},${this.weatherParameters.longitude} in ${this.weatherParameters.state}`);
-				if (this.isEnabled) this.setStatus(STATUS.failed);
+				// a failed refresh keeps showing the forecast that is already loaded
+				this.setStatus(this.data ? STATUS.loaded : STATUS.failed);
 				return;
 			}
 
