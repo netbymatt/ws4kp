@@ -61,6 +61,10 @@ const renderIndex = (req, res, production = false) => {
 	});
 };
 
+// production ("distribution") mode serves pre-built files from the dist directory
+// 'npm run build' and then 'DIST=1 npm start'
+const isDist = process.env?.DIST === '1';
+
 const index = (req, res) => {
 	// test for no query string in request and if environment query string values were provided
 	if (hasQsVars && Object.keys(req.query).length === 0) {
@@ -70,8 +74,9 @@ const index = (req, res) => {
 		res.redirect(307, url.toString());
 		return;
 	}
-	// return the EJS template page in development mode (serve files from server directory directly)
-	renderIndex(req, res, false);
+	// render the EJS template: production mode uses the compressed files in dist,
+	// development mode serves the files from the server directory directly
+	renderIndex(req, res, isDist);
 };
 
 const geoip = (req, res) => {
@@ -152,18 +157,12 @@ Object.entries(dataEndpoints).forEach(([name, data]) => {
 	});
 });
 
-if (process.env?.DIST === '1') {
-	// Production ("distribution") mode uses pre-baked files in the dist directory
-	// 'npm run build' and then 'DIST=1 npm start'
+if (isDist) {
 	app.use('/scripts', express.static('./server/scripts', staticOptions));
 	app.use('/geoip', geoip);
 	app.use('/music', express.static('./server/music', staticOptions));
 
-	// render the EJS template in production mode (serve compressed files from dist directory)
-	app.get('/', (req, res) => {
-		if (hasQsVars && Object.keys(req.query).length === 0) return index(req, res); // or factor out the redirect
-		return renderIndex(req, res, true);
-	});
+	app.get('/', index);
 	app.use('/', express.static('./dist', staticOptions));
 } else {
 	// Development mode serves files from the server directory: 'npm start'
