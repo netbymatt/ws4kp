@@ -185,10 +185,8 @@ class RegionalForecast extends WeatherDisplay {
 
 		const sortedRegionalCities = regionalCitiesDistance.sort((a, b) => a.distance - b.distance);
 
-		const regionalCities = [];
-
 		// Determine which cities do not overlap each other, starting with the closest city
-		regionalCities.push(...placeCities(sortedRegionalCities, boxPadY));
+		const regionalCities = placeCities(sortedRegionalCities, boxPadY);
 
 		// now do the same for the list of stations (back fills empty areas on the map)
 		const stationsNearby = Object.values(await StationInfo).filter((city) => cityLatLonBoundingBox(city, minMaxLatLonStations));
@@ -196,14 +194,18 @@ class RegionalForecast extends WeatherDisplay {
 		const stationsDistance = stationsNearby.map((city) => calcDistPxyBBox(city, projection, user));
 		const sortedStations = stationsDistance.sort((a, b) => a.distance - b.distance);
 
-		// place non-overlapping cities
-		regionalCities.push(...placeCities(sortedStations, boxPadY, regionalCities));
+		// place non-overlapping stations
+		// placeCities returns the union of non overlapping sortedStations and regional cities
+		const combinedStations = placeCities(sortedStations, boxPadY, regionalCities);
+
+		// limit stations to 15 on non-portrait, in portrait the additional box height helps with density
+		const limitedStations = combinedStations.slice(0, settings.portrait?.value ? Infinity : 15);
 
 		// get a unit converter
 		const temperatureConverter = temperatureUnit();
 
 		// get regional forecasts and observations using centralized safe Promise handling
-		const regionalDataAll = await safePromiseAll(regionalCities.map(async (city) => {
+		const regionalDataAll = await safePromiseAll(limitedStations.map(async (city) => {
 			try {
 				const point = city?.point ?? (await getAndFormatPoint(city.lat, city.lon));
 				if (!point) {
@@ -381,10 +383,6 @@ class RegionalForecast extends WeatherDisplay {
 				elem.style.left = `${x - offset[PX] - boxOffset[PX]}px`;
 			} else {
 				elem.style.right = 0;
-			}
-
-			if (coercedRight) {
-				elem.classList.add('coerced-right');
 			}
 
 			return elem;

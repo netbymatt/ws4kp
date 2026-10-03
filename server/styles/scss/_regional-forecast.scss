@@ -18,27 +18,33 @@
 			@include u.text-shadow();
 		}
 
-		.icon {
-			display: inline-block;
-			top: 26px;
-
-			img {
-				max-height: 32px;
-			}
-		}
-
-		.temp {
-			display: inline-block;
-			font-family: 'Star4000 Large';
-			font-size: 28px;
-			padding-top: 2px;
-			color: c.$title-color;
-			top: 28px;
-		}
-
 		.city {
 			font-family: Star4000;
 			font-size: 20px;
+		}
+
+		.details {
+			padding-top: 2px;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+
+			.icon {
+				img {
+					display: block;
+					max-height: 32px;
+				}
+			}
+
+			.temp {
+				// position and top deal with the weird-ness of the font's baseline
+				position: relative;
+				top: 5px;
+				// regular styling below
+				font-family: 'Star4000 Large';
+				font-size: 28px;
+				color: c.$title-color;
+			}
 		}
 	}
 

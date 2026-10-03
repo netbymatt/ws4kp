@@ -195,7 +195,7 @@ class CurrentWeather extends WeatherDisplay {
 			condition = shortConditions(condition);
 		}
 
-		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, '') + this.data.WindSpeed.toString().padStart(3, ' ') : this.data.WindSpeed;
+		const wind = (typeof this.data.WindSpeed === 'number') ? this.data.WindDirection.padEnd(3, ' ') + this.data.WindSpeed.toString().padStart(2, ' ') : this.data.WindSpeed;
 
 		// get location (city name) from StationInfo if available (allows for overrides)
 		// longer name allowed if in wide-enhanced

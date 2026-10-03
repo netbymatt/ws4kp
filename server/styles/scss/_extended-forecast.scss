@@ -71,6 +71,8 @@ $portrait-gap-adder: 20px;
 
 		.temperatures {
 			width: 100%;
+			display: flex;
+			justify-content: space-evenly;
 
 			.portrait.enhanced & {
 				margin-top: $portrait-gap-adder;

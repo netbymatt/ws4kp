@@ -53,6 +53,13 @@
 
 		.temp {
 			left: 230px;
+			width: 45px;
+			text-align: right;
+		}
+
+		.like {
+			width: 60px;
+			text-align: right;
 		}
 
 		.weather {
@@ -120,7 +127,6 @@
 
 				.wind {
 					white-space: pre;
-					text-align: right;
 				}
 
 				.portrait.enhanced & {

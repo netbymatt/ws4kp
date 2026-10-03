@@ -205,66 +205,54 @@
 					text-align: right;
 					right: 0px;
 
+					// end labels are pinned to the top and bottom of the chart
 					&.l-1 {
 						top: 0px;
 					}
 
+					// middle labels are centered on their value's position
+					// the chart scale has 10px of padding at the top and bottom (see calcScale in hourly-graph.mjs)
+					&.l-2,
+					&.l-3 {
+						// the font's digits sit 5px below the center of the line box
+						margin-top: -5px;
+						transform: translateY(-50%);
+					}
+
 					&.l-2 {
-						top: calc(280px / 3);
+						top: calc(10px + (100% - 20px) / 3);
 					}
 
 					&.l-3 {
-						bottom: calc(280px / 3 - 11px);
+						top: calc(10px + (100% - 20px) * 2 / 3);
 					}
 
 					&.l-4 {
 						bottom: 0px;
-					}
-
-					.portrait.enhanced & {
-						&.l-1 {
-							top: 0px;
-						}
-
-						&.l-2 {
-							top: calc(445px / 3);
-						}
-
-						&.l-3 {
-							bottom: calc(445px / 3 - 11px);
-						}
-
-						&.l-4 {
-							bottom: 0px;
-						}
 					}
 				}
 			}
 
 			&.bottom {
 				.y-axis .label {
-					.portrait.enhanced & {
-						&.l-1 {
-							top: 0px;
-						}
 
-						&.l-2 {
-							top: calc(445px / 4);
-						}
+					&.l-2 {
+						top: calc(10px + (100% - 20px) / 4);
+					}
 
-						&.l-3 {
-							top: calc(445px / 2 - 11px);
-						}
+					&.l-3 {
+						top: calc(10px + (100% - 20px) / 2);
+					}
 
-						&.l-4 {
-							bottom: calc(445px / 4 - 11px);
-						}
+					&.l-4 {
+						top: calc(10px + (100% - 20px) * 3 / 4);
+						bottom: auto;
+						margin-top: -5px;
+						transform: translateY(-50%);
+					}
 
-						&.l-5 {
-							bottom: 0px;
-						}
-
-						;
+					&.l-5 {
+						bottom: 0px;
 					}
 				}
 			}

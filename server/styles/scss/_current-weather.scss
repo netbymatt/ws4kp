@@ -41,6 +41,10 @@
 					margin-left: 50px;
 					width: calc(p.$blue-box-width - 140px);
 				}
+
+				.wind-portrait {
+					white-space: pre;
+				}
 			}
 
 			&.left {
@@ -75,6 +79,8 @@
 
 
 				.row {
+					display: flex;
+					justify-content: space-between;
 					margin-bottom: 12px;
 
 					&.hidden {
@@ -132,6 +138,7 @@
 			.wind {
 				text-align: right;
 				float: right;
+				white-space: pre;
 			}
 		}
 
