@@ -96,6 +96,8 @@ const init = async () => {
 	const autoComplete = new AutoComplete(document.querySelector(TXT_ADDRESS_SELECTOR), {
 		serviceUrl: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest',
 		deferRequestBy: 300,
+		// the full width of .location-input, so the list follows the text box as the page resizes
+		width: '100%',
 		paramName: 'text',
 		params: () => ({
 			f: 'json',

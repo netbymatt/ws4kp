@@ -39,19 +39,47 @@ body {
 }
 
 #divQuery {
-	max-width: p.$standard-width;
+	// match the player's rendered width, which tabs.mjs measures when the player is scaled
+	box-sizing: border-box;
+	width: var(--player-width, 100%);
+	max-width: var(--player-width, #{p.$standard-width});
 	padding: 8px;
 
+	// the text box takes the space left over by the buttons
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	column-gap: 8px;
+
+	&:has(~ #divTwc.wide) {
+		max-width: var(--player-width, #{p.$wide-width});
+	}
+
+	.location-input {
+		// a zero basis lets the text box shrink before the buttons wrap to the next line
+		flex: 1 1 0;
+		min-width: 0;
+		// the autocomplete list is added after the text box and positioned against this
+		position: relative;
+
+		.autocomplete-suggestions {
+			top: 100%;
+			left: 0px;
+		}
+	}
+
 	.location-status {
+		flex-basis: 100%;
 		margin-top: 6px;
 		font-size: 14px;
 		color: #c62828;
 	}
 
 	.buttons {
-		display: inline-block;
-		width: 150px;
-		text-align: right;
+		flex: none;
+		// flex instead of inline-block so the spacing doesn't depend on whitespace in the html (minified in dist)
+		display: flex;
+		gap: 4px;
 
 		button {
 			font-size: 21px;
@@ -102,11 +130,10 @@ body {
 	}
 
 	#txtLocation {
-		width: calc(100% - 170px);
-		max-width: 490px;
+		box-sizing: border-box;
+		width: 100%;
 		font-size: 21px;
-		min-width: 200px;
-		display: inline-block;
+		display: block;
 
 		// Ensure consistent styling across light and dark modes
 		background-color: white;

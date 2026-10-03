@@ -9,7 +9,7 @@
 		"build:travelcities": "node datagenerators/travelcities.mjs",
 		"build:regionalcities": "node datagenerators/regionalcities.mjs",
 		"build:stations": "node datagenerators/stations.mjs",
-		"build:css": "sass --style=compressed ./server/styles/scss/ws.scss ./server/styles/ws.css",
+		"build:css": "sass --style=compressed ./server/styles/scss/ws.scss ./server/styles/ws.min.css",
 		"watch:css": "npm run build:css -- --watch",
 		"build": "npx gulp buildDist",
 		"lint": "npx eslint .",

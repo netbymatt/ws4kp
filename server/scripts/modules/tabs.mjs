@@ -70,6 +70,7 @@ const updateHeadend = () => {
 const matchPlayerWidth = () => {
 	const { width } = document.querySelector('#divTwc').getBoundingClientRect();
 	document.querySelector('#lower-tabs').style.setProperty('--player-width', `${width}px`);
+	document.querySelector('#divQuery').style.setProperty('--player-width', `${width}px`);
 };
 
 const selectTab = (selected) => {
