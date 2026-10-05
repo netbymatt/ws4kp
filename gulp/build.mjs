@@ -120,8 +120,7 @@ const copyImageSources = () => src(imageSources, { base: './server', encoding: f
 	.pipe(dest('./dist'));
 
 const buildPlaylist = async () => {
-	const availableFiles = await reader();
-	const playlist = { availableFiles };
+	const playlist = await reader();
 	// dist doesn't exist yet in a fresh checkout or a Docker build, and the tasks that create it run in parallel with this one
 	await mkdir('./dist', { recursive: true });
 

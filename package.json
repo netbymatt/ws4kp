@@ -41,6 +41,7 @@
 		"gulp-sass": "^6.0.0",
 		"luxon": "^3.0.0",
 		"metar-taf-parser": "^9.0.0",
+
 		"p-limit": "^7.3.1",
 		"proj4": "^2.22.0",
 		"sass": "^1.54.0",
@@ -52,7 +53,8 @@
 	"dependencies": {
 		"dotenv": "^18.0.1",
 		"ejs": "^6.0.1",
-		"express": "^5.1.0"
+		"express": "^5.1.0",
+		"music-metadata": "^12.0.0"
 	},
 	"allowScripts": {
 		"@parcel/watcher@2.6.0": true,

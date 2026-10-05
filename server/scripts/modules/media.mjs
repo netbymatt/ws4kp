@@ -346,10 +346,26 @@ const playerEnded = () => {
 };
 
 const setTrackName = (fileName) => {
-	const baseName = fileName.split('/').pop();
-	const trackName = decodeURIComponent(
-		baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
-	);
+	// check for metadata
+	const metaData = playlist?.metaData?.[fileName];
+
+	// if no metadata just use the track name
+	if (!metaData) {
+		const baseName = fileName.split('/').pop();
+		const trackName = decodeURIComponent(
+			baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
+		);
+		setHeadend('music', trackName);
+	}
+
+	// otherwise build a name from metadata
+	let trackName = metaData.title;
+	if (metaData?.artist) trackName += ` - ${metaData.artist}`;
+	if (metaData?.album) trackName += ` - ${metaData.album}`;
+	// min:sec format
+	const d = metaData?.duration;
+	if (d) trackName += ` (${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')})`;
+
 	setHeadend('music', trackName);
 };
 
