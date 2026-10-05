@@ -349,17 +349,18 @@ const setTrackName = (fileName) => {
 	// check for metadata
 	const metaData = playlist?.metaData?.[fileName];
 
-	// if no metadata just use the track name
+	// generate a fallback track name from the file name
+	const baseName = fileName.split('/').pop();
+	const fileTrackName = decodeURIComponent(
+		baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
+	);
 	if (!metaData) {
-		const baseName = fileName.split('/').pop();
-		const trackName = decodeURIComponent(
-			baseName.replace(/\.mp3/gi, '').replace(/(_-)/gi, ''),
-		);
-		setHeadend('music', trackName);
+		setHeadend('music', fileTrackName);
+		return;
 	}
 
 	// otherwise build a name from metadata
-	let trackName = metaData.title;
+	let trackName = metaData.title ?? fileTrackName;
 	if (metaData?.artist) trackName += ` - ${metaData.artist}`;
 	if (metaData?.album) trackName += ` - ${metaData.album}`;
 	// min:sec format
