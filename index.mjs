@@ -171,7 +171,7 @@ if (isDist) {
 	app.use('/resources', express.static('./server/scripts/modules'));
 	app.get('/', index);
 	app.get('/.well-known/appspecific/com.chrome.devtools.json', devTools);
-	app.get('*name', express.static('./server', staticOptions));
+	app.get('*name', express.static('./server'));
 }
 
 const server = app.listen(port, () => {
