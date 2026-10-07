@@ -11,6 +11,7 @@ To run your own copy, see [Quick Start](#quick-start).
 This release adds one major feature and a lot of work behind the scenes:
 
 * **Future Radar** is a new display that loops forecast radar reflectivity from NOAA's [HRRR](https://rapidrefresh.noaa.gov/hrrr/) (High-Resolution Rapid Refresh) model for the next several hours. It is available within the continental United States.
+* **Updated Maps** Maps were redrawn from public data in the classic weatherstar style and are now a proper mercator projection.
 * **Code cleanup** a significant cleanup of the code throughout the project.
 
 ## About
