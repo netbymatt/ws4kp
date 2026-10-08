@@ -87,6 +87,15 @@
 						display: none;
 					}
 
+					// the flex above outranks the global .portrait-only rule, so portrait rows have to be hidden and shown again here
+					&.portrait-only {
+						display: none;
+
+						.portrait.enhanced &:not(.hidden) {
+							display: flex;
+						}
+					}
+
 					.label,
 					.value {
 						display: inline-block;

@@ -74,10 +74,14 @@
 				.icon {
 					left: 330px;
 					width: 70px;
-					text-align: center;
-					top: unset;
+					// center the icon on the text's centerline (20px below the top of the row), independent of the icon's height
+					top: 20px;
+					transform: translateY(-50%);
 
 					img {
+						// block removes the space below an inline image so the icon's box is the image
+						display: block;
+						margin: 0 auto;
 						max-width: 47px;
 					}
 				}
