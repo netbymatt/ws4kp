@@ -182,4 +182,4 @@ class FutureRadar extends FilmstripWeatherDisplay {
 }
 
 // register display
-registerDisplay(new FutureRadar(12, 'future-radar'));
+registerDisplay(new FutureRadar(13, 'future-radar'));

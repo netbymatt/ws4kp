@@ -17,4 +17,4 @@ class Radar extends FilmstripWeatherDisplay {
 }
 
 // register display
-registerDisplay(new Radar(11, 'radar'));
+registerDisplay(new Radar(12, 'radar'));

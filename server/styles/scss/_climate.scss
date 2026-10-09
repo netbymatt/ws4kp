@@ -1,0 +1,40 @@
+@use 'shared/_colors'as c;
+@use 'shared/_utils'as u;
+@use 'shared/positions'as p;
+
+.weather-display .climate {
+	// clamp width to standard
+	&.main {
+		width: calc(p.$standard-width - (2 * p.$blue-box-margin));
+	}
+
+	.container {
+		position: relative;
+		top: 15px;
+		margin: 0px 10px;
+		box-sizing: border-box;
+		height: 280px;
+		overflow: hidden;
+
+		.portrait.enhanced & {
+			height: 960px;
+		}
+	}
+
+	.data {
+		font-family: 'Star4000';
+		font-size: 32px;
+		@include u.text-shadow();
+		line-height: 40px;
+		text-align: center;
+
+		div:first-child {
+			margin-top: 20px;
+		}
+	}
+	.spacer {
+		margin-top: 40px;
+	}
+
+	
+}
