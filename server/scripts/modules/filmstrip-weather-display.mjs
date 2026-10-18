@@ -201,8 +201,24 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 		this.elem.querySelector('.scroll-area').style.transform = `translate(${previousTopLeft[PX] - currentTopLeft[PX]}px, ${previousTopLeft[PY] - currentTopLeft[PY]}px)`;
 	}
 
+	// stepping between frames is a jump of the strip, not a redraw, so it skips the render events.
+	// the full draw only runs as the display first comes on screen
+	screenIndexChange() {
+		if (this.elem.classList.contains('show')) {
+			this.drawFrame();
+		} else {
+			this.drawCanvas();
+		}
+	}
+
 	async drawCanvas() {
 		super.drawCanvas();
+		this.drawFrame();
+		this.finishDraw();
+	}
+
+	// show the frame for the current screen index: the time in the header and the strip scrolled to the frame
+	drawFrame() {
 		const time = this.times[this.screenIndex].toLocaleString(DateTime.TIME_SIMPLE);
 		const timePadded = time.length >= 8 ? time : `&nbsp;${time} `;
 		this.elem.querySelector('.header .right .time').innerHTML = timePadded;
@@ -217,8 +233,6 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 		if (debugFlag(this.elemId)) {
 			console.log(`${this.constructor.name}: drawing screen ${this.screenIndex} of ${this.times.length}, ${timePadded.replace('&nbsp;', '').trim()}, frame height ${actualFrameHeight}px, scrolled to ${-this.screenIndex * actualFrameHeight}px`);
 		}
-
-		this.finishDraw();
 	}
 }
 
