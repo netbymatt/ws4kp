@@ -92,6 +92,10 @@ const makeCityBox = (city, padY = 0) => ({
 	y2: city.pxy[PY] - boxOffset[PY] + CITYBOX[PY] + padY,
 });
 
+// names a forecast period the same way in every time zone: day or night, and the local date it ends on.
+// night periods end the morning after, so "Tonight" and an after-midnight "Overnight" for the same night match
+const periodKey = (period) => `${DateTime.fromISO(period.endTime, { setZone: true }).toISODate()} ${period.isDaytime ? 'day' : 'night'}`;
+
 const cityLatLonBoundingBox = (city, minMaxLatLon) => (
 	city.lat > minMaxLatLon.minLat
 	&& city.lat < minMaxLatLon.maxLat
@@ -253,12 +257,10 @@ class RegionalForecast extends WeatherDisplay {
 					return false;
 				}
 
-				// group together the current observation and next two periods
-				return [
-					regionalObservation,
-					buildForecast(activePeriods[1], city),
-					buildForecast(activePeriods[2], city),
-				];
+				// determine the necessary forecast periods to find
+
+				// the forecast periods to show are picked once all the stations have loaded
+				return { regionalObservation, activePeriods, city };
 			} catch (error) {
 				console.error(`Unexpected error getting Regional Forecast data for '${city.city}': ${error.message}`);
 				return false;
@@ -266,7 +268,22 @@ class RegionalForecast extends WeatherDisplay {
 		}));
 
 		// filter out any false (unavailable data)
-		const regionalData = regionalDataAll.filter((data) => data);
+		const loaded = regionalDataAll.filter((data) => data);
+
+		// the first station that loaded picks the two forecast periods, the same station sets the title.
+		// every other station shows its matching periods, which can sit at a different index when it's
+		// in another time zone and has already rolled over from day to night
+		const targets = loaded.length > 0 ? [periodKey(loaded[0].activePeriods[1]), periodKey(loaded[0].activePeriods[2])] : [];
+		const regionalData = loaded.map(({ regionalObservation, activePeriods, city }) => {
+			const periods = targets.map((key) => activePeriods.find((period) => periodKey(period) === key));
+			if (periods.some((period) => !period)) {
+				if (debugFlag('verbose-failures')) {
+					console.warn(`Regional Forecast for ${city.city} has no period matching ${targets.join(', ')}`);
+				}
+				return false;
+			}
+			return [regionalObservation, ...periods.map((period) => buildForecast(period, city))];
+		}).filter((data) => data);
 
 		// test for data present
 		if (regionalData.length === 0) {
