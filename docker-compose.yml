@@ -1,0 +1,15 @@
+# WS4KP Docker Compose — Node server mode + volume-mounted music
+# Usage: docker compose up -d   /   docker compose down
+
+services:
+  ws4kp:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount your local music folder into the server's music directory.
+      # Drop .mp3 files here — the server-side proxy handles the rest.
+      - ./music:/app/server/music:ro
+    restart: unless-stopped

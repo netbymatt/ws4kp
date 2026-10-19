@@ -1,0 +1,6 @@
+# music/
+
+Add .mp3 files here.
+They will be mounted as a volume into the container and served at http://localhost:8080/music/
+
+The app scans this directory automatically (no playlist.json needed).
