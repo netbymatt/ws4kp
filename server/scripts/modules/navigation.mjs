@@ -68,6 +68,10 @@ const updateStatus = (value) => {
 	// if this is the first display and we're playing, load it up so it starts playing
 	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
+	} else if (isPlaying() && currentDisplayIndex() === -1 && countLoadedDisplays() === displays.length) {
+		// backup case for when the first display has no data or an error, find the next available once all have loaded
+		const alternateFirstDisplay = displays.find((display) => display?.enabled && display?.timing?.totalScreens > 0 && display?.status === STATUS.loaded);
+		showDisplay(alternateFirstDisplay);
 	}
 };
 

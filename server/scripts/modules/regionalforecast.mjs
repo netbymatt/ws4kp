@@ -16,6 +16,7 @@ import settings from './settings.mjs';
 import createProjection, { OUTPUTSIZES } from './utils/map-projection.mjs';
 import { getRegionalObservation, formatCity, buildForecast } from './regionalforecast-utils.mjs';
 import { RegionalCities, StationInfo } from './utils/data-loader.mjs';
+import isObsFresh from './utils/is-obs-fresh.mjs';
 
 // array indices for reference
 const PX = 0;
@@ -233,7 +234,7 @@ class RegionalForecast extends WeatherDisplay {
 				// wait for the regional observation if it's not done yet
 				const observation = await observationPromise;
 
-				if (!observation) return false;
+				if (!observation || !isObsFresh(observation.timestamp)) return false;
 
 				// format the observation the same as the forecast
 				const regionalObservation = {

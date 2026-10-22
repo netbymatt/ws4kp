@@ -199,6 +199,7 @@ class WeatherDisplay {
 	// resolves right away if the data is here, otherwise when it arrives (undefined if loading fails)
 	dataReady(stillWaiting) {
 		if (this.data) return Promise.resolve(this.data);
+		if (this.status === STATUS.failed || this.status === STATUS.noData) return Promise.resolve(null);
 		if (stillWaiting) this.stillWaitingCallbacks.push(stillWaiting);
 		return new Promise((resolve) => {
 			this.getDataCallbacks.push(resolve);

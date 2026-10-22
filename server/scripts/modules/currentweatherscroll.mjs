@@ -99,7 +99,10 @@ const drawScreen = async () => {
 	}
 
 	// if we have no current weather and no hazards, there's nothing to display
-	if (!data && (!scrollData.hazards || scrollData.hazards.length === 0)) return;
+	if (!data && (!scrollData.hazards || scrollData.hazards.length === 0)) {
+		drawCondition('No local observations available');
+		return;
+	}
 
 	const thisScreen = await workingScreens[screenIndex](scrollData, parameters);
 

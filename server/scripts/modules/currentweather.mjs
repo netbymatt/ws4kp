@@ -18,6 +18,7 @@ import { DateTime } from '../vendor/auto/luxon.mjs';
 import settings from './settings.mjs';
 import setHeadend from './headend.mjs';
 import { StationInfo } from './utils/data-loader.mjs';
+import isObsFresh from './utils/is-obs-fresh.mjs';
 
 class CurrentWeather extends WeatherDisplay {
 	constructor(navId, elemId) {
@@ -78,7 +79,7 @@ class CurrentWeather extends WeatherDisplay {
 				// eslint-disable-next-line no-await-in-loop
 				candidateObservation = await safeJson(`${station.id}/observations`, {
 					data: {
-						limit: 5, // we need the two most recent observations to calculate pressure direction, and to back fill any missing data
+						limit: 15, // some stations produce data at 5 minute intervals but only full data every hour, 15 observations gives us ~75 minutes of data to backfill from if needed
 					},
 					retryCount: 3,
 					stillWaiting: () => this.stillWaiting(),
@@ -89,7 +90,7 @@ class CurrentWeather extends WeatherDisplay {
 			}
 
 			// Check if request was successful and has data
-			if (candidateObservation && candidateObservation.features?.length > 0) {
+			if (candidateObservation && candidateObservation.features?.length > 0 && isObsFresh(candidateObservation.features[0].properties.timestamp)) {
 				// Attempt making observation data usable with METAR data
 				const originalData = { ...candidateObservation.features[0].properties };
 				candidateObservation.features[0].properties = augmentObservationWithMetar(candidateObservation.features[0].properties);
@@ -122,6 +123,11 @@ class CurrentWeather extends WeatherDisplay {
 					// Station data is good, use it
 					observations = candidateObservation;
 					filledFromMetar = metarReplacements;
+
+					// icon may not be supplied on every observation from 5-minute update stations
+					// pull the icon from up to an hour ago
+					observations.features[0].properties.icon = candidateObservation.features.find((observation) => observation.properties.icon).properties.icon;
+
 					if (debugFlag('currentweather') && missingOptional.length > 0) {
 						console.log(`Data for station ${stationId} is missing optional fields: ${missingOptional.join(', ')} (acceptable)`);
 					}
@@ -134,15 +140,17 @@ class CurrentWeather extends WeatherDisplay {
 			} else if (debugFlag('verbose-failures')) {
 				if (!candidateObservation) {
 					console.log(`Current Conditions for station ${stationId} failed, trying next station`);
-				} else {
+				} else if (candidateObservation.features?.length === 0) {
 					console.log(`No features returned for station ${stationId}, trying next station`);
+				} else {
+					console.log('Observation is > 1 hour old');
 				}
 			}
 		}
 		// test for data received
 		if (!observations) {
 			console.error('Current Conditions failure: all nearby weather stations exhausted!');
-			if (this.isEnabled) this.setStatus(STATUS.failed);
+			if (this.isEnabled) this.setStatus(STATUS.noData);
 			setHeadend('station', 'none available');
 			setHeadend('observed');
 			// release anyone waiting, they get the data from the last successful load (undefined if there isn't any)

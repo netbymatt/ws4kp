@@ -11,6 +11,7 @@ import settings from './settings.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import { enhanceObservationWithMapClick } from './utils/mapclick.mjs';
 import { StationInfo } from './utils/data-loader.mjs';
+import isObsFresh from './utils/is-obs-fresh.mjs';
 
 const MAX_REGIONAL_STATIONS = 7;
 
@@ -66,7 +67,7 @@ class LatestObservations extends WeatherDisplay {
 		const stationData = await this.getStationWorker(station);
 
 		// if data was returned use this, otherwise recur
-		if (stationData) return stationData;
+		if (stationData && isObsFresh(stationData.timestamp)) return stationData;
 		// recur (loop is ended when nextStation is exhausted with the length of regional stations)
 		return this.getStation(nextStation);
 	}
