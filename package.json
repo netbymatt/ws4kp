@@ -1,6 +1,6 @@
 {
 	"name": "ws4kp",
-	"version": "8.0.1",
+	"version": "8.0.2",
 	"description": "A web-based simulation of the classic WeatherStar 4000 cable tv forecast hardware",
 	"main": "index.mjs",
 	"type": "module",
