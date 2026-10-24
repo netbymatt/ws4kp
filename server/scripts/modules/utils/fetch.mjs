@@ -65,7 +65,7 @@ const fetchAsync = async (_url, responseType, _params = {}) => {
 		retryCount: 3, // Default to 3 retries for any failed requests (timeout or 5xx server errors)
 		timeout: DEFAULT_REQUEST_TIMEOUT,
 		..._params,
-		headers,
+		headers: { ...headers, ..._params?.headers ?? {} },
 	};
 
 	// rewrite URLs for various services to use the backend proxy server for proper caching (and request logging)

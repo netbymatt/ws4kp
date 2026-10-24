@@ -3,253 +3,274 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <title>WeatherStar 4000+</title>
-  <meta name="description" content="Web based WeatherStar 4000 simulator that reports current and forecast weather conditions plus a few extras!" />
-  <meta name="keywords" content="WeatherStar 4000+" />
-  <meta name="author" content="Matt Walsh" />
-  <meta name="application-name" content="WeatherStar 4000+" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="images/logos/logo192.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="images/logos/app-icon-180.png" />
-  <meta property="og:image" content="https://weatherstar.netbymatt.com/images/social/1200x600.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="627">
-  <link rel="prefetch" href="fonts/Star4000.woff" as="font" type="font/woff" crossorigin>
-  <link rel="prefetch" href="fonts/Star4000 Extended.woff" as="font" type="font/woff" crossorigin>
-  <link rel="prefetch" href="fonts/Star4000 Large.woff" as="font" type="font/woff" crossorigin>
-  <link rel="prefetch" href="fonts/Star4000 Small.woff" as="font" type="font/woff" crossorigin>
-  <% if (typeof serverAvailable !== 'undefined' && serverAvailable) { %>
-  <script>
-    window.WS4KP_SERVER_AVAILABLE = true;
-  </script>
-  <% } %>
+	<meta charset="utf-8" />
+	<title>WeatherStar 4000+</title>
+	<meta name="description"
+		content="Web based WeatherStar 4000 simulator that reports current and forecast weather conditions plus a few extras!" />
+	<meta name="keywords" content="WeatherStar 4000+" />
+	<meta name="author" content="Matt Walsh" />
+	<meta name="application-name" content="WeatherStar 4000+" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<link rel="manifest" href="manifest.json" />
+	<link rel="icon" href="images/logos/logo192.png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="images/logos/app-icon-180.png" />
+	<meta property="og:image" content="https://weatherstar.netbymatt.com/images/social/1200x600.png">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="627">
+	<link rel="prefetch" href="fonts/Star4000.woff" as="font" type="font/woff" crossorigin>
+	<link rel="prefetch" href="fonts/Star4000 Extended.woff" as="font" type="font/woff" crossorigin>
+	<link rel="prefetch" href="fonts/Star4000 Large.woff" as="font" type="font/woff" crossorigin>
+	<link rel="prefetch" href="fonts/Star4000 Small.woff" as="font" type="font/woff" crossorigin>
+	<% if (typeof serverAvailable !=='undefined' && serverAvailable) { %>
+		<script>
+			window.WS4KP_SERVER_AVAILABLE = true;
+		</script>
+		<% } %>
 
-  <% if (production) { %>
-  <link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=version%>" />
-  <script type="text/javascript" src="resources/ws.min.js?_=<%=version%>" defer></script>
-  <script type="text/javascript">
-    const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
-  </script>
-  <% } else { %>
-  <link rel="stylesheet" type="text/css" href="styles/ws.min.css" />
-  <!--<script type="text/javascript">const OVERRIDES={};</script>-->
-  <script type="text/javascript">
-    const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
-  </script>
-  <script type="module" src="scripts/ws.mjs"></script>
-  <% } %>
+			<% if (production) { %>
+				<link rel="stylesheet" type="text/css" href="resources/ws.min.css?_=<%=version%>" />
+				<script type="text/javascript" src="resources/ws.min.js?_=<%=version%>" defer></script>
+				<script type="text/javascript">
+					const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
+				</script>
+				<% } else { %>
+					<link rel="stylesheet" type="text/css" href="styles/ws.min.css" />
+					<!--<script type="text/javascript">const OVERRIDES={};</script>-->
+					<script type="text/javascript">
+						const OVERRIDES = <%- JSON.stringify(OVERRIDES ?? {}) %>;
+					</script>
+					<script type="module" src="scripts/ws.mjs"></script>
+					<% } %>
 
 </head>
 
-<body <% if (query && (query['kiosk'] === 'true' || query['settings-kiosk-checkbox'] === 'true' )) { %>class="kiosk" <% }%>>
+<body <% if (query && (query['kiosk']==='true' || query['settings-kiosk-checkbox']==='true' )) { %>class="kiosk" <% }%>>
 
-  <div id="divQuery">
-    <div class="location-input">
-      <input id="txtLocation" name="txtLocation" type="text" value="" placeholder="ZIP Code or City, State" aria-label="Location" data-1p-ignore />
-    </div>
-    <div class="buttons">
-      <button id="btnGetGps" type="button" title="Get GPS Location" aria-label="Get GPS location"><img src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light" alt="" />
-        <img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark" alt="" />
-      </button>
-      <button id="btnGetLatLng" type="submit">GO</button>
-      <button id="btnClearQuery" type="button">Reset</button>
-    </div>
-    <div class="location-status" role="status"></div>
-  </div>
-  <div id="version" style="display:none">
-    <%- version %>
-  </div>
+		<div id="divQuery">
+			<div class="location-input">
+				<input id="txtLocation" name="txtLocation" type="text" value="" placeholder="ZIP Code or City, State"
+					aria-label="Location" data-1p-ignore />
+			</div>
+			<div class="buttons">
+				<button id="btnGetGps" type="button" title="Get GPS Location" aria-label="Get GPS location"><img
+						src="images/nav/ic_gps_fixed_black_18dp_1x.png" class="light" alt="" />
+					<img src="images/nav/ic_gps_fixed_white_18dp_1x.png" class="dark" alt="" />
+				</button>
+				<button id="btnGetLatLng" type="submit">GO</button>
+				<button id="btnClearQuery" type="button">Reset</button>
+			</div>
+			<div class="location-status" role="status"></div>
+		</div>
+		<div id="version" style="display:none">
+			<%- version %>
+		</div>
 
-  <div id="divTwc">
-    <div id="divTwcMain">
-      <div id="container">
-        <div id="loading">
-          <div>
-            <div class="title">WeatherStar 4000+</div>
-            <div class="version">v<%- version %></div>
-            <div class="instructions">Enter your location above to continue</div>
-            <div class="location-status"></div>
-          </div>
-        </div>
-        <div id="progress-html" class="weather-display">
-          <%- include('partials/progress.ejs') %>
-        </div>
-        <div id="hourly-html" class="weather-display">
-          <%- include('partials/hourly.ejs') %>
-        </div>
-        <div id="hourly-graph-html" class="weather-display">
-          <%- include('partials/hourly-graph.ejs') %>
-        </div>
-        <div id="travel-html" class="weather-display">
-          <%- include('partials/travel.ejs') %>
-        </div>
-        <div id="current-weather-html" class="weather-display">
-          <%- include('partials/current-weather.ejs') %>
-        </div>
-        <div id="local-forecast-html" class="weather-display">
-          <%- include('partials/local-forecast.ejs') %>
-        </div>
-        <div id="latest-observations-html" class="weather-display">
-          <%- include('partials/latest-observations.ejs') %>
-        </div>
-        <div id="regional-forecast-html" class="weather-display">
-          <%- include('partials/regional-forecast.ejs') %>
-        </div>
-        <div id="almanac-html" class="weather-display">
-          <%- include('partials/almanac.ejs') %>
-        </div>
-        <div id="spc-outlook-html" class="weather-display">
-          <%- include('partials/spc-outlook.ejs') %>
-        </div>
-        <div id="extended-forecast-html" class="weather-display">
-          <%- include('partials/extended-forecast.ejs') %>
-        </div>
-        <div id="radar-html" class="weather-display">
-          <%- include('partials/radar-common.ejs', { titleTop: 'Local', mainClass: 'radar' }) %>
-        </div>
-        <div id="future-radar-html" class="weather-display">
-          <%- include('partials/radar-common.ejs', { titleTop: 'Future', mainClass: 'future-radar' }) %>
-        </div>
-        <div id="hazards-html" class="weather-display">
-          <%- include('partials/hazards.ejs') %>
-        </div>
-        <%- include('partials/scroll.ejs') %>
-      </div>
-    </div>
-    <div id="divTwcBottom">
-      <div id="divTwcBottomLeft">
-        <button type="button" id="NavigateMenu" class="navButton" title="Menu" aria-label="Menu"><img src="images/nav/ic_menu_white_24dp_2x.png" alt="" /></button>
-        <button type="button" id="NavigatePrevious" class="navButton" title="Previous" aria-label="Previous"><img src="images/nav/ic_skip_previous_white_24dp_2x.png" alt="" /></button>
-        <button type="button" id="NavigateNext" class="navButton" title="Next" aria-label="Next"><img src="images/nav/ic_skip_next_white_24dp_2x.png" alt="" /></button>
-        <button type="button" id="NavigatePlay" class="navButton" title="Play" aria-label="Play"><img src="images/nav/ic_play_arrow_white_24dp_2x.png" alt="" /></button>
-      </div>
-      <div id="divTwcBottomMiddle">
-        <button type="button" id="NavigateRefresh" class="navButton" title="Refresh" aria-label="Refresh"><img src="images/nav/ic_refresh_white_24dp_2x.png" alt="" /></button>
-      </div>
-      <div id="divTwcBottomRight">
-        <div id="ToggleMediaContainer">
-          <button type="button" id="ToggleMedia" class="navButton" title="Toggle music" aria-label="Music" aria-pressed="false">
-            <img class="off" src="images/nav/ic_music_off_white_24dp_2x.png" alt="" />
-            <img class="on" src="images/nav/ic_music_on_white_24dp_2x.png" alt="" />
-          </button>
-          <button type="button" id="ToggleMediaVolume" class="navButton" title="Volume" aria-label="Volume" aria-expanded="false" aria-controls="volume-slider"><img src="images/nav/ic_volume_on_white_24dp_2x.png" alt="" /></button>
-          <div class="volume-slider" id="volume-slider">
-            <input type="range" min="1" max="100" value="75" aria-label="Music volume" />
-          </div>
-        </div>
-        <button type="button" id="ToggleScanlines" class="navButton" title="Scan lines" aria-label="Scan lines" aria-pressed="false">
-          <img class="off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" alt="" />
-          <img class="on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" alt="" />
-        </button>
-        <button type="button" id="ToggleFullScreen" class="navButton" title="Enter fullscreen" aria-label="Enter fullscreen"><img src="images/nav/ic_fullscreen_white_24dp_2x.png" alt="" /></button>
-      </div>
-    </div>
-  </div>
+		<div id="divTwc">
+			<div id="divTwcMain">
+				<div id="container">
+					<div id="loading">
+						<div>
+							<div class="title">WeatherStar 4000+</div>
+							<div class="version">v<%- version %></div>
+							<div class="instructions">Enter your location above to continue</div>
+							<div class="location-status"></div>
+						</div>
+					</div>
+					<div id="progress-html" class="weather-display">
+						<%- include('partials/progress.ejs') %>
+					</div>
+					<div id="hourly-html" class="weather-display">
+						<%- include('partials/hourly.ejs') %>
+					</div>
+					<div id="hourly-graph-html" class="weather-display">
+						<%- include('partials/hourly-graph.ejs') %>
+					</div>
+					<div id="travel-html" class="weather-display">
+						<%- include('partials/travel.ejs') %>
+					</div>
+					<div id="current-weather-html" class="weather-display">
+						<%- include('partials/current-weather.ejs') %>
+					</div>
+					<div id="local-forecast-html" class="weather-display">
+						<%- include('partials/local-forecast.ejs') %>
+					</div>
+					<div id="latest-observations-html" class="weather-display">
+						<%- include('partials/latest-observations.ejs') %>
+					</div>
+					<div id="regional-forecast-html" class="weather-display">
+						<%- include('partials/regional-forecast.ejs') %>
+					</div>
+					<div id="almanac-html" class="weather-display">
+						<%- include('partials/almanac.ejs') %>
+					</div>
+					<div id="climate-html" class="weather-display">
+						<%- include('partials/climate.ejs') %>
+					</div>
+					<div id="spc-outlook-html" class="weather-display">
+						<%- include('partials/spc-outlook.ejs') %>
+					</div>
+					<div id="extended-forecast-html" class="weather-display">
+						<%- include('partials/extended-forecast.ejs') %>
+					</div>
+					<div id="radar-html" class="weather-display">
+						<%- include('partials/radar-common.ejs', { titleTop: 'Local' , mainClass: 'radar' }) %>
+					</div>
+					<div id="future-radar-html" class="weather-display">
+						<%- include('partials/radar-common.ejs', { titleTop: 'Future' , mainClass: 'future-radar' }) %>
+					</div>
+					<div id="hazards-html" class="weather-display">
+						<%- include('partials/hazards.ejs') %>
+					</div>
+					<%- include('partials/scroll.ejs') %>
+				</div>
+			</div>
+			<div id="divTwcBottom">
+				<div id="divTwcBottomLeft">
+					<button type="button" id="NavigateMenu" class="navButton" title="Menu" aria-label="Menu"><img
+							src="images/nav/ic_menu_white_24dp_2x.png" alt="" /></button>
+					<button type="button" id="NavigatePrevious" class="navButton" title="Previous" aria-label="Previous"><img
+							src="images/nav/ic_skip_previous_white_24dp_2x.png" alt="" /></button>
+					<button type="button" id="NavigateNext" class="navButton" title="Next" aria-label="Next"><img
+							src="images/nav/ic_skip_next_white_24dp_2x.png" alt="" /></button>
+					<button type="button" id="NavigatePlay" class="navButton" title="Play" aria-label="Play"><img
+							src="images/nav/ic_play_arrow_white_24dp_2x.png" alt="" /></button>
+				</div>
+				<div id="divTwcBottomMiddle">
+					<button type="button" id="NavigateRefresh" class="navButton" title="Refresh" aria-label="Refresh"><img
+							src="images/nav/ic_refresh_white_24dp_2x.png" alt="" /></button>
+				</div>
+				<div id="divTwcBottomRight">
+					<div id="ToggleMediaContainer">
+						<button type="button" id="ToggleMedia" class="navButton" title="Toggle music" aria-label="Music"
+							aria-pressed="false">
+							<img class="off" src="images/nav/ic_music_off_white_24dp_2x.png" alt="" />
+							<img class="on" src="images/nav/ic_music_on_white_24dp_2x.png" alt="" />
+						</button>
+						<button type="button" id="ToggleMediaVolume" class="navButton" title="Volume" aria-label="Volume"
+							aria-expanded="false" aria-controls="volume-slider"><img src="images/nav/ic_volume_on_white_24dp_2x.png"
+								alt="" /></button>
+						<div class="volume-slider" id="volume-slider">
+							<input type="range" min="1" max="100" value="75" aria-label="Music volume" />
+						</div>
+					</div>
+					<button type="button" id="ToggleScanlines" class="navButton" title="Scan lines" aria-label="Scan lines"
+						aria-pressed="false">
+						<img class="off" src="images/nav/ic_scanlines_off_white_24dp_2x.png" alt="" />
+						<img class="on" src="images/nav/ic_scanlines_on_white_24dp_2x.png" alt="" />
+					</button>
+					<button type="button" id="ToggleFullScreen" class="navButton" title="Enter fullscreen"
+						aria-label="Enter fullscreen"><img src="images/nav/ic_fullscreen_white_24dp_2x.png" alt="" /></button>
+				</div>
+			</div>
+		</div>
 
-  <div id="lower-tabs">
-    <div class="tab-bar" role="tablist">
-      <button type="button" role="tab" id="tab-displays" aria-controls="tab-panel-displays" aria-selected="true">Displays <span id="enabled-count" class="count"></span></button>
-      <button type="button" role="tab" id="tab-settings" aria-controls="tab-panel-settings" aria-selected="false">Settings</button>
-      <button type="button" role="tab" id="tab-share" aria-controls="tab-panel-share" aria-selected="false">Share</button>
-      <button type="button" role="tab" id="tab-headend" aria-controls="tab-panel-headend" aria-selected="false">Headend</button>
-    </div>
-    <div class="tab-panels">
-      <div class="tab-panel active" role="tabpanel" id="tab-panel-displays" aria-labelledby="tab-displays">
-        <div id="enabledDisplays"></div>
-        <div class="legend">
-          <span class="ready">Ready (click to view)</span>
-          <span class="loading">Loading</span>
-          <span class="failed">Failed</span>
-          <span class="off">Off / no data</span>
-        </div>
-      </div>
-      <div class="tab-panel" role="tabpanel" id="tab-panel-settings" aria-labelledby="tab-settings">
-        <div id="settings"></div>
-      </div>
-      <div class="tab-panel" role="tabpanel" id="tab-panel-share" aria-labelledby="tab-share">
-        <div class="share-row">
-          <input type="url" id="share-link-url" readonly aria-label="Permalink">
-          <button type="button" id="share-link" class="tab-button">Copy permalink</button>
-        </div>
-        <p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied" class="copied" role="status"></span></p>
-      </div>
-      <div class="tab-panel" role="tabpanel" id="tab-panel-headend" aria-labelledby="tab-headend">
-        <!-- each row is written by key through modules/headend.mjs -->
-        <dl id="divInfo">
-          <div class="wide-item">
-            <dt>Location</dt>
-            <dd data-headend="location"></dd>
-          </div>
-          <div>
-            <dt>Station</dt>
-            <dd data-headend="station"></dd>
-          </div>
-          <div>
-            <dt>Radar</dt>
-            <dd data-headend="radar"></dd>
-          </div>
-          <div class="wide-item">
-            <dt>Observed</dt>
-            <dd data-headend="observed"></dd>
-          </div>
-          <div>
-            <dt>Zone</dt>
-            <dd data-headend="zone"></dd>
-          </div>
-          <div>
-            <dt>Office</dt>
-            <dd data-headend="office"></dd>
-          </div>
-          <div class="wide-item">
-            <dt>Refreshed</dt>
-            <dd data-headend="refreshed"></dd>
-          </div>
-          <div>
-            <dt>Grid X,Y</dt>
-            <dd data-headend="grid"></dd>
-          </div>
-          <div>
-            <dt>HRRR run</dt>
-            <dd data-headend="hrrr"></dd>
-          </div>
-          <div class="wide-item">
-            <dt>Display</dt>
-            <dd data-headend="display"></dd>
-          </div>
-          <div class="wide-item">
-            <dt>Source</dt>
-            <dd data-headend="source"></dd>
-          </div>
-          <div>
-            <dt>Version</dt>
-            <dd data-headend="version"><%- version %></dd>
-          </div>
-          <div class="full-row">
-            <dt>Problems</dt>
-            <dd data-headend="problems"></dd>
-          </div>
-          <div class="full-row">
-            <dt>Music</dt>
-            <dd data-headend="music">Not playing</dd>
-          </div>
-        </dl>
-        <div class="button-row">
-          <button type="button" id="copy-headend" class="tab-button">Copy headend info</button>
-          <span id="copy-headend-copied" class="copied" role="status"></span>
-        </div>
-      </div>
-    </div>
-  </div>
+		<div id="lower-tabs">
+			<div class="tab-bar" role="tablist">
+				<button type="button" role="tab" id="tab-displays" aria-controls="tab-panel-displays"
+					aria-selected="true">Displays <span id="enabled-count" class="count"></span></button>
+				<button type="button" role="tab" id="tab-settings" aria-controls="tab-panel-settings"
+					aria-selected="false">Settings</button>
+				<button type="button" role="tab" id="tab-share" aria-controls="tab-panel-share"
+					aria-selected="false">Share</button>
+				<button type="button" role="tab" id="tab-headend" aria-controls="tab-panel-headend"
+					aria-selected="false">Headend</button>
+			</div>
+			<div class="tab-panels">
+				<div class="tab-panel active" role="tabpanel" id="tab-panel-displays" aria-labelledby="tab-displays">
+					<div id="enabledDisplays"></div>
+					<div class="legend">
+						<span class="ready">Ready (click to view)</span>
+						<span class="loading">Loading</span>
+						<span class="failed">Failed</span>
+						<span class="off">Off / no data</span>
+					</div>
+				</div>
+				<div class="tab-panel" role="tabpanel" id="tab-panel-settings" aria-labelledby="tab-settings">
+					<div id="settings"></div>
+				</div>
+				<div class="tab-panel" role="tabpanel" id="tab-panel-share" aria-labelledby="tab-share">
+					<div class="share-row">
+						<input type="url" id="share-link-url" readonly aria-label="Permalink">
+						<button type="button" id="share-link" class="tab-button">Copy permalink</button>
+					</div>
+					<p class="hint">Includes your location, selected displays and settings. <span id="share-link-copied"
+							class="copied" role="status"></span></p>
+				</div>
+				<div class="tab-panel" role="tabpanel" id="tab-panel-headend" aria-labelledby="tab-headend">
+					<!-- each row is written by key through modules/headend.mjs -->
+					<dl id="divInfo">
+						<div class="wide-item">
+							<dt>Location</dt>
+							<dd data-headend="location"></dd>
+						</div>
+						<div>
+							<dt>Station</dt>
+							<dd data-headend="station"></dd>
+						</div>
+						<div>
+							<dt>Radar</dt>
+							<dd data-headend="radar"></dd>
+						</div>
+						<div class="wide-item">
+							<dt>Observed</dt>
+							<dd data-headend="observed"></dd>
+						</div>
+						<div>
+							<dt>Zone</dt>
+							<dd data-headend="zone"></dd>
+						</div>
+						<div>
+							<dt>Office</dt>
+							<dd data-headend="office"></dd>
+						</div>
+						<div class="wide-item">
+							<dt>Refreshed</dt>
+							<dd data-headend="refreshed"></dd>
+						</div>
+						<div>
+							<dt>Grid X,Y</dt>
+							<dd data-headend="grid"></dd>
+						</div>
+						<div>
+							<dt>HRRR run</dt>
+							<dd data-headend="hrrr"></dd>
+						</div>
+						<div class="wide-item">
+							<dt>Display</dt>
+							<dd data-headend="display"></dd>
+						</div>
+						<div class="wide-item">
+							<dt>Source</dt>
+							<dd data-headend="source"></dd>
+						</div>
+						<div>
+							<dt>Version</dt>
+							<dd data-headend="version"><%- version %></dd>
+						</div>
+						<div class="full-row">
+							<dt>Problems</dt>
+							<dd data-headend="problems"></dd>
+						</div>
+						<div class="full-row">
+							<dt>Music</dt>
+							<dd data-headend="music">Not playing</dd>
+						</div>
+					</dl>
+					<div class="button-row">
+						<button type="button" id="copy-headend" class="tab-button">Copy headend info</button>
+						<span id="copy-headend-copied" class="copied" role="status"></span>
+					</div>
+				</div>
+			</div>
+		</div>
 
-  <div class="content-wrapper">
-    <div class="info">
-      <a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
-    </div>
-  </div>
+		<div class="content-wrapper">
+			<div class="info">
+				<a href="https://github.com/netbymatt/ws4kp#weatherstar-4000">More information</a>
+			</div>
+		</div>
 
 </body>
 

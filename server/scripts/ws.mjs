@@ -17,6 +17,7 @@ import './modules/travelforecast.mjs';
 import './modules/progress.mjs';
 import './modules/radar.mjs';
 import './modules/future-radar.mjs';
+import './modules/climate.mjs';
 import './modules/settings.mjs';
 import './modules/media.mjs';
 import './modules/custom-scroll-text.mjs';
