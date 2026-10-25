@@ -10,11 +10,21 @@ const BOUNDS = {
 		x: [-126, -65.5],
 		y: [50.5, 23.5],
 	},
+	'forecast-alaska': {
+		x: [-170, -129],
+		y: [72, 51],
+	},
+	'forecast-hawaii': {
+		x: [-160.5, -154.5],
+		y: [22.5, 18.5],
+	},
 };
 
 const PROJECTIONS = {
 	'forecast-conus': (lon0) => `+proj=merc +lon_0=${lon0} +datum=WGS84 +units=m +no_defs`,
 	'radar-conus': (lon0) => `+proj=merc +lon_0=${lon0} +datum=WGS84 +units=m +no_defs`,
+	'forecast-alaska': (lon0) => `+proj=merc +lon_0=${lon0} +datum=WGS84 +units=m +no_defs`,
+	'forecast-hawaii': (lon0) => `+proj=merc +lon_0=${lon0} +datum=WGS84 +units=m +no_defs`,
 };
 
 const OUTPUTSIZES = {
@@ -25,6 +35,14 @@ const OUTPUTSIZES = {
 	'radar-conus': {
 		width: 5100,
 		height: 3200,
+	},
+	'forecast-alaska': {
+		width: 3456,
+		height: 4276,
+	},
+	'forecast-hawaii': {
+		width: 506 * 2,
+		height: 396 * 2,
 	},
 };
 

@@ -18,12 +18,14 @@ class Climate extends WeatherDisplay {
 	async getData(weatherParameters, refresh) {
 		if (!super.getData(weatherParameters, refresh)) return;
 
+		const searchSize = 0.2;
+
 		// generate a station bounding box
 		const { latitude: lat, longitude: lon } = this.weatherParameters;
-		const west = (lon - 0.2).toFixed(2);
-		const south = (lat - 0.2).toFixed(2);
-		const east = (lon + 0.2).toFixed(2);
-		const north = (lat + 0.2).toFixed(2);
+		const west = (lon - searchSize).toFixed(2);
+		const south = (lat - searchSize).toFixed(2);
+		const east = (lon + searchSize).toFixed(2);
+		const north = (lat + searchSize).toFixed(2);
 
 		// compute month span (can't include today as we don't yet know the total precipitation)
 		// so this may roll backwards into last month on the first of the month.
@@ -69,11 +71,12 @@ class Climate extends WeatherDisplay {
 
 		// grab the first station
 		const station = stations[0];
-		const sid = station.sids[0];
+		const sid = station?.sids?.[0];
 
 		if (!station) {
 			console.error('After filtering, could not find any stations with climate data');
 			this.setStatus(STATUS.noData);
+			return;
 		}
 
 		// query the station
