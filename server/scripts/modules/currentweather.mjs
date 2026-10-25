@@ -126,7 +126,7 @@ class CurrentWeather extends WeatherDisplay {
 
 					// icon may not be supplied on every observation from 5-minute update stations
 					// pull the icon from up to an hour ago
-					observations.features[0].properties.icon = candidateObservation.features.find((observation) => observation.properties.icon).properties.icon;
+					observations.features[0].properties.icon = candidateObservation.features.find((observation) => observation.properties.icon)?.properties?.icon ?? null;
 
 					if (debugFlag('currentweather') && missingOptional.length > 0) {
 						console.log(`Data for station ${stationId} is missing optional fields: ${missingOptional.join(', ')} (acceptable)`);
