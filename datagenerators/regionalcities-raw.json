@@ -1700,7 +1700,7 @@
 		"lon": 41.6378
 	},
 	{
-		"city": "Cape Cod",
+		"city": "Cape Coral",
 		"lat": -81.95675,
 		"lon": 26.62982
 	},
@@ -1833,5 +1833,80 @@
 		"city": "Aiea",
 		"lat": -157.93084,
 		"lon": 21.38013
+	},
+	{
+		"city": "Anchorage",
+		"lat": -149.9003,
+		"lon": 61.2181
+	},
+	{
+		"city": "Fairbanks",
+		"lat": -147.7164,
+		"lon": 64.8378
+	},
+	{
+		"city": "Juneau",
+		"lat": -134.4197,
+		"lon": 58.3019
+	},
+	{
+		"city": "Knik-Fairview",
+		"lat": -149.6005,
+		"lon": 61.5124
+	},
+	{
+		"city": "Badger",
+		"lat": -147.5300,
+		"lon": 64.8000
+	},
+	{
+		"city": "College",
+		"lat": -147.8028,
+		"lon": 64.8569
+	},
+	{
+		"city": "Wasilla",
+		"lat": -149.4394,
+		"lon": 61.5814
+	},
+	{
+		"city": "Tanaina",
+		"lat": -149.4278,
+		"lon": 61.6267
+	},
+	{
+		"city": "Sitka",
+		"lat": -135.3300,
+		"lon": 57.0531
+	},
+	{
+		"city": "Ketchikan",
+		"lat": -131.6461,
+		"lon": 55.3422
+	},
+	{
+		"city": "Hilo",
+		"lat": -155.0868,
+		"lon": 19.7241
+	},
+	{
+		"city": "Kailua-Kona",
+		"lat": -155.9969,
+		"lon": 19.6400
+	},
+	{
+		"city": "Kahului",
+		"lat": -156.4729,
+		"lon": 20.8893
+	},
+	{
+		"city": "Lihue",
+		"lat": -159.3711,
+		"lon": 21.9811
+	},
+	{
+		"city": "Kaunakakai",
+		"lat": -157.0226,
+		"lon": 21.0906
 	}
 ]

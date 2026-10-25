@@ -3330,7 +3330,7 @@
 			"y": 58,
 			"wfo": "UNR"
 		},
-		"id": "KRAP"
+		"id": "KRCA"
 	},
 	{
 		"city": "La Crosse",
@@ -3740,7 +3740,7 @@
 		"id": "KEWB"
 	},
 	{
-		"city": "Cape Cod",
+		"city": "Cape Coral",
 		"lat": "26.6298",
 		"lon": "-81.9567",
 		"point": {
@@ -4035,5 +4035,170 @@
 			"wfo": "HFO"
 		},
 		"id": "PHNL"
+	},
+	{
+		"city": "Anchorage",
+		"lat": "61.2181",
+		"lon": "-149.9003",
+		"point": {
+			"x": 143,
+			"y": 236,
+			"wfo": "AER"
+		},
+		"id": "PAMR"
+	},
+	{
+		"city": "Fairbanks",
+		"lat": "64.8378",
+		"lon": "-147.7164",
+		"point": {
+			"x": 493,
+			"y": 119,
+			"wfo": "AFG"
+		},
+		"id": "PAFB"
+	},
+	{
+		"city": "Juneau",
+		"lat": "58.3019",
+		"lon": "-134.4197",
+		"point": {
+			"x": 194,
+			"y": 163,
+			"wfo": "AJK"
+		},
+		"id": "PAJN"
+	},
+	{
+		"city": "Knik-Fairview",
+		"lat": "61.5124",
+		"lon": "-149.6005",
+		"point": {
+			"x": 148,
+			"y": 247,
+			"wfo": "AER"
+		},
+		"id": "PAWS"
+	},
+	{
+		"city": "Badger",
+		"lat": "64.8000",
+		"lon": "-147.5300",
+		"point": {
+			"x": 495,
+			"y": 118,
+			"wfo": "AFG"
+		},
+		"id": "PAFB"
+	},
+	{
+		"city": "College",
+		"lat": "64.8569",
+		"lon": "-147.8028",
+		"point": {
+			"x": 491,
+			"y": 120,
+			"wfo": "AFG"
+		},
+		"id": "PAFA"
+	},
+	{
+		"city": "Wasilla",
+		"lat": "61.5814",
+		"lon": "-149.4394",
+		"point": {
+			"x": 151,
+			"y": 250,
+			"wfo": "AER"
+		},
+		"id": "PAWS"
+	},
+	{
+		"city": "Tanaina",
+		"lat": "61.6267",
+		"lon": "-149.4278",
+		"point": {
+			"x": 151,
+			"y": 251,
+			"wfo": "AER"
+		},
+		"id": "PAWS"
+	},
+	{
+		"city": "Sitka",
+		"lat": "57.0531",
+		"lon": "-135.3300",
+		"point": {
+			"x": 188,
+			"y": 112,
+			"wfo": "AJK"
+		},
+		"id": "PASI"
+	},
+	{
+		"city": "Ketchikan",
+		"lat": "55.3422",
+		"lon": "-131.6461",
+		"point": {
+			"x": 281,
+			"y": 72,
+			"wfo": "AJK"
+		},
+		"id": "PAKT"
+	},
+	{
+		"city": "Hilo",
+		"lat": "19.7241",
+		"lon": "-155.0868",
+		"point": {
+			"x": 270,
+			"y": 74,
+			"wfo": "HFO"
+		},
+		"id": "PHTO"
+	},
+	{
+		"city": "Kailua-Kona",
+		"lat": "19.6400",
+		"lon": "-155.9969",
+		"point": {
+			"x": 232,
+			"y": 70,
+			"wfo": "HFO"
+		},
+		"id": "PHKO"
+	},
+	{
+		"city": "Kahului",
+		"lat": "20.8893",
+		"lon": "-156.4729",
+		"point": {
+			"x": 212,
+			"y": 126,
+			"wfo": "HFO"
+		},
+		"id": "PHOG"
+	},
+	{
+		"city": "Lihue",
+		"lat": "21.9811",
+		"lon": "-159.3711",
+		"point": {
+			"x": 91,
+			"y": 175,
+			"wfo": "HFO"
+		},
+		"id": "PHLI"
+	},
+	{
+		"city": "Kaunakakai",
+		"lat": "21.0906",
+		"lon": "-157.0226",
+		"point": {
+			"x": 189,
+			"y": 135,
+			"wfo": "HFO"
+		},
+		"id": "PHMK"
 	}
 ]

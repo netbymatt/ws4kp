@@ -124,10 +124,13 @@ class RegionalForecast extends WeatherDisplay {
 
 		// pre-load the base map
 		let baseMap = 'images/maps/forecast-conus.webp';
+		this.mapName = 'forecast-conus';
 		if (weatherParameters.state === 'HI') {
-			baseMap = 'images/maps/radar-hawaii.png';
+			baseMap = 'images/maps/forecast-hawaii.webp';
+			this.mapName = 'forecast-hawaii';
 		} else if (weatherParameters.state === 'AK') {
-			baseMap = 'images/maps/radar-alaska.png';
+			baseMap = 'images/maps/forecast-alaska.webp';
+			this.mapName = 'forecast-alaska';
 		}
 		this.elem.querySelector('.map img').src = baseMap;
 
@@ -307,7 +310,7 @@ class RegionalForecast extends WeatherDisplay {
 	calcLayout() {
 		const {
 			available, mapSize, projection, boxPadY,
-		} = scaling('forecast-conus');
+		} = scaling(this.mapName);
 		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
 		user[PX] = coerce(user[PX], available.width / 2, mapSize.width - (available.width / 2));
 		user[PY] = coerce(user[PY], available.height / 2, mapSize.height - (available.height / 2));
