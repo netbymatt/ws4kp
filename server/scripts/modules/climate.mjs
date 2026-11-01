@@ -29,7 +29,8 @@ class Climate extends WeatherDisplay {
 
 		// compute month span (can't include today as we don't yet know the total precipitation)
 		// so this may roll backwards into last month on the first of the month.
-		const eDate = DateTime.local().setZone(timeZone()).plus({ days: -1 }).startOf('day');
+		const today = DateTime.local().setZone(timeZone());
+		const eDate = today.plus({ days: -1 }).startOf('day');
 		const sDate = eDate.startOf('month');
 
 		// lookup the nearest ACIS station
@@ -82,7 +83,7 @@ class Climate extends WeatherDisplay {
 		// query the station
 		const [precip, normalTemperature] = await Promise.allSettled([
 			getPrecip(sid, sDate, eDate),
-			getTemperature(sid, sDate, eDate),
+			getTemperature(sid, today),
 		]);
 
 		// test for actual data
@@ -192,15 +193,14 @@ const getPrecip = async (sid, sDate, eDate) => {
 	return precip;
 };
 
-const getTemperature = async (sid, eDate) => {
-	const date = eDate.plus({ days: 1 }).toISODate();
+const getTemperature = async (sid, date) => {
 	const temperatureRaw = await safeJson('https://data.rcc-acis.org/StnData', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			sid,
-			sdate: date,
-			edate: date,
+			sdate: date.toISODate(),
+			edate: date.toISODate(),
 			elems: [
 				{ name: 'maxt', normal: '1' },
 				{ name: 'mint', normal: '1' },
