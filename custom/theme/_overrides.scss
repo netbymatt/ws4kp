@@ -1,0 +1,37 @@
+// ATV fork: overrides for colors upstream hard-codes outside _colors.scss
+// Loaded last from server/styles/scss/ws.scss, so these rules win on equal specificity.
+// Keep rules here (not in upstream files) to keep upstream merges conflict-free.
+@use 'colors' as c;
+
+// splash/"enter a location" screen title and status text (upstream: yellow)
+#loading {
+	.title,
+	.location-status {
+		color: c.$atv-sunshine;
+	}
+}
+
+// settings / displays tabs below the screen: upstream exposes these as custom properties
+#lower-tabs {
+	--accent: #{c.$atv-forest-green};
+	--accent-text: #{c.$atv-white};
+	--panel: #{c.$atv-cream};
+	--line: #{c.$atv-sage};
+	--field: #{c.$atv-cloud};
+	--text: #{c.$atv-black};
+	--muted: #{c.$atv-slate};
+
+	@media (prefers-color-scheme: dark) {
+		--accent: #{c.$atv-pear};
+		--accent-text: #{c.$atv-black};
+		--panel: #{c.$atv-navy};
+		--line: #{c.$atv-dark-blue};
+		--text: #{c.$atv-cloud};
+		--muted: #{c.$atv-sage};
+	}
+}
+
+// Intentionally NOT themed:
+// - radar legend (_radar.scss): precipitation intensity colors are data, not brand
+// - status colors (shared/_utils.scss): loading/failed meanings rely on yellow/red
+// - hourly graph line colors (hourly-graph.mjs, canvas): change in JS if needed

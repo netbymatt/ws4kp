@@ -3,3 +3,9 @@
 *.ejs text eol=lf
 *.html text eol=lf
 *.json text eol=lf
+# ATV fork: generated files keep our side on merge conflicts; custom/scripts/sync-upstream.sh rebuilds them
+datagenerators/output/travelcities.json merge=ours
+datagenerators/output/regionalcities.json merge=ours
+datagenerators/output/stations.json merge=ours
+server/styles/ws.min.css merge=ours
+server/styles/ws.min.css.map merge=ours

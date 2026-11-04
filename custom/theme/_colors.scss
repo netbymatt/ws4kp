@@ -1,0 +1,70 @@
+// ATV fork: color theme
+// Upstream's server/styles/scss/shared/_colors.scss forwards this file, so every
+// upstream variable name below MUST stay defined (custom/scripts/check-theme.mjs verifies).
+@use 'sass:color';
+
+// ---------------------------------------------------------------------------
+// Brand palette (from ATV-colors.txt)
+// ---------------------------------------------------------------------------
+// primary
+$atv-forest-green: #41561b;
+$atv-seafoam: #d5eae9;
+$atv-white: #fff;
+// accents
+$atv-burgundy: #611327;
+$atv-dark-blue: #093c8a;
+$atv-sky-blue: #99cafb;
+$atv-sunset-orange: #f68234;
+// secondary accents
+$atv-apple: #ae1139;
+$atv-lilac: #c6c6fc;
+$atv-sunshine: #fdb11a;
+$atv-pear: #b7e465;
+// neutrals
+$atv-cloud: #fcfbf9;
+$atv-cream: #f6f2ee;
+$atv-slate: #7e7e7d;
+$atv-black: #170c03;
+// tints and shades
+$atv-sage: #b3bba4;
+$atv-sea-green: #85b0ad;
+$atv-navy: #051e45;
+$atv-mahogany: #3f0012;
+
+// derived: deep forest for the dark end of panel gradients (no brand shade exists)
+$atv-forest-deep: color.mix($atv-forest-green, $atv-black, 45%);
+
+// ---------------------------------------------------------------------------
+// Upstream variables -> brand mapping
+// ---------------------------------------------------------------------------
+// screen titles ("Current Conditions", "Travel Forecast", ...)
+$title-color: $atv-sunshine;
+// clock/date in the header
+$date-time: $atv-cloud;
+// outline/drop shadow on all on-screen text
+$text-shadow: $atv-black;
+
+// column headers on Hourly / Travel / Almanac / SPC Outlook
+$column-header-text: $atv-sunshine;
+$column-header: $atv-navy;
+
+// banded panel background on Hourly and Travel (was blue #102080 -> #001040)
+$gradient-main-background-1: $atv-forest-green;
+$gradient-main-background-2: $atv-forest-deep;
+
+// progress / loading bar, dark -> light
+$gradient-loading-1: $atv-navy;
+$gradient-loading-2: $atv-dark-blue;
+$gradient-loading-3: $atv-sky-blue;
+$gradient-loading-4: $atv-seafoam;
+
+// data highlights: must stay readable on green and blue panels
+$extended-low: $atv-sky-blue; // low temps, Extended Forecast
+$wind-chill: $atv-lilac; // cold values, Hourly / Latest Observations
+$heat-index: $atv-sunset-orange; // hot values (Apple #ae1139 is too dark on these panels)
+
+// progress screen boxes
+$blue-box: $atv-navy;
+
+// hazard / warning panels and the hazard crawl
+$hazard-background: $atv-burgundy;
