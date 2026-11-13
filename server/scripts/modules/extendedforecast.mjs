@@ -216,4 +216,4 @@ const shortenExtendedForecastText = (long) => {
 };
 
 // register display
-registerDisplay(new ExtendedForecast(8, 'extended-forecast'));
+registerDisplay(new ExtendedForecast(9, 'extended-forecast'));

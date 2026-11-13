@@ -47,3 +47,6 @@ export const TILE_COUNT = { x: 10, y: 10 };
 export const TILE_FULL_SIZE = OUTPUTSIZES['radar-conus'];
 export const RADAR_FULL_SIZE = { width: 6000, height: 2600 };
 export const RADAR_FINAL_SIZE = radarFinalSize;
+// number of images in the radar loop. every caller of getRecentRadars() asks for this many so they
+// share one cache, a caller asking for fewer would evict the images the others are still using
+export const RADAR_IMAGE_COUNT = 6;

@@ -223,7 +223,7 @@ const formatTimeForColumn = (time) => {
 };
 
 // register display
-const display = new Almanac(9, 'almanac');
+const display = new Almanac(10, 'almanac');
 registerDisplay(display);
 
 const getSun = display.getSun.bind(display);

@@ -2,8 +2,10 @@
 @use 'shared/_utils'as u;
 @use 'shared/positions'as p;
 
+// displays built on the radar base map
 #radar-html.weather-display,
-#future-radar-html.weather-display {
+#future-radar-html.weather-display,
+#active-warnings-html.weather-display {
 	background-image: url('../images/backgrounds/4.png');
 
 	.wide & {
@@ -28,7 +30,14 @@
 				top: 31px;
 			}
 		}
+	}
+}
 
+// precipitation scale and frame time
+#radar-html.weather-display,
+#future-radar-html.weather-display {
+
+	.header {
 		.right {
 			position: absolute;
 			right: 0px;
@@ -108,7 +117,8 @@
 }
 
 .weather-display .main.radar,
-.weather-display .main.future-radar {
+.weather-display .main.future-radar,
+.weather-display .main.active-warnings {
 	overflow: hidden;
 	height: 367px;
 	width: p.$standard-width;
@@ -132,4 +142,24 @@
 			position: relative;
 		}
 	}
+}
+
+// the radar image and the warning polygons are canvases stacked between and above the map tiles
+.weather-display .main.active-warnings {
+	.container {
+		.layer {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+
+			canvas {
+				display: block;
+			}
+		}
+	}
+}
+
+// the color key can list long names, keep each on one line
+#active-warnings-html.weather-display .header .legend {
+	white-space: nowrap;
 }

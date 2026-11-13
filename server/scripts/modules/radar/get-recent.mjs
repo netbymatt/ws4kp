@@ -104,9 +104,15 @@ const imageFetcher = async (stepBack, attempts, user, projection, viewKey) => {
 	}
 };
 
+// a request that is still running, so displays asking for the same images at the same time share
+// one download and one round of processing
+let inFlight = null;
+
 // get the (max) most recent radars by computing the file name and falling back in time if it's not yet published
 // allow up to (attempts) to fall back in time to older images if one is not present
-const getRecentRadars = async (max, user, projection, attempts = 2) => {
+// the canvases returned are shared between callers and the cache: a caller that puts one in the
+// page owns its place there, any other caller must copy it
+const getRecentRadars = (max, user, projection, attempts = 2) => {
 	// compute the starting timestamp (5 minute rounding)
 	const startingTimestamp = DateTime.utc().set({
 		minute: Math.round(DateTime.utc().minute / 5) * 5,
@@ -116,6 +122,24 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 		zone: 'UTC',
 	});
 
+	// the processed images are rendered for one location and view size, both of which form the key
+	const radarFinalSize = RADAR_FINAL_SIZE();
+	const viewKey = `${user[0]}-${user[1]}-${radarFinalSize.width}x${radarFinalSize.height}`;
+
+	const requestKey = `${viewKey}-${startingTimestamp.toMillis()}-${max}-${attempts}`;
+	if (inFlight?.key === requestKey) return inFlight.promise;
+
+	const promise = loadRecentRadars(max, user, projection, attempts, startingTimestamp, viewKey);
+	const request = { key: requestKey, promise };
+	inFlight = request;
+	const clear = () => {
+		if (inFlight === request) inFlight = null;
+	};
+	promise.then(clear, clear);
+	return promise;
+};
+
+const loadRecentRadars = async (max, user, projection, attempts, startingTimestamp, viewKey) => {
 	if (debugFlag('radar')) {
 		console.log(`Radar: requesting ${max} images from ${startingTimestamp.toISO({ suppressMilliseconds: true })}, stepping back 5 minutes each, ${attempts} attempts each, ${processedRadars.length} processed images cached`);
 	}
@@ -131,10 +155,6 @@ const getRecentRadars = async (max, user, projection, attempts = 2) => {
 	radarBlobs.forEach((entry) => {
 		entry.used = false;
 	});
-
-	// the processed images are rendered for one location and view size, both of which form the key
-	const radarFinalSize = RADAR_FINAL_SIZE();
-	const viewKey = `${user[0]}-${user[1]}-${radarFinalSize.width}x${radarFinalSize.height}`;
 
 	// kick off the loop
 	const imagePromises = await Promise.allSettled(Array.from({ length: max }, () => imageFetcher(stepBack, attempts, user, projection, viewKey)));

@@ -237,4 +237,4 @@ const metarFields = [
 ];
 
 // register display
-registerDisplay(new LatestObservations(2, 'latest-observations'));
+registerDisplay(new LatestObservations(3, 'latest-observations'));

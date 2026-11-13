@@ -371,7 +371,7 @@ const updateHeadend = (station, observations, fetchedAt, filledFromMetar, isStal
 	setHeadend('refreshed', `${fetchedAt.setZone(zone).toFormat('h:mm a')}, next ${nextRefresh.setZone(zone).toFormat('h:mm a')}`);
 };
 
-const display = new CurrentWeather(1, 'current-weather');
+const display = new CurrentWeather(2, 'current-weather');
 registerDisplay(display);
 
 const getCurrentWeather = display.getCurrentWeather.bind(display);

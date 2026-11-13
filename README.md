@@ -25,6 +25,7 @@ I've made several changes to this WeatherStar 4000 simulation compared to the or
 
 * Radar displays the timestamp of the image. Local Radar is not available for Alaska or Hawaii.
 * A new Future Radar display loops forecast radar reflectivity from the HRRR model for the next several hours. It is only available within the continental United States.
+* A new Active Warnings display shows a map of the warning polygons (tornado, severe thunderstorm, flash flood and others) in effect around your location over the latest radar image, with a color key. It only displays when a warning polygon is on the map, and is not available for Alaska or Hawaii.
 * A new hour-by-hour graph of the temperature, dewpoint, cloud cover and precipitation chances for the next 36 hours (48 hours in Widescreen Enhanced).
 * A new hourly forecast display for the next 24 hours is available, and is shown in the style of the travel cities forecast. (off by default because it duplicates the hourly graph)
 * The SPC Outlook is shown in the style of the old air quality screen. This shows the probability of severe weather over the next 3 days at your location. SPC outlook only displays if you're within one of the highlight areas over the next 3 days. You can view the [maps](https://www.weather.gov/crh/outlooks) and pick a location within one of the risk categories to see if the screen is working for you.
@@ -145,7 +146,7 @@ Selected displays, the forecast city and most settings are sticky from one sessi
 
 Your permalink will be very long. Here is an example for the Orlando International Airport:
 ```
-https://weatherstar.netbymatt.com/?hazards=true&current-weather=true&latest-observations=true&hourly=false&hourly-graph=true&travel=false&regional-forecast=true&local-forecast=true&extended-forecast=true&almanac=true&spc-outlook=true&radar=true&future-radar=true&kiosk=false&stickyKiosk=false&customTextEnable=false&speed=1.00&viewMode=standard&scanLineMode=auto&units=us&customText=&mediaVolume=0.75&wide=false&portrait=false&enhanced=false&scanLines=false&latLonQuery=Orlando+International+Airport%2C+Orlando%2C+FL%2C+USA&latLon=%7B%22lat%22%3A28.4311%2C%22lon%22%3A-81.3091%7D
+https://weatherstar.netbymatt.com/?hazards=true&active-warnings=true&current-weather=true&latest-observations=true&hourly=false&hourly-graph=true&travel=false&regional-forecast=true&local-forecast=true&extended-forecast=true&almanac=true&spc-outlook=true&radar=true&future-radar=true&kiosk=false&stickyKiosk=false&customTextEnable=false&speed=1.00&viewMode=standard&scanLineMode=auto&units=us&customText=&mediaVolume=0.75&wide=false&portrait=false&enhanced=false&scanLines=false&latLonQuery=Orlando+International+Airport%2C+Orlando%2C+FL%2C+USA&latLon=%7B%22lat%22%3A28.4311%2C%22lon%22%3A-81.3091%7D
 ```
 You can also build your own permalink. Settings left out of the link keep the viewer's own saved choice, or the default if they've never changed it. This lets a link change one thing, such as `?units=si`, without touching anything else. Here are a few examples:
 ```

@@ -3,6 +3,7 @@ import './vendor/auto/swiped-events.js';
 import './vendor/auto/proj4.js';
 // app scripts
 import './modules/hazards.mjs';
+import './modules/active-warnings.mjs';
 import './modules/currentweatherscroll.mjs';
 import './modules/currentweather.mjs';
 import './modules/almanac.mjs';

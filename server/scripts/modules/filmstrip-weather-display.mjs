@@ -16,11 +16,8 @@ import WeatherDisplay from './weatherdisplay.mjs';
 import { timeZone } from './location.mjs';
 import { debugFlag } from './utils/debug.mjs';
 import setTiles from './radar/tiles.mjs';
-import { coerce } from './utils/calc.mjs';
-import createProjection from './utils/map-projection.mjs';
-import {
-	RADAR_FINAL_SIZE, TILE_FULL_SIZE, PX, PY,
-} from './radar/constants.mjs';
+import calcView from './radar/view.mjs';
+import { TILE_FULL_SIZE, PX, PY } from './radar/constants.mjs';
 
 // The loop plays three times over, holding the last frame at the end of each pass with the longest hold
 // at the very end. The first pass opens on either the last frame or the first: opening on the last frame
@@ -142,18 +139,7 @@ class FilmstripWeatherDisplay extends WeatherDisplay {
 	// user's location in map pixels, kept on the display so drawCanvas() never has to work it out.
 	// this is arithmetic only, no network and no rendering
 	calcView() {
-		const radarFinalSize = RADAR_FINAL_SIZE();
-		const projection = createProjection('radar-conus');
-		const user = projection.forward([this.weatherParameters.longitude, this.weatherParameters.latitude]);
-		const projected = [...user];
-
-		// adjust the user's location to not run off the map
-		user[PX] = coerce(user[PX], radarFinalSize.width / 2, TILE_FULL_SIZE.width - (radarFinalSize.width / 2));
-		user[PY] = coerce(user[PY], radarFinalSize.height / 2, TILE_FULL_SIZE.height - (radarFinalSize.height / 2));
-
-		return {
-			user, projection, radarFinalSize, projected,
-		};
+		return calcView(this.weatherParameters);
 	}
 
 	// the frames are rendered for one view size, so a change of display mode has to rebuild them.

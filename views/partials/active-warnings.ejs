@@ -1,0 +1,10 @@
+<%- include('header.ejs', { titleDual: { top: 'Active' , bottom: 'Warnings' } }) %>
+<div class="main active-warnings can-enhance">
+  <div class="container">
+    <%# the img placeholders and the width of the tile containers are created by tiles.mjs from TILE_GRID %>
+    <div class="map-tiles tiles"></div>
+    <div class="radar-layer layer"></div>
+    <div class="overlay-tiles tiles"></div>
+    <div class="polygon-layer layer"></div>
+  </div>
+</div>

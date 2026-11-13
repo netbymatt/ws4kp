@@ -220,4 +220,4 @@ const getTemperature = async (sid, date) => {
 };
 
 // register display
-registerDisplay(new Climate(11, 'climate'));
+registerDisplay(new Climate(12, 'climate'));
