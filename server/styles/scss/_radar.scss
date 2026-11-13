@@ -159,7 +159,16 @@
 	}
 }
 
-// the color key can list long names, keep each on one line
-#active-warnings-html.weather-display .header .legend {
-	white-space: nowrap;
+// active warnings uses the radar layout with a red/orange header in place of the purple one
+#active-warnings-html.weather-display {
+	background-image: url('../images/backgrounds/4-warnings.png');
+
+	.wide & {
+		background: url(../images/backgrounds/4-warnings-wide.png);
+	}
+
+	// the color key can list long names, keep each on one line
+	.header .legend {
+		white-space: nowrap;
+	}
 }
