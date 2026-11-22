@@ -47,6 +47,10 @@ const STATE_MARGIN = 60;
 // time between radar images
 const RADAR_INTERVAL = 300_000;
 
+// identifies a view by the user's position on the map and the size of the image, a radar image is
+// only correct for the view it was drawn for
+const viewKeyOf = ({ user, radarFinalSize }) => `${user[PX]}-${user[PY]}-${radarFinalSize.width}x${radarFinalSize.height}`;
+
 const isWarning = (alert) => /\bWarning$/i.test(alert?.properties?.event ?? '');
 
 // the states that have a station on or near the map
@@ -210,11 +214,17 @@ class ActiveWarnings extends WeatherDisplay {
 
 		// 0 screens skips this during "play" until a warning is found
 		this.timing.totalScreens = 0;
+
+		// play does not start until this has loaded, so a warning map can be shown first
+		this.holdsStart = true;
 	}
 
 	async getData(weatherParameters, refresh) {
 		// a new location has nothing to show until its warnings are loaded
-		if (!refresh) this.setScreens(0);
+		if (!refresh) {
+			this.setScreens(0);
+			this.clearRadar();
+		}
 		if (!super.getData(weatherParameters, refresh)) return;
 
 		// the base map does not cover alaska and hawaii
@@ -268,15 +278,15 @@ class ActiveWarnings extends WeatherDisplay {
 
 		const key = keyFor(warnings);
 		const polygons = drawWarnings(warnings, key, view.radarFinalSize);
-		const radar = await this.getRadar(view);
-		if (!this.isEnabled) return;
 
 		// base map and overlay tiles, with the radar between them and the warnings on top
 		setTiles({
 			user: view.user,
 			elemId: this.elemId,
 		});
-		this.elem.querySelector('.radar-layer').replaceChildren(...(radar ? [radar] : []));
+		// a radar image for this view stays in place until a newer one arrives, one drawn for
+		// another view would be out of place
+		if (this.radarViewKey !== viewKeyOf(view)) this.clearRadar();
 		this.elem.querySelector('.polygon-layer').replaceChildren(polygons);
 
 		// color key for the warnings on the map only
@@ -292,12 +302,43 @@ class ActiveWarnings extends WeatherDisplay {
 
 		this.setScreens(1);
 		this.setStatus(STATUS.loaded);
+
+		// the map is ready without the radar, which is added when it arrives. this is not awaited so
+		// the start of play is not held up by the radar images
+		this.updateRadar(view);
+	}
+
+	// put the most recent radar image for the view in the radar layer
+	async updateRadar(view) {
+		const request = Symbol('radar');
+		this.radarRequest = request;
+		const canvas = await this.getRadar(view);
+
+		// a newer map was built, or the display was reset or turned off, while the image loaded
+		if (this.radarRequest !== request || !canvas || !this.isEnabled) return;
+
+		const layer = this.elem.querySelector('.radar-layer');
+		if (layer.firstChild === canvas) return;
+
+		// the image can arrive while the map is on screen, let ws4channels know the picture changed
+		const onScreen = this.active;
+		if (onScreen) WeatherDisplay.sendRenderStart();
+		layer.replaceChildren(canvas);
+		this.radarViewKey = viewKeyOf(view);
+		if (onScreen) WeatherDisplay.sendRenderEnd();
+	}
+
+	// remove the radar image and drop any request for one that is still loading
+	clearRadar() {
+		this.radarRequest = null;
+		this.radarViewKey = null;
+		this.elem?.querySelector('.radar-layer')?.replaceChildren();
 	}
 
 	// the most recent radar image for the view, or null when it is not available. the map is still
 	// worth showing without it
 	async getRadar({ user, projection, radarFinalSize }) {
-		const key = `${user[PX]}-${user[PY]}-${radarFinalSize.width}x${radarFinalSize.height}-${Math.floor(Date.now() / RADAR_INTERVAL)}`;
+		const key = `${viewKeyOf({ user, radarFinalSize })}-${Math.floor(Date.now() / RADAR_INTERVAL)}`;
 		if (this.radar?.key === key) return this.radar.canvas;
 
 		try {
@@ -326,6 +367,7 @@ class ActiveWarnings extends WeatherDisplay {
 	reset() {
 		super.reset();
 		this.setScreens(0);
+		this.clearRadar();
 	}
 
 	// the map is drawn for one view size, and a larger view can bring more warnings on to it
@@ -337,7 +379,7 @@ class ActiveWarnings extends WeatherDisplay {
 		if (size.width === this.view.radarFinalSize.width && size.height === this.view.radarFinalSize.height) return;
 
 		// what is on the page was drawn for the previous view, remove it rather than show it out of place
-		this.elem.querySelector('.radar-layer').replaceChildren();
+		this.clearRadar();
 		this.elem.querySelector('.polygon-layer').replaceChildren();
 		setTiles({
 			user: calcView(this.weatherParameters).user,

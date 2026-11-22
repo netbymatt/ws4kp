@@ -46,27 +46,18 @@ const updateStatus = (value) => {
 
 	if (progress) progress.drawCanvas(displays, countLoadedDisplays());
 
-	// first display is hazards and it must load before evaluating the first display
-	if (!displays[0] || displays[0].status === STATUS.loading) return;
+	// the alert displays (hazards and active warnings) come first when they have something to show,
+	// so play can not start until each one that is enabled has finished loading. a failed or
+	// retrying request is finished for this purpose, play starts without it and it joins the
+	// rotation if it loads later
+	if (displays.some((display) => display?.holdsStart && display.status === STATUS.loading)) return;
 
-	// calculate first enabled display
-	const firstDisplayIndex = displays.findIndex((display) => display?.enabled && display?.timing?.totalScreens > 0);
+	// the first enabled display with something to show: an alert display with data, otherwise
+	// current conditions or whichever display follows it
+	const firstDisplay = displays.find((display) => display?.enabled && display?.timing?.totalScreens > 0);
 
-	// value.id = 0 is hazards, if they fail to load hot-wire a new value.id to the current display to see if it needs to be loaded
-	// typically this plays out as current conditions loads, then hazards fails.
-	if (value.id === 0 && (value.status === STATUS.failed || value.status === STATUS.retrying)) {
-		value.id = firstDisplayIndex;
-		value.status = displays[firstDisplayIndex].status;
-	}
-
-	// if hazards data arrives after the firstDisplayIndex loads, then we need to hot wire this to the first display
-	if (value.id === 0 && value.status === STATUS.loaded && displays[0] && displays[0].timing && displays[0].timing.totalScreens === 0) {
-		value.id = firstDisplayIndex;
-		value.status = displays[firstDisplayIndex].status;
-	}
-
-	// if this is the first display and we're playing, load it up so it starts playing
-	if (isPlaying() && value.id === firstDisplayIndex && value.status === STATUS.loaded) {
+	// start playing once that display is ready. nothing is started when a display is already showing
+	if (isPlaying() && currentDisplayIndex() === -1 && firstDisplay?.status === STATUS.loaded) {
 		navTo(msg.command.firstFrame);
 	} else if (isPlaying() && currentDisplayIndex() === -1 && countLoadedDisplays() === displays.length) {
 		// backup case for when the first display has no data or an error, find the next available once all have loaded

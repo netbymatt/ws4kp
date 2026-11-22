@@ -33,6 +33,9 @@ class Hazards extends ScrollWeatherDisplay {
 		this.showOnProgress = false;
 		this.okToDrawCurrentConditions = false;
 
+		// play does not start until this has loaded, so hazards can be shown first
+		this.holdsStart = true;
+
 		// force a 1-minute refresh time for the most up-to-date hazards
 		this.refreshTime = 60_000;
 
