@@ -71,7 +71,8 @@ const updateStatus = (value) => {
 	} else if (isPlaying() && currentDisplayIndex() === -1 && countLoadedDisplays() === displays.length) {
 		// backup case for when the first display has no data or an error, find the next available once all have loaded
 		const alternateFirstDisplay = displays.find((display) => display?.enabled && display?.timing?.totalScreens > 0 && display?.status === STATUS.loaded);
-		showDisplay(alternateFirstDisplay);
+		// nothing may be ready yet, a later status update tries again
+		if (alternateFirstDisplay) showDisplay(alternateFirstDisplay);
 	}
 };
 
@@ -318,6 +319,13 @@ const startDisplays = async (weatherParameters) => {
 			progress.showCanvas();
 		}
 	}
+
+	// every enabled display is loading before any of them is asked for data. otherwise the first
+	// status update, such as a disabled hazards display reporting in, sees the displays that have
+	// not been asked yet with the status they were given when the page loaded and counts them as done
+	displays.forEach((display) => {
+		display.status = display.enabled ? STATUS.loading : STATUS.disabled;
+	});
 
 	// call for new data on each display
 	displays.forEach((display) => display.getData(weatherParameters));
